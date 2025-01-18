@@ -1009,3 +1009,5 @@ coverage*[.json, .xml, .info]
 
 # Android studio 3.1+ serialized cache file
 
+# Personal.
+todo/*
