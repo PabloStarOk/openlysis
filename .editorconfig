@@ -362,3 +362,20 @@ dotnet_naming_style.s_camelcase.required_suffix =
 dotnet_naming_style.s_camelcase.word_separator = 
 dotnet_naming_style.s_camelcase.capitalization = camel_case
 
+#
+# StyleCop
+#
+# SA1101: Prefix local variables with 'this.'
+dotnet_diagnostic.SA1101.severity = none
+
+# SA1313: The name of a parameter in C# does not begin with a lower-case letter.
+dotnet_diagnostic.SA1313.severity = none
+
+# SA1200: A C# using directive is placed outside of a namespace element.
+dotnet_diagnostic.SA1200.severity = none
+
+# SA1309: A field name in C# begins with an underscore.
+dotnet_diagnostic.SA1309.severity = none
+
+# SA1010: Opening square brackets should not be preceded by a space
+dotnet_diagnostic.SA1010.severity = none
