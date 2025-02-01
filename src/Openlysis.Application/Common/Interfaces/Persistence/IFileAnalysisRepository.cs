@@ -1,3 +1,4 @@
+using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.FileReports;
 using Openlysis.Domain.FileReports.ValueObjects;
 
@@ -20,5 +21,12 @@ public interface IFileAnalysisRepository
     /// </summary>
     /// <param name="fileAnalysisId">ID of the file analysis to get.</param>
     /// <returns>A <see cref="FileAnalysis"/>.</returns>
-    public Task<FileAnalysis> GetByIdAsync(FileAnalysisId fileAnalysisId);
+    public Task<FileAnalysis?> GetByIdAsync(FileAnalysisId fileAnalysisId);
+
+    /// <summary>
+    /// Gets a file analysis from the repository by its hash.
+    /// </summary>
+    /// <param name="hashSet">A <see cref="HashSet"/>.</param>
+    /// <returns>A <see cref="FileAnalysis"/>.</returns>
+    public Task<FileAnalysis?> GetByHashAsync(HashSet hashSet);
 }
