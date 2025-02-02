@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.Hash;
 
-namespace Openlysis.Domain.FileReports.ValueObjects;
+namespace Openlysis.Domain.FileAnalyses.ValueObjects;
 
 /// <summary>
 /// A single file with metadata.

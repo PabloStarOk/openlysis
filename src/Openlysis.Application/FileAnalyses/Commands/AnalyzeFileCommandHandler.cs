@@ -8,11 +8,11 @@ using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Application.FileAnalyses.Ports;
 using Openlysis.Domain.Common.Hash;
-using Openlysis.Domain.FileReports;
-using Openlysis.Domain.FileReports.Enums;
-using Openlysis.Domain.FileReports.ValueObjects;
+using Openlysis.Domain.FileAnalyses;
+using Openlysis.Domain.FileAnalyses.Enums;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-using File = Openlysis.Domain.FileReports.ValueObjects.File;
+using File = Openlysis.Domain.FileAnalyses.ValueObjects.File;
 
 namespace Openlysis.Application.FileAnalyses.Commands;
 

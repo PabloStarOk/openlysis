@@ -1,7 +1,7 @@
 using Openlysis.Domain.Common.Reports;
-using Openlysis.Domain.FileReports.ValueObjects;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.Domain.FileReports.Entities;
+namespace Openlysis.Domain.FileAnalyses.Entities;
 
 /// <summary>
 /// Represents a report of a file.

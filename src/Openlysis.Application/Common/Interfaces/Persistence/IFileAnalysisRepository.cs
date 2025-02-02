@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.Hash;
-using Openlysis.Domain.FileReports;
-using Openlysis.Domain.FileReports.ValueObjects;
+using Openlysis.Domain.FileAnalyses;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Openlysis.Application.Common.Interfaces.Persistence;
 

@@ -1,11 +1,11 @@
 using Openlysis.Domain.Common.Models;
 using Openlysis.Domain.Common.Reports;
-using Openlysis.Domain.FileReports.Entities;
-using Openlysis.Domain.FileReports.Enums;
-using Openlysis.Domain.FileReports.ValueObjects;
-using File = Openlysis.Domain.FileReports.ValueObjects.File;
+using Openlysis.Domain.FileAnalyses.Entities;
+using Openlysis.Domain.FileAnalyses.Enums;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
+using File = Openlysis.Domain.FileAnalyses.ValueObjects.File;
 
-namespace Openlysis.Domain.FileReports;
+namespace Openlysis.Domain.FileAnalyses;
 
 /// <summary>
 /// Represents a report for a file.

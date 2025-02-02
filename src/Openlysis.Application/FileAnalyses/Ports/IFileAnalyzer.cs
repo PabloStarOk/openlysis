@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.Reports;
-using Openlysis.Domain.FileReports.Entities;
-using Openlysis.Domain.FileReports.ValueObjects;
+using Openlysis.Domain.FileAnalyses.Entities;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Openlysis.Application.FileAnalyses.Ports;
 

@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.Reports;
 
-namespace Openlysis.Domain.FileReports.ValueObjects;
+namespace Openlysis.Domain.FileAnalyses.ValueObjects;
 
 /// <summary>
 /// Information of a detection.

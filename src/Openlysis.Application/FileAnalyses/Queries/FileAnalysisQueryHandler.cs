@@ -4,7 +4,7 @@ using MediatR;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.FileAnalyses.Ports;
-using Openlysis.Domain.FileReports;
+using Openlysis.Domain.FileAnalyses;
 
 namespace Openlysis.Application.FileAnalyses.Queries;
 
