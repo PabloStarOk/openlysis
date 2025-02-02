@@ -118,4 +118,17 @@ public class FileAnalysis : AggregateRoot<FileAnalysisId>
 
         _reports.Add(fileReport);
     }
+
+    /// <summary>
+    /// Adds a collection of reports.
+    /// </summary>
+    /// <param name="fileReports">An <see cref="IEnumerable{T}"/> of <see cref="FileReport"/>.</param>
+    public void AddReports(IEnumerable<FileReport> fileReports)
+    {
+        var uniqueReports = new HashSet<FileReport>(_reports);
+        uniqueReports.UnionWith(fileReports);
+
+        _reports.Clear();
+        _reports.AddRange(uniqueReports);
+    }
 }
