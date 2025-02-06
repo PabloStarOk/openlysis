@@ -1,0 +1,13 @@
+@OpenlysisAPIHostAddress = http://localhost:5248/api
+@SampleFileAnalysisId = 5bd9ae5a-6a3c-44a4-9b1c-1d7ecabd97f5
+@SampleFileAnalysisSha256 = SHA256
+
+// Get by ID
+GET {{OpenlysisAPIHostAddress}}/analyses/file/{{SampleFileAnalysisId}}
+Accept: application/json
+###
+
+// Get by hash
+GET {{OpenlysisAPIHostAddress}}/analyses/file/hash/{{SampleFileAnalysisSha256}}
+Accept: application/json
+###

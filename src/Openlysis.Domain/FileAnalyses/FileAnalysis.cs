@@ -36,6 +36,16 @@ public class FileAnalysis : AggregateRoot<FileAnalysisId>
         _reports = reports;
     }
 
+    // For EF core.
+#pragma warning disable CS8618
+#pragma warning disable S1144
+    private FileAnalysis()
+    {
+        _reports = [];
+    }
+#pragma warning restore S1144
+#pragma warning restore CS8618
+
     /// <summary>
     /// Gets the last date when the file was scanned.
     /// </summary>

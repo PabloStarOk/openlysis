@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Application", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure", "src\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj", "{E5EBF866-0154-421C-BC87-209A3269645A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API", "src\Openlysis.API\Openlysis.API.csproj", "{56C77A97-4A8E-48DC-B14D-45935FFC177C}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +30,10 @@ Global
 		{E5EBF866-0154-421C-BC87-209A3269645A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5EBF866-0154-421C-BC87-209A3269645A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5EBF866-0154-421C-BC87-209A3269645A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56C77A97-4A8E-48DC-B14D-45935FFC177C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56C77A97-4A8E-48DC-B14D-45935FFC177C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56C77A97-4A8E-48DC-B14D-45935FFC177C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56C77A97-4A8E-48DC-B14D-45935FFC177C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
