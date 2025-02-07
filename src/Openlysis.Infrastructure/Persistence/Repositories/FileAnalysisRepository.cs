@@ -39,10 +39,29 @@ public class FileAnalysisRepository : IFileAnalysisRepository
     /// <inheritdoc/>
     public async Task<FileAnalysis?> GetByHashAsync(HashSet hashSet)
     {
-        var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f => f.File.HashSet.Sha256 == hashSet.Sha256)
-            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f => f.File.HashSet.Md5 == hashSet.Md5)
-            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f => f.File.HashSet.Sha1 == hashSet.Sha1)
-            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f => f.File.HashSet.Sha512 == hashSet.Sha512);
+        var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
+                f.File.HashSet.Sha256 == hashSet.Md5)
+            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
+                f.File.HashSet.Md5 == hashSet.Sha1)
+            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
+                f.File.HashSet.Sha1 == hashSet.Sha256)
+            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
+                f.File.HashSet.Sha512 == hashSet.Sha512);
+
+        return fileAnalysis;
+    }
+
+    /// <inheritdoc/>
+    public async Task<FileAnalysis?> GetByHashAsync(string hash)
+    {
+        var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
+                f.File.HashSet.Sha256 == hash)
+            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
+                f.File.HashSet.Md5 == hash)
+            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
+                f.File.HashSet.Sha1 == hash)
+            ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
+                f.File.HashSet.Sha512 == hash);
 
         return fileAnalysis;
     }

@@ -1,10 +1,15 @@
+using System.Security.Cryptography;
+using System.Text;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
+using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
+using Openlysis.Infrastructure.Services;
 
 namespace Openlysis.Infrastructure;
 
@@ -27,6 +32,14 @@ public static class DependencyInjection
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<IFileAnalysisRepository, FileAnalysisRepository>();
+
+        // Hash service
+        services.AddTransient<Encoding>(_ => Encoding.UTF8);
+        services.AddKeyedSingleton<HashAlgorithm>("MD5Algorithm", (_, _) => new HMACMD5());
+        services.AddKeyedSingleton<HashAlgorithm>("SHA1Algorithm", (_, _) => new HMACSHA1());
+        services.AddKeyedSingleton<HashAlgorithm>("SHA256Algorithm", (_, _) => new HMACSHA256());
+        services.AddKeyedSingleton<HashAlgorithm>("SHA512Algorithm", (_, _) => new HMACSHA512());
+        services.AddSingleton<IHashService, HashService>();
 
         return services;
     }

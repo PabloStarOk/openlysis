@@ -4,7 +4,7 @@
 
 - File
   - `POST` `/api/analyses/file` Submits a file to be analyzed.
-  - `GET` `/api/analyses/file/{id}` Gets a file analysis.
+  - `GET` `/api/analyses/file/{id}` Gets a file analysis by its id.
   - `GET` `/api/analyses/file/hash/{md5, sha1, sha256, sha512}` Gets a file analysis by hash.
 - URL
   - `POST` `/api/analyses/url` Submits an URL to be analyzed.

@@ -1,4 +1,4 @@
-@OpenlysisAPIHostAddress = http://localhost:5248/api
+@OpenlysisAPIHostAddress = http://localhost:5248/api/v1
 @SampleFileAnalysisId = 5bd9ae5a-6a3c-44a4-9b1c-1d7ecabd97f5
 @SampleFileAnalysisSha256 = SHA256
 
