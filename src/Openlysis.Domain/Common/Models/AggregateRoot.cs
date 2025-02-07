@@ -16,4 +16,16 @@ public abstract class AggregateRoot<TId> : Entity<TId>
         : base(id)
     {
     }
+
+#pragma warning disable CS8618
+#pragma warning disable S1144
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AggregateRoot{TId}"/> class
+    /// to be used by EF Core.
+    /// </summary>
+    protected AggregateRoot()
+    {
+    }
+#pragma warning restore S1144
+#pragma warning restore CS8618
 }

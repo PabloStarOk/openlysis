@@ -1011,3 +1011,9 @@ coverage*[.json, .xml, .info]
 
 # Personal.
 todo/*
+
+# API
+launchSettings.json
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
