@@ -1,11 +1,11 @@
 using Openlysis.Domain.Common.Models;
 using Openlysis.Domain.Common.Reports;
-using Openlysis.Domain.FileReports.Entities;
-using Openlysis.Domain.FileReports.Enums;
-using Openlysis.Domain.FileReports.ValueObjects;
-using File = Openlysis.Domain.FileReports.ValueObjects.File;
+using Openlysis.Domain.FileAnalyses.Entities;
+using Openlysis.Domain.FileAnalyses.Enums;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
+using File = Openlysis.Domain.FileAnalyses.ValueObjects.File;
 
-namespace Openlysis.Domain.FileReports;
+namespace Openlysis.Domain.FileAnalyses;
 
 /// <summary>
 /// Represents a report for a file.
@@ -35,6 +35,16 @@ public class FileAnalysis : AggregateRoot<FileAnalysisId>
         File = file;
         _reports = reports;
     }
+
+    // For EF core.
+#pragma warning disable CS8618
+#pragma warning disable S1144
+    private FileAnalysis()
+    {
+        _reports = [];
+    }
+#pragma warning restore S1144
+#pragma warning restore CS8618
 
     /// <summary>
     /// Gets the last date when the file was scanned.
@@ -117,5 +127,18 @@ public class FileAnalysis : AggregateRoot<FileAnalysisId>
         }
 
         _reports.Add(fileReport);
+    }
+
+    /// <summary>
+    /// Adds a collection of reports.
+    /// </summary>
+    /// <param name="fileReports">An <see cref="IEnumerable{T}"/> of <see cref="FileReport"/>.</param>
+    public void AddReports(IEnumerable<FileReport> fileReports)
+    {
+        var uniqueReports = new HashSet<FileReport>(_reports);
+        uniqueReports.UnionWith(fileReports);
+
+        _reports.Clear();
+        _reports.AddRange(uniqueReports);
     }
 }

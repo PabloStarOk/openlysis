@@ -1,12 +1,12 @@
 using Openlysis.Domain.Common.Reports;
-using Openlysis.Domain.FileReports.ValueObjects;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.Domain.FileReports.Entities;
+namespace Openlysis.Domain.FileAnalyses.Entities;
 
 /// <summary>
 /// Represents a report of a file.
 /// </summary>
-public class FileReport : Report
+public sealed class FileReport : Report, IEquatable<FileReport>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FileReport"/> class.
@@ -38,7 +38,35 @@ public class FileReport : Report
     }
 
     /// <summary>
-    /// Gets or sets the detection information details of the scan.
+    /// Gets the detection information details of the scan.
     /// </summary>
-    public DetectionInfo DetectionInfo { get; protected set; }
+    public DetectionInfo DetectionInfo { get; private set; }
+
+    /// <inheritdoc/>
+    public bool Equals(FileReport? other)
+    {
+        return other is not null && Id.Equals(other.Id);
+    }
+
+    /// <inheritdoc/>
+    public override bool Equals(object? obj)
+    {
+        if (obj is null)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
+        return obj.GetType() == GetType() && Equals((FileReport)obj);
+    }
+
+    /// <inheritdoc/>
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }

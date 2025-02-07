@@ -16,10 +16,21 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
         Id = id;
     }
 
+    // For EF core.
+#pragma warning disable CS8618
     /// <summary>
-    /// Gets or sets ID of the entity.
+    /// Initializes a new instance of the <see cref="Entity{TId}"/> class
+    /// to be used by EF Core.
     /// </summary>
-    public TId Id { get; protected init; }
+    protected Entity()
+    {
+    }
+#pragma warning restore CS8618
+
+    /// <summary>
+    /// Gets ID of the entity.
+    /// </summary>
+    public TId Id { get; }
 
     public static bool operator ==(Entity<TId> left, Entity<TId> right)
     {

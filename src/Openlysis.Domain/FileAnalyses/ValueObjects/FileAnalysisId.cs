@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.FileReports.ValueObjects;
+namespace Openlysis.Domain.FileAnalyses.ValueObjects;
 
 /// <summary>
 /// Represents the ID of a file report.
@@ -22,5 +22,15 @@ public sealed record FileAnalysisId
     public static FileAnalysisId CreateUnique()
     {
         return new FileAnalysisId(Guid.NewGuid());
+    }
+
+    /// <summary>
+    /// Creates a <see cref="FileAnalysisId"/> from the specified <see cref="Guid"/>.
+    /// </summary>
+    /// <param name="guid">The <see cref="Guid"/> to create the <see cref="FileAnalysisId"/> from.</param>
+    /// <returns>A <see cref="FileAnalysisId"/>.</returns>
+    public static FileAnalysisId Create(Guid guid)
+    {
+        return new FileAnalysisId(guid);
     }
 }

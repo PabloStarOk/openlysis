@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.FileReports.Enums;
+namespace Openlysis.Domain.FileAnalyses.Enums;
 
 /// <summary>
 /// Represents a verdict.
