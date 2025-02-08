@@ -1,3 +1,5 @@
+using FastEndpoints;
+
 using Openlysis.API.Endpoints.Analyses.File;
 
 namespace Openlysis.API.Endpoints.Analyses;
@@ -5,19 +7,21 @@ namespace Openlysis.API.Endpoints.Analyses;
 /// <summary>
 /// Group of endpoints for file analyses.
 /// </summary>
-public static class FileAnalysesGroup
+public sealed class FileAnalysesGroup : Group
 {
     /// <summary>
-    /// Add all endpoints related to file analyses.
+    /// Initializes a new instance of the <see cref="FileAnalysesGroup"/> class.
     /// </summary>
-    /// <param name="routeBuilder">Builder of routes.</param>
-    public static void AddFileAnalysisEndpoints(this IEndpointRouteBuilder routeBuilder)
+    public FileAnalysesGroup()
     {
-        // TODO: Add metadata and security.
-        var group = routeBuilder.MapGroup("/api/v1/analyses/file/")
-            .WithName("FileAnalyses");
-
-        GetFileAnalysisByIdEndpoint.Map(group);
-        GetFileAnalysisByHashEndpoint.Map(group);
+        Configure("/api/v1/analyses/file", ep =>
+        {
+            ep.Description(b =>
+                {
+                    b.WithGroupName("FileAnalyses");
+                    b.WithDisplayName("FileAnalyses");
+                }); // TODO: Add metadata.
+            ep.AllowAnonymous(); // TODO: Add and security.
+        });
     }
 }

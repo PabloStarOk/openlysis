@@ -1,26 +1,26 @@
-using Openlysis.API.Endpoints.Analyses;
+using FastEndpoints;
+using FastEndpoints.Swagger;
+
+using Openlysis.API;
 using Openlysis.Application;
 using Openlysis.Infrastructure;
 
-var builder = WebApplication.CreateSlimBuilder(args);
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+WebApplicationOptions options = new ();
+var builder = WebApplication.CreateSlimBuilder(options);
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddApi();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerGen();
 }
 
 app.UseHttpsRedirection();
-
-app.AddFileAnalysisEndpoints();
+app.UseFastEndpoints();
 
 await app.RunAsync();
