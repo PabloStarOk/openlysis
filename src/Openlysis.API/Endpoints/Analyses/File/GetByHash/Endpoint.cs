@@ -59,8 +59,9 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
 
         if (string.IsNullOrWhiteSpace(hash))
         {
-            AddError("Provided hash is not valid.");
-            await SendErrorsAsync(StatusCodes.Status400BadRequest, ct); // TODO: Return ProblemsDetails.
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "Hash is required."));
             return;
         }
 
@@ -69,12 +70,26 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
 
         if (fileAnalysis.IsError)
         {
-            foreach (var error in fileAnalysis.Errors)
+            // Not found
+            if (fileAnalysis.Errors.Any(e => e.Type is ErrorType.NotFound))
             {
-                AddError(error.Description);
+                await SendResultAsync(Results.Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    detail: "File analysis with the specified hash does not exist."));
+                return;
             }
 
-            await SendErrorsAsync(StatusCodes.Status400BadRequest, ct); // TODO: Return ProblemsDetails.
+            // Other errors
+            var extensions = new Dictionary<string, object?>
+            {
+                {
+                    "errors", fileAnalysis.Errors
+                },
+            };
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "One or more errors occurred.",
+                extensions: extensions));
             return;
         }
 

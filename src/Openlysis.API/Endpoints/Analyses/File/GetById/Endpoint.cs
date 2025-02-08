@@ -97,7 +97,7 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
             var extensions = new Dictionary<string, object?>
             {
                 {
-                    "Errors", fileAnalysis.Errors
+                    "errors", fileAnalysis.Errors
                 },
             };
             await SendResultAsync(Results.Problem(
