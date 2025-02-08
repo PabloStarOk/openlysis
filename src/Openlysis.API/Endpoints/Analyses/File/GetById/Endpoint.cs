@@ -40,6 +40,7 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
                 b.WithDisplayName("GetFileAnalysisById");
                 b.Produces<FileAnalysisResponse>();
                 b.ProducesProblemDetails();
+                b.ProducesProblemDetails(StatusCodes.Status404NotFound);
             });
         Summary(
             s =>
@@ -58,10 +59,21 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
     {
         string id = Route<string>("id") ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(id) || !Guid.TryParse(id, out Guid guid))
+        // ID is null or empty
+        if (string.IsNullOrWhiteSpace(id))
         {
-            AddError("Provided id is not valid.");
-            await SendErrorsAsync(StatusCodes.Status400BadRequest, ct); // TODO: Return ProblemsDetails.
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "ID is required."));
+            return;
+        }
+
+        // Invalid ID
+        if (!Guid.TryParse(id, out Guid guid))
+        {
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "Provided ID has an invalid format."));
             return;
         }
 
@@ -72,23 +84,37 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
 
         if (fileAnalysis.IsError)
         {
-            foreach (var error in fileAnalysis.Errors)
+            // Not found
+            if (fileAnalysis.Errors.Any(e => e.Type is ErrorType.NotFound))
             {
-                AddError(error.Description);
+                await SendResultAsync(Results.Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    detail: "File analysis with the specified ID does not exist."));
+                return;
             }
 
-            await SendErrorsAsync(StatusCodes.Status400BadRequest, ct); // TODO: Return ProblemsDetails.
+            // Other errors
+            var extensions = new Dictionary<string, object?>
+            {
+                {
+                    "Errors", fileAnalysis.Errors
+                },
+            };
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "One or more errors occurred.",
+                extensions: extensions));
             return;
         }
 
         // Map to DTO
-        var response = new FileAnalysisResponse(
+        Response = new FileAnalysisResponse(
             fileAnalysis.Value.Id.Value.ToString(),
             fileAnalysis.Value.LastScanDate,
             fileAnalysis.Value.ReportsAmount,
             fileAnalysis.Value.Verdict,
             fileAnalysis.Value.File,
             fileAnalysis.Value.Reports.ToArray());
-        await SendOkAsync(response, ct);
+        await SendOkAsync(Response, ct);
     }
 }

@@ -14,12 +14,22 @@ public static class DependencyInjection
     /// <param name="serviceCollection">Collection of services.</param>
     public static void AddApi(this IServiceCollection serviceCollection)
     {
+        serviceCollection.AddProblemDetails(
+            opt =>
+            {
+                opt.CustomizeProblemDetails = context =>
+                {
+                    context.ProblemDetails.Instance = context.HttpContext.Request.Path;
+                };
+            });
+
         serviceCollection.AddFastEndpoints(
             opt =>
             {
                 opt.DisableAutoDiscovery = true;
                 opt.SourceGeneratorDiscoveredTypes.AddRange(typeof(Program).Assembly.DefinedTypes);
             });
+
         serviceCollection.SwaggerDocument(
             opt =>
             {
