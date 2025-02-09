@@ -20,7 +20,8 @@ public sealed class FileAnalysesGroup : Group
                 {
                     b.WithGroupName("FileAnalyses");
                     b.WithDisplayName("FileAnalyses");
-                }); // TODO: Add metadata.
+                    b.WithTags("File");
+                });
             ep.AllowAnonymous(); // TODO: Add and security.
         });
     }

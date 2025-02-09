@@ -16,7 +16,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwaggerGen();
+    app.UseSwaggerGen(uiConfig: u =>
+    {
+        u.DocExpansion = "list";
+    });
 }
 
 app.UseHttpsRedirection();

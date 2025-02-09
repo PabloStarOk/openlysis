@@ -37,7 +37,9 @@ public static class DependencyInjection
                 {
                     s.Title = "Openlysis API";
                     s.Description = "API of openlysis.";
+                    s.Version = "1.0.0";
                 };
+                opt.RemoveEmptyRequestSchema = true;
             });
     }
 }
