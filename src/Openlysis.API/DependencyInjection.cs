@@ -1,6 +1,8 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
+using NSwag;
+
 namespace Openlysis.API;
 
 /// <summary>
@@ -37,7 +39,19 @@ public static class DependencyInjection
                 {
                     s.Title = "Openlysis API";
                     s.Description = "API of openlysis.";
-                    s.Version = "1.0.0";
+                    s.Version = "v1";
+
+                    s.PostProcess = document =>
+                    {
+                        document.Info = new OpenApiInfo
+                        {
+                            License = new OpenApiLicense
+                            {
+                                Name = "MIT License",
+                                Url = "https://license.md/licenses/mit-license/",
+                            },
+                        };
+                    };
                 };
                 opt.RemoveEmptyRequestSchema = true;
             });

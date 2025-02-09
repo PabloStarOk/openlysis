@@ -1,6 +1,3 @@
-using FastEndpoints;
-using FastEndpoints.Swagger;
-
 using Openlysis.API;
 using Openlysis.Application;
 using Openlysis.Infrastructure;
@@ -13,16 +10,7 @@ builder.Services.AddApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwaggerGen(uiConfig: u =>
-    {
-        u.DocExpansion = "list";
-    });
-}
-
 app.UseHttpsRedirection();
-app.UseFastEndpoints();
+app.ConfigureApi();
 
 await app.RunAsync();
