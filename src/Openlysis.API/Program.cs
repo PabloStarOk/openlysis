@@ -5,8 +5,7 @@ using Openlysis.API;
 using Openlysis.Application;
 using Openlysis.Infrastructure;
 
-WebApplicationOptions options = new ();
-var builder = WebApplication.CreateSlimBuilder(options);
+var builder = WebApplication.CreateSlimBuilder();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
