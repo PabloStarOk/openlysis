@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -34,12 +33,11 @@ public static class DependencyInjection
         services.AddScoped<IFileAnalysisRepository, FileAnalysisRepository>();
 
         // Hash service
-        services.AddTransient<Encoding>(_ => Encoding.UTF8);
-        services.AddKeyedSingleton<HashAlgorithm>("MD5Algorithm", (_, _) => new HMACMD5());
-        services.AddKeyedSingleton<HashAlgorithm>("SHA1Algorithm", (_, _) => new HMACSHA1());
-        services.AddKeyedSingleton<HashAlgorithm>("SHA256Algorithm", (_, _) => new HMACSHA256());
-        services.AddKeyedSingleton<HashAlgorithm>("SHA512Algorithm", (_, _) => new HMACSHA512());
-        services.AddSingleton<IHashService, HashService>();
+        services.AddTransient<MD5>(_ => MD5.Create());
+        services.AddTransient<SHA1>(_ => SHA1.Create());
+        services.AddTransient<SHA256>(_ => SHA256.Create());
+        services.AddTransient<SHA512>(_ => SHA512.Create());
+        services.AddScoped<IHashService, HashService>();
 
         return services;
     }
