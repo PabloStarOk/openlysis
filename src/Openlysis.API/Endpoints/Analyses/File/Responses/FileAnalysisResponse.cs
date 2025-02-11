@@ -1,6 +1,7 @@
 using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Enums;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Analyses.File.Responses;
 
@@ -11,12 +12,12 @@ namespace Openlysis.API.Endpoints.Analyses.File.Responses;
 /// <param name="LastScanDate">The date and time of the last scan.</param>
 /// <param name="ReportsAmount">The number of reports generated.</param>
 /// <param name="Verdict">The verdict of the file analysis.</param>
-/// <param name="File">The file being analyzed.</param>
+/// <param name="Metadata">Metadata of the file.</param>
 /// <param name="Reports">The array of reports generated from the analysis.</param>
 public record FileAnalysisResponse(
     string Id,
     DateTime LastScanDate,
     int ReportsAmount,
     Verdict Verdict,
-    Domain.FileAnalyses.ValueObjects.File File,
+    FileMetadata Metadata,
     Report[] Reports);

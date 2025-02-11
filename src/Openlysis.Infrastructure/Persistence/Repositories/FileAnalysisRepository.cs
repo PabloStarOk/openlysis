@@ -40,13 +40,13 @@ public class FileAnalysisRepository : IFileAnalysisRepository
     public async Task<FileAnalysis?> GetByHashAsync(HashSet hashSet)
     {
         var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.File.HashSet.Sha256 == hashSet.Md5)
+                f.Metadata.HashSet.Sha256 == hashSet.Md5)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.File.HashSet.Md5 == hashSet.Sha1)
+                f.Metadata.HashSet.Md5 == hashSet.Sha1)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.File.HashSet.Sha1 == hashSet.Sha256)
+                f.Metadata.HashSet.Sha1 == hashSet.Sha256)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.File.HashSet.Sha512 == hashSet.Sha512);
+                f.Metadata.HashSet.Sha512 == hashSet.Sha512);
 
         return fileAnalysis;
     }
@@ -55,13 +55,13 @@ public class FileAnalysisRepository : IFileAnalysisRepository
     public async Task<FileAnalysis?> GetByHashAsync(string hash)
     {
         var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.File.HashSet.Sha256 == hash)
+                f.Metadata.HashSet.Sha256 == hash)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.File.HashSet.Md5 == hash)
+                f.Metadata.HashSet.Md5 == hash)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.File.HashSet.Sha1 == hash)
+                f.Metadata.HashSet.Sha1 == hash)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.File.HashSet.Sha512 == hash);
+                f.Metadata.HashSet.Sha512 == hash);
 
         return fileAnalysis;
     }

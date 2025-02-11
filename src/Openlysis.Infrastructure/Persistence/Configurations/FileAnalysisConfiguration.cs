@@ -38,7 +38,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
                 verdict => verdict.ToString(),
                 dbValue => Enum.Parse<Verdict>(dbValue, true));
 
-        builder.OwnsOne(f => f.File, fileBuilder =>
+        builder.OwnsOne(f => f.Metadata, fileBuilder =>
         {
             fileBuilder.OwnsOne(
                 f => f.HashSet, hashBuilder =>

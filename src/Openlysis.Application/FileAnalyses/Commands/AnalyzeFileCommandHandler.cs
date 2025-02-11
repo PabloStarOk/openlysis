@@ -9,8 +9,6 @@ using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Enums;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-using File = Openlysis.Domain.FileAnalyses.ValueObjects.File;
-
 namespace Openlysis.Application.FileAnalyses.Commands;
 
 /// <summary>
@@ -63,7 +61,7 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
 
         // Save the new file analysis in database.
         var fileGeneralInfo = new FileGeneralInfo(command.FileName, command.FileContentType, command.FileData.Length);
-        var fileMetadata = new File(hashSet, fileGeneralInfo);
+        var fileMetadata = new FileMetadata(hashSet, fileGeneralInfo);
         var fileAnalysis = FileAnalysis.Create(_timeProvider.GetUtcNow().DateTime, Verdict.Undetected, fileMetadata, []);
         await _fileAnalysisRepository.AddAsync(fileAnalysis);
         return fileAnalysis;

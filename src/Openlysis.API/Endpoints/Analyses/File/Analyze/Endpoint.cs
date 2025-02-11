@@ -102,10 +102,10 @@ public class Endpoint : Endpoint<Request, Response>
 
         Response = new Response(
             fileAnalysisOrError.Value.Id.Value.ToString(),
-            fileAnalysisOrError.Value.File.HashSet.Md5,
-            fileAnalysisOrError.Value.File.HashSet.Sha1,
-            fileAnalysisOrError.Value.File.HashSet.Sha256,
-            fileAnalysisOrError.Value.File.HashSet.Sha512);
+            fileAnalysisOrError.Value.Metadata.HashSet.Md5,
+            fileAnalysisOrError.Value.Metadata.HashSet.Sha1,
+            fileAnalysisOrError.Value.Metadata.HashSet.Sha256,
+            fileAnalysisOrError.Value.Metadata.HashSet.Sha512);
 
         var routeValues = new Dictionary<string, string>
         {

@@ -3,7 +3,6 @@ using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.Enums;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
-using File = Openlysis.Domain.FileAnalyses.ValueObjects.File;
 
 namespace Openlysis.Domain.FileAnalyses;
 
@@ -20,19 +19,19 @@ public class FileAnalysis : AggregateRoot<FileAnalysisId>
     /// <param name="id">ID of the file report.</param>
     /// <param name="lastScanDate">Last date when the file was scanned.</param>
     /// <param name="verdict">Verdict for the file.</param>
-    /// <param name="file">File information.</param>
+    /// <param name="metadata">Metadata of the file.</param>
     /// <param name="reports">Analysis reports of the file.</param>
     private FileAnalysis(
         FileAnalysisId id,
         DateTime lastScanDate,
         Verdict verdict,
-        File file,
+        FileMetadata metadata,
         List<FileReport> reports)
         : base(id)
     {
         LastScanDate = lastScanDate;
         Verdict = verdict;
-        File = file;
+        Metadata = metadata;
         _reports = reports;
     }
 
@@ -64,7 +63,7 @@ public class FileAnalysis : AggregateRoot<FileAnalysisId>
     /// <summary>
     /// Gets the information of the file.
     /// </summary>
-    public File File { get; private set; }
+    public FileMetadata Metadata { get; private set; }
 
     /// <summary>
     /// Gets the reports of the analysis.
@@ -76,14 +75,14 @@ public class FileAnalysis : AggregateRoot<FileAnalysisId>
     /// </summary>
     /// <param name="lastScanDate">Last date when the file was scanned.</param>
     /// <param name="verdict">Verdict for the file.</param>
-    /// <param name="file">File information.</param>
+    /// <param name="metadata">File information.</param>
     /// <param name="reports">Analysis reports of the file.</param>
     /// <returns>A <see cref="FileAnalysis"/>.</returns>
     /// <exception cref="ArgumentNullException">If reports list is null.</exception>
     public static FileAnalysis Create(
         DateTime lastScanDate,
         Verdict verdict,
-        File file,
+        FileMetadata metadata,
         List<FileReport> reports)
     {
         ArgumentNullException.ThrowIfNull(reports);
@@ -92,7 +91,7 @@ public class FileAnalysis : AggregateRoot<FileAnalysisId>
             FileAnalysisId.CreateUnique(),
             lastScanDate,
             verdict,
-            file,
+            metadata,
             reports);
     }
 
