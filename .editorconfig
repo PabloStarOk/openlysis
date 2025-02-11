@@ -382,3 +382,6 @@ dotnet_diagnostic.SA1010.severity = none
 
 # SA1201: A constructor should not follow a property
 dotnet_diagnostic.SA1201.severity = none
+
+# SA1633: A constructor should not follow a property
+dotnet_diagnostic.SA1633.severity = none
