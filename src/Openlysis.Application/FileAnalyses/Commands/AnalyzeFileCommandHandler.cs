@@ -1,13 +1,10 @@
 using ErrorOr;
 
-using FileSignatures;
-
 using MediatR;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Application.FileAnalyses.Ports;
-using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Enums;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
@@ -19,7 +16,7 @@ namespace Openlysis.Application.FileAnalyses.Commands;
 /// <summary>
 /// Handles <see cref="AnalyzeFileCommand"/>.
 /// </summary>
-public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, ErrorOr<FileAnalysisId>>
+public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, ErrorOr<FileAnalysis>>
 {
     private readonly IFileAnalysisRepository _fileAnalysisRepository;
     private readonly IEnumerable<IFileAnalyzer> _fileAnalyzers;
@@ -46,13 +43,9 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<FileAnalysisId>> Handle(AnalyzeFileCommand command, CancellationToken cancellationToken)
+    public async Task<ErrorOr<FileAnalysis>> Handle(AnalyzeFileCommand command, CancellationToken cancellationToken)
     {
-        HashSet hashSet;
-        using (var dataMemoryStream = new MemoryStream(command.FileData))
-        {
-            hashSet = await _hashService.HashDataAsync(dataMemoryStream);
-        }
+        var hashSet = await _hashService.HashDataAsync(command.FileData);
 
         // Check if the file has already been analyzed.
         var existingAnalysis = await _fileAnalysisRepository.GetByHashAsync(hashSet);
@@ -63,33 +56,20 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
                 await AnalyzeFileAsync(command.FileData, cancellationToken);
             }
 
-            return existingAnalysis.Id;
+            return existingAnalysis;
         }
 
         await AnalyzeFileAsync(command.FileData, cancellationToken);
 
         // Save the new file analysis in database.
-        var fileFormatInspector = new FileFormatInspector();
-        var mimeType = "other";
-
-        using (var stream = new MemoryStream(command.FileData))
-        {
-            var format = fileFormatInspector.DetermineFileFormat(stream);
-
-            if (format is not null)
-            {
-                mimeType = format.MediaType;
-            }
-        }
-
-        var fileGeneralInfo = new FileGeneralInfo(command.Filename, mimeType, command.FileData.Length, command.CreationDate);
-        var fileInfo = new File(hashSet, fileGeneralInfo);
-        var fileAnalysis = FileAnalysis.Create(_timeProvider.GetUtcNow().DateTime, Verdict.Undetected, fileInfo, []);
+        var fileGeneralInfo = new FileGeneralInfo(command.FileName, command.FileContentType, command.FileData.Length);
+        var fileMetadata = new File(hashSet, fileGeneralInfo);
+        var fileAnalysis = FileAnalysis.Create(_timeProvider.GetUtcNow().DateTime, Verdict.Undetected, fileMetadata, []);
         await _fileAnalysisRepository.AddAsync(fileAnalysis);
-        return fileAnalysis.Id;
+        return fileAnalysis;
     }
 
-    private async Task AnalyzeFileAsync(byte[] fileData, CancellationToken cancellationToken)
+    private async Task AnalyzeFileAsync(Stream fileData, CancellationToken cancellationToken)
     {
         var list = _fileAnalyzers.Select(f => f.AnalyzeAsync(fileData, cancellationToken));
         await Task.WhenAll(list);

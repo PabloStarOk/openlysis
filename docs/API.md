@@ -4,8 +4,9 @@
 
 - File
   - `POST` `/api/analyses/file` Submits a file to be analyzed.
-  - `GET` `/api/analyses/file/{id}` Gets a file analysis.
+  - `GET` `/api/analyses/file/{id}` Gets a file analysis by its id.
   - `GET` `/api/analyses/file/hash/{md5, sha1, sha256, sha512}` Gets a file analysis by hash.
+  - `GET` `/api/analyses/file/{id}/report/{id}` Gets a report of file analysis.
 - URL
   - `POST` `/api/analyses/url` Submits an URL to be analyzed.
   - `GET` `/api/analyses/url/{id}` Gets an URL analysis.
@@ -15,7 +16,7 @@
 - **`POST`** `/api/analyses/file`: Submits a file to be analyzed and gets a `FileAnalysis` ID.
 - `GET` `/api/analyses/file/{id}` Gets a `FileAnalysis` with the following structure:
 
-### `FileAnalysis` object
+### `FileAnalysis` DTO response object
 
 ```json
 {

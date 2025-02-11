@@ -62,9 +62,6 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
                         .HasColumnName("MimeType");
                     infoBuilder.Property(i => i.Size)
                         .HasColumnName("Size");
-                    infoBuilder.Property(i => i.CreationDate)
-                        .HasColumnName("CreationDate")
-                        .HasColumnType("DATETIME2");
                 });
         });
 
