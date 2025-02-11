@@ -25,7 +25,7 @@ public sealed record FileMetadata
     /// <summary>
     /// Gets the set of hash of the file.
     /// </summary>
-    public HashSet HashSet { get; init; }
+    public ContentHashSet ContentHashSet { get; init; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMetadata"/> class.
@@ -33,17 +33,17 @@ public sealed record FileMetadata
     /// <param name="name">Name of the file.</param>
     /// <param name="contentType">Type of the content of the file.</param>
     /// <param name="size">Size of the file in bytes.</param>
-    /// <param name="hashSet">The hash set associated with the file.</param>
+    /// <param name="contentContentHashSet">The hash set associated with the file.</param>
     public FileMetadata(
         string name,
         string contentType,
         long size,
-        HashSet hashSet)
+        ContentHashSet contentContentHashSet)
     {
         Name = name;
         ContentType = contentType;
         Size = size;
-        HashSet = hashSet;
+        ContentHashSet = contentContentHashSet;
     }
 
     // For EF core.

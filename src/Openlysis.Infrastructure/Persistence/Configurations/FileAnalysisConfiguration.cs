@@ -48,7 +48,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
                 .HasColumnName("Size");
 
             metadataBuilder.OwnsOne(
-                f => f.HashSet, hashBuilder =>
+                f => f.ContentHashSet, hashBuilder =>
                 {
                     hashBuilder.Property(h => h.Md5)
                         .HasColumnName("Md5");

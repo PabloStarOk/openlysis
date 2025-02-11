@@ -35,7 +35,7 @@ public class HashService : IHashService
     }
 
     /// <inheritdoc/>
-    public async Task<HashSet> HashDataAsync(Stream data)
+    public async Task<ContentHashSet> HashDataAsync(Stream data)
     {
         byte[] md5HashBytes = await _md5Algorithm.ComputeHashAsync(data);
         ResetStreamPosition(data);
@@ -53,7 +53,7 @@ public class HashService : IHashService
         string sha256HashString = Convert.ToHexString(sha256HashBytes);
         string sha512HashString = Convert.ToHexString(sha512HashBytes);
 
-        return new HashSet(
+        return new ContentHashSet(
             md5HashString,
             sha1HashString,
             sha256HashString,

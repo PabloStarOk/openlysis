@@ -24,11 +24,11 @@ public interface IFileAnalysisRepository
     public Task<FileAnalysis?> GetByIdAsync(FileAnalysisId fileAnalysisId);
 
     /// <summary>
-    /// Gets a file analysis from the repository by a <see cref="HashSet"/>.
+    /// Gets a file analysis from the repository by a <see cref="ContentHashSet"/>.
     /// </summary>
-    /// <param name="hashSet">A <see cref="HashSet"/>.</param>
+    /// <param name="contentHashSet">A <see cref="ContentHashSet"/>.</param>
     /// <returns>A <see cref="FileAnalysis"/>.</returns>
-    public Task<FileAnalysis?> GetByHashAsync(HashSet hashSet);
+    public Task<FileAnalysis?> GetByHashAsync(ContentHashSet contentHashSet);
 
     /// <summary>
     /// Gets a file analysis from the repository by its hash.

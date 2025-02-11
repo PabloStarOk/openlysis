@@ -37,16 +37,16 @@ public class FileAnalysisRepository : IFileAnalysisRepository
     }
 
     /// <inheritdoc/>
-    public async Task<FileAnalysis?> GetByHashAsync(HashSet hashSet)
+    public async Task<FileAnalysis?> GetByHashAsync(ContentHashSet contentHashSet)
     {
         var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.Metadata.HashSet.Sha256 == hashSet.Md5)
+                f.Metadata.ContentHashSet.Sha256 == contentHashSet.Md5)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.Metadata.HashSet.Md5 == hashSet.Sha1)
+                f.Metadata.ContentHashSet.Md5 == contentHashSet.Sha1)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.Metadata.HashSet.Sha1 == hashSet.Sha256)
+                f.Metadata.ContentHashSet.Sha1 == contentHashSet.Sha256)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.Metadata.HashSet.Sha512 == hashSet.Sha512);
+                f.Metadata.ContentHashSet.Sha512 == contentHashSet.Sha512);
 
         return fileAnalysis;
     }
@@ -55,13 +55,13 @@ public class FileAnalysisRepository : IFileAnalysisRepository
     public async Task<FileAnalysis?> GetByHashAsync(string hash)
     {
         var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.Metadata.HashSet.Sha256 == hash)
+                f.Metadata.ContentHashSet.Sha256 == hash)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.Metadata.HashSet.Md5 == hash)
+                f.Metadata.ContentHashSet.Md5 == hash)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.Metadata.HashSet.Sha1 == hash)
+                f.Metadata.ContentHashSet.Sha1 == hash)
             ?? await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
-                f.Metadata.HashSet.Sha512 == hash);
+                f.Metadata.ContentHashSet.Sha512 == hash);
 
         return fileAnalysis;
     }
