@@ -43,7 +43,7 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
     /// <inheritdoc/>
     public async Task<ErrorOr<FileAnalysis>> Handle(AnalyzeFileCommand command, CancellationToken cancellationToken)
     {
-        var hashSet = await _hashService.HashDataAsync(command.FileData);
+        var hashSet = await _hashService.HashDataAsync(command.FileData, cancellationToken);
 
         // Check if the file has already been analyzed.
         var existingAnalysis = await _fileAnalysisRepository.GetByHashAsync(hashSet);
