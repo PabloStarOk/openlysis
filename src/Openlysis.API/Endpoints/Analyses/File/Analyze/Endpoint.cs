@@ -62,17 +62,12 @@ public class Endpoint : Endpoint<Request, Response>
                 detail: "Provided file has no content."));
         }
 
-        AnalyzeFileCommand command;
-
-        await using (var memoryStream = new MemoryStream())
-        {
-            await request.File.CopyToAsync(memoryStream, ct);
-            command = new AnalyzeFileCommand(
-                request.File.FileName,
-                request.File.ContentType,
-                FileData: memoryStream.ToArray(),
-                Reanalyze: request.Reanalyze);
-        }
+        await using var fileData = request.File.OpenReadStream();
+        var command = new AnalyzeFileCommand(
+            request.File.FileName,
+            request.File.ContentType,
+            fileData,
+            request.Reanalyze);
 
         var fileAnalysisOrError = await _mediator.Send(command, ct);
 

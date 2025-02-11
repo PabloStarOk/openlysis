@@ -13,6 +13,6 @@ namespace Openlysis.Application.FileAnalyses.Commands;
 public record AnalyzeFileCommand(
     string FileName,
     string FileContentType,
-    byte[] FileData,
+    Stream FileData,
     bool Reanalyze = false)
     : IRequest<ErrorOr<FileAnalysis>>;

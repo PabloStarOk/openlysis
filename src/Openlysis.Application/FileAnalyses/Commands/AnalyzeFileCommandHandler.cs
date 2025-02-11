@@ -5,7 +5,6 @@ using MediatR;
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Application.FileAnalyses.Ports;
-using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Enums;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
@@ -46,11 +45,7 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
     /// <inheritdoc/>
     public async Task<ErrorOr<FileAnalysis>> Handle(AnalyzeFileCommand command, CancellationToken cancellationToken)
     {
-        HashSet hashSet;
-        using (var dataMemoryStream = new MemoryStream(command.FileData))
-        {
-            hashSet = await _hashService.HashDataAsync(dataMemoryStream);
-        }
+        var hashSet = await _hashService.HashDataAsync(command.FileData);
 
         // Check if the file has already been analyzed.
         var existingAnalysis = await _fileAnalysisRepository.GetByHashAsync(hashSet);
@@ -68,13 +63,13 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
 
         // Save the new file analysis in database.
         var fileGeneralInfo = new FileGeneralInfo(command.FileName, command.FileContentType, command.FileData.Length);
-        var fileInfo = new File(hashSet, fileGeneralInfo);
-        var fileAnalysis = FileAnalysis.Create(_timeProvider.GetUtcNow().DateTime, Verdict.Undetected, fileInfo, []);
+        var fileMetadata = new File(hashSet, fileGeneralInfo);
+        var fileAnalysis = FileAnalysis.Create(_timeProvider.GetUtcNow().DateTime, Verdict.Undetected, fileMetadata, []);
         await _fileAnalysisRepository.AddAsync(fileAnalysis);
         return fileAnalysis;
     }
 
-    private async Task AnalyzeFileAsync(byte[] fileData, CancellationToken cancellationToken)
+    private async Task AnalyzeFileAsync(Stream fileData, CancellationToken cancellationToken)
     {
         var list = _fileAnalyzers.Select(f => f.AnalyzeAsync(fileData, cancellationToken));
         await Task.WhenAll(list);
