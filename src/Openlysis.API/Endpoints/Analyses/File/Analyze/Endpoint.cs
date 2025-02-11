@@ -16,6 +16,11 @@ public class Endpoint : Endpoint<Request, Response>
     private readonly IMediator _mediator;
 
     /// <summary>
+    /// Gets the name of the endpoint.
+    /// </summary>
+    public static string Name { get; } = "AnalyzeFile";
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Endpoint"/> class.
     /// </summary>
     /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
@@ -35,8 +40,8 @@ public class Endpoint : Endpoint<Request, Response>
         Description(
             b =>
             {
-                b.WithName("AnalyzeFile");
-                b.WithDisplayName("AnalyzeFile");
+                b.WithName(Name);
+                b.WithDisplayName(Name);
                 b.Accepts<Request>(contentType: "multipart/form-data");
                 b.Produces<Response>(StatusCodes.Status201Created);
                 b.ProducesProblemDetails();
@@ -108,7 +113,7 @@ public class Endpoint : Endpoint<Request, Response>
         };
 
         await SendCreatedAtAsync(
-            "GetFileAnalysisById",
+            GetById.Endpoint.Name,
             routeValues,
             Response,
             generateAbsoluteUrl: true,

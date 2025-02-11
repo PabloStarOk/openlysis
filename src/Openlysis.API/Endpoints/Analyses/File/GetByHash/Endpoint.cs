@@ -18,6 +18,11 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
     private readonly IMediator _mediator;
 
     /// <summary>
+    /// Gets the name of the endpoint.
+    /// </summary>
+    public static string Name { get; } = "GetFileAnalysisByHash";
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="Endpoint"/> class.
     /// </summary>
     /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
@@ -35,8 +40,8 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
         Group<FileAnalysesGroup>();
         Description(b =>
             {
-                b.WithName("GetFileAnalysisByHash"); // TODO: Should name be stored in a public static var?
-                b.WithDisplayName("GetFileAnalysisByHash");
+                b.WithName(Name);
+                b.WithDisplayName(Name);
                 b.Produces<FileAnalysisResponse>();
                 b.ProducesProblemDetails();
             });
