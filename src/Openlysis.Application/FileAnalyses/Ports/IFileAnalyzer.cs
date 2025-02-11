@@ -12,10 +12,10 @@ public interface IFileAnalyzer
     /// <summary>
     /// Analyzes a file.
     /// </summary>
-    /// <param name="fileData">Data of file to be analyzed.</param>
+    /// <param name="fileData">A <see cref="Stream"/> to read the data of the file.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A <see cref="FileAnalysisId"/>.</returns>
-    public Task<FileAnalysisId> AnalyzeAsync(byte[] fileData, CancellationToken cancellationToken);
+    public Task<FileAnalysisId> AnalyzeAsync(Stream fileData, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets all reports for a file analysis.

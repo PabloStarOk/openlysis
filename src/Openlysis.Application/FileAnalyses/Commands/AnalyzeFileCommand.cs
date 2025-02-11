@@ -2,7 +2,7 @@ using ErrorOr;
 
 using MediatR;
 
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.FileAnalyses;
 
 namespace Openlysis.Application.FileAnalyses.Commands;
 
@@ -11,8 +11,8 @@ namespace Openlysis.Application.FileAnalyses.Commands;
 /// </summary>
 /// <param name="FileData">Data of the file to be analyzed.</param>
 public record AnalyzeFileCommand(
-    string Filename,
-    DateTime CreationDate,
-    byte[] FileData,
+    string FileName,
+    string FileContentType,
+    Stream FileData,
     bool Reanalyze = false)
-    : IRequest<ErrorOr<FileAnalysisId>>;
+    : IRequest<ErrorOr<FileAnalysis>>;
