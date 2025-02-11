@@ -1,3 +1,5 @@
+using ErrorOr;
+
 using FastEndpoints;
 
 using MediatR;
@@ -38,6 +40,7 @@ public class Endpoint : Endpoint<Request, Response>
                 b.Accepts<Request>(contentType: "multipart/form-data");
                 b.Produces<Response>(StatusCodes.Status201Created);
                 b.ProducesProblemDetails();
+                b.ProducesProblemDetails(StatusCodes.Status500InternalServerError);
             });
         Summary(
             s =>
@@ -70,6 +73,27 @@ public class Endpoint : Endpoint<Request, Response>
             request.Reanalyze);
 
         var fileAnalysisOrError = await _mediator.Send(command, ct);
+
+        if (fileAnalysisOrError.IsError)
+        {
+            if (fileAnalysisOrError.Errors.Any(e => e.Type is ErrorType.Unexpected))
+            {
+                await SendResultAsync(Results.Problem(
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    detail: "An internal error occured, try again later."));
+            }
+
+            var extensions = new Dictionary<string, object?>
+            {
+                {
+                    "errors", fileAnalysisOrError.Errors
+                },
+            };
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "One or more errors occurred.",
+                extensions: extensions));
+        }
 
         Response = new Response(
             fileAnalysisOrError.Value.Id.Value.ToString(),
