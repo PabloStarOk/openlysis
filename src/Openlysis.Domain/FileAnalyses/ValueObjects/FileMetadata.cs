@@ -8,24 +8,42 @@ namespace Openlysis.Domain.FileAnalyses.ValueObjects;
 public sealed record FileMetadata
 {
     /// <summary>
+    /// Gets the name of the file.
+    /// </summary>
+    public string Name { get; init; }
+
+    /// <summary>
+    /// Gets the type of the content of the file.
+    /// </summary>
+    public string ContentType { get; init; }
+
+    /// <summary>
+    /// Gets the size of the file in bytes.
+    /// </summary>
+    public long Size { get; init; }
+
+    /// <summary>
     /// Gets the set of hash of the file.
     /// </summary>
     public HashSet HashSet { get; init; }
 
     /// <summary>
-    /// Gets the information of the file.
-    /// </summary>
-    public FileGeneralInfo Information { get; init; }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="FileMetadata"/> class.
     /// </summary>
+    /// <param name="name">Name of the file.</param>
+    /// <param name="contentType">Type of the content of the file.</param>
+    /// <param name="size">Size of the file in bytes.</param>
     /// <param name="hashSet">The hash set associated with the file.</param>
-    /// <param name="information">The general information about the file.</param>
-    public FileMetadata(HashSet hashSet, FileGeneralInfo information)
+    public FileMetadata(
+        string name,
+        string contentType,
+        long size,
+        HashSet hashSet)
     {
+        Name = name;
+        ContentType = contentType;
+        Size = size;
         HashSet = hashSet;
-        Information = information;
     }
 
     // For EF core.

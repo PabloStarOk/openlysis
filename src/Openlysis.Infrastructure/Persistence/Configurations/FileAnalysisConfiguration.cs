@@ -38,9 +38,16 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
                 verdict => verdict.ToString(),
                 dbValue => Enum.Parse<Verdict>(dbValue, true));
 
-        builder.OwnsOne(f => f.Metadata, fileBuilder =>
+        builder.OwnsOne(f => f.Metadata, metadataBuilder =>
         {
-            fileBuilder.OwnsOne(
+            metadataBuilder.Property(i => i.Name)
+                .HasColumnName("FileName");
+            metadataBuilder.Property(i => i.ContentType)
+                .HasColumnName("ContentType");
+            metadataBuilder.Property(i => i.Size)
+                .HasColumnName("Size");
+
+            metadataBuilder.OwnsOne(
                 f => f.HashSet, hashBuilder =>
                 {
                     hashBuilder.Property(h => h.Md5)
@@ -51,17 +58,6 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
                         .HasColumnName("Sha256");
                     hashBuilder.Property(h => h.Sha512)
                         .HasColumnName("Sha512");
-                });
-
-            fileBuilder.OwnsOne(
-                f => f.Information, infoBuilder =>
-                {
-                    infoBuilder.Property(i => i.Name)
-                        .HasColumnName("FileName");
-                    infoBuilder.Property(i => i.MimeType)
-                        .HasColumnName("MimeType");
-                    infoBuilder.Property(i => i.Size)
-                        .HasColumnName("Size");
                 });
         });
 

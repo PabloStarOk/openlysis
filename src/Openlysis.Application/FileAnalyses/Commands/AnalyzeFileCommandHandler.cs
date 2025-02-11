@@ -60,8 +60,11 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
         await AnalyzeFileAsync(command.FileData, cancellationToken);
 
         // Save the new file analysis in database.
-        var fileGeneralInfo = new FileGeneralInfo(command.FileName, command.FileContentType, command.FileData.Length);
-        var fileMetadata = new FileMetadata(hashSet, fileGeneralInfo);
+        var fileMetadata = new FileMetadata(
+            command.FileName,
+            command.FileContentType,
+            command.FileData.Length,
+            hashSet);
         var fileAnalysis = FileAnalysis.Create(_timeProvider.GetUtcNow().DateTime, Verdict.Undetected, fileMetadata, []);
         await _fileAnalysisRepository.AddAsync(fileAnalysis);
         return fileAnalysis;
