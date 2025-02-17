@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.Enums;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations;

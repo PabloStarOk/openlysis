@@ -1,10 +1,15 @@
-namespace Openlysis.Domain.FileAnalyses.Enums;
+namespace Openlysis.Domain.Common.Enums;
 
 /// <summary>
 /// Represents a verdict.
 /// </summary>
 public enum Verdict
 {
+    /// <summary>
+    /// The verdict is unknown.
+    /// </summary>
+    Unknown,
+
     /// <summary>
     /// Not malicious activity detected.
     /// </summary>

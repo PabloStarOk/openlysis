@@ -1,6 +1,6 @@
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.Enums;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Analyses.File.Responses;

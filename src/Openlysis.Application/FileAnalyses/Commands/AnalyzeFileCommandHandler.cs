@@ -5,8 +5,8 @@ using MediatR;
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Application.FileAnalyses.Ports;
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.Enums;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Openlysis.Application.FileAnalyses.Commands;
