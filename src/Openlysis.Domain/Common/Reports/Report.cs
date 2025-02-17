@@ -1,3 +1,4 @@
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Models;
 
 namespace Openlysis.Domain.Common.Reports;
@@ -12,21 +13,21 @@ public abstract class Report : Entity<ReportId>
     /// </summary>
     /// <param name="id">ID of the report.</param>
     /// <param name="serviceName">Name of the service.</param>
-    /// <param name="scanState">State of the scan.</param>
+    /// <param name="analysisStatus">State of the scan.</param>
     /// <param name="scanStartDate">Start date of the scan.</param>
     /// <param name="scanEndDate">End date of the scan.</param>
     /// <param name="verdict">Verdict of the scan.</param>
     protected Report(
         ReportId id,
         string serviceName,
-        ScanState scanState,
+        AnalysisStatus analysisStatus,
         DateTime scanStartDate,
-        ScanState scanEndDate,
+        AnalysisStatus scanEndDate,
         string verdict)
         : base(id)
     {
         ServiceName = serviceName;
-        ScanState = scanState;
+        AnalysisStatus = analysisStatus;
         ScanStartDate = scanStartDate;
         ScanEndDate = scanEndDate;
         Verdict = verdict;
@@ -40,7 +41,7 @@ public abstract class Report : Entity<ReportId>
     /// <summary>
     /// Gets or sets the state of the scan.
     /// </summary>
-    public ScanState ScanState { get; protected set; }
+    public AnalysisStatus AnalysisStatus { get; protected set; }
 
     /// <summary>
     /// Gets or sets the start date of the scan.
@@ -50,7 +51,7 @@ public abstract class Report : Entity<ReportId>
     /// <summary>
     /// Gets or sets the end date of the scan.
     /// </summary>
-    public ScanState ScanEndDate { get; protected set; }
+    public AnalysisStatus ScanEndDate { get; protected set; }
 
     /// <summary>
     /// Gets or sets the verdict of the scan.

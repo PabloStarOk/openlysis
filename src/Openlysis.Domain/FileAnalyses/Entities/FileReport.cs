@@ -1,3 +1,4 @@
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
@@ -13,7 +14,7 @@ public sealed class FileReport : Report, IEquatable<FileReport>
     /// </summary>
     /// <param name="id">ID of the report.</param>
     /// <param name="serviceName">Name of the service.</param>
-    /// <param name="scanState">State of the scan.</param>
+    /// <param name="analysisStatus">State of the scan.</param>
     /// <param name="scanStartDate">Start date of the scan.</param>
     /// <param name="scanEndDate">End date of the scan.</param>
     /// <param name="verdict">Verdict of the scan.</param>
@@ -21,15 +22,15 @@ public sealed class FileReport : Report, IEquatable<FileReport>
     public FileReport(
         ReportId id,
         string serviceName,
-        ScanState scanState,
+        AnalysisStatus analysisStatus,
         DateTime scanStartDate,
-        ScanState scanEndDate,
+        AnalysisStatus scanEndDate,
         string verdict,
         DetectionInfo detectionInfo)
         : base(
             id,
             serviceName,
-            scanState,
+            analysisStatus,
             scanStartDate,
             scanEndDate,
             verdict)
