@@ -13,8 +13,4 @@
       </PackageReference>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="FileAnalyses\Enums\" />
-    </ItemGroup>
-
 </Project>

@@ -1,9 +1,9 @@
-namespace Openlysis.Domain.Common.Reports;
+namespace Openlysis.Domain.Common.Enums;
 
 /// <summary>
 /// Dangerous zone of a report.
 /// </summary>
-public enum ReportZone
+public enum ThreatZone
 {
     /// <summary>
     /// There's no report zone.
