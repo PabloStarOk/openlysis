@@ -71,7 +71,7 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
         }
 
         var query = new FileAnalysisQueryByHash(hash);
-        ErrorOr<FileAnalysis> fileAnalysis = await _mediator.Send(query, ct);
+        ErrorOr<FileMultiAnalysis> fileAnalysis = await _mediator.Send(query, ct);
 
         if (fileAnalysis.IsError)
         {
@@ -99,13 +99,13 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
         }
 
         // Map to DTO
-        var response = new FileAnalysisResponse(
+        Response = new FileAnalysisResponse(
             fileAnalysis.Value.Id.Value.ToString(),
-            fileAnalysis.Value.LastScanDate,
-            fileAnalysis.Value.ReportsAmount,
-            fileAnalysis.Value.Verdict,
+            fileAnalysis.Value.StartedDate,
+            fileAnalysis.Value.AverageVerdict,
             fileAnalysis.Value.Metadata,
-            fileAnalysis.Value.Reports.ToArray());
-        await SendOkAsync(response, ct);
+            fileAnalysis.Value.AllReports,
+            fileAnalysis.Value.ReportsAmount);
+        await SendOkAsync(Response, ct);
     }
 }

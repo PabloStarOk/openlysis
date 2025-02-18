@@ -8,36 +8,36 @@ using Openlysis.Domain.FileAnalyses.ValueObjects;
 namespace Openlysis.Infrastructure.Persistence.Repositories;
 
 /// <summary>
-/// Repository to access <see cref="FileAnalysis"/>.
+/// Repository to access <see cref="FileMultiAnalysis"/>.
 /// </summary>
-public class FileAnalysisRepository : IFileAnalysisRepository
+public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
 {
     private readonly AnalysesDbContext _dbContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileAnalysisRepository"/> class.
+    /// Initializes a new instance of the <see cref="FileMultiAnalysisRepository"/> class.
     /// </summary>
     /// <param name="dbContext">The database context to be used by the repository.</param>
-    public FileAnalysisRepository(AnalysesDbContext dbContext)
+    public FileMultiAnalysisRepository(AnalysesDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
     /// <inheritdoc/>
-    public async Task AddAsync(FileAnalysis fileAnalysis)
+    public async Task AddAsync(FileMultiAnalysis fileMultiAnalysis)
     {
-        await _dbContext.FileAnalyses.AddAsync(fileAnalysis);
+        await _dbContext.FileAnalyses.AddAsync(fileMultiAnalysis);
         await _dbContext.SaveChangesAsync();
     }
 
     /// <inheritdoc/>
-    public async Task<FileAnalysis?> GetByIdAsync(FileAnalysisId fileAnalysisId)
+    public async Task<FileMultiAnalysis?> GetByIdAsync(FileMultiAnalysisId fileMultiAnalysisId)
     {
-        return await _dbContext.FileAnalyses.FindAsync(fileAnalysisId);
+        return await _dbContext.FileAnalyses.FindAsync(fileMultiAnalysisId);
     }
 
     /// <inheritdoc/>
-    public async Task<FileAnalysis?> GetByHashAsync(ContentHashSet contentHashSet)
+    public async Task<FileMultiAnalysis?> GetByHashAsync(ContentHashSet contentHashSet)
     {
         var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
                 f.Metadata.ContentHashSet.Sha256 == contentHashSet.Md5)
@@ -52,7 +52,7 @@ public class FileAnalysisRepository : IFileAnalysisRepository
     }
 
     /// <inheritdoc/>
-    public async Task<FileAnalysis?> GetByHashAsync(string hash)
+    public async Task<FileMultiAnalysis?> GetByHashAsync(string hash)
     {
         var fileAnalysis = await _dbContext.FileAnalyses.FirstOrDefaultAsync(f =>
                 f.Metadata.ContentHashSet.Sha256 == hash)

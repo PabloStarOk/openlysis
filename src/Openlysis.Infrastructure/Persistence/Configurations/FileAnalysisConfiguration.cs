@@ -8,30 +8,30 @@ using Openlysis.Domain.FileAnalyses.ValueObjects;
 namespace Openlysis.Infrastructure.Persistence.Configurations;
 
 /// <summary>
-/// Configuration for the <see cref="FileAnalysis"/> entity in the database.
+/// Configuration for the <see cref="FileMultiAnalysis"/> entity in the database.
 /// </summary>
-public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
+public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnalysis>
 {
     /// <inheritdoc/>
-    public void Configure(EntityTypeBuilder<FileAnalysis> builder)
+    public void Configure(EntityTypeBuilder<FileMultiAnalysis> builder)
     {
         builder.ToTable("FileAnalyses");
 
         builder.HasKey(f => f.Id);
         builder.Property(f => f.Id)
-            .HasColumnName("FileAnalysisId")
+            .HasColumnName("FileMultiAnalysisId")
             .HasColumnType("VARCHAR")
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                dbValue => FileAnalysisId.Create(dbValue));
+                dbValue => FileMultiAnalysisId.Create(dbValue));
 
-        builder.Property(f => f.LastScanDate)
-            .HasColumnName("LastScanDate")
+        builder.Property(f => f.StartedDate)
+            .HasColumnName("StartedDate")
             .HasColumnType("DATETIME2");
 
-        builder.Property(f => f.Verdict)
-            .HasColumnName("Verdict")
+        builder.Property(f => f.AverageVerdict)
+            .HasColumnName("AverageVerdict")
             .HasColumnType("VARCHAR")
             .HasMaxLength(10)
             .HasConversion(
@@ -40,8 +40,6 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
 
         builder.OwnsOne(f => f.Metadata, metadataBuilder =>
         {
-            metadataBuilder.Property(i => i.Name)
-                .HasColumnName("FileName");
             metadataBuilder.Property(i => i.ContentType)
                 .HasColumnName("ContentType");
             metadataBuilder.Property(i => i.Size)
@@ -60,7 +58,5 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
                         .HasColumnName("Sha512");
                 });
         });
-
-        builder.Ignore(f => f.Reports);
     }
 }

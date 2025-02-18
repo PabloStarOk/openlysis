@@ -11,4 +11,4 @@ namespace Openlysis.Application.FileAnalyses.Queries;
 /// </summary>
 /// <param name="Hash">A <see cref="string"/> representing a MD5, SHA1, SHA256, or SHA512 hash of the file.</param>
 public record FileAnalysisQueryByHash(string Hash)
-    : IRequest<ErrorOr<FileAnalysis>>;
+    : IRequest<ErrorOr<FileMultiAnalysis>>;
