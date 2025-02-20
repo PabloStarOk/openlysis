@@ -1,5 +1,3 @@
-using FluentResults;
-
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.Common.Models;
@@ -126,32 +124,28 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// Adds a new service file analysis to the collection.
     /// </summary>
     /// <param name="analysis">The service file analysis to add.</param>
-    /// <returns>A result indicating success or failure.</returns>
-    public Result AddServiceAnalysis(ServiceFileAnalysis analysis)
+    public void AddServiceAnalysis(ServiceFileAnalysis analysis)
     {
         if (!_serviceFileAnalyses.TryAdd(analysis.Id, analysis))
         {
-            return Result.Fail("Already exists an analysis with the same ID.");
+            return;
         }
 
         AllReports = _serviceFileAnalyses.Values.SelectMany(s => s.Reports).ToList().AsReadOnly();
         UpdateAvgVerdict();
         UpdateAvgThreatZone();
         UpdateStatus();
-
-        return Result.Ok();
     }
 
     /// <summary>
     /// Updates an existing service file analysis in the collection.
     /// </summary>
     /// <param name="analysis">The service file analysis to update.</param>
-    /// <returns>A result indicating success or failure.</returns>
-    public Result UpdateServiceAnalysis(ServiceFileAnalysis analysis)
+    public void UpdateServiceAnalysis(ServiceFileAnalysis analysis)
     {
         if (!_serviceFileAnalyses.ContainsKey(analysis.Id))
         {
-            return Result.Fail("Analysis doesn't exist.");
+            return;
         }
 
         AllReports = _serviceFileAnalyses.Values.SelectMany(s => s.Reports).ToList().AsReadOnly();
@@ -160,7 +154,6 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
         UpdateStatus();
 
         _serviceFileAnalyses[analysis.Id] = analysis;
-        return Result.Ok();
     }
 
     /// <summary>

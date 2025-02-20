@@ -1,5 +1,3 @@
-using FluentResults;
-
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Models;
 using Openlysis.Domain.Common.Reports;
@@ -111,37 +109,26 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
     /// Adds a report to the analysis.
     /// </summary>
     /// <param name="report">The report to add.</param>
-    /// <returns>
-    /// A <see cref="Result"/> indicating the success or failure of the operation.
-    /// Returns a failure result if the report already exists in the analysis.
-    /// </returns>
-    public Result AddReport(Report report)
+    public void AddReport(Report report)
     {
         ArgumentNullException.ThrowIfNull(report);
 
-        return !_reports.TryAdd(report.Id, report)
-            ? Result.Fail("Report already exists.")
-            : Result.Ok();
+        _reports.TryAdd(report.Id, report);
     }
 
     /// <summary>
     /// Updates an existing report in the analysis.
     /// </summary>
     /// <param name="report">The report to update.</param>
-    /// <returns>
-    /// A <see cref="Result"/> indicating the success or failure of the operation.
-    /// Returns a failure result if the report does not exist in the analysis.
-    /// </returns>
-    public Result UpdateReport(Report report)
+    public void UpdateReport(Report report)
     {
         ArgumentNullException.ThrowIfNull(report);
 
         if (!_reports.ContainsKey(report.Id))
         {
-            return Result.Fail("Report doesn't exist in the analysis.");
+            return;
         }
 
         _reports[report.Id] = report;
-        return Result.Ok();
     }
 }
