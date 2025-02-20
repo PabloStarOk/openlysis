@@ -27,7 +27,7 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
     /// <summary>
     /// Gets the reports associated with the analysis as a read-only dictionary.
     /// </summary>
-    public IReadOnlyDictionary<ReportId, Report> Reports => _reports.AsReadOnly();
+    public IReadOnlyList<Report> Reports => _reports.Values.ToList().AsReadOnly();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ServiceFileAnalysis"/> class.
@@ -47,6 +47,15 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
         Status = status;
         _reports = reports;
     }
+
+    // For EF core.
+#pragma warning disable CS8618
+#pragma warning disable S1144
+    private ServiceFileAnalysis()
+    {
+    }
+#pragma warning restore S1144
+#pragma warning restore CS8618
 
     /// <summary>
     /// Creates a new instance of <see cref="ServiceFileAnalysis"/> with the specified parameters.

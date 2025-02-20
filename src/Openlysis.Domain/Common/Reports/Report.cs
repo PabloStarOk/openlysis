@@ -43,6 +43,15 @@ public class Report : Entity<ReportId>
         ThreatLevel = threatLevel;
     }
 
+    // For EF core.
+#pragma warning disable CS8618
+#pragma warning disable S1144
+    protected Report()
+    {
+    }
+#pragma warning restore S1144
+#pragma warning restore CS8618
+
     /// <summary>
     /// Creates a new instance of the <see cref="Report"/> class.
     /// </summary>

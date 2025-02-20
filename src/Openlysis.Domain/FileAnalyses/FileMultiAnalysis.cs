@@ -1,6 +1,7 @@
 using FluentResults;
 
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.Common.Models;
 using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
@@ -13,7 +14,7 @@ namespace Openlysis.Domain.FileAnalyses;
 /// </summary>
 public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
 {
-    private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses;
+    private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
 
     /// <summary>
     /// Gets the date and time when the analysis started.
@@ -36,19 +37,19 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     public AnalysisStatus Status { get; private set; }
 
     /// <summary>
-    /// Gets the name of the file.
-    /// </summary>
-    public string FileName { get; }
-
-    /// <summary>
     /// Gets the information of the file.
     /// </summary>
-    public FileMetadata Metadata { get; }
+    public FileMetadata FileMetadata { get; init; }
+
+    /// <summary>
+    /// Gets the set of hash of the file.
+    /// </summary>
+    public ContentHashSet ContentHashSet { get; init; }
 
     /// <summary>
     /// Gets the list of service file analyses.
     /// </summary>
-    public IReadOnlyDictionary<ServiceFileAnalysisId, ServiceFileAnalysis> ServiceFileAnalyses => _serviceFileAnalyses;
+    public IReadOnlyList<ServiceFileAnalysis> ServiceFileAnalyses => _serviceFileAnalyses.Values.ToList().AsReadOnly();
 
     /// <summary>
     /// Gets all reports from the service file analyses.
@@ -68,24 +69,24 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="averageVerdict">The summary verdict of the analysis.</param>
     /// <param name="averageThreatZone">The summary threat zone of the analysis.</param>
-    /// <param name="fileName">The name of the file being analyzed.</param>
-    /// <param name="metadata">The metadata information of the file.</param>
+    /// <param name="fileMetadata">The metadata of the file.</param>
+    /// <param name="contentHashSet">The set of hash of the file.</param>
     private FileMultiAnalysis(
         FileMultiAnalysisId id,
         Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> serviceFileAnalyses,
         DateTime startedDate,
         Verdict averageVerdict,
         ThreatZone averageThreatZone,
-        string fileName,
-        FileMetadata metadata)
+        FileMetadata fileMetadata,
+        ContentHashSet contentHashSet)
         : base(id)
     {
         _serviceFileAnalyses = serviceFileAnalyses;
         StartedDate = startedDate;
         AverageVerdict = averageVerdict;
         AverageThreatZone = averageThreatZone;
-        FileName = fileName;
-        Metadata = metadata;
+        FileMetadata = fileMetadata;
+        ContentHashSet = contentHashSet;
     }
 
     // For EF core.
@@ -101,14 +102,14 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// Creates a new instance of the <see cref="FileMultiAnalysis"/> class with the specified file name, metadata, and reports.
     /// </summary>
     /// <param name="startedDate">The date and time when the analysis started.</param>
-    /// <param name="fileName">The name of the file being analyzed.</param>
-    /// <param name="metadata">The metadata information of the file.</param>
-    /// <param name="serviceFileAnalyses">The list of service file analyses.</param>
+    /// <param name="fileMetadata">The metadata of the file.</param>
+    /// <param name="contentHashSet">The set of hash of the file.</param>
+    /// <param name="serviceFileAnalyses">The dictionary of service file analyses.</param>
     /// <returns>A new instance of the <see cref="FileMultiAnalysis"/> class.</returns>
     public static FileMultiAnalysis Create(
         DateTime startedDate,
-        string fileName,
-        FileMetadata metadata,
+        FileMetadata fileMetadata,
+        ContentHashSet contentHashSet,
         Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> serviceFileAnalyses)
     {
         return new FileMultiAnalysis(
@@ -117,8 +118,8 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
             startedDate,
             Verdict.Unknown,
             ThreatZone.None,
-            fileName,
-            metadata);
+            fileMetadata,
+            contentHashSet);
     }
 
     /// <summary>
@@ -133,7 +134,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
             return Result.Fail("Already exists an analysis with the same ID.");
         }
 
-        AllReports = _serviceFileAnalyses.Values.SelectMany(s => s.Reports.Values).ToList().AsReadOnly();
+        AllReports = _serviceFileAnalyses.Values.SelectMany(s => s.Reports).ToList().AsReadOnly();
         UpdateAvgVerdict();
         UpdateAvgThreatZone();
         UpdateStatus();
@@ -153,7 +154,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
             return Result.Fail("Analysis doesn't exist.");
         }
 
-        AllReports = _serviceFileAnalyses.Values.SelectMany(s => s.Reports.Values).ToList().AsReadOnly();
+        AllReports = _serviceFileAnalyses.Values.SelectMany(s => s.Reports).ToList().AsReadOnly();
         UpdateAvgVerdict();
         UpdateAvgThreatZone();
         UpdateStatus();

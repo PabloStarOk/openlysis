@@ -117,7 +117,8 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
             fileAnalysis.Value.Id.Value.ToString(),
             fileAnalysis.Value.StartedDate,
             fileAnalysis.Value.AverageVerdict,
-            fileAnalysis.Value.Metadata,
+            fileAnalysis.Value.FileMetadata,
+            fileAnalysis.Value.ContentHashSet,
             fileAnalysis.Value.AllReports,
             fileAnalysis.Value.ReportsAmount);
         await SendOkAsync(Response, ct);

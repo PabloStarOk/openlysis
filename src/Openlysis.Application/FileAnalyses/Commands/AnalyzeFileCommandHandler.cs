@@ -60,10 +60,14 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
 
         // Save the new file analysis in database.
         var fileMetadata = new FileMetadata(
+            command.FileName,
             command.FileContentType,
-            command.FileData.Length,
-            hashSet);
-        var fileAnalysis = FileMultiAnalysis.Create(_timeProvider.GetUtcNow().DateTime, command.FileName, fileMetadata, []);
+            command.FileData.Length);
+        var fileAnalysis = FileMultiAnalysis.Create(
+            _timeProvider.GetUtcNow().DateTime,
+            fileMetadata,
+            hashSet,
+            []);
         await _fileMultiAnalysisRepository.AddAsync(fileAnalysis);
         return fileAnalysis;
     }
