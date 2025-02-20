@@ -1,9 +1,9 @@
-namespace Openlysis.Domain.Common.Reports;
+namespace Openlysis.Domain.Common.Enums;
 
 /// <summary>
 /// State of a scan.
 /// </summary>
-public enum ScanState
+public enum AnalysisStatus
 {
     /// <summary>
     /// The scan is in the queue.

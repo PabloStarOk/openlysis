@@ -19,4 +19,4 @@ public record AnalyzeFileCommand(
     string FileContentType,
     Stream FileData,
     bool Reanalyze = false)
-    : IRequest<ErrorOr<FileAnalysis>>;
+    : IRequest<ErrorOr<FileMultiAnalysis>>;

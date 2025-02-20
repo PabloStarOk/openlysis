@@ -82,10 +82,10 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
             return;
         }
 
-        var fileAnalysisId = FileAnalysisId.Create(guid);
+        var fileAnalysisId = FileMultiAnalysisId.Create(guid);
         var query = new FileAnalysisQueryById(fileAnalysisId);
 
-        ErrorOr<FileAnalysis> fileAnalysis = await _mediator.Send(query, ct);
+        ErrorOr<FileMultiAnalysis> fileAnalysis = await _mediator.Send(query, ct);
 
         if (fileAnalysis.IsError)
         {
@@ -115,11 +115,12 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
         // Map to DTO
         Response = new FileAnalysisResponse(
             fileAnalysis.Value.Id.Value.ToString(),
-            fileAnalysis.Value.LastScanDate,
-            fileAnalysis.Value.ReportsAmount,
-            fileAnalysis.Value.Verdict,
-            fileAnalysis.Value.Metadata,
-            fileAnalysis.Value.Reports.ToArray());
+            fileAnalysis.Value.StartedDate,
+            fileAnalysis.Value.AverageVerdict,
+            fileAnalysis.Value.FileMetadata,
+            fileAnalysis.Value.ContentHashSet,
+            fileAnalysis.Value.AllReports,
+            fileAnalysis.Value.ReportsAmount);
         await SendOkAsync(Response, ct);
     }
 }

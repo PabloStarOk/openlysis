@@ -30,7 +30,7 @@ public static class DependencyInjection
         services.AddDbContext<AnalysesDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-        services.AddScoped<IFileAnalysisRepository, FileAnalysisRepository>();
+        services.AddScoped<IFileMultiAnalysisRepository, FileMultiAnalysisRepository>();
 
         // Hash service
         services.AddTransient<MD5>(_ => MD5.Create());

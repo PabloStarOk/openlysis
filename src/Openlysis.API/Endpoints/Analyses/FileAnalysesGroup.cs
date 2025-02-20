@@ -18,8 +18,8 @@ public sealed class FileAnalysesGroup : Group
         {
             ep.Description(b =>
                 {
-                    b.WithGroupName("FileAnalyses");
-                    b.WithDisplayName("FileAnalyses");
+                    b.WithGroupName("FileMultiAnalyses");
+                    b.WithDisplayName("FileMultiAnalyses");
                     b.WithTags("File");
                 });
             ep.AllowAnonymous(); // TODO: Add and security.
