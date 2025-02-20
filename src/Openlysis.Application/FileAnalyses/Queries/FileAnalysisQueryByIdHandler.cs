@@ -38,7 +38,7 @@ public class FileAnalysisQueryByIdHandler
     /// <returns>A <see cref="ErrorOr"/> in case of an error, or a <see cref="FileMultiAnalysis"/>.</returns>
     public async Task<ErrorOr<FileMultiAnalysis>> Handle(FileAnalysisQueryById query, CancellationToken cancellationToken)
     {
-        var fileAnalysis = await _fileMultiAnalysisRepository.GetByIdAsync(query.FileMultiAnalysisId);
+        var fileAnalysis = await _fileMultiAnalysisRepository.GetByIdAsync(query.FileMultiAnalysisId, cancellationToken);
 
         if (fileAnalysis is null)
         {

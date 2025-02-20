@@ -37,7 +37,7 @@ public class FileAnalysisQueryByHashHandler : IRequestHandler<FileAnalysisQueryB
     /// <returns>A <see cref="ErrorOr"/> in case of an error, or a <see cref="FileMultiAnalysis"/>.</returns>
     public async Task<ErrorOr<FileMultiAnalysis>> Handle(FileAnalysisQueryByHash query, CancellationToken cancellationToken)
     {
-        var fileAnalysis = await _fileMultiAnalysisRepository.GetByHashAsync(query.Hash);
+        var fileAnalysis = await _fileMultiAnalysisRepository.GetByHashAsync(query.Hash, cancellationToken);
 
         if (fileAnalysis is null)
         {
