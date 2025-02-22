@@ -46,19 +46,15 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
 
         // Check if the file has already been analyzed.
         var existingAnalysis = await _fileMultiAnalysisRepository.GetByHashAsync(hashSet, cancellationToken);
-        if (existingAnalysis is not null)
-        {
-            if (command.Reanalyze)
-            {
-                await AnalyzeFileAsync(command.FileData, cancellationToken);
-            }
 
+        if (existingAnalysis is not null && !command.Reanalyze)
+        {
             return existingAnalysis;
         }
 
-        await AnalyzeFileAsync(command.FileData, cancellationToken);
+        await AnalyzeFileAsync(command, cancellationToken);
 
-        // Save the new file analysis in database.
+        // Save a new file analysis in database.
         var fileMetadata = new FileMetadata(
             command.FileName,
             command.FileContentType,
@@ -72,9 +68,25 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
         return fileAnalysis;
     }
 
-    private async Task AnalyzeFileAsync(Stream fileData, CancellationToken cancellationToken)
+    /// <summary>
+    /// Analyzes the file using all available analyzers.
+    /// </summary>
+    /// <param name="command">The file analysis command containing file data and metadata.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    private async Task AnalyzeFileAsync(AnalyzeFileCommand command, CancellationToken cancellationToken)
     {
-        var list = _fileAnalyzers.Select(f => f.AnalyzeAsync(fileData, cancellationToken));
+        var list = _fileAnalyzers.Select(f =>
+            {
+                command.FileData.Position = 0;
+                var request = new AnalyzeFileRequest(
+                    command.FileName,
+                    command.FileContentType,
+                    command.FileData,
+                    Description: string.Empty, // TODO: Get description from endpoints.
+                    Password: string.Empty, // TODO: Get password from endpoints.
+                    IsPrivateFile: true); // TODO: Get option from endpoints, but prefer true.
+                return f.AnalyzeAsync(request, cancellationToken);
+            });
         await Task.WhenAll(list);
     }
 }

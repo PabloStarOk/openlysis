@@ -1,27 +1,27 @@
 namespace Openlysis.Domain.Common.Enums;
 
 /// <summary>
-/// State of a scan.
+/// State of an analysis.
 /// </summary>
 public enum AnalysisStatus
 {
     /// <summary>
-    /// The scan is in the queue.
+    /// The analysis is in the queue.
     /// </summary>
     Queued,
 
     /// <summary>
-    /// The scan was started.
+    /// The analysis is currently in progress.
     /// </summary>
-    Started,
+    InProgress,
 
     /// <summary>
-    /// The scan was finished.
+    /// The analysis was finished.
     /// </summary>
     Finished,
 
     /// <summary>
-    /// The scan was not completed because of timeout.
+    /// The analysis was not completed because of timeout.
     /// </summary>
     Timeout,
 }
