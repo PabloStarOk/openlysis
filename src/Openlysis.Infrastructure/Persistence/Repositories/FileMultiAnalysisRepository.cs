@@ -26,10 +26,16 @@ public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
     /// <inheritdoc/>
     public async Task AddAsync(FileMultiAnalysis fileMultiAnalysis, CancellationToken cancellationToken = default)
     {
-        await _dbContext.AddAsync(fileMultiAnalysis.ContentHashSet, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        var hashSetExists = await _dbContext.ContentHashSets
+            .AnyAsync(
+                c => c.Sha256 == fileMultiAnalysis.ContentHashSet.Sha256,
+                cancellationToken);
 
-        _dbContext.Entry(fileMultiAnalysis).Property("Sha256").CurrentValue = fileMultiAnalysis.ContentHashSet.Sha256;
+        if (hashSetExists)
+        {
+            _dbContext.Attach(fileMultiAnalysis.ContentHashSet).State = EntityState.Unchanged;
+        }
+
         await _dbContext.AddAsync(fileMultiAnalysis, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

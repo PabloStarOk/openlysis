@@ -1,6 +1,6 @@
 @OpenlysisAPIHostAddress = http://localhost:5248/api/v1
-@SampleFileAnalysisId = 62eff127-7bce-4b43-832d-d860d6a353c9
-@SampleFileAnalysisSha256 = C58440CF7E0E589C51CAB78AABCCBECEDAB753CAD91CCC5EEC0CA8BC7007EC2E
+@SampleFileAnalysisId = 16351fe3-d1ad-41c3-9e52-9a8396c2519d
+@SampleFileAnalysisSha256 = 24B0AC1FCEAFD2100E112E2B66D8832979CB3036F8C3EF3965EAEE22DFD1604D
 
 // Get by ID
 GET {{OpenlysisAPIHostAddress}}/analyses/file/{{SampleFileAnalysisId}}
