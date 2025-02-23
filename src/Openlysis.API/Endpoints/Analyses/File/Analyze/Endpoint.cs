@@ -75,6 +75,9 @@ public class Endpoint : Endpoint<Request, Response>
             request.File.FileName,
             request.File.ContentType,
             fileData,
+            request.FileDescription,
+            request.FilePassword,
+            request.IsPrivateFile,
             request.Reanalyze);
 
         var fileAnalysisOrError = await _mediator.Send(command, ct);

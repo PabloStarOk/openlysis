@@ -82,9 +82,9 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
                     command.FileName,
                     command.FileContentType,
                     command.FileData,
-                    Description: string.Empty, // TODO: Get description from endpoints.
-                    Password: string.Empty, // TODO: Get password from endpoints.
-                    IsPrivateFile: true); // TODO: Get option from endpoints, but prefer true.
+                    command.FileDescription,
+                    command.FilePassword,
+                    command.IsPrivateFile);
                 return f.AnalyzeAsync(request, cancellationToken);
             });
         await Task.WhenAll(list);

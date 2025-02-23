@@ -23,6 +23,16 @@ Content-Type: text/plain; charset=UTF-8
 
 This is a sample text from openlysis
 --Boundary
+Content-Disposition: form-data; name="fileDescription";
+Content-Type: text/plain
+
+Sample file description.
+--Boundary
+Content-Disposition: form-data; name="isPrivateFile";
+Content-Type: text/plain
+
+true
+--Boundary
 Content-Disposition: form-data; name="reanalyze";
 Content-Type: text/plain
 
