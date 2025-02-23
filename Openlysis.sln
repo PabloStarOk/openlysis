@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API", "src\Openlysis.API\Openlysis.API.csproj", "{56C77A97-4A8E-48DC-B14D-45935FFC177C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filescan.Client", "src\lib\Filescan.Client\Filescan.Client.csproj", "{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +36,10 @@ Global
 		{56C77A97-4A8E-48DC-B14D-45935FFC177C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56C77A97-4A8E-48DC-B14D-45935FFC177C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56C77A97-4A8E-48DC-B14D-45935FFC177C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

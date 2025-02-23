@@ -1,3 +1,5 @@
+using ErrorOr;
+
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
@@ -16,10 +18,10 @@ public interface IFileAnalyzer
     /// <summary>
     /// Analyzes a file.
     /// </summary>
-    /// <param name="fileData">A <see cref="Stream"/> to read the data of the file.</param>
+    /// <param name="request">A <see cref="AnalyzeFileRequest"/> containing the file data and other parameters.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A <see cref="ServiceFileAnalysisId"/>.</returns>
-    public Task<ServiceFileAnalysisId> AnalyzeAsync(Stream fileData, CancellationToken cancellationToken);
+    public Task<ErrorOr<ServiceFileAnalysisId>> AnalyzeAsync(AnalyzeFileRequest request, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets an analysis made by the analyzer.
@@ -27,5 +29,5 @@ public interface IFileAnalyzer
     /// <param name="analysisId">A <see cref="ServiceFileAnalysisId"/>.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A <see cref="ServiceFileAnalysis"/>.</returns>
-    public Task<ServiceFileAnalysis> GetAnalysisAsync(ServiceFileAnalysisId analysisId, CancellationToken cancellationToken);
+    public Task<ErrorOr<ServiceFileAnalysis>> GetAnalysisAsync(ServiceFileAnalysisId analysisId, CancellationToken cancellationToken);
 }

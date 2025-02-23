@@ -22,8 +22,7 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">Collection of services.</param>
     /// <param name="configuration">Configuration of the application.</param>
-    /// <returns>An <see cref="IServiceCollection"/>.</returns>
-    public static IServiceCollection AddInfrastructure(
+    public static void AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration)
     {
@@ -38,7 +37,5 @@ public static class DependencyInjection
         services.AddTransient<SHA256>(_ => SHA256.Create());
         services.AddTransient<SHA512>(_ => SHA512.Create());
         services.AddScoped<IHashService, HashService>();
-
-        return services;
     }
 }

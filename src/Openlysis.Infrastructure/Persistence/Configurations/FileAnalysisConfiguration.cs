@@ -20,7 +20,6 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
     public void Configure(EntityTypeBuilder<FileMultiAnalysis> builder)
     {
         ConfigureFileMultiAnalysesTable(builder);
-        ConfigureContentHashSetsTable(builder);
         ConfigureServiceFileAnalysesTable(builder);
     }
 
@@ -97,55 +96,13 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
                     .IsRequired();
             });
 
-        // Shadow property for referencing ContentHashSet.
-        builder.Property<string>("Sha256")
-            .HasColumnName("Sha256")
-            .HasColumnType(VarcharType)
-            .HasMaxLength(64)
+        builder.HasOne(f => f.ContentHashSet)
+            .WithMany()
+            .HasForeignKey("Sha256")
             .IsRequired();
 
         builder.Ignore(f => f.AllReports);
         builder.Ignore(f => f.ReportsAmount);
-    }
-
-    /// <summary>
-    /// Configures the ContentHashSets table.
-    /// </summary>
-    /// <param name="builder">The builder to be used to configure the entity.</param>
-    private static void ConfigureContentHashSetsTable(EntityTypeBuilder<FileMultiAnalysis> builder)
-    {
-        builder.OwnsOne(f => f.ContentHashSet, hashBuilder =>
-        {
-            hashBuilder.ToTable("ContentHashSets");
-            hashBuilder.HasKey(h => h.Sha256);
-
-            hashBuilder.WithOwner().HasPrincipalKey("Sha256");
-
-            hashBuilder.Property(h => h.Sha256)
-                .HasColumnName("Sha256")
-                .HasColumnType(VarcharType)
-                .HasMaxLength(64)
-                .IsRequired()
-                .ValueGeneratedNever();
-
-            hashBuilder.Property(h => h.Md5)
-                .HasColumnName("Md5")
-                .HasColumnType(VarcharType)
-                .HasMaxLength(32)
-                .IsRequired();
-
-            hashBuilder.Property(h => h.Sha1)
-                .HasColumnName("Sha1")
-                .HasColumnType(VarcharType)
-                .HasMaxLength(40)
-                .IsRequired();
-
-            hashBuilder.Property(h => h.Sha512)
-                .HasColumnName("Sha512")
-                .HasColumnType(VarcharType)
-                .HasMaxLength(128)
-                .IsRequired();
-        });
     }
 
     /// <summary>
