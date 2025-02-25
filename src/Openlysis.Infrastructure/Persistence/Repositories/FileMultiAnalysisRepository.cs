@@ -43,7 +43,9 @@ public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
     /// <inheritdoc/>
     public async Task<FileMultiAnalysis?> GetAsync(FileMultiAnalysisId fileMultiAnalysisId, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.FileMultiAnalyses.FindAsync([fileMultiAnalysisId], cancellationToken);
+        return await _dbContext.FileMultiAnalyses
+            .Include(f => f.ContentHashSet)
+            .FirstOrDefaultAsync(f => f.Id == fileMultiAnalysisId, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -54,7 +56,9 @@ public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
             return null;
         }
 
-        var fileAnalysis = await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
+        var fileAnalysis = await _dbContext.FileMultiAnalyses
+                .Include(f => f.ContentHashSet)
+                .FirstOrDefaultAsync(
                 f => f.ContentHashSet.Sha256 == contentHashSet.Md5,
                 cancellationToken)
             ?? await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
@@ -78,7 +82,9 @@ public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
             return null;
         }
 
-        var fileAnalysis = await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
+        var fileAnalysis = await _dbContext.FileMultiAnalyses
+                .Include(f => f.ContentHashSet)
+                .FirstOrDefaultAsync(
                 f => f.ContentHashSet.Sha256 == hash,
                 cancellationToken)
             ?? await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(

@@ -85,12 +85,12 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
         var fileAnalysisId = FileMultiAnalysisId.Create(guid);
         var query = new FileAnalysisQueryById(fileAnalysisId);
 
-        ErrorOr<FileMultiAnalysis> fileAnalysis = await _mediator.Send(query, ct);
+        ErrorOr<FileMultiAnalysis> mediatorResult = await _mediator.Send(query, ct);
 
-        if (fileAnalysis.IsError)
+        if (mediatorResult.IsError)
         {
             // Not found
-            if (fileAnalysis.Errors.Any(e => e.Type is ErrorType.NotFound))
+            if (mediatorResult.Errors.Any(e => e.Type is ErrorType.NotFound))
             {
                 await SendResultAsync(Results.Problem(
                     statusCode: StatusCodes.Status404NotFound,
@@ -102,7 +102,7 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
             var extensions = new Dictionary<string, object?>
             {
                 {
-                    "errors", fileAnalysis.Errors
+                    "errors", mediatorResult.Errors
                 },
             };
             await SendResultAsync(Results.Problem(
@@ -113,14 +113,33 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
         }
 
         // Map to DTO
+        var serviceAnalyses = mediatorResult.Value.ServiceFileAnalyses.Select(
+            s =>
+            {
+                IEnumerable<ReportDto> reportDtos = s.Reports
+                    .Select(
+                        r => new ReportDto(
+                            r.Id.Value,
+                            r.Verdict.ToString(),
+                            r.ThreatZone.ToString(),
+                            r.ThreatLevel));
+
+                return new ServiceFileAnalysisDto(
+                    s.ServiceName,
+                    s.Status.ToString(),
+                    reportDtos);
+            });
+
         Response = new FileAnalysisResponse(
-            fileAnalysis.Value.Id.Value.ToString(),
-            fileAnalysis.Value.StartedDate,
-            fileAnalysis.Value.AverageVerdict,
-            fileAnalysis.Value.FileMetadata,
-            fileAnalysis.Value.ContentHashSet,
-            fileAnalysis.Value.AllReports,
-            fileAnalysis.Value.ReportsAmount);
+            mediatorResult.Value.Id.Value.ToString(),
+            mediatorResult.Value.StartedDate,
+            mediatorResult.Value.AverageVerdict.ToString(),
+            mediatorResult.Value.AverageThreatZone.ToString(),
+            mediatorResult.Value.Status.ToString(),
+            mediatorResult.Value.FileMetadata,
+            mediatorResult.Value.ContentHashSet,
+            serviceAnalyses,
+            mediatorResult.Value.ReportsAmount);
         await SendOkAsync(Response, ct);
     }
 }
