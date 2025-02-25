@@ -7,24 +7,8 @@ namespace Openlysis.Application.Common.Interfaces.Persistence;
 /// <summary>
 /// Defines a repository for file analyses.
 /// </summary>
-public interface IFileMultiAnalysisRepository
+public interface IFileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMultiAnalysisId>
 {
-    /// <summary>
-    /// Adds a file analysis to the repository.
-    /// </summary>
-    /// <param name="fileMultiAnalysis">File analysis to save.</param>
-    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task AddAsync(FileMultiAnalysis fileMultiAnalysis, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Gets a file analysis from the repository by its ID.
-    /// </summary>
-    /// <param name="fileMultiAnalysisId">ID of the file analysis to get.</param>
-    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    /// <returns>A <see cref="FileMultiAnalysis"/>.</returns>
-    public Task<FileMultiAnalysis?> GetByIdAsync(FileMultiAnalysisId fileMultiAnalysisId, CancellationToken cancellationToken = default);
-
     /// <summary>
     /// Gets a file analysis from the repository by a <see cref="ContentHashSet"/>.
     /// </summary>

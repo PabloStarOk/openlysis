@@ -1,14 +1,16 @@
+using System.Net;
 using System.Text.Json;
 
 using Filescan.Client.Abstractions;
+using Filescan.Client.Constants.Common;
+using Filescan.Client.Constants.Endpoints;
 using Filescan.Client.Models.Common;
-using Filescan.Client.Models.Options;
 using Filescan.Client.Services;
 using Filescan.Client.Services.Parsers;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Application.FileAnalyses.Ports;
+using Openlysis.Application.Common.Interfaces.Ports;
 using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
@@ -34,12 +36,19 @@ public static class DependencyInjection
 
         int timeout = int.Parse(timeoutString);
 
-        services.AddTransient(_ => ApiOptions.Create(apiKey, timeout));
         services.AddTransient<ModelParser<FilescanError, JsonElement>, FilescanErrorParser>();
         services.AddTransient<ModelParser<ServiceFileAnalysisId, JsonElement>, AnalysisIdParser>();
         services.AddTransient<ModelParser<Report, JsonProperty>, ReportParser>();
         services.AddTransient<ModelParser<ServiceFileAnalysis, JsonElement>, AnalysisParser>();
+        services.AddHttpClient(ServiceConstants.ServiceName, httpClient =>
+        {
+            httpClient.DefaultRequestVersion = HttpVersion.Version30;
+            httpClient.Timeout = TimeSpan.FromMilliseconds(timeout);
+            httpClient.BaseAddress = new Uri(Addresses.BaseAddress);
+            httpClient.DefaultRequestHeaders.Add(HeaderNames.ApiKey, apiKey);
+        });
+
         services.AddScoped<IFileScannerService, FileScanner>();
-        services.AddScoped<IFileAnalyzer, FilescanAnalyzer>();
+        services.AddScoped<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>, FilescanAnalyzer>();
     }
 }

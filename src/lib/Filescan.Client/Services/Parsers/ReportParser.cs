@@ -51,7 +51,11 @@ public class ReportParser : ModelParser<Report, JsonProperty>
     private static Verdict ParseVerdict(JsonElement finalVerdictElement)
     {
         string verdictString = GetStringOrEmpty("verdict", finalVerdictElement);
-        verdictString = verdictString.Trim().Replace(" ", string.Empty).ToUpper();
+        verdictString = verdictString
+            .Trim()
+            .Replace(" ", string.Empty)
+            .Replace("_", string.Empty)
+            .ToUpper();
         return VerdictsMap[verdictString];
     }
 

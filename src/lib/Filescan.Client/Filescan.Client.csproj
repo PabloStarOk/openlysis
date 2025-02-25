@@ -19,4 +19,10 @@
       <ProjectReference Include="..\..\Openlysis.Application\Openlysis.Application.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Http">
+        <HintPath>..\..\..\..\..\..\..\..\.dotnet\shared\Microsoft.AspNetCore.App\8.0.8\Microsoft.Extensions.Http.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

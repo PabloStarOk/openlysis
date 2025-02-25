@@ -5,16 +5,16 @@ using Filescan.Client.Constants.Common;
 using Filescan.Client.Models.Requests;
 using Filescan.Client.Models.Scans;
 
-using Openlysis.Application.FileAnalyses.Ports;
+using Openlysis.Application.Common.Interfaces.Ports;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Filescan.Client;
 
 /// <summary>
-/// Represents a file scanner analyzer that implements the <see cref="IFileAnalyzer"/> interface.
+/// Represents a file scanner analyzer that implements the <see cref="IServiceAnalyzer{TAnalysis, TAnalysisID}"/> interface.
 /// </summary>
-public class FilescanAnalyzer : IFileAnalyzer
+public class FilescanAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>
 {
     /// <inheritdoc/>
     public string ServiceName => ServiceConstants.ServiceName;
@@ -31,7 +31,7 @@ public class FilescanAnalyzer : IFileAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<ServiceFileAnalysisId>> AnalyzeAsync(AnalyzeFileRequest request, CancellationToken cancellationToken)
+    public async Task<ErrorOr<ServiceFileAnalysisId>> AnalyzeAsync(FileAnalysisJobRequest request, CancellationToken cancellationToken = default)
     {
         var options = ScanOptions.True;
         var scanRequest = new ScanRequest(
@@ -47,7 +47,7 @@ public class FilescanAnalyzer : IFileAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<ServiceFileAnalysis>> GetAnalysisAsync(ServiceFileAnalysisId analysisId, CancellationToken cancellationToken)
+    public async Task<ErrorOr<ServiceFileAnalysis>> GetAnalysisAsync(ServiceFileAnalysisId analysisId, CancellationToken cancellationToken = default)
     {
         var getScanRequest = new GetScanRequest(analysisId.Value);
 

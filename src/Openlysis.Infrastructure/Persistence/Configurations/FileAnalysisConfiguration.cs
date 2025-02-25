@@ -69,7 +69,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
         builder.Property(f => f.Status)
             .HasColumnName("Status")
             .HasColumnType(VarcharType)
-            .HasMaxLength(8)
+            .HasMaxLength(10)
             .IsRequired()
             .HasConversion(
                 status => status.ToString(),

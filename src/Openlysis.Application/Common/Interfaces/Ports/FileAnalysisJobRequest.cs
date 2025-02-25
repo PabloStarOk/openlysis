@@ -1,7 +1,7 @@
-namespace Openlysis.Application.FileAnalyses.Ports;
+namespace Openlysis.Application.Common.Interfaces.Ports;
 
 /// <summary>
-/// Represents a request to analyze a file.
+/// Represents a request to start a job to analyze a file.
 /// </summary>
 /// <param name="FileName">The name of the file.</param>
 /// <param name="FileContentType">The content type of the file.</param>
@@ -9,7 +9,7 @@ namespace Openlysis.Application.FileAnalyses.Ports;
 /// <param name="Description">A description of the file.</param>
 /// <param name="Password">The password for the file, if any.</param>
 /// <param name="IsPrivateFile">Indicates if the file is private.</param>
-public record AnalyzeFileRequest(
+public record FileAnalysisJobRequest(
     string FileName,
     string FileContentType,
     Stream FileStreamData,

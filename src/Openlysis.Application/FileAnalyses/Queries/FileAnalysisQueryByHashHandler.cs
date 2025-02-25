@@ -3,7 +3,6 @@ using ErrorOr;
 using MediatR;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
-using Openlysis.Application.FileAnalyses.Ports;
 using Openlysis.Domain.FileAnalyses;
 
 namespace Openlysis.Application.FileAnalyses.Queries;
@@ -14,19 +13,15 @@ namespace Openlysis.Application.FileAnalyses.Queries;
 public class FileAnalysisQueryByHashHandler : IRequestHandler<FileAnalysisQueryByHash, ErrorOr<FileMultiAnalysis>>
 {
     private readonly IFileMultiAnalysisRepository _fileMultiAnalysisRepository;
-    private readonly IEnumerable<IFileAnalyzer> _fileAnalyzers;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileAnalysisQueryByHashHandler"/> class.
     /// </summary>
     /// <param name="fileMultiAnalysisRepository">Repository of file analyses.</param>
-    /// <param name="fileAnalyzers">An <see cref="IEnumerable{T}"/> of <see cref="IFileAnalyzer"/>.</param>
     public FileAnalysisQueryByHashHandler(
-        IFileMultiAnalysisRepository fileMultiAnalysisRepository,
-        IEnumerable<IFileAnalyzer> fileAnalyzers)
+        IFileMultiAnalysisRepository fileMultiAnalysisRepository)
     {
         _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
-        _fileAnalyzers = fileAnalyzers;
     }
 
     /// <summary>

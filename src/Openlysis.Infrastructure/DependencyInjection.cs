@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Domain.FileAnalyses;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
 using Openlysis.Infrastructure.Services;
@@ -29,6 +31,7 @@ public static class DependencyInjection
         services.AddDbContext<AnalysesDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+        services.AddScoped<IRepository<FileMultiAnalysis, FileMultiAnalysisId>, FileMultiAnalysisRepository>();
         services.AddScoped<IFileMultiAnalysisRepository, FileMultiAnalysisRepository>();
 
         // Hash service
@@ -37,5 +40,6 @@ public static class DependencyInjection
         services.AddTransient<SHA256>(_ => SHA256.Create());
         services.AddTransient<SHA512>(_ => SHA512.Create());
         services.AddScoped<IHashService, HashService>();
+        services.AddScoped<IFileAnalysisService, FileAnalysisService>();
     }
 }

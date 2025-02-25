@@ -3,7 +3,6 @@ using ErrorOr;
 using MediatR;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
-using Openlysis.Application.FileAnalyses.Ports;
 using Openlysis.Domain.FileAnalyses;
 
 namespace Openlysis.Application.FileAnalyses.Queries;
@@ -15,19 +14,15 @@ public class FileAnalysisQueryByIdHandler
     : IRequestHandler<FileAnalysisQueryById, ErrorOr<FileMultiAnalysis>>
 {
     private readonly IFileMultiAnalysisRepository _fileMultiAnalysisRepository;
-    private readonly IEnumerable<IFileAnalyzer> _fileAnalyzers;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileAnalysisQueryByIdHandler"/> class.
     /// </summary>
     /// <param name="fileMultiAnalysisRepository">Repository of file analyses.</param>
-    /// <param name="fileAnalyzers">An <see cref="IEnumerable{T}"/> of <see cref="IFileAnalyzer"/>.</param>
     public FileAnalysisQueryByIdHandler(
-        IFileMultiAnalysisRepository fileMultiAnalysisRepository,
-        IEnumerable<IFileAnalyzer> fileAnalyzers)
+        IFileMultiAnalysisRepository fileMultiAnalysisRepository)
     {
         _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
-        _fileAnalyzers = fileAnalyzers;
     }
 
     /// <summary>
@@ -38,7 +33,7 @@ public class FileAnalysisQueryByIdHandler
     /// <returns>A <see cref="ErrorOr"/> in case of an error, or a <see cref="FileMultiAnalysis"/>.</returns>
     public async Task<ErrorOr<FileMultiAnalysis>> Handle(FileAnalysisQueryById query, CancellationToken cancellationToken)
     {
-        var fileAnalysis = await _fileMultiAnalysisRepository.GetByIdAsync(query.FileMultiAnalysisId, cancellationToken);
+        var fileAnalysis = await _fileMultiAnalysisRepository.GetAsync(query.FileMultiAnalysisId, cancellationToken);
 
         if (fileAnalysis is null)
         {

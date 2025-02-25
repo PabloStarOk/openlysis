@@ -8,7 +8,6 @@ using Filescan.Client.Abstractions;
 using Filescan.Client.Constants.Common;
 using Filescan.Client.Constants.Endpoints;
 using Filescan.Client.Models.Common;
-using Filescan.Client.Models.Options;
 using Filescan.Client.Models.Requests;
 
 using Openlysis.Domain.FileAnalyses.Entities;
@@ -19,40 +18,30 @@ namespace Filescan.Client.Services;
 /// <summary>
 /// Client to scan files.
 /// </summary>
-public sealed class FileScanner : IFileScannerService, IDisposable
+public sealed class FileScanner : IFileScannerService
 {
-    private readonly ApiOptions _options;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly ModelParser<FilescanError, JsonElement> _errorParser;
     private readonly ModelParser<ServiceFileAnalysisId, JsonElement> _analysisIdParser;
     private readonly ModelParser<ServiceFileAnalysis, JsonElement> _analysisParser;
-    private readonly bool _disposeHttpClient;
-    private bool _isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileScanner"/> class.
     /// </summary>
-    /// <param name="httpClient">An <see cref="HttpClient"/> to send requests.</param>
-    /// <param name="options">The API options containing the API key.</param>
-    /// <param name="errorParser">A parser to create <see cref="FilescanError"/> objects from <see cref="HttpResponseMessage"/>.</param>
-    /// <param name="analysisIdParser">A parser to create <see cref="ServiceFileAnalysisId"/> objects from <see cref="HttpResponseMessage"/>.</param>
-    /// <param name="analysisParser">A parser to create <see cref="ServiceFileAnalysis"/> objects from <see cref="HttpResponseMessage"/>.</param>
-    /// <param name="disposeHttpClient">If the given <see cref="HttpClient"/> should be disposed along with this class.</param>
+    /// <param name="httpClientFactory">The HTTP client factory to create HTTP clients.</param>
+    /// <param name="errorParser">A parser to create <see cref="FilescanError"/> objects from <see cref="JsonElement"/>.</param>
+    /// <param name="analysisIdParser">A parser to create <see cref="ServiceFileAnalysisId"/> objects from <see cref="JsonElement"/>.</param>
+    /// <param name="analysisParser">A parser to create <see cref="ServiceFileAnalysis"/> objects from <see cref="JsonElement"/>.</param>
     public FileScanner(
-        ApiOptions options,
-        HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         ModelParser<FilescanError, JsonElement> errorParser,
         ModelParser<ServiceFileAnalysisId, JsonElement> analysisIdParser,
-        ModelParser<ServiceFileAnalysis, JsonElement> analysisParser,
-        bool disposeHttpClient = false)
+        ModelParser<ServiceFileAnalysis, JsonElement> analysisParser)
     {
-        _options = options;
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _errorParser = errorParser;
         _analysisIdParser = analysisIdParser;
         _analysisParser = analysisParser;
-        _disposeHttpClient = disposeHttpClient;
-        ConfigureHttpClient();
     }
 
     /// <inheritdoc/>
@@ -94,7 +83,9 @@ public sealed class FileScanner : IFileScannerService, IDisposable
         using StringContent ocrQrContent = AddStringContent(formDataContent, scanRequest.Options?.OcrQr, ScanFieldNames.OcrQr);
         using StringContent phishingDetectionContent = AddStringContent(formDataContent, scanRequest.Options?.PhishingDetection, ScanFieldNames.PhishingDetection);
 
-        HttpResponseMessage response = await _httpClient.PostAsync(Addresses.ScanFile, formDataContent, cancellationToken).ConfigureAwait(false);
+        HttpClient httpClient = _httpClientFactory.CreateClient(ServiceConstants.ServiceName);
+        HttpResponseMessage response = await httpClient.PostAsync(Addresses.ScanFile, formDataContent, cancellationToken).ConfigureAwait(false);
+
         return await GetResultAsync(_analysisIdParser, response, cancellationToken);
     }
 
@@ -124,15 +115,10 @@ public sealed class FileScanner : IFileScannerService, IDisposable
 
         uriBuilder.Query = paramsBuilder.ToString();
         Uri requestUri = uriBuilder.Uri;
-        HttpResponseMessage response = await _httpClient.GetAsync(requestUri, cancellationToken).ConfigureAwait(false);
-        return await GetResultAsync(_analysisParser, response, cancellationToken);
-    }
 
-    /// <inheritdoc/>
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
+        HttpClient httpClient = _httpClientFactory.CreateClient(ServiceConstants.ServiceName);
+        HttpResponseMessage response = await httpClient.GetAsync(requestUri, cancellationToken).ConfigureAwait(false);
+        return await GetResultAsync(_analysisParser, response, cancellationToken);
     }
 
     /// <summary>
@@ -212,43 +198,5 @@ public sealed class FileScanner : IFileScannerService, IDisposable
                 }));
 
         return errors;
-    }
-
-    /// <summary>
-    /// Configures the http client.
-    /// </summary>
-    private void ConfigureHttpClient()
-    {
-        _httpClient.DefaultRequestVersion = _options.HttpVersion;
-        _httpClient.Timeout = _options.TimeoutPerRequest;
-        _httpClient.BaseAddress = new Uri(Addresses.BaseAddress);
-        _httpClient.DefaultRequestHeaders.Add(HeaderNames.ApiKey, _options.ApiKey);
-    }
-
-    /// <summary>
-    /// Disposes the resources used by the <see cref="FileScanner"/> class.
-    /// </summary>
-    /// <param name="disposing">A boolean value indicating whether the method is called from the Dispose method (true) or from a finalizer (false).</param>
-    private void Dispose(bool disposing)
-    {
-        if (_isDisposed)
-        {
-            return;
-        }
-
-        if (disposing && _disposeHttpClient)
-        {
-            _httpClient.Dispose();
-        }
-
-        _isDisposed = true;
-    }
-
-    /// <summary>
-    /// Finalizes an instance of the <see cref="FileScanner"/> class.
-    /// </summary>
-    ~FileScanner()
-    {
-        Dispose(disposing: false);
     }
 }

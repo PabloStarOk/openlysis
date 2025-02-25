@@ -41,7 +41,7 @@ public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
     }
 
     /// <inheritdoc/>
-    public async Task<FileMultiAnalysis?> GetByIdAsync(FileMultiAnalysisId fileMultiAnalysisId, CancellationToken cancellationToken = default)
+    public async Task<FileMultiAnalysis?> GetAsync(FileMultiAnalysisId fileMultiAnalysisId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.FileMultiAnalyses.FindAsync([fileMultiAnalysisId], cancellationToken);
     }
@@ -92,5 +92,26 @@ public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
                 cancellationToken);
 
         return fileAnalysis;
+    }
+
+    /// <inheritdoc/>
+    public async Task UpdateAsync(FileMultiAnalysis multiAnalysis, CancellationToken cancellationToken = default)
+    {
+        bool analysisExists = await _dbContext.FileMultiAnalyses.AnyAsync(
+            f => f.Id == multiAnalysis.Id, cancellationToken);
+
+        if (!analysisExists)
+        {
+            return;
+        }
+
+        _dbContext.FileMultiAnalyses.Update(multiAnalysis);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> ExistsAsync(FileMultiAnalysisId id, CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.FileMultiAnalyses.AnyAsync(f => f.Id == id, cancellationToken);
     }
 }

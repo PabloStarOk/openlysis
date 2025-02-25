@@ -3,8 +3,8 @@ using ErrorOr;
 using MediatR;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
+using Openlysis.Application.Common.Interfaces.Ports;
 using Openlysis.Application.Common.Interfaces.Services;
-using Openlysis.Application.FileAnalyses.Ports;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
@@ -16,27 +16,27 @@ namespace Openlysis.Application.FileAnalyses.Commands;
 public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, ErrorOr<FileMultiAnalysis>>
 {
     private readonly IFileMultiAnalysisRepository _fileMultiAnalysisRepository;
-    private readonly IEnumerable<IFileAnalyzer> _fileAnalyzers;
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
+    private readonly IFileAnalysisService _analysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileCommandHandler"/> class.
     /// </summary>
-    /// <param name="fileAnalyzers">Analyzers services.</param>
-    /// <param name="timeProvider">Provider of time.</param>
     /// <param name="fileMultiAnalysisRepository">Repository of file analyses.</param>
+    /// <param name="analysisService">Service to analyze the file.</param>
+    /// <param name="timeProvider">Provider of time.</param>
     /// <param name="hashService">Service to hash data.</param>
     public AnalyzeFileCommandHandler(
         IFileMultiAnalysisRepository fileMultiAnalysisRepository,
-        IEnumerable<IFileAnalyzer> fileAnalyzers,
+        IFileAnalysisService analysisService,
         TimeProvider timeProvider,
         IHashService hashService)
     {
         _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
-        _fileAnalyzers = fileAnalyzers;
         _timeProvider = timeProvider;
         _hashService = hashService;
+        _analysisService = analysisService;
     }
 
     /// <inheritdoc/>
@@ -52,41 +52,27 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
             return existingAnalysis;
         }
 
-        await AnalyzeFileAsync(command, cancellationToken);
-
         // Save a new file analysis in database.
         var fileMetadata = new FileMetadata(
             command.FileName,
             command.FileContentType,
             command.FileData.Length);
-        var fileAnalysis = FileMultiAnalysis.Create(
+        var multiAnalysis = FileMultiAnalysis.Create(
             _timeProvider.GetUtcNow().DateTime,
             fileMetadata,
             hashSet,
             []);
-        await _fileMultiAnalysisRepository.AddAsync(fileAnalysis, cancellationToken);
-        return fileAnalysis;
-    }
 
-    /// <summary>
-    /// Analyzes the file using all available analyzers.
-    /// </summary>
-    /// <param name="command">The file analysis command containing file data and metadata.</param>
-    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    private async Task AnalyzeFileAsync(AnalyzeFileCommand command, CancellationToken cancellationToken)
-    {
-        var list = _fileAnalyzers.Select(f =>
-            {
-                command.FileData.Position = 0;
-                var request = new AnalyzeFileRequest(
-                    command.FileName,
-                    command.FileContentType,
-                    command.FileData,
-                    command.FileDescription,
-                    command.FilePassword,
-                    command.IsPrivateFile);
-                return f.AnalyzeAsync(request, cancellationToken);
-            });
-        await Task.WhenAll(list);
+        var request = new FileAnalysisJobRequest(
+            command.FileName,
+            command.FileContentType,
+            command.FileData,
+            command.FileDescription,
+            command.FilePassword,
+            command.IsPrivateFile);
+
+        await _analysisService.StartJobAsync(request, multiAnalysis, cancellationToken);
+
+        return multiAnalysis;
     }
 }
