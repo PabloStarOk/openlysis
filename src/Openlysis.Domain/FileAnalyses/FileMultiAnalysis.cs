@@ -12,7 +12,7 @@ namespace Openlysis.Domain.FileAnalyses;
 /// </summary>
 public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
 {
-    private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
+    private readonly List<ServiceFileAnalysis> _serviceFileAnalyses = [];
 
     /// <summary>
     /// Gets the date and time when the analysis started.
@@ -47,12 +47,13 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// <summary>
     /// Gets the list of service file analyses.
     /// </summary>
-    public IReadOnlyList<ServiceFileAnalysis> ServiceFileAnalyses => _serviceFileAnalyses.Values.ToList().AsReadOnly();
+    public IReadOnlyList<ServiceFileAnalysis> ServiceFileAnalyses => _serviceFileAnalyses.AsReadOnly();
 
     /// <summary>
     /// Gets all reports from the service file analyses.
     /// </summary>
-    public IReadOnlyList<Report> AllReports { get; private set; } = [];
+    public IReadOnlyList<Report> AllReports => _serviceFileAnalyses
+        .SelectMany(s => s.Reports).ToList().AsReadOnly();
 
     /// <summary>
     /// Gets the total number of reports.
@@ -71,7 +72,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// <param name="contentHashSet">The set of hash of the file.</param>
     private FileMultiAnalysis(
         FileMultiAnalysisId id,
-        Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> serviceFileAnalyses,
+        List<ServiceFileAnalysis> serviceFileAnalyses,
         DateTime startedDate,
         Verdict averageVerdict,
         ThreatZone averageThreatZone,
@@ -108,7 +109,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
         DateTime startedDate,
         FileMetadata fileMetadata,
         ContentHashSet contentHashSet,
-        Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> serviceFileAnalyses)
+        List<ServiceFileAnalysis> serviceFileAnalyses)
     {
         return new FileMultiAnalysis(
             FileMultiAnalysisId.CreateUnique(),
@@ -126,12 +127,12 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// <param name="analysis">The service file analysis to add.</param>
     public void AddServiceAnalysis(ServiceFileAnalysis analysis)
     {
-        if (!_serviceFileAnalyses.TryAdd(analysis.Id, analysis))
+        if (_serviceFileAnalyses.Contains(analysis))
         {
             return;
         }
 
-        AllReports = _serviceFileAnalyses.Values.SelectMany(s => s.Reports).ToList().AsReadOnly();
+        _serviceFileAnalyses.Add(analysis);
         UpdateAvgVerdict();
         UpdateAvgThreatZone();
         UpdateStatus();
@@ -143,17 +144,16 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// <param name="analysis">The service file analysis to update.</param>
     public void UpdateServiceAnalysis(ServiceFileAnalysis analysis)
     {
-        if (!_serviceFileAnalyses.ContainsKey(analysis.Id))
+        if (!_serviceFileAnalyses.Contains(analysis))
         {
             return;
         }
 
-        AllReports = _serviceFileAnalyses.Values.SelectMany(s => s.Reports).ToList().AsReadOnly();
+        int analysisIndex = _serviceFileAnalyses.IndexOf(analysis);
+        _serviceFileAnalyses[analysisIndex] = analysis;
         UpdateAvgVerdict();
         UpdateAvgThreatZone();
         UpdateStatus();
-
-        _serviceFileAnalyses[analysis.Id] = analysis;
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// </summary>
     private void UpdateStatus()
     {
-        IEnumerable<ServiceFileAnalysis> analyses = _serviceFileAnalyses.Values;
+        IEnumerable<ServiceFileAnalysis> analyses = _serviceFileAnalyses;
 
         if (analyses.All(a => a.Status is AnalysisStatus.Finished))
         {

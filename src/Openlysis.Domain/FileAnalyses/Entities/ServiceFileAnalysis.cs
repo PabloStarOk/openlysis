@@ -10,7 +10,7 @@ namespace Openlysis.Domain.FileAnalyses.Entities;
 /// </summary>
 public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
 {
-    private readonly Dictionary<ReportId, Report> _reports;
+    private readonly List<Report> _reports = [];
 
     /// <summary>
     /// Gets the name of the service.
@@ -25,7 +25,7 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
     /// <summary>
     /// Gets the reports associated with the analysis as a read-only dictionary.
     /// </summary>
-    public IReadOnlyList<Report> Reports => _reports.Values.ToList().AsReadOnly();
+    public IReadOnlyList<Report> Reports => _reports.AsReadOnly();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ServiceFileAnalysis"/> class.
@@ -38,7 +38,7 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
         ServiceFileAnalysisId id,
         string serviceName,
         AnalysisStatus status,
-        Dictionary<ReportId, Report> reports)
+        List<Report> reports)
         : base(id)
     {
         ServiceName = serviceName;
@@ -67,7 +67,7 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
         string id,
         string serviceName,
         AnalysisStatus status,
-        Dictionary<ReportId, Report> reports)
+        List<Report> reports)
     {
         return new ServiceFileAnalysis(
             ServiceFileAnalysisId.Create(id),
@@ -113,7 +113,12 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
     {
         ArgumentNullException.ThrowIfNull(report);
 
-        _reports.TryAdd(report.Id, report);
+        if (_reports.Contains(report))
+        {
+            return;
+        }
+
+        _reports.Add(report);
     }
 
     /// <summary>
@@ -124,11 +129,12 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
     {
         ArgumentNullException.ThrowIfNull(report);
 
-        if (!_reports.ContainsKey(report.Id))
+        if (!_reports.Contains(report))
         {
             return;
         }
 
-        _reports[report.Id] = report;
+        int reportIndex = _reports.IndexOf(report);
+        _reports[reportIndex] = report;
     }
 }

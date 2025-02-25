@@ -51,7 +51,7 @@ public class AnalysisParser : ModelParser<ServiceFileAnalysis, JsonElement>
             flowId,
             ServiceConstants.ServiceName,
             status,
-            reports.ToDictionary(r => r.Id, r => r));
+            reports.ToList());
     }
 
     /// <summary>

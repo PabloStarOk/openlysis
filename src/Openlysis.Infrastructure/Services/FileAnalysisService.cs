@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -125,22 +127,34 @@ public class FileAnalysisService : IFileAnalysisService
         FileMultiAnalysis multiAnalysis,
         CancellationToken cancellationToken)
     {
+        const int updateFrequencyMs = 500;
+        ConcurrentBag<ServiceFileAnalysis> analyses = [];
+        var analyzersMap = analyzers.ToDictionary(a => a.ServiceName);
+
         while (!cancellationToken.IsCancellationRequested &&
                (multiAnalysis.Status is not AnalysisStatus.Finished and not AnalysisStatus.Timeout))
         {
-            await Parallel.ForEachAsync(multiAnalysis.ServiceFileAnalyses, cancellationToken, async (analysis, token) =>
-            {
-                var analyzer = analyzers.Single(analyzer => analyzer.ServiceName == analysis.ServiceName);
-                var result = await analyzer.GetAnalysisAsync(analysis.Id, token);
-                if (result.IsError)
+            await Parallel.ForEachAsync(
+                multiAnalysis.ServiceFileAnalyses, cancellationToken, async (analysis, token) =>
                 {
-                    // TODO: Log error.
-                    return;
-                }
+                    var analyzer = analyzersMap[analysis.ServiceName];
+                    var result = await analyzer.GetAnalysisAsync(analysis.Id, token);
 
-                multiAnalysis.UpdateServiceAnalysis(result.Value);
-            });
-            await Task.Delay(500, cancellationToken); // TODO: Use options instead for update frequency.
+                    if (result.IsError)
+                    {
+                        // TODO: Log error.
+                        return;
+                    }
+
+                    analyses.Add(result.Value);
+                });
+
+            while (analyses.TryTake(out ServiceFileAnalysis? analysis))
+            {
+                multiAnalysis.UpdateServiceAnalysis(analysis);
+            }
+
+            await Task.Delay(updateFrequencyMs, cancellationToken); // TODO: Use options instead for update frequency.
         }
     }
 
