@@ -15,7 +15,7 @@ namespace Openlysis.Application.FileAnalyses.Commands;
 /// </summary>
 public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, ErrorOr<FileMultiAnalysis>>
 {
-    private readonly IFileMultiAnalysisRepository _fileMultiAnalysisRepository;
+    private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _fileMultiAnalysisRepository;
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
     private readonly IFileAnalysisService _analysisService;
@@ -28,7 +28,7 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
     /// <param name="timeProvider">Provider of time.</param>
     /// <param name="hashService">Service to hash data.</param>
     public AnalyzeFileCommandHandler(
-        IFileMultiAnalysisRepository fileMultiAnalysisRepository,
+        IRepository<FileMultiAnalysis, FileMultiAnalysisId> fileMultiAnalysisRepository,
         IFileAnalysisService analysisService,
         TimeProvider timeProvider,
         IHashService hashService)
@@ -45,7 +45,9 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
         var hashSet = await _hashService.HashDataAsync(command.FileData, cancellationToken);
 
         // Check if the file has already been analyzed.
-        var existingAnalysis = await _fileMultiAnalysisRepository.GetByHashAsync(hashSet, cancellationToken);
+        var existingAnalysis = await _fileMultiAnalysisRepository.FindAsync(
+            f => f.ContentHashSet == hashSet,
+            cancellationToken);
 
         if (existingAnalysis is not null && !command.Reanalyze)
         {

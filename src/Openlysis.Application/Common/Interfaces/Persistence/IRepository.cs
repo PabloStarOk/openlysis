@@ -32,6 +32,16 @@ public interface IRepository<TModel, in TModelId>
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Finds a model based on a matching expression.
+    /// </summary>
+    /// <param name="matchExpression">The expression to match the model.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>The model if found; otherwise, null.</returns>
+    public Task<TModel?> FindAsync(
+        Expression<Func<TModel, bool>> matchExpression,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Adds a new model to the repository.
     /// </summary>
     /// <param name="model">The model to add.</param>

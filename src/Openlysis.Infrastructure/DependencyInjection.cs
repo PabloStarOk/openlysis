@@ -31,15 +31,17 @@ public static class DependencyInjection
         services.AddDbContext<AnalysesDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+        // Add repositories.
         services.AddScoped<IRepository<FileMultiAnalysis, FileMultiAnalysisId>, FileMultiAnalysisRepository>();
-        services.AddScoped<IFileMultiAnalysisRepository, FileMultiAnalysisRepository>();
 
-        // Hash service
+        // Add hash service.
         services.AddTransient<MD5>(_ => MD5.Create());
         services.AddTransient<SHA1>(_ => SHA1.Create());
         services.AddTransient<SHA256>(_ => SHA256.Create());
         services.AddTransient<SHA512>(_ => SHA512.Create());
         services.AddScoped<IHashService, HashService>();
+
+        // Add file analysis service.
         services.AddScoped<IFileAnalysisService, FileAnalysisService>();
     }
 }

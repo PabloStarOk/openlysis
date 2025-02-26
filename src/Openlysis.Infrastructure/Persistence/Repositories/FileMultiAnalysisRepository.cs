@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
-using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
@@ -12,7 +11,7 @@ namespace Openlysis.Infrastructure.Persistence.Repositories;
 /// <summary>
 /// Repository to access <see cref="FileMultiAnalysis"/>.
 /// </summary>
-public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
+public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMultiAnalysisId>
 {
     private readonly AnalysesDbContext _dbContext;
 
@@ -64,55 +63,11 @@ public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
     }
 
     /// <inheritdoc/>
-    public async Task<FileMultiAnalysis?> GetByHashAsync(ContentHashSet contentHashSet, CancellationToken cancellationToken = default)
+    public async Task<FileMultiAnalysis?> FindAsync(
+        Expression<Func<FileMultiAnalysis, bool>> matchExpression,
+        CancellationToken cancellationToken = default)
     {
-        if (!await _dbContext.FileMultiAnalyses.AnyAsync(cancellationToken))
-        {
-            return null;
-        }
-
-        var fileAnalysis = await _dbContext.FileMultiAnalyses
-                .Include(f => f.ContentHashSet)
-                .FirstOrDefaultAsync(
-                f => f.ContentHashSet.Sha256 == contentHashSet.Md5,
-                cancellationToken)
-            ?? await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
-                f => f.ContentHashSet.Md5 == contentHashSet.Sha1,
-                cancellationToken)
-            ?? await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
-                f => f.ContentHashSet.Sha1 == contentHashSet.Sha256,
-                cancellationToken)
-            ?? await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
-                f => f.ContentHashSet.Sha512 == contentHashSet.Sha512,
-                cancellationToken);
-
-        return fileAnalysis;
-    }
-
-    /// <inheritdoc/>
-    public async Task<FileMultiAnalysis?> GetByHashAsync(string hash, CancellationToken cancellationToken = default)
-    {
-        if (!await _dbContext.FileMultiAnalyses.AnyAsync(cancellationToken))
-        {
-            return null;
-        }
-
-        var fileAnalysis = await _dbContext.FileMultiAnalyses
-                .Include(f => f.ContentHashSet)
-                .FirstOrDefaultAsync(
-                f => f.ContentHashSet.Sha256 == hash,
-                cancellationToken)
-            ?? await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
-                f => f.ContentHashSet.Md5 == hash,
-                cancellationToken)
-            ?? await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
-                f => f.ContentHashSet.Sha1 == hash,
-                cancellationToken)
-            ?? await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(
-                f => f.ContentHashSet.Sha512 == hash,
-                cancellationToken);
-
-        return fileAnalysis;
+        return await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(matchExpression, cancellationToken);
     }
 
     /// <inheritdoc/>
