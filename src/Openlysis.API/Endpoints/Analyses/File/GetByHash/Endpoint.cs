@@ -1,5 +1,3 @@
-using ErrorOr;
-
 using FastEndpoints;
 
 using MediatR;
@@ -13,7 +11,7 @@ namespace Openlysis.API.Endpoints.Analyses.File.GetByHash;
 /// <summary>
 /// Endpoint for retrieving file analysis by hash.
 /// </summary>
-public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
+public class Endpoint : EndpointWithoutRequest<IEnumerable<FileAnalysisResponse>>
 {
     private readonly IMediator _mediator;
 
@@ -36,33 +34,39 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
     /// </summary>
     public override void Configure()
     {
-        Get("/hash/{hash}");
+        Get("/{hash}/analyses");
         Group<FileAnalysesGroup>();
         Description(b =>
             {
                 b.WithName(Name);
                 b.WithDisplayName(Name);
-                b.Produces<FileAnalysisResponse>();
-                b.ProducesProblemDetails();
+                b.Produces<IEnumerable<FileAnalysisResponse>>();
+                b.ProducesProblemDetails(StatusCodes.Status404NotFound);
             });
         Summary(
             s =>
             {
-                s.Summary = "Get a file analysis by hash.";
-                s.Description = "Get a file analysis by providing a MD5, SHA1, SHA256 or SHA512 hash.";
+                s.Summary = "Gets several multi analyses of a file identified by a hash.";
+                s.Description = "Gets a collection of multi analyses by providing a MD5, SHA1, SHA256 or SHA512 hash of a file.";
+                s.Params["hash"] = "A SHA-256 (Preferred), MD5, SHA-1 or SHA-512 hash.";
+                s.Params["amount"] = "Amount of analyses to retrieve.";
+                s.Params["startedDateOrder"] = "Either 'asc' or 'dsc' strings specifying ascending or descending order to get the last or oldest started analyses.";
             });
     }
 
     /// <summary>
-    /// Handles the request to get a file analysis by its hash.
+    /// Handles the request to get several multi analysis of a file identified by hash.
     /// </summary>
     /// <param name="ct">A <see cref="CancellationToken"/> to cancel the operation.</param>
-    /// <returns>The result of the file analysis.</returns>
+    /// <returns>An <see cref="IEnumerable{FileMultiAnalysis}"/>.</returns>
     public override async Task HandleAsync(CancellationToken ct)
     {
-        string hash = Route<string>("hash") ?? string.Empty;
+        string hashQueryParam = Route<string>("hash") ?? string.Empty;
+        int amountQueryParam = Query<int>("amount", false);
+        string orderQueryParam = Query<string>("startedDateOrder", false)
+            ?.Trim().ToLower() ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(hash))
+        if (string.IsNullOrWhiteSpace(hashQueryParam))
         {
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
@@ -70,62 +74,63 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
             return;
         }
 
-        var query = new FileAnalysisQueryByHash(hash);
-        ErrorOr<FileMultiAnalysis> mediatorResult = await _mediator.Send(query, ct);
-
-        if (mediatorResult.IsError)
+        if (!string.IsNullOrWhiteSpace(orderQueryParam)
+            && orderQueryParam is not("asc" or "dsc"))
         {
-            // Not found
-            if (mediatorResult.Errors.Any(e => e.Type is ErrorType.NotFound))
-            {
-                await SendResultAsync(Results.Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    detail: "File analysis with the specified hash does not exist."));
-                return;
-            }
-
-            // Other errors
-            var extensions = new Dictionary<string, object?>
-            {
-                {
-                    "errors", mediatorResult.Errors
-                },
-            };
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
-                detail: "One or more errors occurred.",
-                extensions: extensions));
+                detail: "startDateOrder query param must be 'asc' or 'dsc'."));
+            return;
+        }
+
+        var query = new FileAnalysisQueryByHash(
+            hashQueryParam,
+            amountQueryParam < 1 ? 10 : amountQueryParam,
+            orderQueryParam);
+        IEnumerable<FileMultiAnalysis> multiAnalyses = await _mediator.Send(query, ct);
+        var multiAnalysesArray = multiAnalyses.ToArray();
+
+        if (multiAnalysesArray.Length < 1)
+        {
+            await SendResultAsync(
+                Results.Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    detail: "There are no analyses to retrieve."));
             return;
         }
 
         // Map to DTO
-        var serviceAnalyses = mediatorResult.Value.ServiceFileAnalyses.Select(
-            s =>
+        Response = multiAnalysesArray.Select(f =>
             {
-                IEnumerable<ReportDto> reportDtos = s.Reports
-                    .Select(
-                        r => new ReportDto(
-                            r.Id.Value,
-                            r.Verdict.ToString(),
-                            r.ThreatZone.ToString(),
-                            r.ThreatLevel));
+                var serviceAnalyses = f.ServiceFileAnalyses.Select(
+                    s =>
+                    {
+                        IEnumerable<ReportDto> reportDtos = s.Reports
+                            .Select(
+                                r => new ReportDto(
+                                    r.Id.Value,
+                                    r.Verdict.ToString(),
+                                    r.ThreatZone.ToString(),
+                                    r.ThreatLevel));
 
-                return new ServiceFileAnalysisDto(
-                    s.ServiceName,
-                    s.Status.ToString(),
-                    reportDtos);
+                        return new ServiceFileAnalysisDto(
+                            s.ServiceName,
+                            s.Status.ToString(),
+                            reportDtos);
+                    });
+
+                return new FileAnalysisResponse(
+                    f.Id.Value.ToString(),
+                    f.StartedDate,
+                    f.AverageVerdict.ToString(),
+                    f.AverageThreatZone.ToString(),
+                    f.Status.ToString(),
+                    f.FileMetadata,
+                    f.ContentHashSet,
+                    serviceAnalyses,
+                    f.ReportsAmount);
             });
 
-        Response = new FileAnalysisResponse(
-            mediatorResult.Value.Id.Value.ToString(),
-            mediatorResult.Value.StartedDate,
-            mediatorResult.Value.AverageVerdict.ToString(),
-            mediatorResult.Value.AverageThreatZone.ToString(),
-            mediatorResult.Value.Status.ToString(),
-            mediatorResult.Value.FileMetadata,
-            mediatorResult.Value.ContentHashSet,
-            serviceAnalyses,
-            mediatorResult.Value.ReportsAmount);
         await SendOkAsync(Response, ct);
     }
 }

@@ -37,7 +37,7 @@ public class Endpoint : EndpointWithoutRequest<FileAnalysisResponse>
     /// </summary>
     public override void Configure()
     {
-        Get("/{id}");
+        Get("/analyses/{id}");
         Group<FileAnalysesGroup>();
         Description(b =>
             {

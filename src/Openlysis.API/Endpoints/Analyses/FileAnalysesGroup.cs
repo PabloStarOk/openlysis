@@ -1,7 +1,5 @@
 using FastEndpoints;
 
-using Openlysis.API.Endpoints.Analyses.File;
-
 namespace Openlysis.API.Endpoints.Analyses;
 
 /// <summary>
@@ -14,7 +12,7 @@ public sealed class FileAnalysesGroup : Group
     /// </summary>
     public FileAnalysesGroup()
     {
-        Configure("/api/v1/analyses/file", ep =>
+        Configure("/api/v1/files", ep =>
         {
             ep.Description(b =>
                 {

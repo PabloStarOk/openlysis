@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace Openlysis.Application.Common.Interfaces.Persistence;
 
 /// <summary>
@@ -16,6 +18,18 @@ public interface IRepository<TModel, in TModelId>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>The model if found; otherwise, null.</returns>
     public Task<TModel?> GetAsync(TModelId id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves multiple models based on a matching expression.
+    /// </summary>
+    /// <param name="matchExpression">The expression to match models.</param>
+    /// <param name="amount">The number of models to retrieve. Default is 10.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation, with a result of the models if found; otherwise, null.</returns>
+    public Task<IEnumerable<TModel>> GetManyAsync(
+        Expression<Func<TModel, bool>> matchExpression,
+        int amount = 10,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a new model to the repository.

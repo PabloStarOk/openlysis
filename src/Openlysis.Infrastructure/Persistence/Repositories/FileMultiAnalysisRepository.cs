@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 using Microsoft.EntityFrameworkCore;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
@@ -46,6 +48,19 @@ public class FileMultiAnalysisRepository : IFileMultiAnalysisRepository
         return await _dbContext.FileMultiAnalyses
             .Include(f => f.ContentHashSet)
             .FirstOrDefaultAsync(f => f.Id == fileMultiAnalysisId, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IEnumerable<FileMultiAnalysis>> GetManyAsync(
+        Expression<Func<FileMultiAnalysis, bool>> matchExpression,
+        int amount = 10,
+        CancellationToken cancellationToken = default)
+    {
+        return await _dbContext.FileMultiAnalyses
+            .Include(f => f.ContentHashSet)
+            .Where(matchExpression)
+            .Take(amount)
+            .ToArrayAsync(cancellationToken);
     }
 
     /// <inheritdoc/>
