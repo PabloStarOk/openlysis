@@ -21,7 +21,7 @@ public static class DependencyInjection
             {
                 opt.CustomizeProblemDetails = context =>
                 {
-                    context.ProblemDetails.Instance = context.HttpContext.Request.Path;
+                    context.ProblemDetails.Instance = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
                 };
             });
 
