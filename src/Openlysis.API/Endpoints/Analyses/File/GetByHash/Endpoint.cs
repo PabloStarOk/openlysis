@@ -11,14 +11,14 @@ namespace Openlysis.API.Endpoints.Analyses.File.GetByHash;
 /// <summary>
 /// Endpoint for retrieving file analysis by hash.
 /// </summary>
-public class Endpoint : EndpointWithoutRequest<IEnumerable<FileAnalysisResponse>>
+public class Endpoint : Endpoint<Request, IEnumerable<FileAnalysisResponse>>
 {
     private readonly IMediator _mediator;
 
     /// <summary>
     /// Gets the name of the endpoint.
     /// </summary>
-    public static string Name { get; } = "GetFileAnalysisByHash";
+    public static string Name { get; } = "GetMultiAnalysesByHash";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Endpoint"/> class.
@@ -48,25 +48,21 @@ public class Endpoint : EndpointWithoutRequest<IEnumerable<FileAnalysisResponse>
             {
                 s.Summary = "Gets several multi analyses of a file identified by a hash.";
                 s.Description = "Gets a collection of multi analyses by providing a MD5, SHA1, SHA256 or SHA512 hash of a file.";
-                s.Params["hash"] = "A SHA-256 (Preferred), MD5, SHA-1 or SHA-512 hash.";
-                s.Params["amount"] = "Amount of analyses to retrieve.";
-                s.Params["startedDateOrder"] = "Either 'asc' or 'dsc' strings specifying ascending or descending order to get the last or oldest started analyses.";
+                s.RequestParam(r => r.Hash, "A SHA-256 (Preferred), MD5, SHA-1 or SHA-512 hash.");
+                s.RequestParam(r => r.Amount, "Amount of analyses to retrieve.");
+                s.RequestParam(r => r.StartedDateOrder, "Either 'asc' or 'dsc' specifying order to get the last or oldest started analyses.");
             });
     }
 
     /// <summary>
     /// Handles the request to get several multi analysis of a file identified by hash.
     /// </summary>
+    /// <param name="request">A <see cref="Request"/>.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> to cancel the operation.</param>
     /// <returns>An <see cref="IEnumerable{FileMultiAnalysis}"/>.</returns>
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(Request request, CancellationToken ct)
     {
-        string hashQueryParam = Route<string>("hash") ?? string.Empty;
-        int amountQueryParam = Query<int>("amount", false);
-        string orderQueryParam = Query<string>("startedDateOrder", false)
-            ?.Trim().ToLower() ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(hashQueryParam))
+        if (string.IsNullOrWhiteSpace(request.Hash))
         {
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
@@ -74,8 +70,8 @@ public class Endpoint : EndpointWithoutRequest<IEnumerable<FileAnalysisResponse>
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(orderQueryParam)
-            && orderQueryParam is not("asc" or "dsc"))
+        if (!string.IsNullOrWhiteSpace(request.StartedDateOrder)
+            && request.StartedDateOrder is not("asc" or "dsc"))
         {
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
@@ -84,9 +80,9 @@ public class Endpoint : EndpointWithoutRequest<IEnumerable<FileAnalysisResponse>
         }
 
         var query = new FileAnalysisQueryByHash(
-            hashQueryParam,
-            amountQueryParam < 1 ? 10 : amountQueryParam,
-            orderQueryParam);
+            request.Hash,
+            request.Amount < 1 ? 10 : request.Amount,
+            request.StartedDateOrder);
         IEnumerable<FileMultiAnalysis> multiAnalyses = await _mediator.Send(query, ct);
         var multiAnalysesArray = multiAnalyses.ToArray();
 
