@@ -11,7 +11,7 @@ namespace Openlysis.API.Endpoints.Analyses.File.GetByHash;
 /// <summary>
 /// Endpoint for retrieving file analysis by hash.
 /// </summary>
-public class Endpoint : Endpoint<Request, IEnumerable<FileAnalysisResponse>>
+public class Endpoint : Endpoint<Request, IEnumerable<FileMultiAnalysisDto>>
 {
     private readonly IMediator _mediator;
 
@@ -40,7 +40,7 @@ public class Endpoint : Endpoint<Request, IEnumerable<FileAnalysisResponse>>
             {
                 b.WithName(Name);
                 b.WithDisplayName(Name);
-                b.Produces<IEnumerable<FileAnalysisResponse>>();
+                b.Produces<IEnumerable<FileMultiAnalysisDto>>();
                 b.ProducesProblemDetails(StatusCodes.Status404NotFound);
             });
         Summary(
@@ -115,7 +115,7 @@ public class Endpoint : Endpoint<Request, IEnumerable<FileAnalysisResponse>>
                             reportDtos);
                     });
 
-                return new FileAnalysisResponse(
+                return new FileMultiAnalysisDto(
                     f.Id.Value.ToString(),
                     f.StartedDate,
                     f.AverageVerdict.ToString(),

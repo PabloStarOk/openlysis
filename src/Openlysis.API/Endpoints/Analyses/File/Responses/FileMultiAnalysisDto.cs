@@ -15,7 +15,7 @@ namespace Openlysis.API.Endpoints.Analyses.File.Responses;
 /// <param name="HashSet">The set of content hashes associated with the file.</param>
 /// <param name="ServiceAnalyses">The array of service analyses generated from the analysis.</param>
 /// <param name="ReportsAmount">The number of reports generated.</param>
-public record FileAnalysisResponse(
+public record FileMultiAnalysisDto(
     string Id,
     DateTime StartedDate,
     string AverageVerdict,
