@@ -11,5 +11,5 @@ namespace Openlysis.Application.FileAnalyses.Queries;
 /// Query to retrieve a file analysis by its id.
 /// </summary>
 /// <param name="FileMultiAnalysisId">A <see cref="FileMultiAnalysisId"/>.</param>
-public record FileAnalysisQueryById(FileMultiAnalysisId FileMultiAnalysisId)
+public record FileMultiAnalysisQuery(FileMultiAnalysisId FileMultiAnalysisId)
     : IRequest<ErrorOr<FileMultiAnalysis>>;

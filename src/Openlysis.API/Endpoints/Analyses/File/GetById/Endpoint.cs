@@ -83,7 +83,7 @@ public class Endpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
         }
 
         var fileAnalysisId = FileMultiAnalysisId.Create(guid);
-        var query = new FileAnalysisQueryById(fileAnalysisId);
+        var query = new FileMultiAnalysisQuery(fileAnalysisId);
 
         ErrorOr<FileMultiAnalysis> mediatorResult = await _mediator.Send(query, ct);
 

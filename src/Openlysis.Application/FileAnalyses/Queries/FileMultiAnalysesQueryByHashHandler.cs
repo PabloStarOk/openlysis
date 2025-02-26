@@ -7,29 +7,29 @@ using Openlysis.Domain.FileAnalyses.ValueObjects;
 namespace Openlysis.Application.FileAnalyses.Queries;
 
 /// <summary>
-/// Handles <see cref="FileAnalysisQueryByHash"/>.
+/// Handles <see cref="FileMultiAnalysesQueryByHash"/>.
 /// </summary>
-public class FileAnalysisQueryByHashHandler : IRequestHandler<FileAnalysisQueryByHash, IEnumerable<FileMultiAnalysis>>
+public class FileMultiAnalysesQueryByHashHandler : IRequestHandler<FileMultiAnalysesQueryByHash, IEnumerable<FileMultiAnalysis>>
 {
     private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _fileMultiAnalysisRepository;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileAnalysisQueryByHashHandler"/> class.
+    /// Initializes a new instance of the <see cref="FileMultiAnalysesQueryByHashHandler"/> class.
     /// </summary>
     /// <param name="fileMultiAnalysisRepository">Repository of file analyses.</param>
-    public FileAnalysisQueryByHashHandler(
+    public FileMultiAnalysesQueryByHashHandler(
         IRepository<FileMultiAnalysis, FileMultiAnalysisId> fileMultiAnalysisRepository)
     {
         _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
     }
 
     /// <summary>
-    /// Handles a <see cref="FileAnalysisQueryByHash"/>.
+    /// Handles a <see cref="FileMultiAnalysesQueryByHash"/>.
     /// </summary>
     /// <param name="query">Query to handle.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>A <see cref="IEnumerable{FileMultiAnalysis}"/>.</returns>
-    public async Task<IEnumerable<FileMultiAnalysis>> Handle(FileAnalysisQueryByHash query, CancellationToken cancellationToken)
+    public async Task<IEnumerable<FileMultiAnalysis>> Handle(FileMultiAnalysesQueryByHash query, CancellationToken cancellationToken)
     {
         IEnumerable<FileMultiAnalysis> fileAnalyses = await _fileMultiAnalysisRepository.GetManyAsync(
             f => f.ContentHashSet.Sha256 == query.Hash

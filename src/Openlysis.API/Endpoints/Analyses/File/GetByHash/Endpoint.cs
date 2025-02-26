@@ -79,7 +79,7 @@ public class Endpoint : Endpoint<Request, IEnumerable<FileMultiAnalysisDto>>
             return;
         }
 
-        var query = new FileAnalysisQueryByHash(
+        var query = new FileMultiAnalysesQueryByHash(
             request.Hash,
             request.Amount < 1 ? 10 : request.Amount,
             request.StartedDateOrder);
