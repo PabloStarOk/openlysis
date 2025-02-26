@@ -80,11 +80,11 @@ public class Endpoint : Endpoint<Request, Response>
             request.IsPrivateFile,
             request.Reanalyze);
 
-        var fileAnalysisOrError = await _mediator.Send(command, ct);
+        var mediatorResult = await _mediator.Send(command, ct);
 
-        if (fileAnalysisOrError.IsError)
+        if (mediatorResult.IsError)
         {
-            if (fileAnalysisOrError.Errors.Any(e => e.Type is ErrorType.Unexpected))
+            if (mediatorResult.Errors.Any(e => e.Type is ErrorType.Unexpected))
             {
                 await SendResultAsync(Results.Problem(
                     statusCode: StatusCodes.Status500InternalServerError,
@@ -94,7 +94,7 @@ public class Endpoint : Endpoint<Request, Response>
             var extensions = new Dictionary<string, object?>
             {
                 {
-                    "errors", fileAnalysisOrError.Errors
+                    "errors", mediatorResult.Errors
                 },
             };
             await SendResultAsync(Results.Problem(
@@ -104,11 +104,11 @@ public class Endpoint : Endpoint<Request, Response>
         }
 
         Response = new Response(
-            fileAnalysisOrError.Value.Id.Value.ToString(),
-            fileAnalysisOrError.Value.ContentHashSet.Md5,
-            fileAnalysisOrError.Value.ContentHashSet.Sha1,
-            fileAnalysisOrError.Value.ContentHashSet.Sha256,
-            fileAnalysisOrError.Value.ContentHashSet.Sha512);
+            mediatorResult.Value.Id.Value.ToString(),
+            mediatorResult.Value.ContentHashSet.Md5,
+            mediatorResult.Value.ContentHashSet.Sha1,
+            mediatorResult.Value.ContentHashSet.Sha256,
+            mediatorResult.Value.ContentHashSet.Sha512);
 
         var routeValues = new Dictionary<string, string>
         {

@@ -67,7 +67,9 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
         Expression<Func<FileMultiAnalysis, bool>> matchExpression,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.FileMultiAnalyses.FirstOrDefaultAsync(matchExpression, cancellationToken);
+        return await _dbContext.FileMultiAnalyses
+            .Include(f => f.ContentHashSet)
+            .FirstOrDefaultAsync(matchExpression, cancellationToken);
     }
 
     /// <inheritdoc/>
