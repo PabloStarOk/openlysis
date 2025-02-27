@@ -27,7 +27,7 @@ public interface IRepository<TModel, in TModelId>
     /// <param name="orderBy">An optional function to order the retrieved models.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation, with a result of the models if found; otherwise, null.</returns>
-    public Task<IEnumerable<TModel>> GetManyAsync(
+    public Task<IReadOnlyList<TModel>> GetManyAsync(
         int amount = 10,
         Expression<Func<TModel, bool>>? filter = null,
         Func<IQueryable<TModel>, IOrderedQueryable<TModel>>? orderBy = null,

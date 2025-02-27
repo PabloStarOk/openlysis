@@ -45,14 +45,13 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
         var hashSet = await _hashService.HashDataAsync(command.FileData, cancellationToken);
 
         // Check if the file has already been analyzed.
-        var analysesEnumerable = await _fileMultiAnalysisRepository.GetManyAsync(
+        var existingAnalyses = await _fileMultiAnalysisRepository.GetManyAsync(
             1,
             f => f.ContentHashSet == hashSet,
             q => q.OrderByDescending(f => f.StartedDate),
             cancellationToken);
-        var existingAnalyses = analysesEnumerable.ToArray();
 
-        if (existingAnalyses.Length > 0 && !command.Reanalyze)
+        if (existingAnalyses.Count > 0 && !command.Reanalyze)
         {
             return existingAnalyses[0];
         }

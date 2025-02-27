@@ -50,7 +50,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<FileMultiAnalysis>> GetManyAsync(
+    public async Task<IReadOnlyList<FileMultiAnalysis>> GetManyAsync(
         int amount = 10,
         Expression<Func<FileMultiAnalysis, bool>>? filter = null,
         Func<IQueryable<FileMultiAnalysis>, IOrderedQueryable<FileMultiAnalysis>>? orderBy = null,
@@ -71,7 +71,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
                 .Take(amount);
         }
 
-        return await query.ToArrayAsync(cancellationToken);
+        return await query.ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc/>

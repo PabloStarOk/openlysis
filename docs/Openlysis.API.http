@@ -41,6 +41,6 @@ true
 Content-Disposition: form-data; name="reanalyze";
 Content-Type: text/plain
 
-false
+true
 --Boundary
 ###
