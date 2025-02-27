@@ -51,25 +51,27 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
 
     /// <inheritdoc/>
     public async Task<IEnumerable<FileMultiAnalysis>> GetManyAsync(
-        Expression<Func<FileMultiAnalysis, bool>> matchExpression,
         int amount = 10,
+        Expression<Func<FileMultiAnalysis, bool>>? filter = null,
+        Func<IQueryable<FileMultiAnalysis>, IOrderedQueryable<FileMultiAnalysis>>? orderBy = null,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.FileMultiAnalyses
-            .Include(f => f.ContentHashSet)
-            .Where(matchExpression)
-            .Take(amount)
-            .ToArrayAsync(cancellationToken);
-    }
+        IQueryable<FileMultiAnalysis> query = _dbContext.FileMultiAnalyses
+            .Include(f => f.ContentHashSet);
 
-    /// <inheritdoc/>
-    public async Task<FileMultiAnalysis?> FindAsync(
-        Expression<Func<FileMultiAnalysis, bool>> matchExpression,
-        CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.FileMultiAnalyses
-            .Include(f => f.ContentHashSet)
-            .FirstOrDefaultAsync(matchExpression, cancellationToken);
+        if (filter is not null)
+        {
+            query = query
+                .Where(filter);
+        }
+
+        if (orderBy is not null)
+        {
+            query = orderBy(query)
+                .Take(amount);
+        }
+
+        return await query.ToArrayAsync(cancellationToken);
     }
 
     /// <inheritdoc/>

@@ -22,23 +22,15 @@ public interface IRepository<TModel, in TModelId>
     /// <summary>
     /// Retrieves multiple models based on a matching expression.
     /// </summary>
-    /// <param name="matchExpression">The expression to match models.</param>
     /// <param name="amount">The number of models to retrieve. Default is 10.</param>
+    /// <param name="filter">The expression to match models.</param>
+    /// <param name="orderBy">An optional function to order the retrieved models.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task representing the asynchronous operation, with a result of the models if found; otherwise, null.</returns>
     public Task<IEnumerable<TModel>> GetManyAsync(
-        Expression<Func<TModel, bool>> matchExpression,
         int amount = 10,
-        CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Finds a model based on a matching expression.
-    /// </summary>
-    /// <param name="matchExpression">The expression to match the model.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The model if found; otherwise, null.</returns>
-    public Task<TModel?> FindAsync(
-        Expression<Func<TModel, bool>> matchExpression,
+        Expression<Func<TModel, bool>>? filter = null,
+        Func<IQueryable<TModel>, IOrderedQueryable<TModel>>? orderBy = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -32,12 +32,12 @@ public class FileMultiAnalysesQueryByHashHandler : IRequestHandler<FileMultiAnal
     public async Task<IEnumerable<FileMultiAnalysis>> Handle(FileMultiAnalysesQueryByHash query, CancellationToken cancellationToken)
     {
         IEnumerable<FileMultiAnalysis> fileAnalyses = await _fileMultiAnalysisRepository.GetManyAsync(
+            query.FileAnalysesAmount,
             f => f.ContentHashSet.Sha256 == query.Hash
                 || f.ContentHashSet.Md5 == query.Hash
                 || f.ContentHashSet.Sha1 == query.Hash
                 || f.ContentHashSet.Sha512 == query.Hash,
-            query.FileAnalysesAmount,
-            cancellationToken);
+            cancellationToken: cancellationToken);
 
         string dateOrder = query.StartedDateOrder.Trim().ToLower();
 
