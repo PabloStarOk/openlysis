@@ -101,6 +101,9 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
             .HasForeignKey("Sha256")
             .IsRequired();
 
+        builder.Navigation(f => f.ContentHashSet)
+            .AutoInclude();
+
         builder.Ignore(f => f.AllReports);
         builder.Ignore(f => f.ReportsAmount);
     }

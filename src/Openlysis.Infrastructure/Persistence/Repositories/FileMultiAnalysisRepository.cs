@@ -45,7 +45,6 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
     public async Task<FileMultiAnalysis?> GetAsync(FileMultiAnalysisId fileMultiAnalysisId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.FileMultiAnalyses
-            .Include(f => f.ContentHashSet)
             .FirstOrDefaultAsync(f => f.Id == fileMultiAnalysisId, cancellationToken);
     }
 
@@ -56,8 +55,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
         Func<IQueryable<FileMultiAnalysis>, IOrderedQueryable<FileMultiAnalysis>>? orderBy = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<FileMultiAnalysis> query = _dbContext.FileMultiAnalyses
-            .Include(f => f.ContentHashSet);
+        IQueryable<FileMultiAnalysis> query = _dbContext.FileMultiAnalyses;
 
         if (filter is not null)
         {
