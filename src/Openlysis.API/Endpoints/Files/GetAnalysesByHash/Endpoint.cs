@@ -95,38 +95,7 @@ public class Endpoint : Endpoint<Request, IEnumerable<FileMultiAnalysisDto>>
             return;
         }
 
-        // Map to DTO
-        Response = multiAnalyses.Select(f =>
-            {
-                var serviceAnalyses = f.ServiceFileAnalyses.Select(
-                    s =>
-                    {
-                        IEnumerable<ReportDto> reportDtos = s.Reports
-                            .Select(
-                                r => new ReportDto(
-                                    r.Id.Value,
-                                    r.Verdict.ToString(),
-                                    r.ThreatZone.ToString(),
-                                    r.ThreatLevel));
-
-                        return new ServiceFileAnalysisDto(
-                            s.ServiceName,
-                            s.Status.ToString(),
-                            reportDtos);
-                    });
-
-                return new FileMultiAnalysisDto(
-                    f.Id.Value.ToString(),
-                    f.StartedDate,
-                    f.AverageVerdict.ToString(),
-                    f.AverageThreatZone.ToString(),
-                    f.Status.ToString(),
-                    f.FileMetadata,
-                    f.ContentHashSet,
-                    serviceAnalyses,
-                    f.ReportsAmount);
-            });
-
+        Response = multiAnalyses.Select(FileMultiAnalysisDto.Parse);
         await SendOkAsync(Response, ct);
     }
 }

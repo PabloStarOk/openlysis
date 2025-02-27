@@ -113,34 +113,7 @@ public class Endpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
             return;
         }
 
-        // Map to DTO
-        var serviceAnalyses = mediatorResult.Value.ServiceFileAnalyses.Select(
-            s =>
-            {
-                IEnumerable<ReportDto> reportDtos = s.Reports
-                    .Select(
-                        r => new ReportDto(
-                            r.Id.Value,
-                            r.Verdict.ToString(),
-                            r.ThreatZone.ToString(),
-                            r.ThreatLevel));
-
-                return new ServiceFileAnalysisDto(
-                    s.ServiceName,
-                    s.Status.ToString(),
-                    reportDtos);
-            });
-
-        Response = new FileMultiAnalysisDto(
-            mediatorResult.Value.Id.Value.ToString(),
-            mediatorResult.Value.StartedDate,
-            mediatorResult.Value.AverageVerdict.ToString(),
-            mediatorResult.Value.AverageThreatZone.ToString(),
-            mediatorResult.Value.Status.ToString(),
-            mediatorResult.Value.FileMetadata,
-            mediatorResult.Value.ContentHashSet,
-            serviceAnalyses,
-            mediatorResult.Value.ReportsAmount);
+        Response = FileMultiAnalysisDto.Parse(mediatorResult.Value);
         await SendOkAsync(Response, ct);
     }
 }
