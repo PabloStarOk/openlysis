@@ -43,10 +43,11 @@ public class Endpoint : Endpoint<Request, Response>
                 b.WithName(Name);
                 b.WithDisplayName(Name);
                 b.Accepts<Request>(contentType: "multipart/form-data");
-                b.Produces<Response>(StatusCodes.Status201Created);
+                b.Produces<Response>(StatusCodes.Status202Accepted);
                 b.ProducesProblemDetails();
                 b.ProducesProblemDetails(StatusCodes.Status500InternalServerError);
-            });
+            },
+            clearDefaults: true);
         Summary(
             s =>
             {
@@ -115,11 +116,9 @@ public class Endpoint : Endpoint<Request, Response>
             { "id", Response.FileAnalysisId },
         };
 
-        await SendCreatedAtAsync(
+        await SendResultAsync(Results.AcceptedAtRoute(
             GetById.Endpoint.Name,
             routeValues,
-            Response,
-            generateAbsoluteUrl: true,
-            ct);
+            Response));
     }
 }
