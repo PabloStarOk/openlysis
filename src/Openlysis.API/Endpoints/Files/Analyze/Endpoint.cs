@@ -6,7 +6,7 @@ using MediatR;
 
 using Openlysis.Application.FileAnalyses.Commands;
 
-namespace Openlysis.API.Endpoints.Analyses.File.Analyze;
+namespace Openlysis.API.Endpoints.Files.Analyze;
 
 /// <summary>
 /// Endpoint to analyze a file.
@@ -117,7 +117,7 @@ public class Endpoint : Endpoint<Request, Response>
         };
 
         await SendResultAsync(Results.AcceptedAtRoute(
-            GetById.Endpoint.Name,
+            GetAnalysisById.Endpoint.Name,
             routeValues,
             Response));
     }

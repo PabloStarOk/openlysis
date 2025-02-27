@@ -2,11 +2,11 @@ using FastEndpoints;
 
 using MediatR;
 
-using Openlysis.API.Endpoints.Analyses.File.Responses;
+using Openlysis.API.Endpoints.Files.Responses;
 using Openlysis.Application.FileAnalyses.Queries;
 using Openlysis.Domain.FileAnalyses;
 
-namespace Openlysis.API.Endpoints.Analyses.File.GetByHash;
+namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 
 /// <summary>
 /// Endpoint for retrieving file analysis by hash.

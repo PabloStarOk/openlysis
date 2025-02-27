@@ -1,4 +1,4 @@
-namespace Openlysis.API.Endpoints.Analyses.File.Analyze;
+namespace Openlysis.API.Endpoints.Files.Analyze;
 
 /// <summary>
 /// Response for analyze file endpoint.

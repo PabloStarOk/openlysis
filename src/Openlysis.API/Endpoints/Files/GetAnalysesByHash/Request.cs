@@ -1,6 +1,6 @@
 using FastEndpoints;
 
-namespace Openlysis.API.Endpoints.Analyses.File.GetByHash;
+namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 
 /// <summary>
 /// Represents a request to get a file analysis by hash.

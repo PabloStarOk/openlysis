@@ -1,4 +1,4 @@
-namespace Openlysis.API.Endpoints.Analyses.File.Responses;
+namespace Openlysis.API.Endpoints.Files.Responses;
 
 /// <summary>
 /// Represents the analysis result from a specific service.

@@ -1,7 +1,7 @@
 using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.API.Endpoints.Analyses.File.Responses;
+namespace Openlysis.API.Endpoints.Files.Responses;
 
 /// <summary>
 /// Represents the response for a file multi analysis.

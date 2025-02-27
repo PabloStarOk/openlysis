@@ -1,6 +1,6 @@
 using FastEndpoints;
 
-namespace Openlysis.API.Endpoints.Analyses;
+namespace Openlysis.API.Endpoints.Files;
 
 /// <summary>
 /// Group of endpoints for file analyses.
