@@ -34,8 +34,9 @@ public class Endpoint : Endpoint<Request, IEnumerable<FileMultiAnalysisDto>>
     /// </summary>
     public override void Configure()
     {
-        Get("/{hash}/analyses");
+        Get("{hash}/analyses");
         Group<FileAnalysesGroup>();
+        Version(1);
         Description(b =>
             {
                 b.WithName(Name);

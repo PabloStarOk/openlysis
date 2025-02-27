@@ -37,8 +37,9 @@ public class Endpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
     /// </summary>
     public override void Configure()
     {
-        Get("/analyses/{id}");
+        Get("analyses/{id}");
         Group<FileAnalysesGroup>();
+        Version(1);
         Description(b =>
             {
                 b.WithName(Name);

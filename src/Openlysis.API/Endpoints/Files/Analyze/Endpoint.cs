@@ -37,6 +37,7 @@ public class Endpoint : Endpoint<Request, Response>
         Post(string.Empty);
         Group<FileAnalysesGroup>();
         AllowFileUploads();
+        Version(1);
         Description(
             b =>
             {

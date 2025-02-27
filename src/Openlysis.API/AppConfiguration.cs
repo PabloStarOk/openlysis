@@ -19,6 +19,14 @@ public static class AppConfiguration
             app.UseSwaggerUi(c => c.DocExpansion = "list");
         }
 
-        app.UseFastEndpoints();
+        app.UseFastEndpoints(
+            c =>
+            {
+                c.Endpoints.RoutePrefix = "api";
+
+                c.Versioning.Prefix = "v";
+                c.Versioning.DefaultVersion = 1;
+                c.Versioning.PrependToRoute = true;
+            });
     }
 }

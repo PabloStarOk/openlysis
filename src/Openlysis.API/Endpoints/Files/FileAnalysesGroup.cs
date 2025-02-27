@@ -12,7 +12,7 @@ public sealed class FileAnalysesGroup : Group
     /// </summary>
     public FileAnalysesGroup()
     {
-        Configure("/api/v1/files", ep =>
+        Configure("files", ep =>
         {
             ep.Description(b =>
                 {
