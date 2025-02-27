@@ -42,6 +42,6 @@ public static class DependencyInjection
         services.AddScoped<IHashService, HashService>();
 
         // Add file analysis service.
-        services.AddScoped<IFileAnalysisService, FileAnalysisService>();
+        services.AddScoped<IFileMultiAnalysisService, FileMultiAnalysisService>();
     }
 }

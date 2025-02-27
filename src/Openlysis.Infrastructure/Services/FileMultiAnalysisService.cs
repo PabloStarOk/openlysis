@@ -17,17 +17,17 @@ namespace Openlysis.Infrastructure.Services;
 /// <summary>
 /// Service to analyze a file using multi services.
 /// </summary>
-public class FileAnalysisService : IFileAnalysisService
+public class FileMultiAnalysisService : IFileMultiAnalysisService
 {
     private readonly IOptions<FormOptions> _formOptions;
     private readonly IServiceScopeFactory _serviceScopeFactory;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileAnalysisService"/> class.
+    /// Initializes a new instance of the <see cref="FileMultiAnalysisService"/> class.
     /// </summary>
     /// <param name="formOptions">The form options for configuring the service.</param>
     /// <param name="serviceScopeFactory">The service scope factory for creating service scopes.</param>
-    public FileAnalysisService(
+    public FileMultiAnalysisService(
         IOptions<FormOptions> formOptions,
         IServiceScopeFactory serviceScopeFactory)
     {

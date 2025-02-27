@@ -18,25 +18,25 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
     private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _fileMultiAnalysisRepository;
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
-    private readonly IFileAnalysisService _analysisService;
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileCommandHandler"/> class.
     /// </summary>
     /// <param name="fileMultiAnalysisRepository">Repository of file analyses.</param>
-    /// <param name="analysisService">Service to analyze the file.</param>
+    /// <param name="multiAnalysisService">Service to analyze the file.</param>
     /// <param name="timeProvider">Provider of time.</param>
     /// <param name="hashService">Service to hash data.</param>
     public AnalyzeFileCommandHandler(
         IRepository<FileMultiAnalysis, FileMultiAnalysisId> fileMultiAnalysisRepository,
-        IFileAnalysisService analysisService,
+        IFileMultiAnalysisService multiAnalysisService,
         TimeProvider timeProvider,
         IHashService hashService)
     {
         _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
         _timeProvider = timeProvider;
         _hashService = hashService;
-        _analysisService = analysisService;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <inheritdoc/>
@@ -75,7 +75,7 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
             command.FilePassword,
             command.IsPrivateFile);
 
-        await _analysisService.StartJobAsync(request, multiAnalysis, cancellationToken);
+        await _multiAnalysisService.StartJobAsync(request, multiAnalysis, cancellationToken);
 
         return multiAnalysis;
     }

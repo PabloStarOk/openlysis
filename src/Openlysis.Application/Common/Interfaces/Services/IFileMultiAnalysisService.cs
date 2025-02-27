@@ -6,7 +6,7 @@ namespace Openlysis.Application.Common.Interfaces.Services;
 /// <summary>
 /// Defines a service to analyze a file.
 /// </summary>
-public interface IFileAnalysisService
+public interface IFileMultiAnalysisService
 {
     /// <summary>
     /// Starts a multi analysis job asynchronously.
