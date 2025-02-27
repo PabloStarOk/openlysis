@@ -9,7 +9,7 @@ namespace Openlysis.Application.FileAnalyses.Queries;
 /// <summary>
 /// Handles <see cref="FileMultiAnalysesQueryByHash"/>.
 /// </summary>
-public class FileMultiAnalysesQueryByHashHandler : IRequestHandler<FileMultiAnalysesQueryByHash, IEnumerable<FileMultiAnalysis>>
+public class FileMultiAnalysesQueryByHashHandler : IRequestHandler<FileMultiAnalysesQueryByHash, IReadOnlyList<FileMultiAnalysis>>
 {
     private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _fileMultiAnalysisRepository;
 
@@ -29,24 +29,27 @@ public class FileMultiAnalysesQueryByHashHandler : IRequestHandler<FileMultiAnal
     /// <param name="query">Query to handle.</param>
     /// <param name="cancellationToken">Token to cancel the asynchronous operation.</param>
     /// <returns>A <see cref="IEnumerable{FileMultiAnalysis}"/>.</returns>
-    public async Task<IEnumerable<FileMultiAnalysis>> Handle(FileMultiAnalysesQueryByHash query, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<FileMultiAnalysis>> Handle(FileMultiAnalysesQueryByHash query, CancellationToken cancellationToken)
     {
-        IEnumerable<FileMultiAnalysis> fileAnalyses = await _fileMultiAnalysisRepository.GetManyAsync(
+        Func<IQueryable<FileMultiAnalysis>, IOrderedQueryable<FileMultiAnalysis>>? orderBy = null;
+        string dateOrder = query.StartedDateOrder.Trim();
+        if (dateOrder.Equals("asc", StringComparison.InvariantCultureIgnoreCase))
+        {
+            orderBy = q => q.OrderBy(f => f.StartedDate);
+        }
+        else if (dateOrder.Equals("dsc", StringComparison.InvariantCultureIgnoreCase))
+        {
+            orderBy = q => q.OrderByDescending(f => f.StartedDate);
+        }
+
+        IReadOnlyList<FileMultiAnalysis> fileAnalyses = await _fileMultiAnalysisRepository.GetManyAsync(
             query.FileAnalysesAmount,
             f => f.ContentHashSet.Sha256 == query.Hash
                 || f.ContentHashSet.Md5 == query.Hash
                 || f.ContentHashSet.Sha1 == query.Hash
                 || f.ContentHashSet.Sha512 == query.Hash,
-            cancellationToken: cancellationToken);
-
-        string dateOrder = query.StartedDateOrder.Trim().ToLower();
-
-        fileAnalyses = dateOrder switch
-        {
-            "asc" => fileAnalyses.OrderBy(f => f.StartedDate),
-            "dsc" => fileAnalyses.OrderByDescending(f => f.StartedDate),
-            _ => fileAnalyses
-        };
+            orderBy,
+            cancellationToken);
 
         return fileAnalyses;
     }

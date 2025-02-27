@@ -14,4 +14,4 @@ public record FileMultiAnalysesQueryByHash(
     string Hash,
     int FileAnalysesAmount,
     string StartedDateOrder)
-    : IRequest<IEnumerable<FileMultiAnalysis>>;
+    : IRequest<IReadOnlyList<FileMultiAnalysis>>;

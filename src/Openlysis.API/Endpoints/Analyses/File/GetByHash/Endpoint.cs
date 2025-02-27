@@ -83,10 +83,9 @@ public class Endpoint : Endpoint<Request, IEnumerable<FileMultiAnalysisDto>>
             request.Hash,
             request.Amount < 1 ? 10 : request.Amount,
             request.StartedDateOrder);
-        IEnumerable<FileMultiAnalysis> multiAnalyses = await _mediator.Send(query, ct);
-        var multiAnalysesArray = multiAnalyses.ToArray();
+        IReadOnlyList<FileMultiAnalysis> multiAnalyses = await _mediator.Send(query, ct);
 
-        if (multiAnalysesArray.Length < 1)
+        if (multiAnalyses.Count < 1)
         {
             await SendResultAsync(
                 Results.Problem(
@@ -96,7 +95,7 @@ public class Endpoint : Endpoint<Request, IEnumerable<FileMultiAnalysisDto>>
         }
 
         // Map to DTO
-        Response = multiAnalysesArray.Select(f =>
+        Response = multiAnalyses.Select(f =>
             {
                 var serviceAnalyses = f.ServiceFileAnalyses.Select(
                     s =>
