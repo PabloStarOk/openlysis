@@ -8,8 +8,10 @@ using Filescan.Client.Models.Common;
 using Filescan.Client.Services;
 using Filescan.Client.Services.Parsers;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.Analyzers.Contracts.Configuration;
 using Openlysis.Application.Common.Interfaces.Ports;
 using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
@@ -26,28 +28,33 @@ public static class DependencyInjection
     /// Adds the Filescan.IO analyzer services to the specified <see cref="IServiceCollection"/>.
     /// </summary>
     /// <param name="services">The service collection to add the services to.</param>
-    public static void AddFilescanIoAnalyzer(this IServiceCollection services)
+    /// <param name="configuration">The configuration to retrieve settings from.</param>
+    public static void AddFilescanIoAnalyzer(this IServiceCollection services, IConfiguration configuration)
     {
-        string? apiKey = Environment.GetEnvironmentVariable("FILESCAN_API_KEY");
-        string? timeoutString = Environment.GetEnvironmentVariable("ANALYZERS_REQUEST_TIMEOUT");
+        // Retrieve FilescanSettings from the configuration
+        var settings = configuration
+            .GetRequiredSection("FilescanSettings")
+            .Get<AnalyzerSettings>();
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
-        ArgumentException.ThrowIfNullOrWhiteSpace(timeoutString);
+        // Ensure settings are not null
+        ArgumentNullException.ThrowIfNull(settings);
 
-        int timeout = int.Parse(timeoutString);
-
+        // Register model parsers
         services.AddTransient<ModelParser<FilescanError, JsonElement>, FilescanErrorParser>();
         services.AddTransient<ModelParser<ServiceFileAnalysisId, JsonElement>, AnalysisIdParser>();
         services.AddTransient<ModelParser<Report, JsonProperty>, ReportParser>();
         services.AddTransient<ModelParser<ServiceFileAnalysis, JsonElement>, AnalysisParser>();
+
+        // Configure HttpClient for Filescan.IO service
         services.AddHttpClient(ServiceConstants.ServiceName, httpClient =>
         {
             httpClient.DefaultRequestVersion = HttpVersion.Version30;
-            httpClient.Timeout = TimeSpan.FromMilliseconds(timeout);
+            httpClient.Timeout = TimeSpan.FromMilliseconds(settings.RequestsTimeoutMs);
             httpClient.BaseAddress = new Uri(Addresses.BaseAddress);
-            httpClient.DefaultRequestHeaders.Add(HeaderNames.ApiKey, apiKey);
+            httpClient.DefaultRequestHeaders.Add(HeaderNames.ApiKey, settings.ApiKey);
         });
 
+        // Register Filescan.IO services
         services.AddScoped<IFileScannerService, FileScanner>();
         services.AddScoped<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>, FilescanAnalyzer>();
     }

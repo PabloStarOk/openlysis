@@ -18,7 +18,7 @@ builder.ConfigureServices((context, services) =>
             .Get<AnalysisConsumerSettings>();
 
         services.AddSingleton(consumerOptions);
-        services.AddFilescanIoAnalyzer();
+        services.AddFilescanIoAnalyzer(context.Configuration);
         services.AddMassTransit(
             x =>
             {

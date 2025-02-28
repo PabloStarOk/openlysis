@@ -17,9 +17,16 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Openlysis.Application\Openlysis.Application.csproj" />
+      <ProjectReference Include="..\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Configuration.Abstractions">
+        <HintPath>..\..\..\..\..\..\..\..\.nuget\packages\microsoft.extensions.configuration.abstractions\8.0.0\lib\net8.0\Microsoft.Extensions.Configuration.Abstractions.dll</HintPath>
+      </Reference>
+      <Reference Include="Microsoft.Extensions.Configuration.Binder">
+        <HintPath>..\..\..\..\..\..\..\..\.nuget\packages\microsoft.extensions.configuration.binder\8.0.0\lib\net8.0\Microsoft.Extensions.Configuration.Binder.dll</HintPath>
+      </Reference>
       <Reference Include="Microsoft.Extensions.Http">
         <HintPath>..\..\..\..\..\..\..\..\.dotnet\shared\Microsoft.AspNetCore.App\8.0.8\Microsoft.Extensions.Http.dll</HintPath>
       </Reference>
