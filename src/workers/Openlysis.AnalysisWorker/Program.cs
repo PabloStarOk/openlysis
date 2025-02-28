@@ -5,9 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Openlysis.FileMultiAnalysisWorker;
-using Openlysis.FileMultiAnalysisWorker.Configuration;
-using Openlysis.FileMultiAnalysisWorker.Consumer;
+using Openlysis.AnalysisWorker;
+using Openlysis.AnalysisWorker.Configuration;
+using Openlysis.AnalysisWorker.Consumer;
 
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices((context, services) =>
@@ -41,7 +41,7 @@ builder.ConfigureServices((context, services) =>
                     });
             });
 
-        services.AddHostedService<FileMultiAnalysisWorker>();
+        services.AddHostedService<AnalysisWorker>();
     });
 
 IHost host = builder.Build();

@@ -9,14 +9,14 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using Openlysis.AnalysisWorker.Configuration;
 using Openlysis.Application.Common.Interfaces.Ports;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
-using Openlysis.FileMultiAnalysisWorker.Configuration;
 
-namespace Openlysis.FileMultiAnalysisWorker.Consumer;
+namespace Openlysis.AnalysisWorker.Consumer;
 
 /// <summary>
 /// Consumer class for handling file analysis job requests.

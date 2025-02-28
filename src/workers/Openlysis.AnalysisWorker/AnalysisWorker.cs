@@ -3,12 +3,12 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
 
-namespace Openlysis.FileMultiAnalysisWorker;
+namespace Openlysis.AnalysisWorker;
 
 /// <summary>
 /// A background service to keep running the file multi analysis service.
 /// </summary>
-public class FileMultiAnalysisWorker : BackgroundService
+public class AnalysisWorker : BackgroundService
 {
     /// <inheritdoc/>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)

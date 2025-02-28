@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API", "src\Openly
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filescan.Client", "src\lib\Filescan.Client\Filescan.Client.csproj", "{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.FileMultiAnalysisWorker", "src\workers\Openlysis.FileMultiAnalysisWorker\Openlysis.FileMultiAnalysisWorker.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.AnalysisWorker", "src\workers\Openlysis.AnalysisWorker\Openlysis.AnalysisWorker.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Contracts", "src\lib\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
 EndProject

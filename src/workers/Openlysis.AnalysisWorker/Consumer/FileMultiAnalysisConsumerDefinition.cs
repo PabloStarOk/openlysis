@@ -1,6 +1,6 @@
 using MassTransit;
 
-namespace Openlysis.FileMultiAnalysisWorker.Consumer;
+namespace Openlysis.AnalysisWorker.Consumer;
 
 /// <summary>
 /// Defines the consumer for file multi-analysis.
