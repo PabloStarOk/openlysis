@@ -71,6 +71,7 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
             command.FileName,
             command.FileContentType,
             command.FileData,
+            multiAnalysis,
             command.FileDescription,
             command.FilePassword,
             command.IsPrivateFile);

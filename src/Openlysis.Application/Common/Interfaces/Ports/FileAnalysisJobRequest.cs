@@ -1,3 +1,5 @@
+using Openlysis.Domain.FileAnalyses;
+
 namespace Openlysis.Application.Common.Interfaces.Ports;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Openlysis.Application.Common.Interfaces.Ports;
 /// <param name="FileName">The name of the file.</param>
 /// <param name="FileContentType">The content type of the file.</param>
 /// <param name="FileStreamData">The stream data of the file.</param>
+/// <param name="FileMultiAnalysis">The multi-analysis details of the file.</param>
 /// <param name="Description">A description of the file.</param>
 /// <param name="Password">The password for the file, if any.</param>
 /// <param name="IsPrivateFile">Indicates if the file is private.</param>
@@ -13,6 +16,7 @@ public record FileAnalysisJobRequest(
     string FileName,
     string FileContentType,
     Stream FileStreamData,
+    FileMultiAnalysis FileMultiAnalysis,
     string Description,
     string Password,
     bool IsPrivateFile);
