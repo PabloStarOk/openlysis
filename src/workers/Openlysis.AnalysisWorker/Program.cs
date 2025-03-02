@@ -6,55 +6,25 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Openlysis.AnalysisWorker.Core;
-using Openlysis.AnalysisWorker.Core.Abstractions;
 using Openlysis.AnalysisWorker.Features.AnalyzeFile.Consumer;
+using Openlysis.AnalysisWorker.Infrastructure;
 using Openlysis.AnalysisWorker.Infrastructure.Configuration;
-using Openlysis.AnalysisWorker.Infrastructure.Serialization;
-using Openlysis.AnalysisWorker.Infrastructure.Services;
 
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices((context, services) =>
 {
-    var brokerSettingsSection = context.Configuration
-        .GetRequiredSection(BrokerSettings.SectionName);
-    services.Configure<BrokerSettings>(brokerSettingsSection);
-    var brokerSettings = brokerSettingsSection.Get<BrokerSettings>();
-
     var consumerSettingsSection = context.Configuration
         .GetRequiredSection(AnalyzeFileConsumerSettings.SectionName);
     services.Configure<AnalyzeFileConsumerSettings>(consumerSettingsSection);
 
-    services.AddSingleton<IEndpointUriProvider, EndpointUriProvider>();
+    services.AddInfrastructure(context.Configuration);
     services.AddFilescanIoAnalyzer(context.Configuration);
     services.AddMassTransit(
         x =>
         {
             x.SetKebabCaseEndpointNameFormatter();
             x.AddConsumer<AnalyzeFileConsumer, AnalyzeFileConsumerDefinition>();
-
-            x.UsingRabbitMq(
-                (registrationContext, cfg) =>
-                {
-                    cfg.Host(
-                        brokerSettings.Host,
-                        brokerSettings.Port,
-                        brokerSettings.VirtualHost,
-                        hostConfig =>
-                        {
-                            hostConfig.Username(brokerSettings.Username);
-                            hostConfig.Password(brokerSettings.Password);
-                        });
-
-                    cfg.ConfigureJsonSerializerOptions(
-                        options =>
-                        {
-                            options.Converters.Add(new FileMultiAnalysisIdJsonConverter());
-                            options.Converters.Add(new ServiceFileAnalysisJsonConverter());
-                            options.Converters.Add(new ReportJsonConverter());
-                            return options;
-                        });
-                    cfg.ConfigureEndpoints(registrationContext);
-                });
+            x.AddRabbitMqBroker(services);
         });
 
     services.AddHostedService<AnalysisWorker>();
