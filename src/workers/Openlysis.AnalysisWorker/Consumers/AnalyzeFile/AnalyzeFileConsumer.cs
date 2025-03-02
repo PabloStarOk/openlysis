@@ -10,8 +10,8 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using Openlysis.AnalysisWorker.Common.Interfaces;
 using Openlysis.AnalysisWorker.Configuration;
-using Openlysis.AnalysisWorker.Consumers.UpdateFileMultiAnalysis;
 using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Analyzers.Contracts.Requests;
 using Openlysis.Domain.Common.Enums;
@@ -35,9 +35,8 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     public const string EndpointName = "analyze-file";
 
     private readonly ILogger<AnalyzeFileConsumer> _logger;
-    private readonly IOptions<BrokerSettings> _brokerOptions;
     private readonly IOptionsMonitor<AnalyzeFileConsumerSettings> _options;
-    private readonly Uri _updateAnalysisEndpointUri;
+    private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> _analyzers;
     private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
     private FileMultiAnalysisId _multiAnalysisId;
@@ -46,29 +45,20 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileConsumer"/> class.
     /// </summary>
-    /// <param name="brokerOptions">The broker settings options.</param>
     /// <param name="logger">The logger instance to log messages.</param>
+    /// <param name="endpointUriProvider">The provider for endpoint URIs.</param>
     /// <param name="options">The options monitor for file analysis consumer options.</param>
     /// <param name="analyzers">The collection of service analyzers to use for file analysis.</param>
     public AnalyzeFileConsumer(
-        IOptions<BrokerSettings> brokerOptions,
         ILogger<AnalyzeFileConsumer> logger,
+        IEndpointUriProvider endpointUriProvider,
         IOptionsMonitor<AnalyzeFileConsumerSettings> options,
         IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> analyzers)
     {
-        _brokerOptions = brokerOptions;
         _logger = logger;
+        _endpointUriProvider = endpointUriProvider;
         _options = options;
         _analyzers = analyzers;
-
-        var uriBuilder = new UriBuilder
-        {
-            Scheme = "rabbitmq",
-            Host = _brokerOptions.Value.Host,
-            Port = _brokerOptions.Value.Port,
-            Path = UpdateFileMultiAnalysisConsumer.EndpointName,
-        };
-        _updateAnalysisEndpointUri = uriBuilder.Uri;
     }
 
     /// <inheritdoc/>
@@ -197,6 +187,6 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         var request = new UpdateFileMultiAnalysis.UpdateFileMultiAnalysis(
             _multiAnalysisId,
             _serviceFileAnalyses.Values.ToArray());
-        await _context.Send(_updateAnalysisEndpointUri, request);
+        await _context.Send(_endpointUriProvider.UpdateMultiAnalysisUri, request);
     }
 }

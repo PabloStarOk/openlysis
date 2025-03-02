@@ -3,6 +3,8 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.AnalysisWorker.Common.Interfaces;
+using Openlysis.AnalysisWorker.Common.Services;
 using Openlysis.AnalysisWorker.Configuration;
 using Openlysis.AnalysisWorker.Consumers.UpdateFileMultiAnalysis;
 using Openlysis.AnalysisWorker.Serialization;
@@ -27,6 +29,7 @@ public static class DependencyInjection
             .GetRequiredSection(BrokerSettings.SectionName);
         services.Configure<BrokerSettings>(brokerSettingsSection);
         var brokerSettings = brokerSettingsSection.Get<BrokerSettings>();
+        services.AddSingleton<IEndpointUriProvider, EndpointUriProvider>();
         services.AddMassTransit(
             x =>
             {

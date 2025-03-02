@@ -1,13 +1,10 @@
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
 using MassTransit;
 
-using Microsoft.Extensions.Options;
-
-using Openlysis.AnalysisWorker.Configuration;
+using Openlysis.AnalysisWorker.Common.Interfaces;
 using Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
@@ -21,34 +18,24 @@ namespace Openlysis.AnalysisWorker.Services;
 /// </summary>
 public class FileMultiAnalysisService : IFileMultiAnalysisService
 {
-    private readonly IOptions<BrokerSettings> _brokerOptions;
+    private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _multiAnalysisRepository;
     private readonly ISendEndpointProvider _sendEndpointProvider;
-    private readonly Uri _analyzeFileEndpointUri;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMultiAnalysisService"/> class.
     /// </summary>
-    /// <param name="brokerOptions">The broker settings options.</param>
+    /// <param name="endpointUriProvider">The provider for endpoint URIs.</param>
     /// <param name="sendEndpointProvider">The endpoint to send messages to.</param>
     /// <param name="multiAnalysisRepository">The repository for managing file multi-analysis entities.</param>
     public FileMultiAnalysisService(
-        IOptions<BrokerSettings> brokerOptions,
+        IEndpointUriProvider endpointUriProvider,
         ISendEndpointProvider sendEndpointProvider,
         IRepository<FileMultiAnalysis, FileMultiAnalysisId> multiAnalysisRepository)
     {
-        _brokerOptions = brokerOptions;
+        _endpointUriProvider = endpointUriProvider;
         _sendEndpointProvider = sendEndpointProvider;
         this._multiAnalysisRepository = multiAnalysisRepository;
-
-        var uriBuilder = new UriBuilder
-        {
-            Scheme = "rabbitmq",
-            Host = _brokerOptions.Value.Host,
-            Port = _brokerOptions.Value.Port,
-            Path = AnalyzeFileConsumer.EndpointName,
-        };
-        _analyzeFileEndpointUri = uriBuilder.Uri;
     }
 
     /// <inheritdoc/>
@@ -90,7 +77,7 @@ public class FileMultiAnalysisService : IFileMultiAnalysisService
             filePassword,
             isPrivateFile);
 
-        ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(_analyzeFileEndpointUri);
+        ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(_endpointUriProvider.AnalyzeFileUri);
         await sendEndpoint.Send(analyzeFile, cancellationToken);
     }
 }

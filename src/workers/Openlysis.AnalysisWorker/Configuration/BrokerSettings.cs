@@ -6,9 +6,14 @@ namespace Openlysis.AnalysisWorker.Configuration;
 public record BrokerSettings
 {
     /// <summary>
-    /// The configuration section name for RabbitMQ options.
+    /// The configuration section name for broker options.
     /// </summary>
-    public const string SectionName = "RabbitMQ";
+    public const string SectionName = "BrokerSettings";
+
+    /// <summary>
+    /// Gets the scheme of the message broker.
+    /// </summary>
+    public string Scheme { get; init; }
 
     /// <summary>
     /// Gets the host name of the RabbitMQ server.

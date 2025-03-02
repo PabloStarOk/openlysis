@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 using Openlysis.AnalysisWorker;
+using Openlysis.AnalysisWorker.Common.Interfaces;
+using Openlysis.AnalysisWorker.Common.Services;
 using Openlysis.AnalysisWorker.Configuration;
 using Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
 using Openlysis.AnalysisWorker.Serialization;
@@ -22,6 +24,7 @@ builder.ConfigureServices((context, services) =>
         .GetRequiredSection(AnalyzeFileConsumerSettings.SectionName);
     services.Configure<AnalyzeFileConsumerSettings>(consumerSettingsSection);
 
+    services.AddSingleton<IEndpointUriProvider, EndpointUriProvider>();
     services.AddFilescanIoAnalyzer(context.Configuration);
     services.AddMassTransit(
         x =>
