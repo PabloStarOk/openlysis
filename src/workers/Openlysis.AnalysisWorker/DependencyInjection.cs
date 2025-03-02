@@ -3,12 +3,12 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.AnalysisWorker.Common.Interfaces;
-using Openlysis.AnalysisWorker.Common.Services;
-using Openlysis.AnalysisWorker.Configuration;
-using Openlysis.AnalysisWorker.Consumers.UpdateFileMultiAnalysis;
-using Openlysis.AnalysisWorker.Serialization;
-using Openlysis.AnalysisWorker.Services;
+using Openlysis.AnalysisWorker.Application.Services;
+using Openlysis.AnalysisWorker.Core.Abstractions;
+using Openlysis.AnalysisWorker.Features.UpdateFileMultiAnalysis.Consumer;
+using Openlysis.AnalysisWorker.Infrastructure.Configuration;
+using Openlysis.AnalysisWorker.Infrastructure.Serialization;
+using Openlysis.AnalysisWorker.Infrastructure.Services;
 using Openlysis.Application.Common.Interfaces.Services;
 
 namespace Openlysis.AnalysisWorker;

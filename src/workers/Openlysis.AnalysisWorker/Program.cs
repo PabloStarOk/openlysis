@@ -5,12 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using Openlysis.AnalysisWorker;
-using Openlysis.AnalysisWorker.Common.Interfaces;
-using Openlysis.AnalysisWorker.Common.Services;
-using Openlysis.AnalysisWorker.Configuration;
-using Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
-using Openlysis.AnalysisWorker.Serialization;
+using Openlysis.AnalysisWorker.Core;
+using Openlysis.AnalysisWorker.Core.Abstractions;
+using Openlysis.AnalysisWorker.Features.AnalyzeFile.Consumer;
+using Openlysis.AnalysisWorker.Infrastructure.Configuration;
+using Openlysis.AnalysisWorker.Infrastructure.Serialization;
+using Openlysis.AnalysisWorker.Infrastructure.Services;
 
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices((context, services) =>

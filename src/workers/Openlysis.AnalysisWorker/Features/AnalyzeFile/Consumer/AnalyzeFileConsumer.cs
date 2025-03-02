@@ -10,8 +10,9 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.AnalysisWorker.Common.Interfaces;
-using Openlysis.AnalysisWorker.Configuration;
+using Openlysis.AnalysisWorker.Core.Abstractions;
+using Openlysis.AnalysisWorker.Features.AnalyzeFile.Contracts;
+using Openlysis.AnalysisWorker.Infrastructure.Configuration;
 using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Analyzers.Contracts.Requests;
 using Openlysis.Domain.Common.Enums;
@@ -19,7 +20,7 @@ using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
+namespace Openlysis.AnalysisWorker.Features.AnalyzeFile.Consumer;
 
 /// <summary>
 /// Consumer class for handling file analysis job requests.
@@ -27,7 +28,7 @@ namespace Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
 /// <remarks>
 /// This class implements the <see cref="IConsumer{T}"/> interface to process <see cref="AnalyzeFile"/> messages.
 /// </remarks>
-public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
+public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
 {
     /// <summary>
     /// Name of the endpoint.
@@ -43,7 +44,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         s.Status is AnalysisStatus.Finished or AnalysisStatus.Timeout;
 
     private FileMultiAnalysisId _multiAnalysisId;
-    private ConsumeContext<AnalyzeFile> _context;
+    private ConsumeContext<Contracts.AnalyzeFile> _context;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileConsumer"/> class.
@@ -65,7 +66,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     }
 
     /// <inheritdoc/>
-    public async Task Consume(ConsumeContext<AnalyzeFile> context)
+    public async Task Consume(ConsumeContext<Contracts.AnalyzeFile> context)
     {
         _context = context;
         _multiAnalysisId = context.Message.FileMultiAnalysisId;
@@ -201,7 +202,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task SendUpdateAsync()
     {
-        var request = new UpdateFileMultiAnalysis.UpdateFileMultiAnalysis(
+        var request = new UpdateFileMultiAnalysis.Contracts.UpdateFileMultiAnalysis(
             _multiAnalysisId,
             _serviceFileAnalyses.Values.ToArray());
         await _context.Send(_endpointUriProvider.UpdateMultiAnalysisUri, request);

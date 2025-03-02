@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 
 using MassTransit;
 
-using Openlysis.AnalysisWorker.Common.Interfaces;
-using Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
+using Openlysis.AnalysisWorker.Core.Abstractions;
+using Openlysis.AnalysisWorker.Features.AnalyzeFile.Contracts;
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.AnalysisWorker.Services;
+namespace Openlysis.AnalysisWorker.Application.Services;
 
 /// <summary>
 /// Service to analyze a file using multi services.

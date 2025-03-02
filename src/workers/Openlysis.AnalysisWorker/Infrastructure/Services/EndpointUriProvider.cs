@@ -4,12 +4,12 @@ using MassTransit;
 
 using Microsoft.Extensions.Options;
 
-using Openlysis.AnalysisWorker.Common.Interfaces;
-using Openlysis.AnalysisWorker.Configuration;
-using Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
-using Openlysis.AnalysisWorker.Consumers.UpdateFileMultiAnalysis;
+using Openlysis.AnalysisWorker.Core.Abstractions;
+using Openlysis.AnalysisWorker.Features.AnalyzeFile.Consumer;
+using Openlysis.AnalysisWorker.Features.UpdateFileMultiAnalysis.Consumer;
+using Openlysis.AnalysisWorker.Infrastructure.Configuration;
 
-namespace Openlysis.AnalysisWorker.Common.Services;
+namespace Openlysis.AnalysisWorker.Infrastructure.Services;
 
 /// <summary>
 /// Provides URIs of endpoints of <see cref="IConsumer{TMessage}"/>.

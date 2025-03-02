@@ -4,11 +4,12 @@ using System.Threading.Tasks;
 
 using MassTransit;
 
+using Openlysis.AnalysisWorker.Features.UpdateFileMultiAnalysis.Contracts;
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.AnalysisWorker.Consumers.UpdateFileMultiAnalysis;
+namespace Openlysis.AnalysisWorker.Features.UpdateFileMultiAnalysis.Consumer;
 
 /// <summary>
 /// Consumer class for handling the UpdateFileMultiAnalysis message.
@@ -16,7 +17,7 @@ namespace Openlysis.AnalysisWorker.Consumers.UpdateFileMultiAnalysis;
 /// <remarks>
 /// This class consumes messages of type <see cref="UpdateFileMultiAnalysis"/> and processes them.
 /// </remarks>
-public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis>
+public class UpdateFileMultiAnalysisConsumer : IConsumer<Contracts.UpdateFileMultiAnalysis>
 {
     /// <summary>
     /// Name of the endpoint.
@@ -36,9 +37,9 @@ public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis
     }
 
     /// <inheritdoc/>
-    public async Task Consume(ConsumeContext<UpdateFileMultiAnalysis> context)
+    public async Task Consume(ConsumeContext<Contracts.UpdateFileMultiAnalysis> context)
     {
-        UpdateFileMultiAnalysis request = context.Message;
+        Contracts.UpdateFileMultiAnalysis request = context.Message;
         FileMultiAnalysis fileMultiAnalysis = await _multiAnalysisRepository.GetAsync(request.Id);
         ArgumentNullException.ThrowIfNull(fileMultiAnalysis);
 

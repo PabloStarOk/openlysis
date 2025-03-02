@@ -1,6 +1,6 @@
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
+namespace Openlysis.AnalysisWorker.Features.AnalyzeFile.Contracts;
 
 /// <summary>
 /// Represents a request to start a job to analyze a file.

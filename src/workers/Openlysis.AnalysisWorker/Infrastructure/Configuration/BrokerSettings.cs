@@ -1,4 +1,4 @@
-namespace Openlysis.AnalysisWorker.Configuration;
+namespace Openlysis.AnalysisWorker.Infrastructure.Configuration;
 
 /// <summary>
 /// Represents the settings required to configure the broker connection.

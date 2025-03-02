@@ -8,7 +8,7 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
 
-namespace Openlysis.AnalysisWorker.Serialization;
+namespace Openlysis.AnalysisWorker.Infrastructure.Serialization;
 
 /// <summary>
 /// Converts a <see cref="ServiceFileAnalysis"/> object to and from JSON.

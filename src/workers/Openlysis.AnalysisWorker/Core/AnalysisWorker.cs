@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Hosting;
 
-namespace Openlysis.AnalysisWorker;
+namespace Openlysis.AnalysisWorker.Core;
 
 /// <summary>
 /// A background service to keep running the file multi analysis service.

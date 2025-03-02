@@ -1,4 +1,4 @@
-namespace Openlysis.AnalysisWorker.Configuration;
+namespace Openlysis.AnalysisWorker.Infrastructure.Configuration;
 
 /// <summary>
 /// Represents the options for the consumer in the file multi-analysis worker.

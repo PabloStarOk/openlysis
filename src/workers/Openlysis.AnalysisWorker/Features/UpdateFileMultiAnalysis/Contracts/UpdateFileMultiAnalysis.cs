@@ -1,7 +1,7 @@
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.AnalysisWorker.Consumers.UpdateFileMultiAnalysis;
+namespace Openlysis.AnalysisWorker.Features.UpdateFileMultiAnalysis.Contracts;
 
 /// <summary>
 /// Represents a request to update the service file analyses of file's multi analysis.

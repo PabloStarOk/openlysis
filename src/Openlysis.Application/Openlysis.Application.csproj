@@ -20,8 +20,4 @@
       </PackageReference>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Common\Interfaces\Services\Requests\" />
-    </ItemGroup>
-
 </Project>

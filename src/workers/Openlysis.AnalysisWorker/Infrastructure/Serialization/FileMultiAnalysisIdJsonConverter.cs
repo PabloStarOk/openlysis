@@ -1,9 +1,10 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.AnalysisWorker.Serialization;
+namespace Openlysis.AnalysisWorker.Infrastructure.Serialization;
 
 /// <summary>
 /// Converts a <see cref="FileMultiAnalysisId"/> object to and from JSON.

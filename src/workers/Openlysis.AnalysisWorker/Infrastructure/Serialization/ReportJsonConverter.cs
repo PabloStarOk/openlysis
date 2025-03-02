@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Reports;
 
-namespace Openlysis.AnalysisWorker.Serialization;
+namespace Openlysis.AnalysisWorker.Infrastructure.Serialization;
 
 /// <summary>
 /// Converts a <see cref="Report"/> object to and from JSON.
