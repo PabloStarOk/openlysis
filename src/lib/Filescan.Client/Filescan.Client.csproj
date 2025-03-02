@@ -16,7 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Openlysis.Application\Openlysis.Application.csproj" />
+      <ProjectReference Include="..\..\Openlysis.Domain\Openlysis.Domain.csproj" />
       <ProjectReference Include="..\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj" />
     </ItemGroup>
 

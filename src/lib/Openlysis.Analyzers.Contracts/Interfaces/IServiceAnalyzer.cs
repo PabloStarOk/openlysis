@@ -1,6 +1,8 @@
 using ErrorOr;
 
-namespace Openlysis.Application.Common.Interfaces.Ports;
+using Openlysis.Analyzers.Contracts.Requests;
+
+namespace Openlysis.Analyzers.Contracts.Interfaces;
 
 /// <summary>
 /// Interface for analyzing services.
@@ -19,10 +21,10 @@ public interface IServiceAnalyzer<TAnalysis, TAnalysisId>
     /// <summary>
     /// Analyzes a file.
     /// </summary>
-    /// <param name="request">A <see cref="FileAnalysisJobRequest"/> containing the file data and other parameters.</param>
+    /// <param name="request">A <see cref="FileAnalysisRequest"/> containing the file data and other parameters.</param>
     /// <param name="cancellationToken">Token to cancel the operation.</param>
     /// <returns>A <typeparamref name="TAnalysisId"/> representing the result of the analysis.</returns>
-    public Task<ErrorOr<TAnalysisId>> AnalyzeAsync(FileAnalysisJobRequest request, CancellationToken cancellationToken = default);
+    public Task<ErrorOr<TAnalysisId>> AnalyzeAsync(FileAnalysisRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves the analysis result for a given analysis ID.

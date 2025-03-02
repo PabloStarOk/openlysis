@@ -7,42 +7,55 @@ using Microsoft.Extensions.Hosting;
 
 using Openlysis.AnalysisWorker;
 using Openlysis.AnalysisWorker.Configuration;
-using Openlysis.AnalysisWorker.Consumer;
+using Openlysis.AnalysisWorker.Consumers.AnalyzeFile;
+using Openlysis.AnalysisWorker.Serialization;
 
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices((context, services) =>
-    {
-        var brokerSettings = context.Configuration.GetRequiredSection(BrokerSettings.SectionName).Get<BrokerSettings>();
-        var consumerOptions = context.Configuration
-            .GetRequiredSection(AnalysisConsumerSettings.SectionName)
-            .Get<AnalysisConsumerSettings>();
+{
+    var brokerSettingsSection = context.Configuration
+        .GetRequiredSection(BrokerSettings.SectionName);
+    services.Configure<BrokerSettings>(brokerSettingsSection);
+    var brokerSettings = brokerSettingsSection.Get<BrokerSettings>();
 
-        services.AddSingleton(consumerOptions);
-        services.AddFilescanIoAnalyzer(context.Configuration);
-        services.AddMassTransit(
-            x =>
-            {
-                x.SetKebabCaseEndpointNameFormatter();
-                x.AddConsumer<FileMultiAnalysisConsumer, FileMultiAnalysisConsumerDefinition>();
-                x.UsingRabbitMq(
-                    (registrationContext, cfg) =>
-                    {
-                        cfg.Host(
-                            brokerSettings.Host,
-                            brokerSettings.Port,
-                            brokerSettings.VirtualHost,
-                            hostConfig =>
-                            {
-                                hostConfig.Username(brokerSettings.Username);
-                                hostConfig.Password(brokerSettings.Password);
-                            });
+    var consumerSettingsSection = context.Configuration
+        .GetRequiredSection(AnalyzeFileConsumerSettings.SectionName);
+    services.Configure<AnalyzeFileConsumerSettings>(consumerSettingsSection);
 
-                        cfg.ConfigureEndpoints(registrationContext);
-                    });
-            });
+    services.AddFilescanIoAnalyzer(context.Configuration);
+    services.AddMassTransit(
+        x =>
+        {
+            x.SetKebabCaseEndpointNameFormatter();
+            x.AddConsumer<AnalyzeFileConsumer, AnalyzeFileConsumerDefinition>();
 
-        services.AddHostedService<AnalysisWorker>();
-    });
+            x.UsingRabbitMq(
+                (registrationContext, cfg) =>
+                {
+                    cfg.Host(
+                        brokerSettings.Host,
+                        brokerSettings.Port,
+                        brokerSettings.VirtualHost,
+                        hostConfig =>
+                        {
+                            hostConfig.Username(brokerSettings.Username);
+                            hostConfig.Password(brokerSettings.Password);
+                        });
+
+                    cfg.ConfigureJsonSerializerOptions(
+                        options =>
+                        {
+                            options.Converters.Add(new FileMultiAnalysisIdJsonConverter());
+                            options.Converters.Add(new ServiceFileAnalysisJsonConverter());
+                            options.Converters.Add(new ReportJsonConverter());
+                            return options;
+                        });
+                    cfg.ConfigureEndpoints(registrationContext);
+                });
+        });
+
+    services.AddHostedService<AnalysisWorker>();
+});
 
 IHost host = builder.Build();
 await host.RunAsync();

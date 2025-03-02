@@ -1,3 +1,4 @@
+using Openlysis.AnalysisWorker;
 using Openlysis.API;
 using Openlysis.Application;
 using Openlysis.Infrastructure;
@@ -5,9 +6,9 @@ using Openlysis.Infrastructure;
 var builder = WebApplication.CreateSlimBuilder();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAnalysisWorker(builder.Configuration);
 builder.Services.AddApplication();
 builder.Services.AddApi();
-builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

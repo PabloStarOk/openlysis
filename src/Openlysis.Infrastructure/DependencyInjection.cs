@@ -40,8 +40,5 @@ public static class DependencyInjection
         services.AddTransient<SHA256>(_ => SHA256.Create());
         services.AddTransient<SHA512>(_ => SHA512.Create());
         services.AddScoped<IHashService, HashService>();
-
-        // Add file analysis service.
-        services.AddScoped<IFileMultiAnalysisService, FileMultiAnalysisService>();
     }
 }

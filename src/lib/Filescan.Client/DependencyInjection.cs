@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Contracts.Configuration;
-using Openlysis.Application.Common.Interfaces.Ports;
+using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;

@@ -5,14 +5,15 @@ using Filescan.Client.Constants.Common;
 using Filescan.Client.Models.Requests;
 using Filescan.Client.Models.Scans;
 
-using Openlysis.Application.Common.Interfaces.Ports;
+using Openlysis.Analyzers.Contracts.Interfaces;
+using Openlysis.Analyzers.Contracts.Requests;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Filescan.Client;
 
 /// <summary>
-/// Represents a file scanner analyzer that implements the <see cref="IServiceAnalyzer{TAnalysis, TAnalysisID}"/> interface.
+/// Represents a file scanner analyzer that implements the <see cref="IServiceAnalyzer{TAnalysis,TAnalysisId}"/> interface.
 /// </summary>
 public class FilescanAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>
 {
@@ -31,15 +32,15 @@ public class FilescanAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceFil
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<ServiceFileAnalysisId>> AnalyzeAsync(FileAnalysisJobRequest request, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<ServiceFileAnalysisId>> AnalyzeAsync(FileAnalysisRequest request, CancellationToken cancellationToken = default)
     {
         var options = ScanOptions.True;
         var scanRequest = new ScanRequest(
             request.FileName,
             request.FileContentType,
-            request.FileStreamData,
-            request.Description,
-            Password: request.Password,
+            request.FileData,
+            request.FileDescription,
+            Password: request.FilePassword,
             IsPrivateFile: request.IsPrivateFile,
             Options: options);
 
