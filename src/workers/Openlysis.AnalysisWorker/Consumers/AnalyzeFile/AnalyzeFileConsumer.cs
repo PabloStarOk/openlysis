@@ -39,6 +39,9 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> _analyzers;
     private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
+    private readonly Func<ServiceFileAnalysis, bool> _analysisFinished = s =>
+        s.Status is AnalysisStatus.Finished or AnalysisStatus.Timeout;
+
     private FileMultiAnalysisId _multiAnalysisId;
     private ConsumeContext<AnalyzeFile> _context;
 
@@ -69,7 +72,6 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
 
         await AnalyzeAsync(context.CancellationToken);
         await UpdateAnalysisStatusAsync(context.CancellationToken);
-        await SendUpdateAsync();
     }
 
     /// <summary>
@@ -128,12 +130,10 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task UpdateAnalysisStatusAsync(CancellationToken cancellationToken)
     {
-        Func<ServiceFileAnalysis, bool> analysisFinished = s =>
-            s.Status is AnalysisStatus.Finished or AnalysisStatus.Timeout;
-        while (!cancellationToken.IsCancellationRequested && !_serviceFileAnalyses.Values.All(analysisFinished))
+        while (!cancellationToken.IsCancellationRequested
+               && !_serviceFileAnalyses.Values.All(_analysisFinished))
         {
             await RunRequestsBatchAsync(cancellationToken);
-            await SendUpdateAsync();
             await Task.Delay(_options.CurrentValue.RequestBatchWaitTimeMs, cancellationToken);
         }
     }
@@ -148,6 +148,11 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         for (int i = 0; i < _options.CurrentValue.MaxRequestsPerBatch; i++)
         {
             await RunBatchCycleAsync(cancellationToken);
+            if (_serviceFileAnalyses.Values.All(_analysisFinished))
+            {
+                break;
+            }
+
             await Task.Delay(_options.CurrentValue.RequestFrequencyMs, cancellationToken);
         }
     }
@@ -159,6 +164,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task RunBatchCycleAsync(CancellationToken cancellationToken)
     {
+        bool sendUpdate = false;
         var analyzersMap = _analyzers.ToDictionary(a => a.ServiceName);
         await Parallel.ForEachAsync(
             _serviceFileAnalyses.Values,
@@ -174,8 +180,19 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
                 }
 
                 ServiceFileAnalysis updatedAnalysis = result.Value;
+
+                if (updatedAnalysis.Status != analysis.Status)
+                {
+                    sendUpdate = true;
+                }
+
                 _serviceFileAnalyses[updatedAnalysis.Id] = updatedAnalysis;
             });
+
+        if (sendUpdate)
+        {
+            await SendUpdateAsync();
+        }
     }
 
     /// <summary>
