@@ -24,7 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj" />
-      <ProjectReference Include="..\workers\Openlysis.AnalysisWorker\Openlysis.AnalysisWorker.csproj" />
+      <ProjectReference Include="..\Openlysis.Workers\Openlysis.AnalysisWorker\Openlysis.AnalysisWorker.csproj" />
     </ItemGroup>
 
 </Project>

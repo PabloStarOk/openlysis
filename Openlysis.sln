@@ -11,11 +11,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API", "src\Openlysis.API\Openlysis.API.csproj", "{56C77A97-4A8E-48DC-B14D-45935FFC177C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filescan.Client", "src\lib\Filescan.Client\Filescan.Client.csproj", "{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Filescan.Client", "src\Openlysis.Analyzers.Clients\Filescan.Client\Filescan.Client.csproj", "{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.AnalysisWorker", "src\workers\Openlysis.AnalysisWorker\Openlysis.AnalysisWorker.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.AnalysisWorker", "src\Openlysis.Workers\Openlysis.AnalysisWorker\Openlysis.AnalysisWorker.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Contracts", "src\lib\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Contracts", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
 EndProject
 
 Global

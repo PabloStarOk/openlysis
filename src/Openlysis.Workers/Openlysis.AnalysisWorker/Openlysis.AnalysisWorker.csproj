@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\lib\Filescan.Client\Filescan.Client.csproj" />
+    <ProjectReference Include="..\..\Openlysis.Analyzers.Clients\Filescan.Client\Filescan.Client.csproj" />
     <ProjectReference Include="..\..\Openlysis.Application\Openlysis.Application.csproj" />
   </ItemGroup>
 </Project>
