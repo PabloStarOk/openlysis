@@ -12,6 +12,18 @@ namespace Openlysis.MultiAnalyzer.Infrastructure.Services;
 /// </summary>
 public class LocalFileStorageProvider : IFileStorageProvider
 {
+    private readonly DirectoryInfo _tempSubdirectory;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="LocalFileStorageProvider"/> class.
+    /// </summary>
+    /// <param name="tempSubdirectory">The temporary subdirectory for storing files.</param>
+    public LocalFileStorageProvider(
+        DirectoryInfo tempSubdirectory)
+    {
+        _tempSubdirectory = tempSubdirectory;
+    }
+
     /// <inheritdoc/>
     public async Task<string> UploadAsync(Stream fileData, CancellationToken cancellationToken = default)
     {
@@ -59,8 +71,8 @@ public class LocalFileStorageProvider : IFileStorageProvider
         return Task.CompletedTask;
     }
 
-    private static string GetFullTempFilePath(string fileId)
+    private string GetFullTempFilePath(string fileId)
     {
-        return Path.Combine(Path.GetTempPath(), fileId);
+        return Path.Combine(_tempSubdirectory.FullName, fileId);
     }
 }
