@@ -1,7 +1,12 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+
 using NSwag;
+
+using Openlysis.API.Configuration.Options;
 
 namespace Openlysis.API;
 
@@ -14,8 +19,28 @@ public static class DependencyInjection
     /// Adds all services needed for the API.
     /// </summary>
     /// <param name="serviceCollection">Collection of services.</param>
-    public static void AddApi(this IServiceCollection serviceCollection)
+    /// <param name="configuration">Configuration settings.</param>
+    public static void AddApi(
+        this IServiceCollection serviceCollection,
+        IConfiguration configuration)
     {
+        var fileUploadOptions = configuration
+            .GetRequiredSection("FileUploadOptions")
+            .Get<FileUploadOptions>();
+        ArgumentNullException.ThrowIfNull(fileUploadOptions);
+
+        serviceCollection.Configure<KestrelServerOptions>(
+            options =>
+            {
+                options.Limits.MaxRequestBodySize = fileUploadOptions.MaxRequestBodySize;
+            });
+
+        serviceCollection.Configure<FormOptions>(
+            options =>
+            {
+                options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
+            });
+
         serviceCollection.AddProblemDetails(
             opt =>
             {
