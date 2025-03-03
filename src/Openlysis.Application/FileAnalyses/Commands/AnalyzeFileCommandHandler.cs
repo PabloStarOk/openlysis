@@ -4,74 +4,76 @@ using MediatR;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
-using Openlysis.Application.FileAnalyses.Ports;
 using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.Enums;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
-
-using File = Openlysis.Domain.FileAnalyses.ValueObjects.File;
 
 namespace Openlysis.Application.FileAnalyses.Commands;
 
 /// <summary>
 /// Handles <see cref="AnalyzeFileCommand"/>.
 /// </summary>
-public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, ErrorOr<FileAnalysis>>
+public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, ErrorOr<FileMultiAnalysis>>
 {
-    private readonly IFileAnalysisRepository _fileAnalysisRepository;
-    private readonly IEnumerable<IFileAnalyzer> _fileAnalyzers;
+    private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _fileMultiAnalysisRepository;
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileCommandHandler"/> class.
     /// </summary>
-    /// <param name="fileAnalyzers">Analyzers services.</param>
+    /// <param name="fileMultiAnalysisRepository">Repository of file analyses.</param>
+    /// <param name="multiAnalysisService">Service to analyze the file.</param>
     /// <param name="timeProvider">Provider of time.</param>
-    /// <param name="fileAnalysisRepository">Repository of file analyses.</param>
     /// <param name="hashService">Service to hash data.</param>
     public AnalyzeFileCommandHandler(
-        IFileAnalysisRepository fileAnalysisRepository,
-        IEnumerable<IFileAnalyzer> fileAnalyzers,
+        IRepository<FileMultiAnalysis, FileMultiAnalysisId> fileMultiAnalysisRepository,
+        IFileMultiAnalysisService multiAnalysisService,
         TimeProvider timeProvider,
         IHashService hashService)
     {
-        _fileAnalysisRepository = fileAnalysisRepository;
-        _fileAnalyzers = fileAnalyzers;
+        _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
         _timeProvider = timeProvider;
         _hashService = hashService;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<FileAnalysis>> Handle(AnalyzeFileCommand command, CancellationToken cancellationToken)
+    public async Task<ErrorOr<FileMultiAnalysis>> Handle(AnalyzeFileCommand command, CancellationToken cancellationToken)
     {
-        var hashSet = await _hashService.HashDataAsync(command.FileData);
+        var hashSet = await _hashService.HashDataAsync(command.FileData, cancellationToken);
 
         // Check if the file has already been analyzed.
-        var existingAnalysis = await _fileAnalysisRepository.GetByHashAsync(hashSet);
-        if (existingAnalysis is not null)
-        {
-            if (command.Reanalyze)
-            {
-                await AnalyzeFileAsync(command.FileData, cancellationToken);
-            }
+        var existingAnalyses = await _fileMultiAnalysisRepository.GetManyAsync(
+            1,
+            f => f.ContentHashSet == hashSet,
+            q => q.OrderByDescending(f => f.StartedDate),
+            cancellationToken);
 
-            return existingAnalysis;
+        if (existingAnalyses.Count > 0 && !command.Reanalyze)
+        {
+            return existingAnalyses[0];
         }
 
-        await AnalyzeFileAsync(command.FileData, cancellationToken);
+        // Save a new file analysis in database.
+        var fileMetadata = new FileMetadata(
+            command.FileName,
+            command.FileContentType,
+            command.FileData.Length);
+        var multiAnalysis = FileMultiAnalysis.Create(
+            _timeProvider.GetUtcNow().DateTime,
+            fileMetadata,
+            hashSet,
+            []);
 
-        // Save the new file analysis in database.
-        var fileGeneralInfo = new FileGeneralInfo(command.FileName, command.FileContentType, command.FileData.Length);
-        var fileMetadata = new File(hashSet, fileGeneralInfo);
-        var fileAnalysis = FileAnalysis.Create(_timeProvider.GetUtcNow().DateTime, Verdict.Undetected, fileMetadata, []);
-        await _fileAnalysisRepository.AddAsync(fileAnalysis);
-        return fileAnalysis;
-    }
+        await _multiAnalysisService.StartAnalysisAsync(
+            multiAnalysis,
+            command.FileData,
+            command.FileDescription,
+            command.FilePassword,
+            command.IsPrivateFile,
+            cancellationToken);
 
-    private async Task AnalyzeFileAsync(Stream fileData, CancellationToken cancellationToken)
-    {
-        var list = _fileAnalyzers.Select(f => f.AnalyzeAsync(fileData, cancellationToken));
-        await Task.WhenAll(list);
+        return multiAnalysis;
     }
 }

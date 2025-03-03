@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
+using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Infrastructure.Persistence.Configurations;
 
@@ -13,7 +14,12 @@ public class AnalysesDbContext : DbContext
     /// <summary>
     /// Gets the file analyses set of the database.
     /// </summary>
-    public DbSet<FileAnalysis> FileAnalyses { get; init; } = null!;
+    public DbSet<FileMultiAnalysis> FileMultiAnalyses { get; init; } = null!;
+
+    /// <summary>
+    /// Gets the content hash sets of the database.
+    /// </summary>
+    public DbSet<ContentHashSet> ContentHashSets { get; init; } = null!;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalysesDbContext"/> class.
@@ -28,5 +34,6 @@ public class AnalysesDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new FileAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new ContentHashSetConfiguration());
     }
 }

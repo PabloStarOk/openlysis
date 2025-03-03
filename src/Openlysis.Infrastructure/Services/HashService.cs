@@ -35,25 +35,25 @@ public class HashService : IHashService
     }
 
     /// <inheritdoc/>
-    public async Task<HashSet> HashDataAsync(Stream data)
+    public async Task<ContentHashSet> HashDataAsync(Stream data, CancellationToken cancellationToken)
     {
-        byte[] md5HashBytes = await _md5Algorithm.ComputeHashAsync(data);
+        byte[] md5HashBytes = await _md5Algorithm.ComputeHashAsync(data, cancellationToken);
         ResetStreamPosition(data);
 
-        byte[] sha1HashBytes = await _sha1Algorithm.ComputeHashAsync(data);
+        byte[] sha1HashBytes = await _sha1Algorithm.ComputeHashAsync(data, cancellationToken);
         ResetStreamPosition(data);
 
-        byte[] sha256HashBytes = await _sha256Algorithm.ComputeHashAsync(data);
+        byte[] sha256HashBytes = await _sha256Algorithm.ComputeHashAsync(data, cancellationToken);
         ResetStreamPosition(data);
 
-        byte[] sha512HashBytes = await _sha512Algorithm.ComputeHashAsync(data);
+        byte[] sha512HashBytes = await _sha512Algorithm.ComputeHashAsync(data, cancellationToken);
 
         string md5HashString = Convert.ToHexString(md5HashBytes);
         string sha1HashString = Convert.ToHexString(sha1HashBytes);
         string sha256HashString = Convert.ToHexString(sha256HashBytes);
         string sha512HashString = Convert.ToHexString(sha512HashBytes);
 
-        return new HashSet(
+        return new ContentHashSet(
             md5HashString,
             sha1HashString,
             sha256HashString,

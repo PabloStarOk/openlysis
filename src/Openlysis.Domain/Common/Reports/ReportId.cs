@@ -8,19 +8,24 @@ public sealed record ReportId
     /// <summary>
     /// Gets the value.
     /// </summary>
-    public Guid Value { get; }
+    public string Value { get; }
 
-    private ReportId(Guid value)
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReportId"/> class.
+    /// </summary>
+    /// <param name="value">The value of the report ID.</param>
+    private ReportId(string value)
     {
         Value = value;
     }
 
     /// <summary>
-    /// Creates a unique <see cref="ReportId"/>.
+    /// Creates a new instance of the <see cref="ReportId"/> class.
     /// </summary>
-    /// <returns>A <see cref="ReportId"/>.</returns>
-    public static ReportId CreateUnique()
+    /// <param name="value">The value of the report ID.</param>
+    /// <returns>A new instance of the <see cref="ReportId"/> class.</returns>
+    public static ReportId Create(string value)
     {
-        return new ReportId(Guid.NewGuid());
+        return new ReportId(value);
     }
 }

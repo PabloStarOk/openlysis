@@ -21,7 +21,7 @@ public static class DependencyInjection
             {
                 opt.CustomizeProblemDetails = context =>
                 {
-                    context.ProblemDetails.Instance = context.HttpContext.Request.Path;
+                    context.ProblemDetails.Instance = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
                 };
             });
 
@@ -35,8 +35,10 @@ public static class DependencyInjection
         serviceCollection.SwaggerDocument(
             opt =>
             {
+                opt.ReleaseVersion = 1;
                 opt.DocumentSettings = s =>
                 {
+                    s.DocumentName = "Version 1";
                     s.Title = "Openlysis API";
                     s.Description = "API of openlysis.";
                     s.Version = "v1";

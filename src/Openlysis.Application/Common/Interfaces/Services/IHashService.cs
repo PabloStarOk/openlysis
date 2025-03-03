@@ -8,9 +8,10 @@ namespace Openlysis.Application.Common.Interfaces.Services;
 public interface IHashService
 {
     /// <summary>
-    /// Hashes the given data into a <see cref="HashSet"/>.
+    /// Hashes the given data into a <see cref="ContentHashSet"/>.
     /// </summary>
     /// <param name="data">A <see cref="Stream"/> with the data.</param>
-    /// <returns>A <see cref="HashSet"/>.</returns>
-    public Task<HashSet> HashDataAsync(Stream data);
+    /// <param name="cancellationToken">A <see cref="CancellationToken"/> to stop the operation.</param>
+    /// <returns>A <see cref="ContentHashSet"/>.</returns>
+    public Task<ContentHashSet> HashDataAsync(Stream data, CancellationToken cancellationToken);
 }

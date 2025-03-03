@@ -1,27 +1,42 @@
 @OpenlysisAPIHostAddress = http://localhost:5248/api/v1
-@SampleFileAnalysisId = 5bd9ae5a-6a3c-44a4-9b1c-1d7ecabd97f5
-@SampleFileAnalysisSha256 = SHA256
+@SampleFileAnalysisId = 6846984c-1df2-4428-8aaa-1ff3d9dff474
+@SampleFileAnalysisSha256 = 24B0AC1FCEAFD2100E112E2B66D8832979CB3036F8C3EF3965EAEE22DFD1604D
 
 // Get by ID
-GET {{OpenlysisAPIHostAddress}}/analyses/file/{{SampleFileAnalysisId}}
+GET {{OpenlysisAPIHostAddress}}/files/analyses/{{SampleFileAnalysisId}}
 Accept: application/json
 ###
 
-// Get by hash
-GET {{OpenlysisAPIHostAddress}}/analyses/file/hash/{{SampleFileAnalysisSha256}}
+// Get 10 multi analyses of a file identified by hash
+GET {{OpenlysisAPIHostAddress}}/files/{{SampleFileAnalysisSha256}}/analyses?amount=10
+Accept: application/json
+###
+
+// Get 10 multi analysis of a file identified by hash in certain order
+GET {{OpenlysisAPIHostAddress}}/files/{{SampleFileAnalysisSha256}}/analyses?amount=10&startedDateOrder=asc
 Accept: application/json
 ###
 
 // Analyze file
-POST {{OpenlysisAPIHostAddress}}/analyses/file
+POST {{OpenlysisAPIHostAddress}}/files
 Accept: application/json
 Content-Type: multipart/form-data; boundary=Boundary
 
 --Boundary
-Content-Disposition: form-data; name="file"; filename="sample.txt"
+Content-Disposition: form-data; name="file"; filename="openlysis-test.txt"
 Content-Type: text/plain; charset=UTF-8
 
-This is a sample text
+This is a sample text from openlysis
+--Boundary
+Content-Disposition: form-data; name="fileDescription";
+Content-Type: text/plain
+
+Sample file description.
+--Boundary
+Content-Disposition: form-data; name="isPrivateFile";
+Content-Type: text/plain
+
+true
 --Boundary
 Content-Disposition: form-data; name="reanalyze";
 Content-Type: text/plain

@@ -22,4 +22,10 @@
       </PackageReference>
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.AspNetCore.Http">
+        <HintPath>..\..\..\..\..\..\..\.dotnet\shared\Microsoft.AspNetCore.App\8.0.8\Microsoft.AspNetCore.Http.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>
