@@ -34,6 +34,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
 
         if (hashSetExists)
         {
+            _dbContext.ChangeTracker.Clear();
             _dbContext.Attach(fileMultiAnalysis.ContentHashSet).State = EntityState.Unchanged;
         }
 
@@ -45,6 +46,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
     public async Task<FileMultiAnalysis?> GetAsync(FileMultiAnalysisId fileMultiAnalysisId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.FileMultiAnalyses
+            .AsSplitQuery()
             .FirstOrDefaultAsync(f => f.Id == fileMultiAnalysisId, cancellationToken);
     }
 
@@ -55,7 +57,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
         Func<IQueryable<FileMultiAnalysis>, IOrderedQueryable<FileMultiAnalysis>>? orderBy = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<FileMultiAnalysis> query = _dbContext.FileMultiAnalyses;
+        IQueryable<FileMultiAnalysis> query = _dbContext.FileMultiAnalyses.AsSplitQuery();
 
         if (filter is not null)
         {
@@ -75,8 +77,9 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
     /// <inheritdoc/>
     public async Task UpdateAsync(FileMultiAnalysis multiAnalysis, CancellationToken cancellationToken = default)
     {
-        bool analysisExists = await _dbContext.FileMultiAnalyses.AnyAsync(
-            f => f.Id == multiAnalysis.Id, cancellationToken);
+        bool analysisExists = await _dbContext.FileMultiAnalyses
+            .AsSplitQuery()
+            .AnyAsync(f => f.Id == multiAnalysis.Id, cancellationToken);
 
         if (!analysisExists)
         {

@@ -3,7 +3,6 @@ using ErrorOr;
 using MediatR;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
-using Openlysis.Application.Common.Interfaces.Ports;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
@@ -67,15 +66,13 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
             hashSet,
             []);
 
-        var request = new FileAnalysisJobRequest(
-            command.FileName,
-            command.FileContentType,
+        await _multiAnalysisService.StartAnalysisAsync(
+            multiAnalysis,
             command.FileData,
             command.FileDescription,
             command.FilePassword,
-            command.IsPrivateFile);
-
-        await _multiAnalysisService.StartJobAsync(request, multiAnalysis, cancellationToken);
+            command.IsPrivateFile,
+            cancellationToken);
 
         return multiAnalysis;
     }
