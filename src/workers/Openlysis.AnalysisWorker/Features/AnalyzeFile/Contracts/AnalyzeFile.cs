@@ -8,7 +8,7 @@ namespace Openlysis.AnalysisWorker.Features.AnalyzeFile.Contracts;
 /// <param name="FileMultiAnalysisId">The ID of the multi analysis of a file.</param>
 /// <param name="FileName">The name of the file.</param>
 /// <param name="FileContentType">The content type of the file.</param>
-/// <param name="TempFilePath">The temporary file path.</param>
+/// <param name="FileId">The unique identifier of the file.</param>
 /// <param name="FileDescription">A description of the file.</param>
 /// <param name="FilePassword">The password for the file, if any.</param>
 /// <param name="IsPrivateFile">Indicates if the file is private.</param>
@@ -16,7 +16,7 @@ public record AnalyzeFile(
     FileMultiAnalysisId FileMultiAnalysisId,
     string FileName,
     string FileContentType,
-    string TempFilePath,
+    string FileId,
     string FileDescription,
     string FilePassword,
     bool IsPrivateFile);

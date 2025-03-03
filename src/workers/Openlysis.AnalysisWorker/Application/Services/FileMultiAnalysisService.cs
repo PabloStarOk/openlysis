@@ -20,6 +20,7 @@ public class FileMultiAnalysisService : IFileMultiAnalysisService
 {
     private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _multiAnalysisRepository;
+    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly ISendEndpointProvider _sendEndpointProvider;
 
     /// <summary>
@@ -27,15 +28,18 @@ public class FileMultiAnalysisService : IFileMultiAnalysisService
     /// </summary>
     /// <param name="endpointUriProvider">The provider for endpoint URIs.</param>
     /// <param name="sendEndpointProvider">The endpoint to send messages to.</param>
+    /// <param name="fileStorageProvider">The provider for file storage operations.</param>
     /// <param name="multiAnalysisRepository">The repository for managing file multi-analysis entities.</param>
     public FileMultiAnalysisService(
         IEndpointUriProvider endpointUriProvider,
         ISendEndpointProvider sendEndpointProvider,
+        IFileStorageProvider fileStorageProvider,
         IRepository<FileMultiAnalysis, FileMultiAnalysisId> multiAnalysisRepository)
     {
         _endpointUriProvider = endpointUriProvider;
         _sendEndpointProvider = sendEndpointProvider;
-        this._multiAnalysisRepository = multiAnalysisRepository;
+        _fileStorageProvider = fileStorageProvider;
+        _multiAnalysisRepository = multiAnalysisRepository;
     }
 
     /// <inheritdoc/>
@@ -47,32 +51,14 @@ public class FileMultiAnalysisService : IFileMultiAnalysisService
         bool isPrivateFile,
         CancellationToken cancellationToken)
     {
-        var fileStreamOptions = new FileStreamOptions
-        {
-            Access = FileAccess.Write,
-            Mode = FileMode.CreateNew,
-            Options = FileOptions.Asynchronous,
-        };
-
-        string tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        while (File.Exists(tempFilePath))
-        {
-            tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        }
-
-        await using (var fileStream = new FileStream(tempFilePath, fileStreamOptions))
-        {
-            fileData.Position = 0;
-            await fileData.CopyToAsync(fileStream, cancellationToken);
-        }
-
+        string fileId = await _fileStorageProvider.UploadAsync(fileData, cancellationToken);
         await _multiAnalysisRepository.AddAsync(fileMultiAnalysis, cancellationToken);
 
         var analyzeFile = new AnalyzeFile(
             fileMultiAnalysis.Id,
             fileMultiAnalysis.FileMetadata.Name,
             fileMultiAnalysis.FileMetadata.ContentType,
-            tempFilePath,
+            fileId,
             fileDescription,
             filePassword,
             isPrivateFile);

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,6 +38,7 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     private readonly IOptionsMonitor<AnalyzeFileConsumerSettings> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> _analyzers;
+    private readonly IFileStorageProvider _fileStorageProvider;
     private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
     private readonly Func<ServiceFileAnalysis, bool> _analysisFinished = s =>
         s.Status is AnalysisStatus.Finished or AnalysisStatus.Timeout;
@@ -52,16 +52,19 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     /// <param name="logger">The logger instance to log messages.</param>
     /// <param name="endpointUriProvider">The provider for endpoint URIs.</param>
     /// <param name="options">The options monitor for file analysis consumer options.</param>
+    /// <param name="fileStorageProvider">The provider for file storage operations.</param>
     /// <param name="analyzers">The collection of service analyzers to use for file analysis.</param>
     public AnalyzeFileConsumer(
         ILogger<AnalyzeFileConsumer> logger,
         IEndpointUriProvider endpointUriProvider,
         IOptionsMonitor<AnalyzeFileConsumerSettings> options,
+        IFileStorageProvider fileStorageProvider,
         IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> analyzers)
     {
         _logger = logger;
         _endpointUriProvider = endpointUriProvider;
         _options = options;
+        _fileStorageProvider = fileStorageProvider;
         _analyzers = analyzers;
     }
 
@@ -82,15 +85,8 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task AnalyzeAsync(CancellationToken cancellationToken)
     {
-        var fileStreamOptions = new FileStreamOptions
-        {
-            Access = FileAccess.Read,
-            Options = FileOptions.Asynchronous | FileOptions.DeleteOnClose,
-            Mode = FileMode.Open,
-        };
-        await using var fileStream = new FileStream(
-            _context.Message.TempFilePath,
-            fileStreamOptions);
+        await using var fileStream = await _fileStorageProvider
+            .DownloadAsync(_context.Message.FileId, cancellationToken);
 
         var request = new FileAnalysisRequest(
             fileStream,
@@ -121,7 +117,9 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
             _serviceFileAnalyses.Add(analysis.Id, analysis);
         });
 
-        await SendUpdateAsync();
+        await Task.WhenAll(
+            _fileStorageProvider.DeleteAsync(_context.Message.FileId, cancellationToken),
+            SendUpdateAsync());
     }
 
     /// <summary>

@@ -29,6 +29,7 @@ internal static class DependencyInjection
             .GetRequiredSection(BrokerSettings.SectionName);
         services.Configure<BrokerSettings>(brokerSettingsSection);
 
+        services.AddScoped<IFileStorageProvider, LocalFileStorageProvider>();
         services.AddSingleton<IEndpointUriProvider, EndpointUriProvider>();
     }
 
