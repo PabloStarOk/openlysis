@@ -1,4 +1,4 @@
-using Openlysis.AnalysisWorker.Application;
+using Openlysis.MultiAnalyzer.Application;
 using Openlysis.API;
 using Openlysis.Application;
 using Openlysis.Infrastructure;
