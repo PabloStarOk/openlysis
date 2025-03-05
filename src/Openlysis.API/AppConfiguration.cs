@@ -13,6 +13,8 @@ public static class AppConfiguration
     /// <param name="app">The WebApplication instance to configure.</param>
     public static void ConfigureApi(this WebApplication app)
     {
+        app.UseExceptionHandler();
+
         if (app.Environment.IsDevelopment())
         {
             app.UseOpenApi();

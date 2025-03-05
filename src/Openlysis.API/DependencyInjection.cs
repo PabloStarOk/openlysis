@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using NSwag;
 
 using Openlysis.API.Configuration.Options;
+using Openlysis.API.Middlewares.Exceptions;
 
 namespace Openlysis.API;
 
@@ -82,5 +83,7 @@ public static class DependencyInjection
                 };
                 opt.RemoveEmptyRequestSchema = true;
             });
+
+        serviceCollection.AddExceptionHandler<GlobalExceptionHandler>();
     }
 }
