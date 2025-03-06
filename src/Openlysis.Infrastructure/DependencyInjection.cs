@@ -28,8 +28,16 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        string? connectionString = configuration.GetConnectionString("DefaultConnection");
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+
+        // Add auth database.
+        services.AddDbContext<AuthenticationDbContext>(options =>
+            options.UseSqlServer(connectionString));
+
+        // Add analyses database.
         services.AddDbContext<AnalysesDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(connectionString));
 
         // Add repositories.
         services.AddScoped<IRepository<FileMultiAnalysis, FileMultiAnalysisId>, FileMultiAnalysisRepository>();

@@ -2,12 +2,14 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 using NSwag;
 
 using Openlysis.API.Configuration.Options;
 using Openlysis.API.Middlewares.Exceptions;
+using Openlysis.Infrastructure.Persistence;
 
 namespace Openlysis.API;
 
@@ -19,30 +21,52 @@ public static class DependencyInjection
     /// <summary>
     /// Adds all services needed for the API.
     /// </summary>
-    /// <param name="serviceCollection">Collection of services.</param>
+    /// <param name="services">Collection of services.</param>
     /// <param name="configuration">Configuration settings.</param>
+    /// <param name="environment">Hosting environment information.</param>
     public static void AddApi(
-        this IServiceCollection serviceCollection,
-        IConfiguration configuration)
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         var fileUploadOptions = configuration
             .GetRequiredSection("FileUploadOptions")
             .Get<FileUploadOptions>();
         ArgumentNullException.ThrowIfNull(fileUploadOptions);
 
-        serviceCollection.Configure<KestrelServerOptions>(
+        // Server options
+        services.Configure<KestrelServerOptions>(
             options =>
             {
                 options.Limits.MaxRequestBodySize = fileUploadOptions.MaxRequestBodySize;
             });
 
-        serviceCollection.Configure<FormOptions>(
+        // Auth options
+        services.AddAuthorization();
+        services.AddIdentityApiEndpoints<IdentityUser>(
+                opt =>
+                {
+                    opt.User.RequireUniqueEmail = true;
+
+                    if (environment.IsDevelopment())
+                    {
+                        return;
+                    }
+
+                    opt.SignIn.RequireConfirmedEmail = true;
+                    opt.SignIn.RequireConfirmedAccount = true;
+                    opt.Password.RequiredLength = 8;
+                })
+            .AddEntityFrameworkStores<AuthenticationDbContext>();
+
+        // Request options
+        services.Configure<FormOptions>(
             options =>
             {
                 options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
             });
 
-        serviceCollection.AddProblemDetails(
+        services.AddProblemDetails(
             opt =>
             {
                 opt.CustomizeProblemDetails = context =>
@@ -51,14 +75,14 @@ public static class DependencyInjection
                 };
             });
 
-        serviceCollection.AddFastEndpoints(
+        services.AddFastEndpoints(
             opt =>
             {
                 opt.DisableAutoDiscovery = true;
                 opt.SourceGeneratorDiscoveredTypes.AddRange(typeof(Program).Assembly.DefinedTypes);
             });
 
-        serviceCollection.SwaggerDocument(
+        services.SwaggerDocument(
             opt =>
             {
                 opt.ReleaseVersion = 1;
@@ -84,6 +108,6 @@ public static class DependencyInjection
                 opt.RemoveEmptyRequestSchema = true;
             });
 
-        serviceCollection.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
     }
 }

@@ -1,5 +1,7 @@
 using FastEndpoints;
 
+using Microsoft.AspNetCore.Identity;
+
 namespace Openlysis.API;
 
 /// <summary>
@@ -14,6 +16,9 @@ public static class AppConfiguration
     public static void ConfigureApi(this WebApplication app)
     {
         app.UseExceptionHandler();
+
+        app.UseAuthorization();
+        app.MapIdentityApi<IdentityUser>();
 
         if (app.Environment.IsDevelopment())
         {
