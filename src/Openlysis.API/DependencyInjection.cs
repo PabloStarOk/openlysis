@@ -43,21 +43,24 @@ public static class DependencyInjection
 
         // Auth options
         services.AddAuthorization();
-        services.AddIdentityApiEndpoints<IdentityUser>(
-                opt =>
+        services.AddIdentityCore<IdentityUser>(
+                options =>
                 {
-                    opt.User.RequireUniqueEmail = true;
+                    options.User.RequireUniqueEmail = true;
 
                     if (environment.IsDevelopment())
                     {
                         return;
                     }
 
-                    opt.SignIn.RequireConfirmedEmail = true;
-                    opt.SignIn.RequireConfirmedAccount = true;
-                    opt.Password.RequiredLength = 8;
+                    options.SignIn.RequireConfirmedEmail = true;
+                    options.SignIn.RequireConfirmedAccount = true;
+                    options.Password.RequiredLength = 8;
                 })
             .AddEntityFrameworkStores<AuthenticationDbContext>();
+
+        services.AddScoped<IUserEmailStore<IdentityUser>>(sp =>
+            (IUserEmailStore<IdentityUser>)sp.GetRequiredService<IUserStore<IdentityUser>>());
 
         // Request options
         services.Configure<FormOptions>(
