@@ -6,7 +6,7 @@ using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.Infrastructure.Persistence.Repositories;
+namespace Openlysis.Infrastructure.Persistence.Application.Repositories;
 
 /// <summary>
 /// Repository to access <see cref="FileMultiAnalysis"/>.

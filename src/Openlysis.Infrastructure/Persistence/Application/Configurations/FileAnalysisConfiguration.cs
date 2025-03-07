@@ -7,7 +7,7 @@ using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.Infrastructure.Persistence.Configurations;
+namespace Openlysis.Infrastructure.Persistence.Application.Configurations;
 
 /// <summary>
 /// Configuration for the <see cref="FileMultiAnalysis"/> entity in the database.

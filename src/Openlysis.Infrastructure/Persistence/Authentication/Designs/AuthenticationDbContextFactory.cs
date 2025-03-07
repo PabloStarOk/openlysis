@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace Openlysis.Infrastructure.Persistence.Designs;
+namespace Openlysis.Infrastructure.Persistence.Authentication.Designs;
 
 /// <summary>
 /// Factory for creating instances of <see cref="AuthenticationDbContext"/> at design time.

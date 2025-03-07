@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Openlysis.Infrastructure.Migrations
+namespace Openlysis.Infrastructure.Persistence.Authentication.Migrations
 {
     /// <inheritdoc />
     public partial class InitAuthenticationDatabase : Migration

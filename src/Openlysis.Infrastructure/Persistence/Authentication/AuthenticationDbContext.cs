@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Openlysis.Infrastructure.Persistence;
+namespace Openlysis.Infrastructure.Persistence.Authentication;
 
 /// <summary>
 /// Represents the database context for authentication, inheriting from <see cref="IdentityDbContext{IdentityUser}"/>.

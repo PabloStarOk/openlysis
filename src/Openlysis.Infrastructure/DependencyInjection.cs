@@ -8,8 +8,9 @@ using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
-using Openlysis.Infrastructure.Persistence;
-using Openlysis.Infrastructure.Persistence.Repositories;
+using Openlysis.Infrastructure.Persistence.Application;
+using Openlysis.Infrastructure.Persistence.Application.Repositories;
+using Openlysis.Infrastructure.Persistence.Authentication;
 using Openlysis.Infrastructure.Services;
 
 namespace Openlysis.Infrastructure;

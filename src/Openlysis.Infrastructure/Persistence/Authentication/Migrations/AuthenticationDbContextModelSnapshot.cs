@@ -3,20 +3,18 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Openlysis.Infrastructure.Persistence;
+using Openlysis.Infrastructure.Persistence.Authentication;
 
 #nullable disable
 
-namespace Openlysis.Infrastructure.Migrations
+namespace Openlysis.Infrastructure.Persistence.Authentication.Migrations
 {
     [DbContext(typeof(AuthenticationDbContext))]
-    [Migration("20250306024537_InitAuthenticationDatabase")]
-    partial class InitAuthenticationDatabase
+    partial class AuthenticationDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

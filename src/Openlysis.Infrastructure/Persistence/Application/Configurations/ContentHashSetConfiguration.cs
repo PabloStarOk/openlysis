@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Openlysis.Domain.Common.Hash;
 
-namespace Openlysis.Infrastructure.Persistence.Configurations;
+namespace Openlysis.Infrastructure.Persistence.Application.Configurations;
 
 /// <summary>
 /// Configuration class for the ContentHashSet entity.

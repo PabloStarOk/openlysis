@@ -2,9 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.FileAnalyses;
-using Openlysis.Infrastructure.Persistence.Configurations;
+using Openlysis.Infrastructure.Persistence.Application.Configurations;
 
-namespace Openlysis.Infrastructure.Persistence;
+namespace Openlysis.Infrastructure.Persistence.Application;
 
 /// <summary>
 /// Database context for analyses.
