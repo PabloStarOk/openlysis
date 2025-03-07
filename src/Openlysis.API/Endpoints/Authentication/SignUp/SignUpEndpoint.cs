@@ -26,6 +26,23 @@ public class SignUpEndpoint : Endpoint<SignUpRequest>
     {
         Post("sign-up");
         Group<AuthenticationGroup>();
+        Description(
+            builder =>
+            {
+                builder.WithName("SignUp");
+                builder.WithDisplayName("SignUp");
+                builder.Accepts<SignUpRequest>("application/json");
+                builder.Produces(StatusCodes.Status200OK);
+                builder.ProducesValidationProblem();
+            },
+            clearDefaults: true);
+        Summary(
+            s =>
+            {
+                s.Summary = "Register a new user.";
+                s.Description = "Registers a new user.";
+                s.ExampleRequest = new SignUpRequest("ExampleUser", "example@example.com", "ExamplePassword1234$&");
+            });
         AllowAnonymous();
         DontThrowIfValidationFails();
     }
