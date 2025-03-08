@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using Microsoft.AspNetCore.Identity;
 
-namespace Openlysis.API.Authentication.Infrastructure.Persistence.Models;
+namespace Openlysis.API.Authentication.Models;
 
 /// <summary>
 /// Represents a user of the application.

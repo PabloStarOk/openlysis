@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 using Openlysis.API.Authentication.API.Extensions;
-using Openlysis.API.Authentication.Infrastructure.Persistence.Models;
+using Openlysis.API.Authentication.Models;
 
 namespace Openlysis.API.Authentication.API.Endpoints.SignUp;
 

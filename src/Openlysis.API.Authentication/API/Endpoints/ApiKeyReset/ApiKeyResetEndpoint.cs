@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Openlysis.API.Authentication.API.Endpoints.SignIn;
 using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.API.Authentication.Application.Services.Interfaces;
-using Openlysis.API.Authentication.Infrastructure.Persistence.Models;
+using Openlysis.API.Authentication.Models;
 
 namespace Openlysis.API.Authentication.API.Endpoints.ApiKeyReset;
 

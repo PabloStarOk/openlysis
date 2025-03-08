@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-using Openlysis.API.Authentication.Infrastructure.Persistence.Models;
+using Openlysis.API.Authentication.Models;
 
 namespace Openlysis.API.Authentication.Infrastructure.Persistence;
 
