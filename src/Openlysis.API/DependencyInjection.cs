@@ -8,8 +8,12 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using NSwag;
 
 using Openlysis.API.Configuration.Options;
+using Openlysis.API.Configuration.Options.Authentication;
+using Openlysis.API.Endpoints.Authentication.Services.Implementations;
+using Openlysis.API.Endpoints.Authentication.Services.Interfaces;
 using Openlysis.API.Middlewares.Exceptions;
-using Openlysis.Infrastructure.Persistence;
+using Openlysis.Infrastructure.Persistence.Authentication;
+using Openlysis.Infrastructure.Persistence.Authentication.Models;
 
 namespace Openlysis.API;
 
@@ -42,8 +46,28 @@ public static class DependencyInjection
             });
 
         // Auth options
-        services.AddAuthorization();
-        services.AddIdentityCore<IdentityUser>(
+        services.AddTransient<IApiKeyHasher, ApiKeyHasher>();
+        services.AddTransient<IApiKeyProvider, ApiKeyProvider>();
+
+        services.AddAuthentication()
+            .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>(
+                ApiKeySchemeOptions.Scheme,
+                options =>
+                {
+                    options.HeaderName = "X-Api-Key";
+                });
+
+        services.AddAuthorizationBuilder()
+            .AddPolicy("AuthScheme", configure =>
+                {
+                    configure.RequireAuthenticatedUser();
+                    configure.AddAuthenticationSchemes(ApiKeySchemeOptions.Scheme);
+                });
+
+        services.AddScoped<IUserEmailStore<User>>(sp =>
+            (IUserEmailStore<User>)sp.GetRequiredService<IUserStore<User>>());
+
+        services.AddIdentityCore<User>(
                 options =>
                 {
                     options.User.RequireUniqueEmail = true;
@@ -57,10 +81,8 @@ public static class DependencyInjection
                     options.SignIn.RequireConfirmedAccount = true;
                     options.Password.RequiredLength = 8;
                 })
+            .AddSignInManager<SignInManager<User>>()
             .AddEntityFrameworkStores<AuthenticationDbContext>();
-
-        services.AddScoped<IUserEmailStore<IdentityUser>>(sp =>
-            (IUserEmailStore<IdentityUser>)sp.GetRequiredService<IUserStore<IdentityUser>>());
 
         // Request options
         services.Configure<FormOptions>(

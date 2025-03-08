@@ -14,10 +14,9 @@ public class AuthenticationGroup : Group
     {
         Configure("auth", ep =>
         {
-            ep.Description(
-                builder =>
+            ep.Description(builder =>
                 {
-                    builder.WithName("Auth");
+                    builder.WithGroupName("Auth");
                     builder.WithDisplayName("Auth");
                     builder.WithTags("Auth");
                 });

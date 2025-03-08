@@ -2,6 +2,7 @@ using FastEndpoints;
 
 using Microsoft.AspNetCore.Identity;
 using Openlysis.API.Endpoints.Authentication.Utilities;
+using Openlysis.Infrastructure.Persistence.Authentication.Models;
 
 namespace Openlysis.API.Endpoints.Authentication.SignUp;
 
@@ -10,13 +11,13 @@ namespace Openlysis.API.Endpoints.Authentication.SignUp;
 /// </summary>
 public class SignUpEndpoint : Endpoint<SignUpRequest>
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<User> _userManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SignUpEndpoint"/> class.
     /// </summary>
     /// <param name="userManager">The user manager to handle user operations.</param>
-    public SignUpEndpoint(UserManager<IdentityUser> userManager)
+    public SignUpEndpoint(UserManager<User> userManager)
     {
         _userManager = userManager;
     }
@@ -73,7 +74,7 @@ public class SignUpEndpoint : Endpoint<SignUpRequest>
             return;
         }
 
-        var user = new IdentityUser();
+        var user = new User();
         await _userManager.SetUserNameAsync(user, request.UserName);
         await _userManager.SetEmailAsync(user, request.Email);
         IdentityResult result = await _userManager.CreateAsync(user, request.Password);
