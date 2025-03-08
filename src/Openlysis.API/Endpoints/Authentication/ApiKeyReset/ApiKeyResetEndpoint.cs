@@ -16,7 +16,7 @@ namespace Openlysis.API.Endpoints.Authentication.ApiKeyReset;
 /// This endpoint handles the process of resetting an API key for a user. It verifies the user's credentials,
 /// including optional two-factor authentication, and generates a new API key if the authentication is successful.
 /// </remarks>
-public class ApiKeyResetEndpoint : Endpoint<ApiKeyResetRequest, ApiKeyResponse>
+public class ApiKeyResetEndpoint : Endpoint<SignInRequest, ApiKeyResponse>
 {
     private readonly ILogger<ApiKeyResetEndpoint> _logger;
     private readonly SignInManager<User> _signInManager;
@@ -26,6 +26,7 @@ public class ApiKeyResetEndpoint : Endpoint<ApiKeyResetRequest, ApiKeyResponse>
     /// <summary>
     /// Initializes a new instance of the <see cref="ApiKeyResetEndpoint"/> class.
     /// </summary>
+    /// <param name="logger">The logger instance for logging information.</param>
     /// <param name="signInManager">The sign-in manager for user authentication.</param>
     /// <param name="apiKeyProvider">The API key provider for generating new API keys.</param>
     /// <param name="apiKeyHasher">The API key hasher for hashing API keys.</param>
@@ -47,11 +48,32 @@ public class ApiKeyResetEndpoint : Endpoint<ApiKeyResetRequest, ApiKeyResponse>
         Post("api-key-reset");
         Version(1);
         Group<AuthenticationGroup>();
+        Description(
+            builder =>
+            {
+                builder.WithName("ApiKeyReset");
+                builder.WithDisplayName("ApiKeyReset");
+                builder.WithTags("ApiKey");
+                builder.Accepts<SignInRequest>("application/json");
+                builder.Produces<ApiKeyResponse>();
+                builder.ProducesValidationProblem();
+                builder.Produces(StatusCodes.Status401Unauthorized);
+                builder.ProducesProblemDetails(StatusCodes.Status404NotFound);
+                builder.ProducesProblemDetails(StatusCodes.Status500InternalServerError);
+            },
+            clearDefaults: true);
+        Summary(
+            summary =>
+            {
+                summary.Summary = "Reset API Key";
+                summary.Description = "Revokes current API Key and generates a new one for the user.";
+                summary.ExampleRequest = new SignInRequest("ExampleUser", "S4mpleP4sswd$", "123456", "XXXX-XXXX-XXXX");
+            });
         DontThrowIfValidationFails();
     }
 
     /// <inheritdoc/>
-    public override async Task HandleAsync(ApiKeyResetRequest request, CancellationToken ct)
+    public override async Task HandleAsync(SignInRequest request, CancellationToken ct)
     {
         if (ValidationFailed)
         {
