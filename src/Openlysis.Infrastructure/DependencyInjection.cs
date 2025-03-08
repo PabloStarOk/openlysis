@@ -8,9 +8,8 @@ using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
-using Openlysis.Infrastructure.Persistence.Application;
-using Openlysis.Infrastructure.Persistence.Application.Repositories;
-using Openlysis.Infrastructure.Persistence.Authentication;
+using Openlysis.Infrastructure.Persistence;
+using Openlysis.Infrastructure.Persistence.Repositories;
 using Openlysis.Infrastructure.Services;
 
 namespace Openlysis.Infrastructure;
@@ -31,10 +30,6 @@ public static class DependencyInjection
     {
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
-
-        // Add auth database.
-        services.AddDbContext<AuthenticationDbContext>(options =>
-            options.UseSqlServer(connectionString));
 
         // Add analyses database.
         services.AddDbContext<AnalysesDbContext>(options =>

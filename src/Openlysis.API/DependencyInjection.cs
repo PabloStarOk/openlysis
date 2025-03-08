@@ -2,18 +2,14 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 using NSwag;
 
+using Openlysis.API.Authentication;
+using Openlysis.API.Authentication.API;
 using Openlysis.API.Configuration.Options;
-using Openlysis.API.Configuration.Options.Authentication;
-using Openlysis.API.Endpoints.Authentication.Services.Implementations;
-using Openlysis.API.Endpoints.Authentication.Services.Interfaces;
 using Openlysis.API.Middlewares.Exceptions;
-using Openlysis.Infrastructure.Persistence.Authentication;
-using Openlysis.Infrastructure.Persistence.Authentication.Models;
 
 namespace Openlysis.API;
 
@@ -45,44 +41,8 @@ public static class DependencyInjection
                 options.Limits.MaxRequestBodySize = fileUploadOptions.MaxRequestBodySize;
             });
 
-        // Auth options
-        services.AddTransient<IApiKeyHasher, ApiKeyHasher>();
-        services.AddTransient<IApiKeyProvider, ApiKeyProvider>();
-
-        services.AddAuthentication()
-            .AddScheme<ApiKeySchemeOptions, ApiKeySchemeHandler>(
-                ApiKeySchemeOptions.Scheme,
-                options =>
-                {
-                    options.HeaderName = "X-Api-Key";
-                });
-
-        services.AddAuthorizationBuilder()
-            .AddPolicy("AuthScheme", configure =>
-                {
-                    configure.RequireAuthenticatedUser();
-                    configure.AddAuthenticationSchemes(ApiKeySchemeOptions.Scheme);
-                });
-
-        services.AddScoped<IUserEmailStore<User>>(sp =>
-            (IUserEmailStore<User>)sp.GetRequiredService<IUserStore<User>>());
-
-        services.AddIdentityCore<User>(
-                options =>
-                {
-                    options.User.RequireUniqueEmail = true;
-
-                    if (environment.IsDevelopment())
-                    {
-                        return;
-                    }
-
-                    options.SignIn.RequireConfirmedEmail = true;
-                    options.SignIn.RequireConfirmedAccount = true;
-                    options.Password.RequiredLength = 8;
-                })
-            .AddSignInManager<SignInManager<User>>()
-            .AddEntityFrameworkStores<AuthenticationDbContext>();
+        // Add authentication and authorization
+        services.AddApiAuthentication(configuration, environment);
 
         // Request options
         services.Configure<FormOptions>(
@@ -105,6 +65,7 @@ public static class DependencyInjection
             {
                 opt.DisableAutoDiscovery = true;
                 opt.SourceGeneratorDiscoveredTypes.AddRange(typeof(Program).Assembly.DefinedTypes);
+                opt.MapAuthenticationEndpoints();
             });
 
         services.SwaggerDocument(
