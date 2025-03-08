@@ -63,14 +63,7 @@ public class SignUpEndpoint : Endpoint<SignUpRequest>
 
         if (ValidationFailed)
         {
-            IdentityError[] errors = ValidationFailures.Select(e =>
-                new IdentityError
-                {
-                    Code = e.ErrorCode,
-                    Description = e.ErrorMessage,
-                }).ToArray();
-            var errorResult = IdentityResult.Failed(errors);
-            await SendResultAsync(errorResult.AsValidationProblem());
+            await SendResultAsync(ValidationFailures.AsValidationProblem());
             return;
         }
 
