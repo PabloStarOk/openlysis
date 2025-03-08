@@ -46,6 +46,20 @@ public class SignInEndpoint : Endpoint<SignInRequest, ApiKeyResponse>
             {
                 builder.WithName("SignIn");
                 builder.WithDisplayName("SignIn");
+                builder.Accepts<SignInRequest>("application/json");
+                builder.Produces<ApiKeyResponse>();
+                builder.ProducesValidationProblem();
+                builder.Produces(StatusCodes.Status401Unauthorized);
+                builder.ProducesProblem(StatusCodes.Status409Conflict);
+                builder.ProducesProblem(StatusCodes.Status500InternalServerError);
+            },
+            clearDefaults: true);
+        Summary(
+            s =>
+            {
+                s.Summary = "Logins with a user account.";
+                s.Description = "Gets an API Key by login with a user account.";
+                s.ExampleRequest = new SignInRequest("ExampleUser", "S4mpleP4sswd$", "123456", "XXXX-XXXX-XXXX");
             });
         AllowAnonymous();
         DontThrowIfValidationFails();
