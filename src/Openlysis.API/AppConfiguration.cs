@@ -15,7 +15,7 @@ public static class AppConfiguration
     {
         app.UseExceptionHandler();
 
-        app.UseAuthorization();
+        app.UseAuthentication().UseAuthorization();
 
         if (app.Environment.IsDevelopment())
         {

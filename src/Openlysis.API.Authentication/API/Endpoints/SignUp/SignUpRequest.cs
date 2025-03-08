@@ -1,4 +1,4 @@
-namespace Openlysis.API.Endpoints.Authentication.SignUp;
+namespace Openlysis.API.Authentication.API.Endpoints.SignUp;
 
 /// <summary>
 /// Represents a request to register a new user.

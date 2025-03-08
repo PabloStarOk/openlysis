@@ -1,13 +1,14 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Openlysis.Infrastructure.Persistence;
+using Openlysis.API.Authentication.Models;
+
+namespace Openlysis.API.Authentication.Infrastructure.Persistence;
 
 /// <summary>
-/// Represents the database context for authentication, inheriting from <see cref="IdentityDbContext{IdentityUser}"/>.
+/// Represents the database context for authentication, inheriting from <see cref="IdentityDbContext"/>.
 /// </summary>
-public class AuthenticationDbContext : IdentityDbContext<IdentityUser>
+public class AuthenticationDbContext : IdentityDbContext<User>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AuthenticationDbContext"/> class.

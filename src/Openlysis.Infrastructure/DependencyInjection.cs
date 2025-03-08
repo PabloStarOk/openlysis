@@ -31,10 +31,6 @@ public static class DependencyInjection
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
-        // Add auth database.
-        services.AddDbContext<AuthenticationDbContext>(options =>
-            options.UseSqlServer(connectionString));
-
         // Add analyses database.
         services.AddDbContext<AnalysesDbContext>(options =>
             options.UseSqlServer(connectionString));

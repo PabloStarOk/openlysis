@@ -1,12 +1,13 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 
-namespace Openlysis.API.Endpoints.Authentication.Utilities;
+namespace Openlysis.API.Authentication.API.Extensions;
 
 /// <summary>
-/// Provides utility methods for authentication-related operations.
+/// Provides extension methods for the <see cref="IdentityResult"/> class.
 /// </summary>
-public static class AuthenticationExtensions
+public static class IdentityResultExtensions
 {
     /// <summary>
     /// Creates a <see cref="ValidationProblem"/> from an <see cref="IdentityResult"/>.

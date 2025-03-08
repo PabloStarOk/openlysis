@@ -1,6 +1,9 @@
 using FastEndpoints;
 
-namespace Openlysis.API.Endpoints.Authentication;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+
+namespace Openlysis.API.Authentication.API.Endpoints;
 
 /// <summary>
 /// Represents a group of authentication-related endpoints.
@@ -14,10 +17,9 @@ public class AuthenticationGroup : Group
     {
         Configure("auth", ep =>
         {
-            ep.Description(
-                builder =>
+            ep.Description(builder =>
                 {
-                    builder.WithName("Auth");
+                    builder.WithGroupName("Auth");
                     builder.WithDisplayName("Auth");
                     builder.WithTags("Auth");
                 });

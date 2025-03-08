@@ -1,7 +1,8 @@
 using FastEndpoints;
+
 using FluentValidation;
 
-namespace Openlysis.API.Endpoints.Authentication.SignUp;
+namespace Openlysis.API.Authentication.API.Endpoints.SignUp;
 
 /// <summary>
 /// Validator for the SignUp request.
