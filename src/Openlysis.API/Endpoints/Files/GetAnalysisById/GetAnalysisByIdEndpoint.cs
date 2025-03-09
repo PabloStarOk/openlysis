@@ -53,6 +53,10 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
             {
                 s.Summary = "Get a file analysis by ID.";
                 s.Description = "Get a file analysis by its ID.";
+                s.Params = new Dictionary<string, string>
+                {
+                    { "id", "ID of the analysis to retrieve." },
+                };
             });
     }
 

@@ -42,6 +42,7 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHash, IEnumerable
                 b.WithName(Name);
                 b.WithDisplayName(Name);
                 b.Produces<IEnumerable<FileMultiAnalysisDto>>();
+                b.ProducesProblemDetails();
                 b.ProducesProblemDetails(StatusCodes.Status404NotFound);
             });
         Summary(
