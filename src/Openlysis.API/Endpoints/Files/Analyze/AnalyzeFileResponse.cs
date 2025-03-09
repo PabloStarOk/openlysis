@@ -8,7 +8,7 @@ namespace Openlysis.API.Endpoints.Files.Analyze;
 /// <param name="FileAnalysisSha1">The SHA-1 hash of the file analysis.</param>
 /// <param name="FileAnalysisSha256">The SHA-256 hash of the file analysis.</param>
 /// <param name="FileAnalysisSha512">The SHA-512 hash of the file analysis.</param>
-public record Response(
+public record AnalyzeFileResponse(
     string FileAnalysisId,
     string FileAnalysisMd5,
     string FileAnalysisSha1,

@@ -8,7 +8,7 @@ namespace Openlysis.API.Endpoints.Files.Analyze;
 /// <param name="FilePassword">Password for the file if it is protected</param>
 /// <param name="IsPrivateFile">Indicates if the file is private</param>
 /// <param name="Reanalyze">If file has already been analyzed by another user, reanalyze it again.</param>
-public record Request(IFormFile File,
+public record AnalyzeFileRequest(IFormFile File,
     string FileDescription = "",
     string FilePassword = "",
     bool IsPrivateFile = true,

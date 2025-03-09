@@ -5,7 +5,7 @@ namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 /// <summary>
 /// Represents a request to get a file analysis by hash.
 /// </summary>
-public record Request
+public record GetAnalysesByHash
 {
     /// <summary>
     /// Gets the hash of the file.

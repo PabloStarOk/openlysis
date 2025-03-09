@@ -28,4 +28,8 @@
       <ProjectReference Include="..\Openlysis.Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Endpoints\Files\Common\" />
+    </ItemGroup>
+
 </Project>

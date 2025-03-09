@@ -11,7 +11,7 @@ namespace Openlysis.API.Endpoints.Files.Analyze;
 /// <summary>
 /// Endpoint to analyze a file.
 /// </summary>
-public class Endpoint : Endpoint<Request, Response>
+public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileResponse>
 {
     private readonly IMediator _mediator;
 
@@ -21,10 +21,10 @@ public class Endpoint : Endpoint<Request, Response>
     public static string Name { get; } = "AnalyzeFile";
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Endpoint"/> class.
+    /// Initializes a new instance of the <see cref="AnalyzeFileEndpoint"/> class.
     /// </summary>
     /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
-    public Endpoint(IMediator mediator)
+    public AnalyzeFileEndpoint(IMediator mediator)
     {
         _mediator = mediator;
     }
@@ -43,8 +43,8 @@ public class Endpoint : Endpoint<Request, Response>
             {
                 b.WithName(Name);
                 b.WithDisplayName(Name);
-                b.Accepts<Request>(contentType: "multipart/form-data");
-                b.Produces<Response>(StatusCodes.Status202Accepted);
+                b.Accepts<AnalyzeFileRequest>(contentType: "multipart/form-data");
+                b.Produces<AnalyzeFileResponse>(StatusCodes.Status202Accepted);
                 b.ProducesProblemDetails();
                 b.ProducesProblemDetails(StatusCodes.Status500InternalServerError);
             },
@@ -63,7 +63,7 @@ public class Endpoint : Endpoint<Request, Response>
     /// <param name="request">The request containing the file to be analyzed.</param>
     /// <param name="ct">The cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public override async Task HandleAsync(Request request, CancellationToken ct)
+    public override async Task HandleAsync(AnalyzeFileRequest request, CancellationToken ct)
     {
         if (request.File.Length <= 0)
         {
@@ -105,7 +105,7 @@ public class Endpoint : Endpoint<Request, Response>
                 extensions: extensions));
         }
 
-        Response = new Response(
+        Response = new AnalyzeFileResponse(
             mediatorResult.Value.Id.Value.ToString(),
             mediatorResult.Value.ContentHashSet.Md5,
             mediatorResult.Value.ContentHashSet.Sha1,
@@ -118,7 +118,7 @@ public class Endpoint : Endpoint<Request, Response>
         };
 
         await SendResultAsync(Results.AcceptedAtRoute(
-            GetAnalysisById.Endpoint.Name,
+            GetAnalysisById.GetAnalysisByIdEndpoint.Name,
             routeValues,
             Response));
     }

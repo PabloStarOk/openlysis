@@ -1,4 +1,4 @@
-namespace Openlysis.API.Endpoints.Files.Responses;
+namespace Openlysis.API.Endpoints.Files.Common.Responses;
 
 /// <summary>
 /// Represents a report data transfer object.

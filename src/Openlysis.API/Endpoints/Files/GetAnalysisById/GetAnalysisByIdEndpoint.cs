@@ -4,7 +4,7 @@ using FastEndpoints;
 
 using MediatR;
 
-using Openlysis.API.Endpoints.Files.Responses;
+using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.Application.FileAnalyses.Queries;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
@@ -14,7 +14,7 @@ namespace Openlysis.API.Endpoints.Files.GetAnalysisById;
 /// <summary>
 /// Endpoint for retrieving file analysis by hash.
 /// </summary>
-public class Endpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
+public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
 {
     private readonly IMediator _mediator;
 
@@ -24,10 +24,10 @@ public class Endpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
     public static string Name { get; } = "GetFileAnalysisById";
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Endpoint"/> class.
+    /// Initializes a new instance of the <see cref="GetAnalysisByIdEndpoint"/> class.
     /// </summary>
     /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
-    public Endpoint(IMediator mediator)
+    public GetAnalysisByIdEndpoint(IMediator mediator)
     {
         _mediator = mediator;
     }
