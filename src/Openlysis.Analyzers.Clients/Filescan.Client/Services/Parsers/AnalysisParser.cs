@@ -19,7 +19,7 @@ public class AnalysisParser : ModelParser<ServiceFileAnalysis, JsonElement>
         { "CREATED", AnalysisStatus.Queued },
         { "QUEUED", AnalysisStatus.Queued },
         { "SCANNING", AnalysisStatus.InProgress },
-        { "FINISHED", AnalysisStatus.Finished },
+        { "FINISHED", AnalysisStatus.Completed },
     };
 
     private readonly ModelParser<Report, JsonProperty> _reportParser;

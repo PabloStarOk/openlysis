@@ -41,7 +41,7 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     private readonly IFileStorageProvider _fileStorageProvider;
     private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
     private readonly Func<ServiceFileAnalysis, bool> _analysisFinished = s =>
-        s.Status is AnalysisStatus.Finished or AnalysisStatus.Timeout;
+        s.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
 
     private FileMultiAnalysisId _multiAnalysisId;
     private ConsumeContext<Contracts.AnalyzeFile> _context;

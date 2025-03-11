@@ -18,7 +18,12 @@ public enum AnalysisStatus
     /// <summary>
     /// The analysis was finished.
     /// </summary>
-    Finished,
+    Completed,
+
+    /// <summary>
+    /// The analysis failed.
+    /// </summary>
+    Failed,
 
     /// <summary>
     /// The analysis was not completed because of timeout.

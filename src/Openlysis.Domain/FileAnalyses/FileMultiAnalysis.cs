@@ -163,9 +163,9 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     {
         IEnumerable<ServiceFileAnalysis> analyses = _serviceFileAnalyses;
 
-        if (analyses.All(a => a.Status is AnalysisStatus.Finished))
+        if (analyses.All(a => a.Status is AnalysisStatus.Completed))
         {
-            Status = AnalysisStatus.Finished;
+            Status = AnalysisStatus.Completed;
             return;
         }
 
