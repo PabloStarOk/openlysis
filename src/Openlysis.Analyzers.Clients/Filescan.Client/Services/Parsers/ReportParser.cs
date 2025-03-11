@@ -72,7 +72,7 @@ public class ReportParser : ModelParser<Report, JsonProperty>
             Verdict.Malicious => ThreatZone.Red,
             Verdict.Suspicious => ThreatZone.Yellow,
             Verdict.Undetected => ThreatZone.Green,
-            Verdict.Unknown => ThreatZone.None,
+            Verdict.Unknown => ThreatZone.Unknown,
             _ => throw new ArgumentOutOfRangeException(nameof(verdict), verdict, null)
         };
     }

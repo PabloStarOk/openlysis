@@ -116,7 +116,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
             serviceFileAnalyses,
             startedDate,
             Verdict.Unknown,
-            ThreatZone.None,
+            ThreatZone.Unknown,
             fileMetadata,
             contentHashSet);
     }
@@ -210,7 +210,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     {
         if (!AllReports.Any())
         {
-            AverageThreatZone = ThreatZone.None;
+            AverageThreatZone = ThreatZone.Unknown;
             return;
         }
 
