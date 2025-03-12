@@ -1,7 +1,6 @@
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.Common.Models;
-using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 

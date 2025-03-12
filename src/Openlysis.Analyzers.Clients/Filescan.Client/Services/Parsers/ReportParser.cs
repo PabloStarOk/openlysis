@@ -3,7 +3,7 @@ using System.Text.Json;
 using Filescan.Client.Abstractions;
 
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Reports;
+using Openlysis.Domain.FileAnalyses.Entities;
 
 namespace Filescan.Client.Services.Parsers;
 

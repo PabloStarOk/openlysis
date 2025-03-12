@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Analyzers.Contracts.Requests;
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
@@ -37,9 +38,9 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     private readonly ILogger<AnalyzeFileConsumer> _logger;
     private readonly IOptionsMonitor<AnalyzeFileConsumerSettings> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> _analyzers;
+    private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
-    private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
+    private readonly Dictionary<ServiceAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
     private readonly Func<ServiceFileAnalysis, bool> _analysisFinished = s =>
         s.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
 
@@ -59,7 +60,7 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
         IEndpointUriProvider endpointUriProvider,
         IOptionsMonitor<AnalyzeFileConsumerSettings> options,
         IFileStorageProvider fileStorageProvider,
-        IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> analyzers)
+        IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>> analyzers)
     {
         _logger = logger;
         _endpointUriProvider = endpointUriProvider;

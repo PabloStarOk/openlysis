@@ -1,7 +1,8 @@
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Models;
+using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.Domain.Common.Reports;
+namespace Openlysis.Domain.FileAnalyses.Entities;
 
 /// <summary>
 /// Represents a single report.

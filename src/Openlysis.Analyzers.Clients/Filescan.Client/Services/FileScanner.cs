@@ -10,6 +10,7 @@ using Filescan.Client.Constants.Endpoints;
 using Filescan.Client.Models.Common;
 using Filescan.Client.Models.Requests;
 
+using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
@@ -22,7 +23,7 @@ public sealed class FileScanner : IFileScannerService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ModelParser<FilescanError, JsonElement> _errorParser;
-    private readonly ModelParser<ServiceFileAnalysisId, JsonElement> _analysisIdParser;
+    private readonly ModelParser<ServiceAnalysisId, JsonElement> _analysisIdParser;
     private readonly ModelParser<ServiceFileAnalysis, JsonElement> _analysisParser;
 
     /// <summary>
@@ -30,12 +31,12 @@ public sealed class FileScanner : IFileScannerService
     /// </summary>
     /// <param name="httpClientFactory">The HTTP client factory to create HTTP clients.</param>
     /// <param name="errorParser">A parser to create <see cref="FilescanError"/> objects from <see cref="JsonElement"/>.</param>
-    /// <param name="analysisIdParser">A parser to create <see cref="ServiceFileAnalysisId"/> objects from <see cref="JsonElement"/>.</param>
+    /// <param name="analysisIdParser">A parser to create <see cref="ServiceAnalysisId"/> objects from <see cref="JsonElement"/>.</param>
     /// <param name="analysisParser">A parser to create <see cref="ServiceFileAnalysis"/> objects from <see cref="JsonElement"/>.</param>
     public FileScanner(
         IHttpClientFactory httpClientFactory,
         ModelParser<FilescanError, JsonElement> errorParser,
-        ModelParser<ServiceFileAnalysisId, JsonElement> analysisIdParser,
+        ModelParser<ServiceAnalysisId, JsonElement> analysisIdParser,
         ModelParser<ServiceFileAnalysis, JsonElement> analysisParser)
     {
         _httpClientFactory = httpClientFactory;
@@ -45,7 +46,7 @@ public sealed class FileScanner : IFileScannerService
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<ServiceFileAnalysisId>> UploadAsync(ScanRequest scanRequest, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<ServiceAnalysisId>> UploadAsync(ScanRequest scanRequest, CancellationToken cancellationToken = default)
     {
         var formDataContent = new MultipartFormDataContent();
 

@@ -13,7 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Contracts.Configuration;
 using Openlysis.Analyzers.Contracts.Interfaces;
-using Openlysis.Domain.Common.Reports;
+using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
@@ -41,7 +41,7 @@ public static class DependencyInjection
 
         // Register model parsers
         services.AddTransient<ModelParser<FilescanError, JsonElement>, FilescanErrorParser>();
-        services.AddTransient<ModelParser<ServiceFileAnalysisId, JsonElement>, AnalysisIdParser>();
+        services.AddTransient<ModelParser<ServiceAnalysisId, JsonElement>, AnalysisIdParser>();
         services.AddTransient<ModelParser<Report, JsonProperty>, ReportParser>();
         services.AddTransient<ModelParser<ServiceFileAnalysis, JsonElement>, AnalysisParser>();
 
@@ -56,6 +56,6 @@ public static class DependencyInjection
 
         // Register Filescan.IO services
         services.AddScoped<IFileScannerService, FileScanner>();
-        services.AddScoped<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>, FilescanAnalyzer>();
+        services.AddScoped<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>, FilescanAnalyzer>();
     }
 }

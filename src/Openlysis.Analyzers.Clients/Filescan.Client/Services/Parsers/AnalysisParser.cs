@@ -4,7 +4,6 @@ using Filescan.Client.Abstractions;
 using Filescan.Client.Constants.Common;
 
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
 
 namespace Filescan.Client.Services.Parsers;

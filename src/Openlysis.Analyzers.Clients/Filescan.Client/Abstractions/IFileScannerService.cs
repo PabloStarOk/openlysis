@@ -2,6 +2,7 @@ using ErrorOr;
 
 using Filescan.Client.Models.Requests;
 
+using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
@@ -17,8 +18,8 @@ public interface IFileScannerService
     /// </summary>
     /// <param name="scanRequest">Request to scan a file.</param>
     /// <param name="cancellationToken">Cancellation token to stop the operation.</param>
-    /// <returns>A <see cref="ServiceFileAnalysisId"/>.</returns>
-    public Task<ErrorOr<ServiceFileAnalysisId>> UploadAsync(ScanRequest scanRequest, CancellationToken cancellationToken = default);
+    /// <returns>A <see cref="ServiceAnalysisId"/>.</returns>
+    public Task<ErrorOr<ServiceAnalysisId>> UploadAsync(ScanRequest scanRequest, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the scan of a file.
