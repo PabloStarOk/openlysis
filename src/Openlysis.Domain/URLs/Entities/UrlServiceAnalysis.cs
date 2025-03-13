@@ -41,15 +41,18 @@ public sealed class UrlServiceAnalysis : Entity<ServiceAnalysisId>
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlServiceAnalysis"/> class.
     /// </summary>
-    /// <param name="serviceName">The name of the service.</param>
+    /// <param name="id">The unique identifier for the service analysis.</param>
+    /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The current status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
-    /// <param name="threatScore">The threat score of the analysis.</param>
-    public UrlServiceAnalysis(
+    /// <param name="threatScore">The threat score of the analysis. Optional.</param>
+    private UrlServiceAnalysis(
+        ServiceAnalysisId id,
         string serviceName,
         AnalysisStatus status,
         Verdict verdict,
         float? threatScore)
+        : base(id)
     {
         ServiceName = serviceName;
         Status = status;
@@ -65,6 +68,32 @@ public sealed class UrlServiceAnalysis : Entity<ServiceAnalysisId>
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
+
+    /// <summary>
+    /// Creates a new instance of <see cref="UrlServiceAnalysis"/>.
+    /// </summary>
+    /// <param name="id">The unique identifier for the service analysis.</param>
+    /// <param name="serviceName">The name of the service being analyzed.</param>
+    /// <param name="status">The current status of the analysis.</param>
+    /// <param name="verdict">The verdict of the analysis.</param>
+    /// <param name="threatScore">The threat score of the analysis. Optional.</param>
+    /// <returns>A new instance of <see cref="UrlServiceAnalysis"/>.</returns>
+    public static UrlServiceAnalysis Create(
+        string id,
+        string serviceName,
+        AnalysisStatus status,
+        Verdict verdict,
+        float? threatScore = null)
+    {
+        var serviceAnalysisId = ServiceAnalysisId.Create(id);
+
+        return new UrlServiceAnalysis(
+            serviceAnalysisId,
+            serviceName,
+            status,
+            verdict,
+            threatScore);
+    }
 
     /// <summary>
     /// Updates the status of the analysis.
