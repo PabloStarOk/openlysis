@@ -75,18 +75,18 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
     }
 
     /// <inheritdoc/>
-    public async Task UpdateAsync(FileMultiAnalysis multiAnalysis, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(FileMultiAnalysis model, CancellationToken cancellationToken = default)
     {
         bool analysisExists = await _dbContext.FileMultiAnalyses
             .AsSplitQuery()
-            .AnyAsync(f => f.Id == multiAnalysis.Id, cancellationToken);
+            .AnyAsync(f => f.Id == model.Id, cancellationToken);
 
         if (!analysisExists)
         {
             return;
         }
 
-        _dbContext.FileMultiAnalyses.Update(multiAnalysis);
+        _dbContext.FileMultiAnalyses.Update(model);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 

@@ -81,20 +81,20 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
     }
 
     /// <inheritdoc/>
-    public async Task UpdateAsync(UrlMultiAnalysis analysis, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(UrlMultiAnalysis model, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(analysis);
+        ArgumentNullException.ThrowIfNull(model);
 
         bool analysisExists = await _dbContext.UrlMultiAnalyses
             .AsSplitQuery()
-            .AnyAsync(u => u.Id == analysis.Id, cancellationToken);
+            .AnyAsync(u => u.Id == model.Id, cancellationToken);
 
         if (!analysisExists)
         {
             return;
         }
 
-        _dbContext.UrlMultiAnalyses.Update(analysis);
+        _dbContext.UrlMultiAnalyses.Update(model);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
