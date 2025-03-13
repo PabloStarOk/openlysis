@@ -87,6 +87,9 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
             .HasForeignKey("Sha256")
             .IsRequired();
 
+        builder.Navigation(u => u.UrlHashSet)
+            .AutoInclude();
+
         builder.Property(u => u.UserId)
             .HasColumnName("UserId")
             .HasColumnType(NvarcharType)
