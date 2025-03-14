@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Contracts.Configuration;
 using Openlysis.Analyzers.Contracts.Enums;
+using Openlysis.Analyzers.Contracts.Requests;
 using Openlysis.Domain.Common.Enums;
 
 namespace Openlysis.Analyzers.Contracts.Interfaces;
@@ -16,7 +17,7 @@ namespace Openlysis.Analyzers.Contracts.Interfaces;
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
      where TAnalysis : notnull
-     where TRequest : notnull
+     where TRequest : AnalyzeRequest
 {
     protected readonly ILogger<Analyzer<TAnalysis, TRequest>> _logger;
     protected readonly IOptionsMonitor<AnalyzerOptions> _options;
