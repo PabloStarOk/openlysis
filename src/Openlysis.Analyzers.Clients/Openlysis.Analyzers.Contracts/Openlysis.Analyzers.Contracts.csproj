@@ -15,4 +15,8 @@
       <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Openlysis.Domain\Openlysis.Domain.csproj" />
+    </ItemGroup>
+
 </Project>
