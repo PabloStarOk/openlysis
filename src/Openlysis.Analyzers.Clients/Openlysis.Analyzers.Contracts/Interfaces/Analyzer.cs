@@ -61,8 +61,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        _requestLimitManager.OnLimitReached -= OnLimitReached;
-        _requestLimitManager.OnRateReduced -= OnRateReduced;
+        Dispose(disposing: true);
     }
 
     /// <summary>
@@ -111,6 +110,16 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         }
 
         return await OnGetAnalysisAsync(id, cancellationToken);
+    }
+    
+    /// <summary>
+    /// Disposes the resources used by the analyzer.
+    /// </summary>
+    /// <param name="disposing">A boolean value indicating whether the method is called from the Dispose method.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        _requestLimitManager.OnLimitReached -= OnLimitReached;
+        _requestLimitManager.OnRateReduced -= OnRateReduced;
     }
     
     /// <summary>
