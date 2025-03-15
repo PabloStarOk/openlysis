@@ -9,8 +9,8 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using Openlysis.Analyzers.Contracts.Core.Files.Requests;
 using Openlysis.Analyzers.Contracts.Interfaces;
-using Openlysis.Analyzers.Contracts.Requests;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses;

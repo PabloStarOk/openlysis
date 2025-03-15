@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.Contracts.Requests;
+namespace Openlysis.Analyzers.Contracts.Core.Files.Requests;
 
 /// <summary>
 /// Represents a request to analyze a file.

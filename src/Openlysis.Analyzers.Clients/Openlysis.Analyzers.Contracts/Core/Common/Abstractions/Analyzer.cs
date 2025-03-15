@@ -4,11 +4,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Contracts.Configuration;
-using Openlysis.Analyzers.Contracts.Enums;
-using Openlysis.Analyzers.Contracts.Requests;
+using Openlysis.Analyzers.Contracts.Core.Common.Models;
+using Openlysis.Analyzers.Contracts.Core.Configuration;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Enums;
+using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Domain.Common.Enums;
 
-namespace Openlysis.Analyzers.Contracts.Interfaces;
+namespace Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 
 /// <summary>
 /// Abstract base class for analyzers.

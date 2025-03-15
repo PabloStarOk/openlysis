@@ -5,8 +5,8 @@ using Filescan.Client.Constants.Common;
 using Filescan.Client.Models.Requests;
 using Filescan.Client.Models.Scans;
 
+using Openlysis.Analyzers.Contracts.Core.Files.Requests;
 using Openlysis.Analyzers.Contracts.Interfaces;
-using Openlysis.Analyzers.Contracts.Requests;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;

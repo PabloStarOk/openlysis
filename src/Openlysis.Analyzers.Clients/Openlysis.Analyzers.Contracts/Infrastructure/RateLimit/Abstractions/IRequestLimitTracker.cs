@@ -1,6 +1,6 @@
-using Openlysis.Analyzers.Contracts.Enums;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Enums;
 
-namespace Openlysis.Analyzers.Contracts.Interfaces;
+namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
 
 /// <summary>
 /// Define a manager of request limits.

@@ -1,6 +1,6 @@
 using ErrorOr;
 
-using Openlysis.Analyzers.Contracts.Requests;
+using Openlysis.Analyzers.Contracts.Core.Files.Requests;
 
 namespace Openlysis.Analyzers.Contracts.Interfaces;
 

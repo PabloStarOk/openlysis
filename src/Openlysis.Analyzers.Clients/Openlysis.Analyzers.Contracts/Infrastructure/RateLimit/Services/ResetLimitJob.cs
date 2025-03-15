@@ -1,9 +1,9 @@
-using Openlysis.Analyzers.Contracts.Enums;
-using Openlysis.Analyzers.Contracts.Interfaces;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Enums;
 
 using Quartz;
 
-namespace Openlysis.Analyzers.Contracts.Services;
+namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Services;
 
 /// <summary>
 /// Represents a job that resets request limits based on the specified period.

@@ -1,14 +1,14 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Analyzers.Contracts.Configuration;
-using Openlysis.Analyzers.Contracts.Enums;
-using Openlysis.Analyzers.Contracts.Interfaces;
-using Openlysis.Analyzers.Contracts.Services;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Configuration;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Enums;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Services;
 
 using Quartz;
 
-namespace Openlysis.Analyzers.Contracts;
+namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 
 /// <summary>
 /// Provides extension methods for dependency injection.
@@ -23,7 +23,7 @@ public static class DependencyInjection
     /// <param name="parentSectionName">The name of the parent section in the configuration.</param>
     /// <param name="schedulerId">The identifier for the Quartz scheduler.</param>
     /// <param name="schedulerName">The name for the Quartz scheduler.</param>
-    public static void AddRequestLimitManager(
+    public static void AddRequestLimitTracker(
         this IServiceCollection services,
         IConfiguration configuration,
         string parentSectionName,

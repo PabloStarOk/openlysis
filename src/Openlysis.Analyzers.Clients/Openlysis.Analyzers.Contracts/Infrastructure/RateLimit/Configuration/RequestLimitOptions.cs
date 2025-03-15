@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.Contracts.Configuration;
+namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Configuration;
 
 /// <summary>
 /// Represents the configuration options for the analyzer.

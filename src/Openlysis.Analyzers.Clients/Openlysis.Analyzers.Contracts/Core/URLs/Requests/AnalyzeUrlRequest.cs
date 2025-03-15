@@ -1,4 +1,6 @@
-namespace Openlysis.Analyzers.Contracts.Requests;
+using Openlysis.Analyzers.Contracts.Core.Common.Models;
+
+namespace Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 
 /// <summary>
 /// Represents a request to analyze a URL.

@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.Contracts.Enums;
+namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Enums;
 
 /// <summary>
 /// Specifies the period for request limits.

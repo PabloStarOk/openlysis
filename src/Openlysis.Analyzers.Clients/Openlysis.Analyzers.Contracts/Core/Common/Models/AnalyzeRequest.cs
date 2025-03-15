@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.Contracts.Requests;
+namespace Openlysis.Analyzers.Contracts.Core.Common.Models;
 
 /// <summary>
 /// Defines a base request to analyze content.

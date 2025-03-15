@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.Contracts.Configuration;
+namespace Openlysis.Analyzers.Contracts.Core.Configuration;
 
 /// <summary>
 /// Represents the options for secrets configuration.

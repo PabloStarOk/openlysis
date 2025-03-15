@@ -2,11 +2,11 @@ using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Contracts.Configuration;
-using Openlysis.Analyzers.Contracts.Enums;
-using Openlysis.Analyzers.Contracts.Interfaces;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Configuration;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Enums;
 
-namespace Openlysis.Analyzers.Contracts.Services;
+namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Services;
 
 /// <summary>
 /// Tracks rate and quota limits of external APIs according to <see cref="RequestLimitOptions"/>.
