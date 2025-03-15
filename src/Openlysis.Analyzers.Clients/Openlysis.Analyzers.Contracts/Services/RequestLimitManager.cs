@@ -85,12 +85,14 @@ public class RequestLimitManager : IRequestLimitManager, IDisposable, IAsyncDisp
     public void ResetDailyRequestCount()
     {
         _currentRequestsPerDay = 0;
+        OnRateReduced?.Invoke(this, RequestLimitPeriod.Day);
     }
 
     /// <inheritdoc/>
     public void ResetMonthlyRequestCount()
     {
         _currentRequestsPerMonth = 0;
+        OnRateReduced?.Invoke(this, RequestLimitPeriod.Month);
     }
 
     /// <inheritdoc/>
