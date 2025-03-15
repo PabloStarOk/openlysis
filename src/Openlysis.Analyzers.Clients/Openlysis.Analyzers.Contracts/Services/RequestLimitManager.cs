@@ -48,25 +48,33 @@ public class RequestLimitManager : IRequestLimitManager, IDisposable, IAsyncDisp
     public void AddRequest()
     {
         DateTimeOffset now = _timeProvider.GetUtcNow();
-        
-        _currentRequestsPerMinute.Enqueue(now);
-        _currentRequestsPerHour.Enqueue(now);
-        _currentRequestsPerDay++;
-        _currentRequestsPerMonth++;
-
         RequestLimitOptions options = _limitOptions.CurrentValue;
-        CheckIfLimitReached(
-            _currentRequestsPerMinute.Count,
-            options.RatePerMinute,
-            RequestLimitPeriod.Minute);
-        CheckIfLimitReached(
-            _currentRequestsPerHour.Count,
-            options.RatePerHour,
-            RequestLimitPeriod.Hour);
+
+        if (options.RatePerMinute > 0)
+        {
+            _currentRequestsPerMinute.Enqueue(now);
+            CheckIfLimitReached(
+                _currentRequestsPerMinute.Count,
+                options.RatePerMinute,
+                RequestLimitPeriod.Minute);   
+        }
+
+        if (options.RatePerHour > 0)
+        {
+            _currentRequestsPerHour.Enqueue(now);
+            CheckIfLimitReached(
+                _currentRequestsPerHour.Count,
+                options.RatePerHour,
+                RequestLimitPeriod.Hour);
+        }
+        
+        _currentRequestsPerDay++;
         CheckIfLimitReached(
             _currentRequestsPerDay,
             options.QuotaPerDay,
             RequestLimitPeriod.Day);
+        
+        _currentRequestsPerMonth++;
         CheckIfLimitReached(
             _currentRequestsPerMonth,
             options.QuotaPerMonth,
@@ -147,7 +155,7 @@ public class RequestLimitManager : IRequestLimitManager, IDisposable, IAsyncDisp
     /// <param name="limitPeriod">The period for which the rate limit is being checked (e.g., minute, hour).</param>
     private void CheckIfLimitReached(int current, int target, RequestLimitPeriod limitPeriod)
     {
-        if (current >= target)
+        if (target > 0 && current >= target)
         {
             OnLimitReached?.Invoke(this, limitPeriod);
         }
