@@ -12,15 +12,15 @@ public class ResetLimitJob : IJob
 {
     public const string JobDataMapKey = "RequestLimitPeriod";
     
-    private readonly IRequestLimitManager _requestLimitManager;
+    private readonly IRequestLimitTracker _requestLimitTracker;
     
     /// <summary>
     /// Initializes a new instance of the <see cref="ResetLimitJob"/> class.
     /// </summary>
-    /// <param name="requestLimitManager">The request limit manager.</param>
-    public ResetLimitJob(IRequestLimitManager requestLimitManager)
+    /// <param name="requestLimitTracker">The request limit manager.</param>
+    public ResetLimitJob(IRequestLimitTracker requestLimitTracker)
     {
-        _requestLimitManager = requestLimitManager;
+        _requestLimitTracker = requestLimitTracker;
     }
     
     /// <inheritdoc/>
@@ -30,11 +30,11 @@ public class ResetLimitJob : IJob
         
         if (limitPeriod is RequestLimitPeriod.Day)
         {
-            _requestLimitManager.ResetDailyRequestCount();
+            _requestLimitTracker.ResetDailyRequestCount();
         }
         else if (limitPeriod is RequestLimitPeriod.Month)
         {
-            _requestLimitManager.ResetMonthlyRequestCount();
+            _requestLimitTracker.ResetMonthlyRequestCount();
         }
 
         return Task.CompletedTask;

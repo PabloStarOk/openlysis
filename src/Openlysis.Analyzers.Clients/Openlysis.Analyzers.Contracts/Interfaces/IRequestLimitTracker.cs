@@ -5,7 +5,7 @@ namespace Openlysis.Analyzers.Contracts.Interfaces;
 /// <summary>
 /// Define a manager of request limits.
 /// </summary>
-public interface IRequestLimitManager
+public interface IRequestLimitTracker
 {
     /// <summary>
     /// Event triggered when the request limit is reached.

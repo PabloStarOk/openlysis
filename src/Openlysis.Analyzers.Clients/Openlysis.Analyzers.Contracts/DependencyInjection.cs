@@ -16,7 +16,7 @@ namespace Openlysis.Analyzers.Contracts;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds the <see cref="IRequestLimitManager"/> service to the specified <see cref="IServiceCollection"/>.
+    /// Adds the <see cref="IRequestLimitTracker"/> service to the specified <see cref="IServiceCollection"/>.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <param name="configuration">The <see cref="IConfiguration"/> to retrieve the configuration settings from.</param>
@@ -39,7 +39,7 @@ public static class DependencyInjection
         
         // Add limit manager.
         services.AddSingleton(TimeProvider.System);
-        services.AddSingleton<IRequestLimitManager, RequestLimitManager>();
+        services.AddSingleton<IRequestLimitTracker, RequestLimitTracker>();
 
         using var sp = services.BuildServiceProvider();
         

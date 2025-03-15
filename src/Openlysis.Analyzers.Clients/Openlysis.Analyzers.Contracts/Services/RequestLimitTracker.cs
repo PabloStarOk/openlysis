@@ -9,9 +9,9 @@ using Openlysis.Analyzers.Contracts.Interfaces;
 namespace Openlysis.Analyzers.Contracts.Services;
 
 /// <summary>
-/// Manages request limits and triggers events when limits are reached.
+/// Tracks rate and quota limits of external APIs according to <see cref="RequestLimitOptions"/>.
 /// </summary>
-public class RequestLimitManager : IRequestLimitManager, IDisposable, IAsyncDisposable
+public sealed class RequestLimitTracker : IRequestLimitTracker, IDisposable, IAsyncDisposable
 {
     public event EventHandler<RequestLimitPeriod>? OnLimitReached;
     public event EventHandler<RequestLimitPeriod>? OnRateReduced;
@@ -27,11 +27,11 @@ public class RequestLimitManager : IRequestLimitManager, IDisposable, IAsyncDisp
     private int _currentRequestsPerMonth;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RequestLimitManager"/> class.
+    /// Initializes a new instance of the <see cref="RequestLimitTracker"/> class.
     /// </summary>
     /// <param name="limitOptions">The options monitor for request limit configurations.</param>
     /// <param name="timeProvider">The time provider used to create timers.</param>
-    public RequestLimitManager(
+    public RequestLimitTracker(
         IOptionsMonitor<RequestLimitOptions> limitOptions,
         TimeProvider timeProvider)
     {

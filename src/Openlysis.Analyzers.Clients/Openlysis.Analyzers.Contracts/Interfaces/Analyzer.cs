@@ -23,7 +23,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     protected readonly IOptionsMonitor<AnalyzerOptions> _options;
     protected readonly HttpClient _httpClient;
 
-    private readonly IRequestLimitManager _requestLimitManager;
+    private readonly IRequestLimitTracker _requestLimitTracker;
     private readonly HashSet<RequestLimitPeriod> _limitPeriodsReached = new (Enum.GetValues<RequestLimitPeriod>().Length);
 
     /// <summary>
@@ -40,22 +40,22 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// Initializes a new instance of the <see cref="Analyzer{TAnalysis, TRequest}"/> class.
     /// </summary>
     /// <param name="options">The options monitor for <see cref="AnalyzerOptions"/>.</param>
-    /// <param name="requestLimitManager">The request limit manager.</param>
+    /// <param name="requestLimitTracker">The request limit manager.</param>
     /// <param name="httpClient">The HTTP client instance.</param>
     /// <param name="logger">The logger instance.</param>
     protected Analyzer(
         IOptionsMonitor<AnalyzerOptions> options,
-        IRequestLimitManager requestLimitManager,
+        IRequestLimitTracker requestLimitTracker,
         HttpClient httpClient,
         ILogger<Analyzer<TAnalysis, TRequest>> logger)
     {
         _options = options;
-        _requestLimitManager = requestLimitManager;
+        _requestLimitTracker = requestLimitTracker;
         _httpClient = httpClient;
         _logger = logger;
 
-        _requestLimitManager.OnLimitReached += OnLimitReached;
-        _requestLimitManager.OnRateReduced += OnRateReduced;
+        _requestLimitTracker.OnLimitReached += OnLimitReached;
+        _requestLimitTracker.OnRateReduced += OnRateReduced;
     }
     
     /// <inheritdoc/>
@@ -118,8 +118,8 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <param name="disposing">A boolean value indicating whether the method is called from the Dispose method.</param>
     protected virtual void Dispose(bool disposing)
     {
-        _requestLimitManager.OnLimitReached -= OnLimitReached;
-        _requestLimitManager.OnRateReduced -= OnRateReduced;
+        _requestLimitTracker.OnLimitReached -= OnLimitReached;
+        _requestLimitTracker.OnRateReduced -= OnRateReduced;
     }
     
     /// <summary>
