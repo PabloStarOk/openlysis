@@ -120,8 +120,8 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
             .IsRequired()
             .ValueGeneratedNever()
             .HasConversion(
-                id => id.Value,
-                dbValue => ServiceAnalysisId.Create(dbValue));
+                id => id.ToString(),
+                id => ComposedServiceAnalysisId.Create(id));
 
         builder.Property(u => u.ServiceName)
             .HasColumnName("ServiceName")

@@ -11,8 +11,13 @@ namespace Openlysis.Domain.URLs.Entities;
 /// <remarks>
 /// This class inherits from the Entity class with a <see cref="ServiceAnalysisId"/> type parameter.
 /// </remarks>
-public sealed class UrlServiceAnalysis : Entity<ServiceAnalysisId>
+public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
 {
+    /// <summary>
+    /// Gets the unique identifier for the URL service analysis.
+    /// </summary>
+    public string UrlServiceAnalysisId => Id.Primary.Value;
+
     /// <summary>
     /// Gets the name of the service.
     /// </summary>
@@ -47,7 +52,7 @@ public sealed class UrlServiceAnalysis : Entity<ServiceAnalysisId>
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="threatScore">The threat score of the analysis. Optional.</param>
     private UrlServiceAnalysis(
-        ServiceAnalysisId id,
+        ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisStatus status,
         Verdict verdict,
@@ -76,6 +81,7 @@ public sealed class UrlServiceAnalysis : Entity<ServiceAnalysisId>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The current status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
+    /// <param name="jobId">The job identifier. Optional.</param>
     /// <param name="threatScore">The threat score of the analysis. Optional.</param>
     /// <returns>A new instance of <see cref="UrlServiceAnalysis"/>.</returns>
     public static UrlServiceAnalysis Create(
@@ -83,12 +89,13 @@ public sealed class UrlServiceAnalysis : Entity<ServiceAnalysisId>
         string serviceName,
         AnalysisStatus status,
         Verdict verdict,
+        string? jobId = null,
         float? threatScore = null)
     {
-        var serviceAnalysisId = ServiceAnalysisId.Create(id);
+        var composedId = ComposedServiceAnalysisId.Create(id, jobId);
 
         return new UrlServiceAnalysis(
-            serviceAnalysisId,
+            composedId,
             serviceName,
             status,
             verdict,

@@ -1,10 +1,9 @@
 using Filescan.Client;
 using MassTransit;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using Openlysis.Analyzers.URLQuery;
 using Openlysis.MultiAnalyzer.Core;
 using Openlysis.MultiAnalyzer.Features.AnalyzeFile.Consumer;
 using Openlysis.MultiAnalyzer.Infrastructure;
@@ -19,6 +18,7 @@ builder.ConfigureServices((context, services) =>
 
     services.AddInfrastructure(context.Configuration);
     services.AddFilescanIoAnalyzer(context.Configuration);
+    services.AddUrlQueryAnalyzer(context.Configuration);
     services.AddMassTransit(
         x =>
         {
