@@ -72,7 +72,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     {
         string userAgent = Maps.UserAgentsMap[_urlQueryOptions.CurrentValue.DefaultUserAgent];
         var submitUrlRequest = new SubmitUrlRequest(
-            request.Url,
+            request.Url.AbsoluteUri,
             userAgent,
             request.IsPrivate ? Access.Private : Access.Public);
 

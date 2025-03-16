@@ -9,7 +9,7 @@ namespace Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 /// <param name="Description">A description of the URL.</param>
 /// <param name="IsPrivate">Indicates whether the URL is private.</param>
 public record AnalyzeUrlRequest(
-    string Url,
+    Uri Url,
     string Description = "",
     bool IsPrivate = false)
     : AnalyzeRequest(Description, IsPrivate);
