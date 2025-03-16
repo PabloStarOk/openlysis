@@ -53,7 +53,7 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
     /// <summary>
     /// Gets the URL being analyzed.
     /// </summary>
-    public string Url { get; }
+    public Uri Url { get; }
 
     /// <summary>
     /// Gets the hash set of the URL content.
@@ -81,7 +81,7 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
-        string url,
+        Uri url,
         ContentHashSet urlHashSet)
         : base(id)
     {
@@ -117,7 +117,7 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
-        string url,
+        Uri url,
         ContentHashSet urlHashSet)
     {
         List<UrlServiceAnalysis> serviceAnalyses = new (maxServiceAnalysesAmount);

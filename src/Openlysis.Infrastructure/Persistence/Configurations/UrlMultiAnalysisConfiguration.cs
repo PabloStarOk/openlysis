@@ -80,7 +80,10 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
             .HasColumnName("Url")
             .HasColumnType(NvarcharType)
             .HasMaxLength(2083)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion(
+                u => u.AbsoluteUri,
+                dbValue => new Uri(dbValue));
 
         builder.HasOne(u => u.UrlHashSet)
             .WithMany()
