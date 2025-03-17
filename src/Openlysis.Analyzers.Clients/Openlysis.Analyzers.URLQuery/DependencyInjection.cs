@@ -1,13 +1,11 @@
-using System.Net;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
+using Openlysis.Analyzers.Contracts.Infrastructure.Client;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
-using Openlysis.Analyzers.URLQuery.Core.Constants;
 using Openlysis.Analyzers.URLQuery.Infrastructure.Services;
 using Openlysis.Analyzers.URLQuery.Services;
 using Openlysis.Domain.URLs.Entities;
@@ -49,12 +47,7 @@ public static class DependencyInjection
         services.Configure<VerdictCalculationOptions>(verdictCalculationOptionsSection);
 
         // Add http client
-        var httpClient = new HttpClient();
-        httpClient.BaseAddress = new Uri(Addresses.Base);
-        httpClient.Timeout = TimeSpan.FromMilliseconds(analyzerOptions.RequestsTimeoutMs);
-        httpClient.DefaultRequestHeaders.Add(analyzerOptions.ApiKeyHeaderName, secretOptions.ApiKey);
-        httpClient.DefaultRequestVersion = HttpVersion.Version20;
-        services.AddKeyedSingleton(UrlAnalyzer.HttpClientServiceKey, httpClient);
+        services.AddHttpClient(UrlAnalyzer.HttpClientServiceKey, secretOptions, analyzerOptions);
 
         // Add URL analyzer
         services.AddSingleton<IVerdictCalculator, VerdictCalculator>();

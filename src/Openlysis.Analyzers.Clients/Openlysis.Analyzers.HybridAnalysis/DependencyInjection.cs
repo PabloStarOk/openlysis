@@ -1,10 +1,9 @@
-using System.Net;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
+using Openlysis.Analyzers.Contracts.Infrastructure.Client;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
@@ -30,7 +29,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // Get options
-        var hybridSecretOptions = configuration
+        var secretOptions = configuration
             .GetRequiredSection(HybridSecretOptions.SectionName)
             .Get<HybridSecretOptions>();
 
@@ -42,7 +41,7 @@ public static class DependencyInjection
             .GetRequiredSection(SchedulerOptions.SectionName)
             .Get<SchedulerOptions>();
 
-        ArgumentNullException.ThrowIfNull(hybridSecretOptions);
+        ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
         ArgumentNullException.ThrowIfNull(schedulerOptions);
 
@@ -60,13 +59,10 @@ public static class DependencyInjection
             schedulerOptions.Name);
 
         // Add http client
-        var httpClient = new HttpClient();
-        httpClient.BaseAddress = new Uri(Addresses.Base);
-        httpClient.Timeout = TimeSpan.FromMilliseconds(analyzerOptions.RequestsTimeoutMs);
-        httpClient.DefaultRequestHeaders.Add(analyzerOptions.ApiKeyHeaderName, hybridSecretOptions.ApiKey);
-        httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(analyzerOptions.UserAgent);
-        httpClient.DefaultRequestVersion = HttpVersion.Version20;
-        services.AddKeyedSingleton(UrlAnalyzer.HttpClientServiceKey, httpClient);
+        services.AddHttpClient(UrlAnalyzer.HttpClientServiceKey, secretOptions, analyzerOptions, client =>
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd(analyzerOptions.UserAgent);
+            });
 
         // Add analyzer
         services.AddSingleton<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();

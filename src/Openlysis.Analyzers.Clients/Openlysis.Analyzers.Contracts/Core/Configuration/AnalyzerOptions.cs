@@ -9,12 +9,17 @@ public record AnalyzerOptions
     /// Gets the name of the service.
     /// </summary>
     required public string ServiceName { get; init; }
-    
+
+    /// <summary>
+    /// Gets the base address of the service.
+    /// </summary>
+    required public Uri BaseAddress { get; init; }
+
     /// <summary>
     /// Gets the name of the API key header.
     /// </summary>
     required public string ApiKeyHeaderName { get; init;  }
-    
+
     /// <summary>
     /// Gets the timeout for requests in milliseconds.
     /// </summary>
