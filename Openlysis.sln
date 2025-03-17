@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API.Authenticatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.URLQuery", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj", "{CB37658F-C911-41EC-BB74-A3956FA601DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.HybridAnalysis", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.HybridAnalysis\Openlysis.Analyzers.HybridAnalysis.csproj", "{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +66,10 @@ Global
 		{CB37658F-C911-41EC-BB74-A3956FA601DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB37658F-C911-41EC-BB74-A3956FA601DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CB37658F-C911-41EC-BB74-A3956FA601DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
