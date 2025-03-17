@@ -32,12 +32,12 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// Gets the name of the service.
     /// </summary>
     public string ServiceName => _options.CurrentValue.ServiceName;
-    
+
     /// <summary>
     /// Gets or sets a value indicating whether the service is available.
     /// </summary>
     public bool IsAvailable { get; protected set; } = true;
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="Analyzer{TAnalysis, TRequest}"/> class.
     /// </summary>
@@ -75,7 +75,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         _httpClient = httpClient;
         _logger = logger;
     }
-    
+
     /// <inheritdoc/>
     public void Dispose()
     {
@@ -91,13 +91,26 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     public async Task<ErrorOr<TAnalysis>> AnalyzeAsync(TRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        
+
         if (!IsAvailable)
         {
             return Error.Failure(description: $"{ServiceName} analysis service is not available.");
         }
 
-        return await OnAnalyzeAsync(request, cancellationToken);
+        try
+        {
+            return await OnAnalyzeAsync(request, cancellationToken);
+        }
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            if (ex.InnerException is not(null or TimeoutException))
+            {
+                throw;
+            }
+
+            _logger.LogWarning(ex, "A timeout exception occurred while analyzing at {ServiceName} service analyzer.", ServiceName);
+            return Error.Failure("Timeout exception occurred.");
+        }
     }
 
     /// <summary>
@@ -109,13 +122,26 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     public async Task<ErrorOr<AnalysisStatus>> GetStatusAsync(ComposedServiceAnalysisId id, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id.Primary.Value);
-        
+
         if (!IsAvailable)
         {
             return Error.Failure(description: $"{ServiceName} analysis service is not available.");
         }
-        
-        return await OnGetStatusAsync(id, cancellationToken);
+
+        try
+        {
+            return await OnGetStatusAsync(id, cancellationToken);
+        }
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            if (ex.InnerException is not(null or TimeoutException))
+            {
+                throw;
+            }
+
+            _logger.LogWarning(ex, "A timeout exception occurred while analyzing at {ServiceName} service analyzer.", ServiceName);
+            return Error.Failure("Timeout exception occurred.");
+        }
     }
 
     /// <summary>
@@ -127,15 +153,28 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     public async Task<ErrorOr<TAnalysis>> GetAnalysisAsync(ComposedServiceAnalysisId id, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id.Primary.Value);
-        
+
         if (!IsAvailable)
         {
             return Error.Failure(description: $"{ServiceName} analysis service is not available.");
         }
 
-        return await OnGetAnalysisAsync(id, cancellationToken);
+        try
+        {
+            return await OnGetAnalysisAsync(id, cancellationToken);
+        }
+        catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            if (ex.InnerException is not(null or TimeoutException))
+            {
+                throw;
+            }
+
+            _logger.LogWarning(ex, "A timeout exception occurred while analyzing at {ServiceName} service analyzer.", ServiceName);
+            return Error.Failure("Timeout exception occurred.");
+        }
     }
-    
+
     /// <summary>
     /// Disposes the resources used by the analyzer.
     /// </summary>
@@ -146,11 +185,11 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         {
             return;
         }
-            
+
         _requestLimitTracker.OnLimitReached -= OnLimitReached;
         _requestLimitTracker.OnRateReduced -= OnRateReduced;
     }
-    
+
     /// <summary>
     /// Analyzes the given request asynchronously.
     /// </summary>
@@ -158,7 +197,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis result or an error.</returns>
     protected abstract Task<ErrorOr<TAnalysis>> OnAnalyzeAsync(TRequest request, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Checks the status of an analysis asynchronously.
     /// </summary>
@@ -166,7 +205,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis status or an error.</returns>
     protected abstract Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(ComposedServiceAnalysisId id, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Gets the analysis by its identifier asynchronously.
     /// </summary>
@@ -174,7 +213,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis result or an error.</returns>
     protected abstract Task<ErrorOr<TAnalysis>> OnGetAnalysisAsync(ComposedServiceAnalysisId id, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Handles the event when a request limit is reached.
     /// </summary>
@@ -186,14 +225,14 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         {
             return;
         }
-        
+
         IsAvailable = false;
         _logger.LogWarning(
             "{ServiceName} analyzer service is not available due to a {LimitPeriod} limit reached.",
             ServiceName,
             limitPeriod);
     }
-    
+
     /// <summary>
     /// Handles the event when the rate limit is reduced.
     /// </summary>
