@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.HybridAnalysis.Core.Constants;
+namespace Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 
 /// <summary>
 /// Options for the scheduler of Hybrid Analysis analyzer.

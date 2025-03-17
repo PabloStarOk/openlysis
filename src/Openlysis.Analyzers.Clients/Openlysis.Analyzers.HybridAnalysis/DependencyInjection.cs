@@ -7,7 +7,6 @@ using Openlysis.Analyzers.Contracts.Infrastructure.Client;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
-using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 using Openlysis.Analyzers.HybridAnalysis.Services;
 using Openlysis.Domain.URLs.Entities;
