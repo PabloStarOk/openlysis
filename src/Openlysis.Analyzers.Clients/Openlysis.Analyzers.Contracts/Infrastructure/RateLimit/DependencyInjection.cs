@@ -36,46 +36,46 @@ public static class DependencyInjection
             .GetRequiredSection(RequestLimitOptions.SectionName);
         ArgumentNullException.ThrowIfNull(limitOptions);
         services.Configure<RequestLimitOptions>(limitOptions);
-        
+
         // Add limit manager.
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IRequestLimitTracker, RequestLimitTracker>();
 
         using var sp = services.BuildServiceProvider();
-        
+
         // Add quartz.
         services.AddQuartz(
             q =>
             {
                 q.SchedulerId = schedulerId;
                 q.SchedulerName = schedulerName;
-                var dailyJobKey = new JobKey("DailyResetJob");
+                var dailyJobKey = new JobKey("DailyResetJob", schedulerId);
                 q.AddJob<ResetLimitJob>(dailyJobKey);
                 q.AddTrigger(
                     trigger =>
                     {
                         trigger
                             .ForJob(dailyJobKey)
-                            .WithIdentity("DailyResetJobTrigger")
+                            .WithIdentity("DailyResetJobTrigger", schedulerId)
                             .StartNow()
                             .UsingJobData(ResetLimitJob.JobDataMapKey, (int)RequestLimitPeriod.Day)
                             .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 0));
                     });
-                
-                var monthlyJobKey = new JobKey("MonthlyResetJob");
+
+                var monthlyJobKey = new JobKey("MonthlyResetJob", schedulerId);
                 q.AddJob<ResetLimitJob>(monthlyJobKey);
                 q.AddTrigger(
                     trigger =>
                     {
                         trigger
                             .ForJob(monthlyJobKey)
-                            .WithIdentity("MonthlyResetJobTrigger")
+                            .WithIdentity("MonthlyResetJobTrigger", schedulerId)
                             .StartNow()
                             .UsingJobData(ResetLimitJob.JobDataMapKey, (int)RequestLimitPeriod.Month)
                             .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 0));
                     });
             });
-        
+
         services.AddQuartzHostedService(
             options =>
             {

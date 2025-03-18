@@ -3,8 +3,10 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using Openlysis.Analyzers.HybridAnalysis;
 using Openlysis.Analyzers.URLQuery;
+using Openlysis.Analyzers.VirusTotal;
 using Openlysis.MultiAnalyzer.Core;
 using Openlysis.MultiAnalyzer.Features.AnalyzeFile.Consumer;
 using Openlysis.MultiAnalyzer.Infrastructure;
@@ -24,6 +26,7 @@ builder.ConfigureServices((context, services) =>
     services.AddFilescanIoAnalyzer(context.Configuration);
     services.AddUrlQueryAnalyzer(context.Configuration);
     services.AddHybridAnalyzer(context.Configuration);
+    services.AddVirusTotalAnalyzers(context.Configuration);
 
     // Add message broker
     services.AddMassTransit(
