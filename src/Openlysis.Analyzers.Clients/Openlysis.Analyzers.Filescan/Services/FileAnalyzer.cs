@@ -1,22 +1,20 @@
 using ErrorOr;
 
-using Filescan.Client.Abstractions;
-using Filescan.Client.Constants.Common;
-using Filescan.Client.Models.Requests;
-using Filescan.Client.Models.Scans;
-
 using Openlysis.Analyzers.Contracts.Core.Files.Requests;
 using Openlysis.Analyzers.Contracts.Interfaces;
+using Openlysis.Analyzers.Filescan.Core.Abstractions;
+using Openlysis.Analyzers.Filescan.Core.Constants.Common;
+using Openlysis.Analyzers.Filescan.Core.Models.Requests;
+using Openlysis.Analyzers.Filescan.Core.Models.Scans;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Filescan.Client;
+namespace Openlysis.Analyzers.Filescan.Services;
 
 /// <summary>
 /// Represents a file scanner analyzer that implements the <see cref="IServiceAnalyzer{TAnalysis,TAnalysisId}"/> interface.
 /// </summary>
-public class FilescanAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>
+public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>
 {
     /// <inheritdoc/>
     public string ServiceName => ServiceConstants.ServiceName;
@@ -24,10 +22,10 @@ public class FilescanAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAna
     private readonly IFileScannerService _fileScannerService;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FilescanAnalyzer"/> class.
+    /// Initializes a new instance of the <see cref="FileAnalyzer"/> class.
     /// </summary>
     /// <param name="fileScannerService">The file scanner service to be used for file analysis.</param>
-    public FilescanAnalyzer(IFileScannerService fileScannerService)
+    public FileAnalyzer(IFileScannerService fileScannerService)
     {
         _fileScannerService = fileScannerService;
     }

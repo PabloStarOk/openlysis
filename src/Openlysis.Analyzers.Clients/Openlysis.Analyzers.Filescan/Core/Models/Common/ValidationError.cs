@@ -1,4 +1,4 @@
-namespace Filescan.Client.Models.Common;
+namespace Openlysis.Analyzers.Filescan.Core.Models.Common;
 
 /// <summary>
 /// Represents a validation error with details about the type, message, and location of the error.

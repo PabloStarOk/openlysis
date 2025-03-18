@@ -1,9 +1,8 @@
-using Filescan.Client;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using Openlysis.Analyzers.Filescan;
 using Openlysis.Analyzers.HybridAnalysis;
 using Openlysis.Analyzers.URLQuery;
 using Openlysis.Analyzers.VirusTotal;
@@ -23,7 +22,7 @@ builder.ConfigureServices((context, services) =>
     services.AddInfrastructure(context.Configuration);
 
     // Add analyzers
-    services.AddFilescanIoAnalyzer(context.Configuration);
+    services.AddFilescanIoAnalyzers(context.Configuration);
     services.AddUrlQueryAnalyzer(context.Configuration);
     services.AddHybridAnalyzer(context.Configuration);
     services.AddVirusTotalAnalyzers(context.Configuration);

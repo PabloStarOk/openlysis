@@ -1,12 +1,11 @@
 using System.Text.Json;
 
-using Filescan.Client.Abstractions;
-using Filescan.Client.Constants.Common;
-
+using Openlysis.Analyzers.Filescan.Core.Abstractions;
+using Openlysis.Analyzers.Filescan.Core.Constants.Common;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.FileAnalyses.Entities;
 
-namespace Filescan.Client.Services.Parsers;
+namespace Openlysis.Analyzers.Filescan.Infrastructure.Services.Parsers;
 
 /// <summary>
 /// Creates <see cref="ServiceFileAnalysis"/> objects from <see cref="JsonElement"/>.

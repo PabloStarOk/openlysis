@@ -1,12 +1,10 @@
 using ErrorOr;
 
-using Filescan.Client.Models.Requests;
-
+using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Filescan.Client.Abstractions;
+namespace Openlysis.Analyzers.Filescan.Core.Abstractions;
 
 /// <summary>
 /// Defines the client to scan files.

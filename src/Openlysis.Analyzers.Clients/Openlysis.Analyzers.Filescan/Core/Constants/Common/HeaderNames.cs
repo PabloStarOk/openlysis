@@ -1,4 +1,4 @@
-namespace Filescan.Client.Constants.Common;
+namespace Openlysis.Analyzers.Filescan.Core.Constants.Common;
 
 /// <summary>
 /// Contains constant values for header names of Filescan.IO API.

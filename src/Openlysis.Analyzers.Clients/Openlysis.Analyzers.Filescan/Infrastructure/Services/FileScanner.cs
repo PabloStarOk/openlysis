@@ -4,17 +4,15 @@ using System.Text.Json;
 
 using ErrorOr;
 
-using Filescan.Client.Abstractions;
-using Filescan.Client.Constants.Common;
-using Filescan.Client.Constants.Endpoints;
-using Filescan.Client.Models.Common;
-using Filescan.Client.Models.Requests;
-
+using Openlysis.Analyzers.Filescan.Core.Abstractions;
+using Openlysis.Analyzers.Filescan.Core.Constants.Common;
+using Openlysis.Analyzers.Filescan.Core.Constants.Endpoints;
+using Openlysis.Analyzers.Filescan.Core.Models.Common;
+using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Filescan.Client.Services;
+namespace Openlysis.Analyzers.Filescan.Infrastructure.Services;
 
 /// <summary>
 /// Client to scan files.

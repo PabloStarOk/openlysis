@@ -1,9 +1,9 @@
 using System.Text.Json;
 
-using Filescan.Client.Abstractions;
-using Filescan.Client.Models.Common;
+using Openlysis.Analyzers.Filescan.Core.Abstractions;
+using Openlysis.Analyzers.Filescan.Core.Models.Common;
 
-namespace Filescan.Client.Services.Parsers;
+namespace Openlysis.Analyzers.Filescan.Infrastructure.Services.Parsers;
 
 /// <summary>
 /// Creates <see cref="FilescanError"/> objects from <see cref="JsonElement"/>.

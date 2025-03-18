@@ -1,23 +1,22 @@
 using System.Net;
 using System.Text.Json;
 
-using Filescan.Client.Abstractions;
-using Filescan.Client.Constants.Common;
-using Filescan.Client.Constants.Endpoints;
-using Filescan.Client.Models.Common;
-using Filescan.Client.Services;
-using Filescan.Client.Services.Parsers;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Contracts.Configuration;
 using Openlysis.Analyzers.Contracts.Interfaces;
+using Openlysis.Analyzers.Filescan.Core.Abstractions;
+using Openlysis.Analyzers.Filescan.Core.Constants.Common;
+using Openlysis.Analyzers.Filescan.Core.Constants.Endpoints;
+using Openlysis.Analyzers.Filescan.Core.Models.Common;
+using Openlysis.Analyzers.Filescan.Infrastructure.Services;
+using Openlysis.Analyzers.Filescan.Infrastructure.Services.Parsers;
+using Openlysis.Analyzers.Filescan.Services;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Filescan.Client;
+namespace Openlysis.Analyzers.Filescan;
 
 /// <summary>
 /// Provides methods for registering Filescan.IO analyzer services with the dependency injection container.
@@ -29,7 +28,7 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">The service collection to add the services to.</param>
     /// <param name="configuration">The configuration to retrieve settings from.</param>
-    public static void AddFilescanIoAnalyzer(this IServiceCollection services, IConfiguration configuration)
+    public static void AddFilescanIoAnalyzers(this IServiceCollection services, IConfiguration configuration)
     {
         // Retrieve FilescanSettings from the configuration
         var settings = configuration
@@ -56,6 +55,6 @@ public static class DependencyInjection
 
         // Register Filescan.IO services
         services.AddScoped<IFileScannerService, FileScanner>();
-        services.AddScoped<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>, FilescanAnalyzer>();
+        services.AddScoped<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>, FileAnalyzer>();
     }
 }

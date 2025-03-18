@@ -1,4 +1,4 @@
-namespace Filescan.Client.Models.Requests;
+namespace Openlysis.Analyzers.Filescan.Core.Models.Requests;
 
 /// <summary>
 /// Represents a request to get a scan.

@@ -1,4 +1,4 @@
-namespace Filescan.Client.Constants.Common;
+namespace Openlysis.Analyzers.Filescan.Core.Constants.Common;
 
 /// <summary>
 /// Contains constants related to the Filescan service.

@@ -1,6 +1,6 @@
-using Filescan.Client.Models.Scans;
+using Openlysis.Analyzers.Filescan.Core.Models.Scans;
 
-namespace Filescan.Client.Models.Requests;
+namespace Openlysis.Analyzers.Filescan.Core.Models.Requests;
 
 /// <summary>
 /// Represents a request to scan a file.

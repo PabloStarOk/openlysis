@@ -1,4 +1,4 @@
-namespace Filescan.Client.Constants.Endpoints;
+namespace Openlysis.Analyzers.Filescan.Core.Constants.Endpoints;
 
 /// <summary>
 /// Contains the addresses used in the Filescan client.

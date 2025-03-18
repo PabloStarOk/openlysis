@@ -1,11 +1,10 @@
 using System.Text.Json;
 
-using Filescan.Client.Abstractions;
-
+using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.FileAnalyses.Entities;
 
-namespace Filescan.Client.Services.Parsers;
+namespace Openlysis.Analyzers.Filescan.Infrastructure.Services.Parsers;
 
 /// <summary>
 /// Creates <see cref="Report"/> objects from <see cref="JsonElement"/>.

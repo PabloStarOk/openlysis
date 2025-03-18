@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Filescan.Client.Abstractions;
+namespace Openlysis.Analyzers.Filescan.Core.Abstractions;
 
 /// <summary>
 /// Interface for parsing JSON elements to models.

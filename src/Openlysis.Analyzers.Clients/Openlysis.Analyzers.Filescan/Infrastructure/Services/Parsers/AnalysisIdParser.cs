@@ -1,11 +1,9 @@
 using System.Text.Json;
 
-using Filescan.Client.Abstractions;
-
+using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Filescan.Client.Services.Parsers;
+namespace Openlysis.Analyzers.Filescan.Infrastructure.Services.Parsers;
 
 /// <summary>
 /// Creates <see cref="ServiceAnalysisId"/> objects from <see cref="JsonElement"/>.
