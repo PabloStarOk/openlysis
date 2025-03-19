@@ -1,11 +1,18 @@
 using ErrorOr;
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
 using Openlysis.Analyzers.Contracts.Core.Files.Requests;
 using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
-using Openlysis.Analyzers.Filescan.Core.Constants.Common;
+using Openlysis.Analyzers.Filescan.Core.Constants;
+using Openlysis.Analyzers.Filescan.Core.Models.Enums;
 using Openlysis.Analyzers.Filescan.Core.Models.Requests;
+using Openlysis.Analyzers.Filescan.Core.Models.Responses;
 using Openlysis.Analyzers.Filescan.Core.Models.Scans;
+using Openlysis.Analyzers.Filescan.Infrastructure.Factories;
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
 
@@ -19,15 +26,24 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysi
     /// <inheritdoc/>
     public string ServiceName => ServiceConstants.ServiceName;
 
-    private readonly IFileScannerService _fileScannerService;
+    private readonly ILogger<FileAnalyzer> _logger;
+    private readonly HttpClient _httpClient;
+    private readonly IFilescanAnalyzer _filescanAnalyzer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileAnalyzer"/> class.
     /// </summary>
-    /// <param name="fileScannerService">The file scanner service to be used for file analysis.</param>
-    public FileAnalyzer(IFileScannerService fileScannerService)
+    /// <param name="logger">The logger to be used for logging information.</param>
+    /// <param name="httpClient">The HTTP client to be used for making requests.</param>
+    /// <param name="filescanAnalyzer">The file scanner service to be used for file analysis.</param>
+    public FileAnalyzer(
+        ILogger<FileAnalyzer> logger,
+        [FromKeyedServices(ServiceConstants.ServiceName)] HttpClient httpClient,
+        IFilescanAnalyzer filescanAnalyzer)
     {
-        _fileScannerService = fileScannerService;
+        _logger = logger;
+        _httpClient = httpClient;
+        _filescanAnalyzer = filescanAnalyzer;
     }
 
     /// <inheritdoc/>
@@ -43,7 +59,18 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysi
             IsPrivateFile: request.IsPrivateFile,
             Options: options);
 
-        return await _fileScannerService.UploadAsync(scanRequest, cancellationToken);
+        var factory = new FileRequestFactory(scanRequest);
+        ErrorOr<ScanResponse> result = await _filescanAnalyzer.AnalyzeAsync(
+            _httpClient,
+            factory,
+            cancellationToken);
+
+        if (result.IsError)
+        {
+            return result.Errors;
+        }
+
+        return ServiceAnalysisId.Create(result.Value.FlowId);
     }
 
     /// <inheritdoc/>
@@ -51,6 +78,57 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysi
     {
         var getScanRequest = new GetScanRequest(analysisId.Value);
 
-        return await _fileScannerService.GetScanAsync(getScanRequest, cancellationToken);
+        ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(
+            _httpClient,
+            getScanRequest,
+            cancellationToken);
+
+        if (result.IsError)
+        {
+            return result.Errors;
+        }
+
+        GetAnalysisResponse analysisResponse = result.Value;
+
+        if (analysisResponse.Reports.Count > 1)
+        {
+            _logger.LogError(
+                "Get analysis response contains more than 1 report at {ServiceName} service analyzer. \nTotal Reports Received: {TotalReportsReceived}",
+                ServiceName,
+                analysisResponse.Reports.Count);
+            return Error.Unexpected("Filescan get analysis response contains more than 1 report.");
+        }
+
+        AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];
+        var serviceAnalysis = ServiceFileAnalysis.Create(
+            analysisResponse.FlowId,
+            ServiceName,
+            status);
+
+        if (analysisResponse.Reports.Count is 0)
+        {
+            return serviceAnalysis;
+        }
+
+        var filescanReportId = analysisResponse.Reports.First().Key;
+        var filescanReport = analysisResponse.Reports.First().Value;
+        Verdict verdict = Maps.VerdictMap[filescanReport.FinalVerdict?.Verdict ?? FilescanVerdict.Unknown];
+        var threatZone = verdict switch
+        {
+            Verdict.Unknown => ThreatZone.Unknown,
+            Verdict.Undetected => ThreatZone.Green,
+            Verdict.Suspicious => ThreatZone.Yellow,
+            Verdict.Malicious => ThreatZone.Red,
+            _ => throw new InvalidOperationException("Verdict at FileAnalyzer of Filescan service was out of range.")
+        };
+
+        var report = Report.Create(
+            filescanReportId,
+            verdict,
+            threatZone,
+            filescanReport.FinalVerdict?.ThreatLevel);
+        serviceAnalysis.AddReport(report);
+
+        return serviceAnalysis;
     }
 }

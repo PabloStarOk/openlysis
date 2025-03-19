@@ -1,20 +1,19 @@
-using System.Net;
-using System.Text.Json;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Analyzers.Contracts.Configuration;
+using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
+using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
+using Openlysis.Analyzers.Contracts.Infrastructure.Client;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
-using Openlysis.Analyzers.Filescan.Core.Constants.Common;
-using Openlysis.Analyzers.Filescan.Core.Constants.Endpoints;
-using Openlysis.Analyzers.Filescan.Core.Models.Common;
+using Openlysis.Analyzers.Filescan.Core.Configuration;
+using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Infrastructure.Services;
-using Openlysis.Analyzers.Filescan.Infrastructure.Services.Parsers;
 using Openlysis.Analyzers.Filescan.Services;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
+using Openlysis.Domain.URLs.Entities;
 
 namespace Openlysis.Analyzers.Filescan;
 
@@ -30,31 +29,43 @@ public static class DependencyInjection
     /// <param name="configuration">The configuration to retrieve settings from.</param>
     public static void AddFilescanIoAnalyzers(this IServiceCollection services, IConfiguration configuration)
     {
-        // Retrieve FilescanSettings from the configuration
-        var settings = configuration
-            .GetRequiredSection("FilescanSettings")
-            .Get<AnalyzerSettings>();
+        // Get options
+        var secretOptions = configuration
+            .GetRequiredSection(FilescanSecretOptions.SectionName)
+            .Get<FilescanSecretOptions>();
 
-        // Ensure settings are not null
-        ArgumentNullException.ThrowIfNull(settings);
+        var analyzerOptionsSection = configuration
+            .GetRequiredSection(FilescanAnalyzerOptions.SectionName);
+        var analyzerOptions = analyzerOptionsSection.Get<FilescanAnalyzerOptions>();
 
-        // Register model parsers
-        services.AddTransient<ModelParser<FilescanError, JsonElement>, FilescanErrorParser>();
-        services.AddTransient<ModelParser<ServiceAnalysisId, JsonElement>, AnalysisIdParser>();
-        services.AddTransient<ModelParser<Report, JsonProperty>, ReportParser>();
-        services.AddTransient<ModelParser<ServiceFileAnalysis, JsonElement>, AnalysisParser>();
+        var schedulerOptions = configuration
+            .GetRequiredSection(SchedulerOptions.SectionName)
+            .Get<SchedulerOptions>();
 
-        // Configure HttpClient for Filescan.IO service
-        services.AddHttpClient(ServiceConstants.ServiceName, httpClient =>
-        {
-            httpClient.DefaultRequestVersion = HttpVersion.Version30;
-            httpClient.Timeout = TimeSpan.FromMilliseconds(settings.RequestsTimeoutMs);
-            httpClient.BaseAddress = new Uri(Addresses.BaseAddress);
-            httpClient.DefaultRequestHeaders.Add(HeaderNames.ApiKey, settings.ApiKey);
-        });
+        ArgumentNullException.ThrowIfNull(secretOptions);
+        ArgumentNullException.ThrowIfNull(analyzerOptions);
+        ArgumentNullException.ThrowIfNull(schedulerOptions);
 
-        // Register Filescan.IO services
-        services.AddScoped<IFileScannerService, FileScanner>();
-        services.AddScoped<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>, FileAnalyzer>();
+        // Add options
+        services.Configure<FilescanAnalyzerOptions>(analyzerOptionsSection);
+
+        // Add HTTP Client
+        services.AddHttpClient(ServiceConstants.ServiceName, secretOptions, analyzerOptions);
+
+        // Add request limit tracker
+        services.AddRequestLimitTracker(
+            configuration,
+            analyzerOptions.ServiceName,
+            schedulerOptions.Id,
+            schedulerOptions.Name);
+
+        // Add Filescan analyzer.
+        services.AddSingleton<IFilescanAnalyzer, FilescanAnalyzer>();
+
+        // Add URL analyzer.
+        services.AddSingleton<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
+
+        // Add file analyzer.
+        services.AddSingleton<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>, FileAnalyzer>();
     }
 }
