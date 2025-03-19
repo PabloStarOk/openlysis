@@ -83,6 +83,11 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
         string formattedUrl = string.Format(Addresses.AnalysesEndpoint, id);
         using HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, cancellationToken);
 
+        if (!response.IsSuccessStatusCode)
+        {
+            return await LogAndReturnStatusCodeErrorAsync(response, cancellationToken);
+        }
+
         JsonElement dataElement;
         await using (Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken))
         using (JsonDocument jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken))
