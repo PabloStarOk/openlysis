@@ -41,13 +41,8 @@ public static class DependencyInjection
         var verdictCalculationOptionSection = configuration
             .GetRequiredSection(VerdictCalculationOptions.SectionName);
 
-        var schedulerOptions = configuration
-            .GetRequiredSection(SchedulerOptions.SectionName)
-            .Get<SchedulerOptions>();
-
         ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
-        ArgumentNullException.ThrowIfNull(schedulerOptions);
 
         // Add options.
         services.Configure<VirusTotalAnalyzerOptions>(analyzerOptionsSection);
@@ -66,9 +61,8 @@ public static class DependencyInjection
         // Add limit tracker
         services.AddRequestLimitTracker(
             configuration,
-            analyzerOptions.ServiceName,
-            schedulerOptions.Id,
-            schedulerOptions.Name);
+            UrlAnalyzer.LimitTrackerServiceKey,
+            analyzerOptions.ServiceName);
 
         // Add verdict calculator
         services.AddSingleton<IVerdictCalculator, VerdictCalculator>();

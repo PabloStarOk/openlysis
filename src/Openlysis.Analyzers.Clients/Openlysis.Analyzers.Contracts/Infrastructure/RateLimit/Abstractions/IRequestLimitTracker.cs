@@ -21,7 +21,7 @@ public interface IRequestLimitTracker
     /// This event is useful for monitoring and handling scenarios where the request limit has been reduced or reset.
     /// </remarks>
     public event EventHandler<RequestLimitPeriod> OnRateReduced;
-    
+
     /// <summary>
     /// Adds a new request that was made to the limit count.
     /// </summary>
@@ -31,7 +31,7 @@ public interface IRequestLimitTracker
     /// Resets the daily request count.
     /// </summary>
     internal void ResetDailyRequestCount();
-    
+
     /// <summary>
     /// Resets the monthly request count.
     /// </summary>

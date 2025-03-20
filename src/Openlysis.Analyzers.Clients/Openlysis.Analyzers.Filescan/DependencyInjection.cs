@@ -38,13 +38,8 @@ public static class DependencyInjection
             .GetRequiredSection(FilescanAnalyzerOptions.SectionName);
         var analyzerOptions = analyzerOptionsSection.Get<FilescanAnalyzerOptions>();
 
-        var schedulerOptions = configuration
-            .GetRequiredSection(SchedulerOptions.SectionName)
-            .Get<SchedulerOptions>();
-
         ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
-        ArgumentNullException.ThrowIfNull(schedulerOptions);
 
         // Add options
         services.Configure<FilescanAnalyzerOptions>(analyzerOptionsSection);
@@ -55,9 +50,8 @@ public static class DependencyInjection
         // Add request limit tracker
         services.AddRequestLimitTracker(
             configuration,
-            analyzerOptions.ServiceName,
-            schedulerOptions.Id,
-            schedulerOptions.Name);
+            UrlAnalyzer.LimitTrackerServiceKey,
+            analyzerOptions.ServiceName);
 
         // Add Filescan analyzer.
         services.AddSingleton<IFilescanAnalyzer, FilescanAnalyzer>();

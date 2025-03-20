@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.Filescan;
 using Openlysis.Analyzers.HybridAnalysis;
 using Openlysis.Analyzers.URLQuery;
@@ -26,6 +27,9 @@ builder.ConfigureServices((context, services) =>
     services.AddUrlQueryAnalyzer(context.Configuration);
     services.AddHybridAnalyzer(context.Configuration);
     services.AddVirusTotalAnalyzers(context.Configuration);
+
+    // Add limit tracker jobs
+    services.AddLimitTrackerJobs();
 
     // Add message broker
     services.AddMassTransit(

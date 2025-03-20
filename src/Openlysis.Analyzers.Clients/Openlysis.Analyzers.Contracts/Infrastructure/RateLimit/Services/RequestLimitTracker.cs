@@ -13,9 +13,13 @@ namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Services;
 /// </summary>
 public sealed class RequestLimitTracker : IRequestLimitTracker, IDisposable, IAsyncDisposable
 {
+    /// <inheritdoc/>
     public event EventHandler<RequestLimitPeriod>? OnLimitReached;
+
+    /// <inheritdoc/>
     public event EventHandler<RequestLimitPeriod>? OnRateReduced;
 
+    private readonly string _optionsInstanceName;
     private readonly IOptionsMonitor<RequestLimitOptions> _limitOptions;
     private readonly TimeProvider _timeProvider;
     private readonly ITimer _timer;
@@ -29,26 +33,29 @@ public sealed class RequestLimitTracker : IRequestLimitTracker, IDisposable, IAs
     /// <summary>
     /// Initializes a new instance of the <see cref="RequestLimitTracker"/> class.
     /// </summary>
+    /// <param name="optionsInstanceName">The name of the options instance.</param>
     /// <param name="limitOptions">The options monitor for request limit configurations.</param>
     /// <param name="timeProvider">The time provider used to create timers.</param>
     public RequestLimitTracker(
+        string optionsInstanceName,
         IOptionsMonitor<RequestLimitOptions> limitOptions,
         TimeProvider timeProvider)
     {
+        _optionsInstanceName = optionsInstanceName;
         _limitOptions = limitOptions;
         _timeProvider = timeProvider;
         _timer = _timeProvider.CreateTimer(
             UpdateRequestQueues,
             null,
             TimeSpan.Zero,
-            TimeSpan.FromMilliseconds(_limitOptions.CurrentValue.UpdateFrequencyMs));
+            TimeSpan.FromMilliseconds(_limitOptions.Get(_optionsInstanceName).UpdateFrequencyMs));
     }
-    
+
     /// <inheritdoc/>
     public void AddRequest()
     {
         DateTimeOffset now = _timeProvider.GetUtcNow();
-        RequestLimitOptions options = _limitOptions.CurrentValue;
+        RequestLimitOptions options = _limitOptions.Get(_optionsInstanceName);
 
         if (options.RatePerMinute > 0)
         {
@@ -56,7 +63,7 @@ public sealed class RequestLimitTracker : IRequestLimitTracker, IDisposable, IAs
             CheckIfLimitReached(
                 _currentRequestsPerMinute.Count,
                 options.RatePerMinute,
-                RequestLimitPeriod.Minute);   
+                RequestLimitPeriod.Minute);
         }
 
         if (options.RatePerHour > 0)
@@ -67,13 +74,13 @@ public sealed class RequestLimitTracker : IRequestLimitTracker, IDisposable, IAs
                 options.RatePerHour,
                 RequestLimitPeriod.Hour);
         }
-        
+
         _currentRequestsPerDay++;
         CheckIfLimitReached(
             _currentRequestsPerDay,
             options.QuotaPerDay,
             RequestLimitPeriod.Day);
-        
+
         _currentRequestsPerMonth++;
         CheckIfLimitReached(
             _currentRequestsPerMonth,
@@ -99,14 +106,12 @@ public sealed class RequestLimitTracker : IRequestLimitTracker, IDisposable, IAs
     public void Dispose()
     {
         _timer.Dispose();
-        GC.SuppressFinalize(this);
     }
-    
+
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
         await _timer.DisposeAsync();
-        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -119,7 +124,7 @@ public sealed class RequestLimitTracker : IRequestLimitTracker, IDisposable, IAs
             _currentRequestsPerMinute,
             TimeSpan.FromMinutes(1),
             RequestLimitPeriod.Minute);
-        
+
         DequeueExpiredRequests(
             _currentRequestsPerHour,
             TimeSpan.FromHours(1),

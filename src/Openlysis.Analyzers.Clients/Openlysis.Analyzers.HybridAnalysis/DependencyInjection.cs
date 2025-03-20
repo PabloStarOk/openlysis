@@ -36,13 +36,8 @@ public static class DependencyInjection
             .GetRequiredSection(HybridAnalyzerOptions.SectionName);
         var analyzerOptions = analyzerOptionsSection.Get<HybridAnalyzerOptions>();
 
-        var schedulerOptions = configuration
-            .GetRequiredSection(SchedulerOptions.SectionName)
-            .Get<SchedulerOptions>();
-
         ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
-        ArgumentNullException.ThrowIfNull(schedulerOptions);
 
         // Add options
         services.Configure<HybridAnalyzerOptions>(analyzerOptionsSection);
@@ -53,9 +48,8 @@ public static class DependencyInjection
         // Add request limit tracker
         services.AddRequestLimitTracker(
             configuration,
-            analyzerOptions.ServiceName,
-            schedulerOptions.Id,
-            schedulerOptions.Name);
+            UrlAnalyzer.LimitTrackerServiceKey,
+            analyzerOptions.ServiceName);
 
         // Add http client
         services.AddHttpClient(UrlAnalyzer.HttpClientServiceKey, secretOptions, analyzerOptions, client =>

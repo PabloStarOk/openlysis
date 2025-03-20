@@ -26,6 +26,11 @@ namespace Openlysis.Analyzers.Filescan.Services;
 /// </summary>
 public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 {
+    /// <summary>
+    /// Key of the service for tracking request limits.
+    /// </summary>
+    public const string LimitTrackerServiceKey = "FilescanLimitTracker";
+
     private readonly IFilescanAnalyzer _filescanAnalyzer;
 
     /// <summary>
@@ -38,7 +43,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="filescanAnalyzer">The filescan analyzer for analyzing files.</param>
     public UrlAnalyzer(
         IOptionsMonitor<AnalyzerOptions> options,
-        IRequestLimitTracker requestLimitTracker,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
         [FromKeyedServices(ServiceConstants.ServiceName)] HttpClient httpClient,
         ILogger<UrlAnalyzer> logger,
         IFilescanAnalyzer filescanAnalyzer)

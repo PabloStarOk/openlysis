@@ -10,31 +10,37 @@ namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Services;
 /// </summary>
 public class ResetLimitJob : IJob
 {
+    /// <summary>
+    /// The key used to retrieve the request limit period from the job data map.
+    /// </summary>
     public const string JobDataMapKey = "RequestLimitPeriod";
-    
-    private readonly IRequestLimitTracker _requestLimitTracker;
-    
+
+    private readonly IEnumerable<IRequestLimitTracker> _limitTrackers;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="ResetLimitJob"/> class.
     /// </summary>
-    /// <param name="requestLimitTracker">The request limit manager.</param>
-    public ResetLimitJob(IRequestLimitTracker requestLimitTracker)
+    /// <param name="limitTrackers">A collection of <see cref="IRequestLimitTracker"/>.</param>
+    public ResetLimitJob(IEnumerable<IRequestLimitTracker> limitTrackers)
     {
-        _requestLimitTracker = requestLimitTracker;
+        _limitTrackers = limitTrackers;
     }
-    
+
     /// <inheritdoc/>
     public Task Execute(IJobExecutionContext context)
     {
-        RequestLimitPeriod limitPeriod = (RequestLimitPeriod) context.MergedJobDataMap.GetInt(JobDataMapKey);
-        
+        var limitPeriod = (RequestLimitPeriod)context.MergedJobDataMap.GetInt(JobDataMapKey);
+        var limitTrackersList = _limitTrackers.ToList();
+
         if (limitPeriod is RequestLimitPeriod.Day)
         {
-            _requestLimitTracker.ResetDailyRequestCount();
+            limitTrackersList
+                .ForEach(t => t.ResetDailyRequestCount());
         }
         else if (limitPeriod is RequestLimitPeriod.Month)
         {
-            _requestLimitTracker.ResetMonthlyRequestCount();
+            limitTrackersList
+                .ForEach(t => t.ResetMonthlyRequestCount());
         }
 
         return Task.CompletedTask;

@@ -25,6 +25,11 @@ namespace Openlysis.Analyzers.HybridAnalysis.Services;
 public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 {
     /// <summary>
+    /// Key of the service for tracking request limits.
+    /// </summary>
+    public const string LimitTrackerServiceKey = "HybridAnalysisLimitTracker";
+
+    /// <summary>
     /// Key of a <see cref="HttpClient"/> service for the <see cref="UrlAnalyzer"/>.
     /// </summary>
     public const string HttpClientServiceKey = "HybridAnalysisHttpClient";
@@ -42,7 +47,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="sandboxAnalyzer">The sandbox analyzer.</param>
     public UrlAnalyzer(
         IOptionsMonitor<HybridAnalyzerOptions> options,
-        IRequestLimitTracker requestLimitTracker,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
         [FromKeyedServices(HttpClientServiceKey)] HttpClient httpClient,
         ILogger<UrlAnalyzer> logger,
         ISandboxAnalyzer sandboxAnalyzer)

@@ -24,6 +24,11 @@ namespace Openlysis.Analyzers.VirusTotal.Services;
 public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 {
     /// <summary>
+    /// Key of the service for tracking request limits.
+    /// </summary>
+    public const string LimitTrackerServiceKey = "VirusTotalLimitTracker";
+
+    /// <summary>
     /// The key used to identify the VirusTotal HTTP client service.
     /// </summary>
     public const string HttpClientServiceKey = "VirusTotal";
@@ -42,7 +47,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="verdictCalculator">The verdict calculator instance.</param>
     public UrlAnalyzer(
         IOptionsMonitor<VirusTotalAnalyzerOptions> options,
-        IRequestLimitTracker requestLimitTracker,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
         [FromKeyedServices(HttpClientServiceKey)] HttpClient httpClient,
         ILogger<UrlAnalyzer> logger,
         IVirusTotalAnalyzer vtAnalyzer,

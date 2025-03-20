@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Configuration;
@@ -20,56 +21,70 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <param name="configuration">The <see cref="IConfiguration"/> to retrieve the configuration settings from.</param>
-    /// <param name="parentSectionName">The name of the parent section in the configuration.</param>
-    /// <param name="schedulerId">The identifier for the Quartz scheduler.</param>
-    /// <param name="schedulerName">The name for the Quartz scheduler.</param>
+    /// <param name="serviceKey">The key used to identify the <see cref="IRequestLimitTracker"/> service and configured <see cref="RequestLimitOptions"/>.</param>
+    /// <param name="configSectionName">The name of the parent section in the configuration.</param>
     public static void AddRequestLimitTracker(
         this IServiceCollection services,
         IConfiguration configuration,
-        string parentSectionName,
-        string schedulerId,
-        string schedulerName)
+        string serviceKey,
+        string configSectionName)
     {
-        // Add options.
+        // Get options.
         var limitOptions = configuration
-            .GetRequiredSection(parentSectionName)
+            .GetRequiredSection(configSectionName)
             .GetRequiredSection(RequestLimitOptions.SectionName);
         ArgumentNullException.ThrowIfNull(limitOptions);
-        services.Configure<RequestLimitOptions>(limitOptions);
 
-        // Add limit manager.
-        services.AddSingleton(TimeProvider.System);
-        services.AddSingleton<IRequestLimitTracker, RequestLimitTracker>();
+        // Add options.
+        services.Configure<RequestLimitOptions>(serviceKey, limitOptions);
 
-        using var sp = services.BuildServiceProvider();
+        // Get options monitor
+        IOptionsMonitor<RequestLimitOptions> options;
+        using (ServiceProvider serviceProvider = services.BuildServiceProvider())
+        {
+            options = serviceProvider.GetRequiredService<IOptionsMonitor<RequestLimitOptions>>();
+        }
 
-        // Add quartz.
+        // Add limit tracker
+        var limitTracker = new RequestLimitTracker(serviceKey, options, TimeProvider.System);
+        services.AddSingleton<IRequestLimitTracker>(limitTracker);
+        services.AddKeyedSingleton<IRequestLimitTracker>(serviceKey, limitTracker);
+    }
+
+    /// <summary>
+    /// Adds Quartz jobs for resetting request limits on a daily and monthly basis.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to add the jobs to.</param>
+    public static void AddLimitTrackerJobs(this IServiceCollection services)
+    {
         services.AddQuartz(
             q =>
             {
-                q.SchedulerId = schedulerId;
-                q.SchedulerName = schedulerName;
-                var dailyJobKey = new JobKey("DailyResetJob", schedulerId);
-                q.AddJob<ResetLimitJob>(dailyJobKey);
+                // Add job
+                q.SchedulerId = "AnalyzerScheduler";
+                q.SchedulerName = "AnalyzerScheduler";
+                var jobKey = new JobKey("DailyResetJob");
+                q.AddJob<ResetLimitJob>(jobKey);
+
+                // Add daily trigger
                 q.AddTrigger(
                     trigger =>
                     {
                         trigger
-                            .ForJob(dailyJobKey)
-                            .WithIdentity("DailyResetJobTrigger", schedulerId)
+                            .ForJob(jobKey)
+                            .WithIdentity("DailyResetJobTrigger")
                             .StartNow()
                             .UsingJobData(ResetLimitJob.JobDataMapKey, (int)RequestLimitPeriod.Day)
                             .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 0));
                     });
 
-                var monthlyJobKey = new JobKey("MonthlyResetJob", schedulerId);
-                q.AddJob<ResetLimitJob>(monthlyJobKey);
+                // Add monthly trigger
                 q.AddTrigger(
                     trigger =>
                     {
                         trigger
-                            .ForJob(monthlyJobKey)
-                            .WithIdentity("MonthlyResetJobTrigger", schedulerId)
+                            .ForJob(jobKey)
+                            .WithIdentity("MonthlyResetJobTrigger")
                             .StartNow()
                             .UsingJobData(ResetLimitJob.JobDataMapKey, (int)RequestLimitPeriod.Month)
                             .WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(0, 0));
