@@ -21,13 +21,6 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
      where TAnalysis : notnull
      where TRequest : AnalyzeRequest
 {
-    protected readonly ILogger<Analyzer<TAnalysis, TRequest>> _logger;
-    protected readonly IOptionsMonitor<AnalyzerOptions> _options;
-    protected readonly HttpClient _httpClient;
-
-    private readonly IRequestLimitTracker? _requestLimitTracker;
-    private readonly HashSet<RequestLimitPeriod> _limitPeriodsReached = new (Enum.GetValues<RequestLimitPeriod>().Length);
-
     /// <summary>
     /// Gets the name of the service.
     /// </summary>
@@ -37,6 +30,13 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// Gets or sets a value indicating whether the service is available.
     /// </summary>
     public bool IsAvailable { get; protected set; } = true;
+
+    protected readonly ILogger<Analyzer<TAnalysis, TRequest>> _logger;
+    protected readonly IOptionsMonitor<AnalyzerOptions> _options;
+    protected readonly HttpClient _httpClient;
+
+    private readonly IRequestLimitTracker? _requestLimitTracker;
+    private readonly HashSet<RequestLimitPeriod> _limitPeriodsReached = new (Enum.GetValues<RequestLimitPeriod>().Length);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Analyzer{TAnalysis, TRequest}"/> class.
@@ -80,6 +80,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     public void Dispose()
     {
         Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -99,7 +100,13 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
 
         try
         {
-            return await OnAnalyzeAsync(request, cancellationToken);
+            ErrorOr<TAnalysis> result = await OnAnalyzeAsync(request, cancellationToken);
+            if (!result.IsError && _options.CurrentValue.AnalyzeConsumeRequest)
+            {
+                _requestLimitTracker?.AddRequest();
+            }
+
+            return result;
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
@@ -130,7 +137,13 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
 
         try
         {
-            return await OnGetStatusAsync(id, cancellationToken);
+            ErrorOr<AnalysisStatus> result = await OnGetStatusAsync(id, cancellationToken);
+            if (!result.IsError && _options.CurrentValue.GetStatusConsumeRequest)
+            {
+                _requestLimitTracker?.AddRequest();
+            }
+
+            return result;
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
@@ -161,7 +174,13 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
 
         try
         {
-            return await OnGetAnalysisAsync(id, cancellationToken);
+            ErrorOr<TAnalysis> result = await OnGetAnalysisAsync(id, cancellationToken);
+            if (!result.IsError && _options.CurrentValue.GetAnalysisConsumeRequest)
+            {
+                _requestLimitTracker?.AddRequest();
+            }
+
+            return result;
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
         {
