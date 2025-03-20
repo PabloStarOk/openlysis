@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Models;
 using Openlysis.Domain.Common.ServiceAnalyses.Mappings;
@@ -41,6 +43,7 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
     /// <summary>
     /// Gets the threat score of the analysis.
     /// </summary>
+    [Range(.0f, 1.0f)]
     public float? ThreatScore { get; }
 
     /// <summary>
@@ -93,6 +96,15 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
         float? threatScore = null)
     {
         var composedId = ComposedServiceAnalysisId.Create(id, jobId);
+        if (threatScore > 1.0f)
+        {
+            threatScore /= 100.0f;
+        }
+
+        if (threatScore is not null)
+        {
+            threatScore = Math.Clamp((float)threatScore, 0.0f, 1.0f);
+        }
 
         return new UrlServiceAnalysis(
             composedId,

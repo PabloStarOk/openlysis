@@ -181,28 +181,37 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
 
         IEnumerable<UrlServiceAnalysis> analyses = _serviceAnalyses;
 
-        if (analyses.All(a => a.Status is AnalysisStatus.Completed))
-        {
-            Status = AnalysisStatus.Completed;
-            return;
-        }
-
-        if (analyses.All(a => a.Status is AnalysisStatus.Failed))
-        {
-            Status = AnalysisStatus.Failed;
-            return;
-        }
-
+        // If all timeout, set as timeout
         if (analyses.All(a => a.Status is AnalysisStatus.Timeout))
         {
             Status = AnalysisStatus.Timeout;
             return;
         }
 
-        var statusCount = analyses.GroupBy(a => a.Status)
-            .ToDictionary(g => g.Key, g => g.Count());
+        // If all failed, set as failed
+        if (analyses.All(a => a.Status is AnalysisStatus.Failed))
+        {
+            Status = AnalysisStatus.Failed;
+            return;
+        }
 
-        Status = statusCount.OrderBy(s => s.Value)
+        // If is not queued nor in-progress and there's at least one completed, set as completed.
+        if (analyses.All(a => a.Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
+            && analyses.Any(a => a.Status is AnalysisStatus.Completed))
+        {
+            Status = AnalysisStatus.Completed;
+            return;
+        }
+
+        // Queued or in progress according to most frequent or higher status.
+        var statusCount = analyses.GroupBy(a => a.Status)
+            .ToDictionary(g => g.Key, g => g.Count())
+            .Where(g => g.Key
+                is not AnalysisStatus.Completed
+                and not AnalysisStatus.Timeout
+                and not AnalysisStatus.Failed);
+
+        Status = statusCount.OrderByDescending(s => s.Value)
             .ThenBy(s => s.Key)
             .First().Key;
     }
