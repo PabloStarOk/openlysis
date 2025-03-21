@@ -29,11 +29,6 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// </summary>
     public const string LimitTrackerServiceKey = "HybridAnalysisLimitTracker";
 
-    /// <summary>
-    /// Key of a <see cref="HttpClient"/> service for the <see cref="UrlAnalyzer"/>.
-    /// </summary>
-    public const string HttpClientServiceKey = "HybridAnalysisHttpClient";
-
     private readonly IOptionsMonitor<HybridAnalyzerOptions> _hybridOptions;
     private readonly ISandboxAnalyzer _sandboxAnalyzer;
 
@@ -42,30 +37,33 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// </summary>
     /// <param name="options">The options monitor for <see cref="HybridAnalyzerOptions"/>.</param>
     /// <param name="requestLimitTracker">The request limit tracker.</param>
-    /// <param name="httpClient">The HTTP client.</param>
+    /// <param name="httpClientFactory">The HTTP client factory.</param>
     /// <param name="logger">The logger instance.</param>
     /// <param name="sandboxAnalyzer">The sandbox analyzer.</param>
     public UrlAnalyzer(
         IOptionsMonitor<HybridAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
-        [FromKeyedServices(HttpClientServiceKey)] HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
         ISandboxAnalyzer sandboxAnalyzer)
-        : base(options, requestLimitTracker, httpClient, logger)
+        : base(options, requestLimitTracker, httpClientFactory, logger)
     {
         _hybridOptions = options;
         _sandboxAnalyzer = sandboxAnalyzer;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(AnalyzeUrlRequest request, CancellationToken cancellationToken = default)
+    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+        HttpClient httpClient,
+        AnalyzeUrlRequest request,
+        CancellationToken cancellationToken = default)
     {
         var submitUrlRequest = new SubmitUrlRequest(
             request.Url,
             _hybridOptions.CurrentValue.DefaultSandboxEnvironment,
             true);
         ErrorOr<SandboxSubmitResponse> result = await _sandboxAnalyzer.AnalyzeAsync(
-            _httpClient,
+            httpClient,
             submitUrlRequest,
             cancellationToken);
 
@@ -83,10 +81,13 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(ComposedServiceAnalysisId id, CancellationToken cancellationToken = default)
+    protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
+        HttpClient httpClient,
+        ComposedServiceAnalysisId id,
+        CancellationToken cancellationToken = default)
     {
         ErrorOr<Status> result = await _sandboxAnalyzer.GetReportStatusAsync(
-            _httpClient,
+            httpClient,
             id.Primary.Value,
             cancellationToken);
 
@@ -99,10 +100,13 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(ComposedServiceAnalysisId id, CancellationToken cancellationToken = default)
+    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+        HttpClient httpClient,
+        ComposedServiceAnalysisId id,
+        CancellationToken cancellationToken = default)
     {
         ErrorOr<SanboxReportSummary> result = await _sandboxAnalyzer.GetReportSummaryAsync(
-            _httpClient,
+            httpClient,
             id.Primary.Value,
             cancellationToken);
 

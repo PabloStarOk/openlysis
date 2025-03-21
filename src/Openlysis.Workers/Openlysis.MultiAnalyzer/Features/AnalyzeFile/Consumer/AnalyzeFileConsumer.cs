@@ -36,7 +36,7 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     public const string EndpointName = "analyze-file";
 
     private readonly ILogger<AnalyzeFileConsumer> _logger;
-    private readonly IOptionsMonitor<AnalyzeFileConsumerSettings> _options;
+    private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
@@ -58,7 +58,7 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     public AnalyzeFileConsumer(
         ILogger<AnalyzeFileConsumer> logger,
         IEndpointUriProvider endpointUriProvider,
-        IOptionsMonitor<AnalyzeFileConsumerSettings> options,
+        IOptionsMonitor<AnalyzeConsumerOptions> options,
         IFileStorageProvider fileStorageProvider,
         IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>> analyzers)
     {
@@ -145,7 +145,7 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task RunRequestsBatchAsync(CancellationToken cancellationToken)
     {
-        for (int i = 0; i < _options.CurrentValue.MaxRequestsPerBatch; i++)
+        for (int i = 0; i < _options.CurrentValue.RequestsPerBatch; i++)
         {
             await RunBatchCycleAsync(cancellationToken);
             if (_serviceFileAnalyses.Values.All(_analysisFinished))

@@ -52,7 +52,7 @@ public static class DependencyInjection
             analyzerOptions.ServiceName);
 
         // Add http client
-        services.AddHttpClient(UrlAnalyzer.HttpClientServiceKey, secretOptions, analyzerOptions, client =>
+        services.ConfigureHttpClient(secretOptions, analyzerOptions, client =>
             {
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(analyzerOptions.UserAgent);
             });

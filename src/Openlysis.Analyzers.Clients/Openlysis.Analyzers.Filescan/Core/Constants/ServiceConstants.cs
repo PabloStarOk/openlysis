@@ -8,5 +8,5 @@ public static class ServiceConstants
     /// <summary>
     /// The name of the Filescan service.
     /// </summary>
-    public const string ServiceName = "Filescan.io";
+    public const string ServiceName = "Filescan";
 }

@@ -47,7 +47,7 @@ public static class DependencyInjection
         services.Configure<VerdictCalculationOptions>(verdictCalculationOptionsSection);
 
         // Add http client
-        services.AddHttpClient(UrlAnalyzer.HttpClientServiceKey, secretOptions, analyzerOptions);
+        services.ConfigureHttpClient(secretOptions, analyzerOptions);
 
         // Add URL analyzer
         services.AddSingleton<IVerdictCalculator, VerdictCalculator>();

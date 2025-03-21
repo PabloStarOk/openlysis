@@ -28,11 +28,6 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// </summary>
     public const string LimitTrackerServiceKey = "VirusTotalLimitTracker";
 
-    /// <summary>
-    /// The key used to identify the VirusTotal HTTP client service.
-    /// </summary>
-    public const string HttpClientServiceKey = "VirusTotal";
-
     private readonly IVirusTotalAnalyzer _vtAnalyzer;
     private readonly IVerdictCalculator _verdictCalculator;
 
@@ -41,29 +36,32 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// </summary>
     /// <param name="options">The options monitor for VirusTotal analyzer configuration.</param>
     /// <param name="requestLimitTracker">The request limit tracker.</param>
-    /// <param name="httpClient">The HTTP client used for making requests.</param>
+    /// <param name="httpClientFactory">The HTTP client factory used for creating HTTP clients.</param>
     /// <param name="logger">The logger instance for logging.</param>
     /// <param name="vtAnalyzer">The VirusTotal analyzer instance.</param>
     /// <param name="verdictCalculator">The verdict calculator instance.</param>
     public UrlAnalyzer(
         IOptionsMonitor<VirusTotalAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
-        [FromKeyedServices(HttpClientServiceKey)] HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
         IVirusTotalAnalyzer vtAnalyzer,
         IVerdictCalculator verdictCalculator)
-        : base(options, requestLimitTracker, httpClient, logger)
+        : base(options, requestLimitTracker, httpClientFactory, logger)
     {
         _vtAnalyzer = vtAnalyzer;
         _verdictCalculator = verdictCalculator;
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(AnalyzeUrlRequest request, CancellationToken cancellationToken = default)
+    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+        HttpClient httpClient,
+        AnalyzeUrlRequest request,
+        CancellationToken cancellationToken = default)
     {
         var requestFactory = new UrlRequestFactory(request);
         ErrorOr<AnalyzeUrlResponse> result = await _vtAnalyzer.AnalyzeAsync(
-            _httpClient,
+            httpClient,
             requestFactory,
             cancellationToken);
 
@@ -82,10 +80,13 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(ComposedServiceAnalysisId id, CancellationToken cancellationToken = default)
+    protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
+        HttpClient httpClient,
+        ComposedServiceAnalysisId id,
+        CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
-            _httpClient,
+            httpClient,
             id.Primary.Value,
             cancellationToken);
 
@@ -98,10 +99,13 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(ComposedServiceAnalysisId id, CancellationToken cancellationToken = default)
+    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+        HttpClient httpClient,
+        ComposedServiceAnalysisId id,
+        CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
-            _httpClient,
+            httpClient,
             id.Primary.Value,
             cancellationToken);
 

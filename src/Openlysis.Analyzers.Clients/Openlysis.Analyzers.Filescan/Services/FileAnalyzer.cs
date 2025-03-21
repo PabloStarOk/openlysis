@@ -1,6 +1,5 @@
 using ErrorOr;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Openlysis.Analyzers.Contracts.Core.Files.Requests;
@@ -27,22 +26,22 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysi
     public string ServiceName => ServiceConstants.ServiceName;
 
     private readonly ILogger<FileAnalyzer> _logger;
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IFilescanAnalyzer _filescanAnalyzer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileAnalyzer"/> class.
     /// </summary>
     /// <param name="logger">The logger to be used for logging information.</param>
-    /// <param name="httpClient">The HTTP client to be used for making requests.</param>
+    /// <param name="httpClientFactory">The HTTP client factory to be used for creating HTTP clients.</param>
     /// <param name="filescanAnalyzer">The file scanner service to be used for file analysis.</param>
     public FileAnalyzer(
         ILogger<FileAnalyzer> logger,
-        [FromKeyedServices(ServiceConstants.ServiceName)] HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         IFilescanAnalyzer filescanAnalyzer)
     {
         _logger = logger;
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
         _filescanAnalyzer = filescanAnalyzer;
     }
 
@@ -60,8 +59,9 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysi
             Options: options);
 
         var factory = new FileRequestFactory(scanRequest);
+        var httpClient = _httpClientFactory.CreateClient(ServiceName);
         ErrorOr<ScanResponse> result = await _filescanAnalyzer.AnalyzeAsync(
-            _httpClient,
+            httpClient,
             factory,
             cancellationToken);
 
@@ -78,8 +78,9 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysi
     {
         var getScanRequest = new GetScanRequest(analysisId.Value);
 
+        var httpClient = _httpClientFactory.CreateClient(ServiceName);
         ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(
-            _httpClient,
+            httpClient,
             getScanRequest,
             cancellationToken);
 

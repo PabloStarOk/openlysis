@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 
 using ErrorOr;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -30,11 +29,6 @@ namespace Openlysis.Analyzers.URLQuery.Services;
 /// </summary>
 public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 {
-    /// <summary>
-    /// Key of a <see cref="HttpClient"/> service for the <see cref="UrlAnalyzer"/>.
-    /// </summary>
-    public const string HttpClientServiceKey = "UrlQueryHttpClient";
-
     private readonly IOptionsMonitor<UrlQueryAnalyzerOptions> _urlQueryOptions;
     private readonly IVerdictCalculator _verdictCalculator;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new ()
@@ -51,15 +45,15 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// Initializes a new instance of the <see cref="UrlAnalyzer"/> class.
     /// </summary>
     /// <param name="options">The options monitor for <see cref="UrlQueryAnalyzerOptions"/>.</param>
-    /// <param name="httpClient">The HTTP client for making requests to the 'urlquery.net' service.</param>
+    /// <param name="httpClientFactory">The HTTP client factory for creating HTTP clients.</param>
     /// <param name="logger">The logger for logging information.</param>
     /// <param name="verdictCalculator">The calculator for determining the verdict of the URL analysis.</param>
     public UrlAnalyzer(
         IOptionsMonitor<UrlQueryAnalyzerOptions> options,
-        [FromKeyedServices(HttpClientServiceKey)] HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
         IVerdictCalculator verdictCalculator)
-        : base(options, httpClient, logger)
+        : base(options, httpClientFactory, logger)
     {
         _urlQueryOptions = options;
         _verdictCalculator = verdictCalculator;
@@ -67,6 +61,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+        HttpClient httpClient,
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -83,7 +78,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             _jsonSerializerOptions);
 
         // Get response
-        using HttpResponseMessage response = await _httpClient.PostAsync(
+        using HttpResponseMessage response = await httpClient.PostAsync(
             Addresses.SubmitUrlEndpoint,
             jsonContent,
             cancellationToken);
@@ -118,13 +113,14 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
+        HttpClient httpClient,
         ComposedServiceAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id.Job);
 
         string formattedUrl = string.Format(Addresses.SubmitStatusEndpoint, id.Job);
-        using HttpResponseMessage response = await _httpClient.GetAsync(formattedUrl, cancellationToken);
+        using HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -148,11 +144,12 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+        HttpClient httpClient,
         ComposedServiceAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         string formattedUrl = string.Format(Addresses.ReportOverviewEndpoint, id.Primary.Value);
-        using HttpResponseMessage response = await _httpClient.GetAsync(formattedUrl, cancellationToken);
+        using HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

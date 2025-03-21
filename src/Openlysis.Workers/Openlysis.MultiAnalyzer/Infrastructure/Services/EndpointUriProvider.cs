@@ -6,7 +6,9 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.MultiAnalyzer.Core.Abstractions;
 using Openlysis.MultiAnalyzer.Features.AnalyzeFile.Consumer;
+using Openlysis.MultiAnalyzer.Features.Repositories.URLs.Consumer;
 using Openlysis.MultiAnalyzer.Features.UpdateFileMultiAnalysis.Consumer;
+using Openlysis.MultiAnalyzer.Features.URLs.Analyze.Consumer;
 using Openlysis.MultiAnalyzer.Infrastructure.Configuration;
 
 namespace Openlysis.MultiAnalyzer.Infrastructure.Services;
@@ -14,13 +16,19 @@ namespace Openlysis.MultiAnalyzer.Infrastructure.Services;
 /// <summary>
 /// Provides URIs of endpoints of <see cref="IConsumer{TMessage}"/>.
 /// </summary>
-public class EndpointUriProvider : IEndpointUriProvider, IDisposable
+public sealed class EndpointUriProvider : IEndpointUriProvider, IDisposable
 {
     /// <inheritdoc/>
     public Uri AnalyzeFileUri { get; private set; }
 
     /// <inheritdoc/>
     public Uri UpdateMultiAnalysisUri { get; private set; }
+
+    /// <inheritdoc/>
+    public Uri AnalyzeUrlUri { get; private set; }
+
+    /// <inheritdoc/>
+    public Uri UpdateUrlMultiAnalysisUri { get; private set; }
 
     private readonly IDisposable _optionsListener;
     private bool _isDisposed;
@@ -49,6 +57,7 @@ public class EndpointUriProvider : IEndpointUriProvider, IDisposable
     /// <param name="s">A string parameter (not used).</param>
     private void OnOptionsChanged(BrokerSettings settings, string s)
     {
+        // Analyze file consumer.
         var uriBuilder = new UriBuilder
         {
             Scheme = settings.Scheme,
@@ -58,9 +67,17 @@ public class EndpointUriProvider : IEndpointUriProvider, IDisposable
         };
         AnalyzeFileUri = uriBuilder.Uri;
 
+        // Update file multi analysis consumer.
         uriBuilder.Path = Uri.EscapeDataString(UpdateFileMultiAnalysisConsumer.EndpointName);
-
         UpdateMultiAnalysisUri = uriBuilder.Uri;
+
+        // Analyze URL consumer.
+        uriBuilder.Path = Uri.EscapeDataString(AnalyzeUrlConsumer.EndpointName);
+        AnalyzeUrlUri = uriBuilder.Uri;
+
+        // Update URL multi analysis consumer.
+        uriBuilder.Path = Uri.EscapeDataString(UpdateUrlMultiAnalysisConsumer.EndpointName);
+        UpdateUrlMultiAnalysisUri = uriBuilder.Uri;
     }
 
     private void Dispose(bool disposing)

@@ -8,7 +8,6 @@ using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Configuration;
-using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Infrastructure.Services;
 using Openlysis.Analyzers.Filescan.Services;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
@@ -45,7 +44,7 @@ public static class DependencyInjection
         services.Configure<FilescanAnalyzerOptions>(analyzerOptionsSection);
 
         // Add HTTP Client
-        services.AddHttpClient(ServiceConstants.ServiceName, secretOptions, analyzerOptions);
+        services.ConfigureHttpClient(secretOptions, analyzerOptions);
 
         // Add request limit tracker
         services.AddRequestLimitTracker(

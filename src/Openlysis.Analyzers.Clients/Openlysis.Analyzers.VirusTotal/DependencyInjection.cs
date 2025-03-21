@@ -56,7 +56,7 @@ public static class DependencyInjection
         services.AddSingleton<IVirusTotalAnalyzer, VirusTotalAnalyzer>();
 
         // Add http client.
-        services.AddHttpClient(UrlAnalyzer.HttpClientServiceKey, secretOptions, analyzerOptions);
+        services.ConfigureHttpClient(secretOptions, analyzerOptions);
 
         // Add limit tracker
         services.AddRequestLimitTracker(

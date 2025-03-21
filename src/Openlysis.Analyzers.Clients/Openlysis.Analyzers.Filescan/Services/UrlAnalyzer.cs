@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
-using Openlysis.Analyzers.Contracts.Core.Configuration;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
+using Openlysis.Analyzers.Filescan.Core.Configuration;
 using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Core.Models.Enums;
 using Openlysis.Analyzers.Filescan.Core.Models.Objects;
@@ -36,31 +36,32 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlAnalyzer"/> class.
     /// </summary>
-    /// <param name="options">The options monitor for <see cref="AnalyzerOptions"/>.</param>
+    /// <param name="options">The options monitor for <see cref="FilescanAnalyzerOptions"/>.</param>
     /// <param name="requestLimitTracker">The request limit tracker for the service.</param>
-    /// <param name="httpClient">The HTTP client for making requests.</param>
+    /// <param name="httpClientFactory">The HTTP client factory for creating HTTP clients.</param>
     /// <param name="logger">The logger for logging information.</param>
     /// <param name="filescanAnalyzer">The filescan analyzer for analyzing files.</param>
     public UrlAnalyzer(
-        IOptionsMonitor<AnalyzerOptions> options,
+        IOptionsMonitor<FilescanAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
-        [FromKeyedServices(ServiceConstants.ServiceName)] HttpClient httpClient,
+        IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
         IFilescanAnalyzer filescanAnalyzer)
-        : base(options, requestLimitTracker, httpClient, logger)
+        : base(options, requestLimitTracker, httpClientFactory, logger)
     {
         _filescanAnalyzer = filescanAnalyzer;
     }
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+        HttpClient httpClient,
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
     {
         var urlRequestFactory = new UrlRequestFactory(request);
 
         ErrorOr<ScanResponse> result = await _filescanAnalyzer.AnalyzeAsync(
-            _httpClient,
+            httpClient,
             urlRequestFactory,
             cancellationToken);
 
@@ -79,13 +80,14 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
+        HttpClient httpClient,
         ComposedServiceAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         var getScanRequest = new GetScanRequest(id.Primary.Value);
 
         ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(
-            _httpClient,
+            httpClient,
             getScanRequest,
             cancellationToken);
 
@@ -99,13 +101,14 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+        HttpClient httpClient,
         ComposedServiceAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         var getScanRequest = new GetScanRequest(id.Primary.Value);
 
         ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(
-            _httpClient,
+            httpClient,
             getScanRequest,
             cancellationToken);
 

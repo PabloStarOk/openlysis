@@ -9,6 +9,7 @@ using Openlysis.Analyzers.URLQuery;
 using Openlysis.Analyzers.VirusTotal;
 using Openlysis.MultiAnalyzer.Core;
 using Openlysis.MultiAnalyzer.Features.AnalyzeFile.Consumer;
+using Openlysis.MultiAnalyzer.Features.URLs.Analyze.Consumer;
 using Openlysis.MultiAnalyzer.Infrastructure;
 using Openlysis.MultiAnalyzer.Infrastructure.Configuration;
 
@@ -17,8 +18,8 @@ builder.ConfigureServices((context, services) =>
 {
     // Add options
     var consumerSettingsSection = context.Configuration
-        .GetRequiredSection(AnalyzeFileConsumerSettings.SectionName);
-    services.Configure<AnalyzeFileConsumerSettings>(consumerSettingsSection);
+        .GetRequiredSection(AnalyzeConsumerOptions.SectionName);
+    services.Configure<AnalyzeConsumerOptions>(consumerSettingsSection);
 
     services.AddInfrastructure(context.Configuration);
 
@@ -37,6 +38,7 @@ builder.ConfigureServices((context, services) =>
         {
             x.SetKebabCaseEndpointNameFormatter();
             x.AddConsumer<AnalyzeFileConsumer, AnalyzeFileConsumerDefinition>();
+            x.AddConsumer<AnalyzeUrlConsumer, AnalyzeUrlConsumerDefinition>();
             x.AddRabbitMqBroker(services);
         });
 
