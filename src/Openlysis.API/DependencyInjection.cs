@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
@@ -91,6 +93,12 @@ public static class DependencyInjection
                         };
                     };
                 };
+
+                opt.SerializerSettings = s =>
+                {
+                    s.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                };
+
                 opt.RemoveEmptyRequestSchema = true;
             });
 
