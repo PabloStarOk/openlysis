@@ -77,13 +77,13 @@ public static class DependencyInjection
             opt =>
             {
                 opt.ReleaseVersion = 1;
+                opt.EnableJWTBearerAuth = false;
                 opt.DocumentSettings = s =>
                 {
                     s.DocumentName = "Version 1";
                     s.Title = "Openlysis API";
                     s.Description = "API of openlysis.";
                     s.Version = "v1";
-
                     s.PostProcess = document =>
                     {
                         document.Info = new OpenApiInfo
@@ -95,6 +95,14 @@ public static class DependencyInjection
                             },
                         };
                     };
+
+                    s.AddAuth("API Key", new OpenApiSecurityScheme
+                        {
+                            Name = "X-Api-Key",
+                            In = OpenApiSecurityApiKeyLocation.Header,
+                            Type = OpenApiSecuritySchemeType.ApiKey,
+                            Description = "API Key authentication.",
+                        });
                 };
 
                 opt.SerializerSettings = s =>
@@ -107,6 +115,7 @@ public static class DependencyInjection
                     s.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy(), false));
                 };
 
+                opt.ShortSchemaNames = true;
                 opt.RemoveEmptyRequestSchema = true;
             });
 
