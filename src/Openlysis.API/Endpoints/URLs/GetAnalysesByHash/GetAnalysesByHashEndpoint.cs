@@ -21,6 +21,8 @@ namespace Openlysis.API.Endpoints.URLs.GetAnalysesByHash;
 public class GetAnalysesByHashEndpoint
     : Endpoint<GetAnalysesByHashRequest, IEnumerable<UrlMultiAnalysisDto>>
 {
+    private const string Name = "GetUrlAnalysisByHash";
+
     private readonly IMediator _mediator;
 
     /// <summary>
@@ -38,6 +40,27 @@ public class GetAnalysesByHashEndpoint
     {
         Get("{hash}/analyses");
         Group<UrlAnalysesGroup>();
+        Version(1);
+        Description(
+            builder =>
+            {
+                builder.WithName(Name);
+                builder.WithDisplayName(Name);
+                builder.Accepts<GetAnalysesByHashRequest>();
+                builder.Produces<IReadOnlyList<UrlMultiAnalysisDto>>();
+                builder.ProducesValidationProblem();
+                builder.ProducesProblem(StatusCodes.Status404NotFound);
+            },
+            clearDefaults: true);
+        Summary(
+            s =>
+            {
+                s.Summary = "Get several multi analyses of an URL by Hash";
+                s.Description = "Gets a collection of multi analyses by providing a MD5, SHA-1, SHA-256 or SHA-512 hash of a URL.";
+                s.RequestParam(r => r.Hash, "A SHA-256, MD5, SHA-1 or SHA-512 hash of the URL.");
+                s.RequestParam(r => r.Amount, "(Pagination) Amount of analyses to retrieve.");
+                s.RequestParam(r => r.StartedDateOrder, "Order of the collection by started date.");
+            });
         DontThrowIfValidationFails();
     }
 
