@@ -112,13 +112,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
             return;
         }
 
-        UrlMultiAnalysis multiAnalysis = result.Value;
-        Response = new AnalyzeUrlResponse(
-            multiAnalysis.Id.Value.ToString(),
-            multiAnalysis.UrlHashSet.Sha256,
-            multiAnalysis.UrlHashSet.Md5,
-            multiAnalysis.UrlHashSet.Sha1,
-            multiAnalysis.UrlHashSet.Sha512);
+        Response = AnalyzeUrlResponse.Parse(result.Value);
     }
 
     /// <summary>
