@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-
 namespace Openlysis.API.Endpoints.URLs.Analyze;
 
 /// <summary>
@@ -8,5 +6,5 @@ namespace Openlysis.API.Endpoints.URLs.Analyze;
 /// <param name="Url">The URL to be analyzed.</param>
 /// <param name="IsPrivate">Indicates whether the URL is private.</param>
 public record AnalyzeUrlRequest(
-    Uri Url,
+    string Url,
     bool IsPrivate = false);
