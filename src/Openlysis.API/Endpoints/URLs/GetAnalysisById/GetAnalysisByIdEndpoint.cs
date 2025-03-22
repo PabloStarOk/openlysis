@@ -22,7 +22,10 @@ namespace Openlysis.API.Endpoints.URLs.GetAnalysisById;
 /// </remarks>
 public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMultiAnalysisDto>
 {
-    private const string Name = "GetUrlAnalysisById";
+    /// <summary>
+    /// The name of the endpoint for getting URL analysis by ID.
+    /// </summary>
+    public const string Name = "GetUrlAnalysisById";
 
     private readonly ILogger<GetAnalysisByIdEndpoint> _logger;
     private readonly IMediator _mediator;

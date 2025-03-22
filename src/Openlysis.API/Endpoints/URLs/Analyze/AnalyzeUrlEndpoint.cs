@@ -8,6 +8,7 @@ using FastEndpoints;
 using MediatR;
 
 using Openlysis.API.Authentication.API.Extensions;
+using Openlysis.API.Endpoints.URLs.GetAnalysisById;
 using Openlysis.Application.URLs.Commands;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.Users.ValueObjects;
@@ -113,6 +114,13 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
         }
 
         Response = AnalyzeUrlResponse.Parse(result.Value);
+
+        var routeValues = new RouteValueDictionary
+        {
+            { "id", Response.Id },
+        };
+        IResult accepted = Results.AcceptedAtRoute(GetAnalysisByIdEndpoint.Name, routeValues, Response);
+        await SendResultAsync(accepted);
     }
 
     /// <summary>
