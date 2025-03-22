@@ -23,6 +23,8 @@ namespace Openlysis.API.Endpoints.URLs.Analyze;
 /// </remarks>
 public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse>
 {
+    private const string Name = "AnalyzeUrl";
+    
     private readonly ILogger<AnalyzeUrlEndpoint> _logger;
     private readonly IMediator _mediator;
 
@@ -44,12 +46,26 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
     {
         Post(string.Empty);
         Group<UrlAnalysesGroup>();
+        Version(1);
         Description(
             builder =>
             {
+                builder.WithName(Name);
+                builder.WithDisplayName(Name);
                 builder.Accepts<AnalyzeUrlRequest>("application/x-www-form-urlencoded");
+                builder.Produces<AnalyzeUrlResponse>();
+                builder.ProducesValidationProblem();
+                builder.ProducesProblem(StatusCodes.Status500InternalServerError);
             });
-        Version(1);
+        Summary(
+            s =>
+            {
+                s.Summary = "Uploads a URL";
+                s.Description = "Uploads a URL to be analyzed by multiple services.";
+                s.ExampleRequest = new AnalyzeUrlRequest(new Uri("https://example-site.com"), false);
+                s.RequestParam(r => r.Url, "URL to be analyzed.");
+                s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who uploads the URL.");
+            });
         DontThrowIfValidationFails();
     }
 

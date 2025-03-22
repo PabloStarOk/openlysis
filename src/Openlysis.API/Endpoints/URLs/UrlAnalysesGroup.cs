@@ -13,6 +13,15 @@ public class UrlAnalysesGroup : Group
     /// </summary>
     public UrlAnalysesGroup()
     {
-        Configure("urls", ep => { });
+        Configure("urls", ep =>
+        {
+            ep.Description(
+                b =>
+                {
+                    b.WithGroupName("Urls");
+                    b.WithDisplayName("Urls");
+                    b.WithTags("Urls");
+                });
+        });
     }
 }
