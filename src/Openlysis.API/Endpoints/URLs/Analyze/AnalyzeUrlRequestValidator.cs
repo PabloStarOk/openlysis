@@ -18,6 +18,6 @@ public class AnalyzeUrlRequestValidator : Validator<AnalyzeUrlRequest>
             .NotEmpty().WithMessage("URL must be provided.");
 
         RuleFor(x => x.IsPrivate)
-            .NotEmpty().WithMessage("Must provide if the analysis is available to other users");
+            .NotNull().WithMessage("Must provide if the analysis is available to other users");
     }
 }

@@ -1,0 +1,75 @@
+using System.Security.Claims;
+
+using FastEndpoints;
+
+using MediatR;
+
+using Openlysis.API.Authentication.API.Extensions;
+using Openlysis.API.Endpoints.URLs.Common;
+using Openlysis.Application.URLs.Queries;
+using Openlysis.Domain.URLs;
+using Openlysis.Domain.Users.ValueObjects;
+
+namespace Openlysis.API.Endpoints.URLs.GetAnalysesByHash;
+
+/// <summary>
+/// Endpoint to handle requests for getting analyses by hash.
+/// </summary>
+/// <remarks>
+/// This endpoint processes requests to retrieve multiple analyses associated with a specific hash.
+/// </remarks>
+public class GetAnalysesByHashEndpoint
+    : Endpoint<GetAnalysesByHashRequest, IEnumerable<UrlMultiAnalysisDto>>
+{
+    private readonly IMediator _mediator;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GetAnalysesByHashEndpoint"/> class.
+    /// </summary>
+    /// <param name="mediator">The mediator instance used for sending queries.</param>
+    public GetAnalysesByHashEndpoint(
+        IMediator mediator)
+    {
+        _mediator = mediator;
+    }
+
+    /// <inheritdoc/>
+    public override void Configure()
+    {
+        Get("{hash}/analyses");
+        Group<UrlAnalysesGroup>();
+        DontThrowIfValidationFails();
+    }
+
+    /// <inheritdoc/>
+    public override async Task HandleAsync(GetAnalysesByHashRequest req, CancellationToken ct)
+    {
+        if (ValidationFailed)
+        {
+            await SendResultAsync(ValidationFailures.AsValidationProblem());
+            return;
+        }
+
+        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
+        UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
+
+        var query = new UrlMultiAnalysesByHashQuery(
+            req.Hash,
+            userId,
+            req.Amount,
+            req.StartedDateOrder);
+
+        IReadOnlyList<UrlMultiAnalysis> analyses = await _mediator.Send(query, ct);
+
+        if (analyses.Count is 0)
+        {
+            IResult notFoundResult = Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                detail: "There are no analyses for the given hash.");
+            await SendResultAsync(notFoundResult);
+            return;
+        }
+
+        Response = analyses.Select(UrlMultiAnalysisDto.Parse);
+    }
+}
