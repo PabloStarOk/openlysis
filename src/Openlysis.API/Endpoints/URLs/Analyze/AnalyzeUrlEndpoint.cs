@@ -65,7 +65,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
                 s.Description = "Uploads a URL to be analyzed by multiple services.";
                 s.ExampleRequest = new AnalyzeUrlRequest(new Uri("https://example-site.com"), false);
                 s.RequestParam(r => r.Url, "URL to be analyzed.");
-                s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who uploads the URL.");
+                s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who uploads the URL. Default is false");
             });
         DontThrowIfValidationFails();
     }
