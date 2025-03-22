@@ -22,6 +22,8 @@ namespace Openlysis.API.Endpoints.URLs.GetAnalysisById;
 /// </remarks>
 public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMultiAnalysisDto>
 {
+    private const string Name = "GetUrlAnalysisById";
+
     private readonly ILogger<GetAnalysisByIdEndpoint> _logger;
     private readonly IMediator _mediator;
 
@@ -43,6 +45,25 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
     {
         Get("analyses/{id}");
         Group<UrlAnalysesGroup>();
+        Version(1);
+        Description(
+            builder =>
+            {
+                builder.WithName(Name);
+                builder.WithDisplayName(Name);
+                builder.Accepts<GetAnalysisByIdRequest>();
+                builder.Produces<UrlMultiAnalysisDto>();
+                builder.Produces(StatusCodes.Status404NotFound);
+                builder.ProducesProblem(StatusCodes.Status500InternalServerError);
+            },
+            clearDefaults: true);
+        Summary(
+            s =>
+            {
+                s.Summary = "Gets a URL analysis by ID";
+                s.Description = "Gets a URL analysis by using an ID";
+                s.RequestParam(r => r.Id, "ID of the analysis to get.");
+            });
     }
 
     /// <inheritdoc/>

@@ -6,6 +6,9 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+
 using NSwag;
 
 using Openlysis.API.Authentication;
@@ -97,6 +100,11 @@ public static class DependencyInjection
                 opt.SerializerSettings = s =>
                 {
                     s.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                };
+
+                opt.NewtonsoftSettings = s =>
+                {
+                    s.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy(), false));
                 };
 
                 opt.RemoveEmptyRequestSchema = true;

@@ -24,7 +24,7 @@ namespace Openlysis.API.Endpoints.URLs.Analyze;
 public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse>
 {
     private const string Name = "AnalyzeUrl";
-    
+
     private readonly ILogger<AnalyzeUrlEndpoint> _logger;
     private readonly IMediator _mediator;
 
@@ -56,7 +56,8 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
                 builder.Produces<AnalyzeUrlResponse>();
                 builder.ProducesValidationProblem();
                 builder.ProducesProblem(StatusCodes.Status500InternalServerError);
-            });
+            },
+            clearDefaults: true);
         Summary(
             s =>
             {
