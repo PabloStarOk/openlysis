@@ -88,7 +88,7 @@ public class UrlServiceAnalysisConverter : JsonConverter<UrlServiceAnalysis>
         string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(UrlServiceAnalysis.Status);
         string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(UrlServiceAnalysis.Verdict);
         string jobIdKey = options.PropertyNamingPolicy?.ConvertName(JobIdKey) ?? JobIdKey;
-        string threatScoreKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(UrlServiceAnalysis.ThreatScore);
+        string threatScoreKey = options.PropertyNamingPolicy?.ConvertName(ThreatScoreKey) ?? nameof(UrlServiceAnalysis.ThreatScore);
 
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.Primary.Value);

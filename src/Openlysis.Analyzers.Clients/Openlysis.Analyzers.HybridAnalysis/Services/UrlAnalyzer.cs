@@ -122,6 +122,15 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             return Error.Failure($"Status of analysis is Error and analysis information cannot be retrieved. {ServiceName} service analyzer.");
         }
 
+#if DEBUG
+        _logger.LogDebug(
+            "Hybrid Analysis Results:"
+            + "\n\tVerdict: {Verdict}"
+            + "\n\tThreatScore: {ThreatScore}",
+            reportSummary.Verdict,
+            reportSummary.ThreatScore);
+#endif
+
         AnalysisStatus status = Maps.AnalysisStatusMap[reportSummary.Status];
         Verdict verdict = Maps.VerdictMap[reportSummary.Verdict];
         return UrlServiceAnalysis.Create(

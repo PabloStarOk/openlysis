@@ -87,6 +87,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
 
             _serviceAnalyses.Add(result.Value.Id, result.Value);
         });
+        await SendUpdateAsync(_serviceAnalyses.Values.ToArray());
     }
 
     /// <summary>
@@ -145,8 +146,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
             }
 
             // Update status
-            analysis.UpdateStatus(getStatusResult.Value);
-            if (analysis.Status
+            if (getStatusResult.Value
                 is AnalysisStatus.Queued
                 or AnalysisStatus.InProgress)
             {
@@ -160,7 +160,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
                 return;
             }
 
-            analysis.UpdateVerdict(getAnalysisResult.Value.Verdict);
+            analysis = getAnalysisResult.Value;
             _serviceAnalyses.Remove(analysis.Id);
             await SendUpdateAsync(analysis);
         });
@@ -169,13 +169,13 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
     /// <summary>
     /// Sends an update for the given URL service analysis to the main application.
     /// </summary>
-    /// <param name="analysis">The URL service analysis to be updated.</param>
+    /// <param name="analyses">The URL service analyses to be updated.</param>
     private async Task SendUpdateAsync(
-        UrlServiceAnalysis analysis)
+        params UrlServiceAnalysis[] analyses)
     {
         var request = new UpdateUrlMultiAnalysis(
             _context.Message.MultiAnalysisId,
-            analysis);
+            analyses);
         await _context.Send(_endpointUriProvider.UpdateUrlMultiAnalysisUri, request);
     }
 }

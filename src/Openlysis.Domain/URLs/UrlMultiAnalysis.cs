@@ -162,7 +162,9 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
         }
 
         int analysisIndex = _serviceAnalyses.IndexOf(analysis);
-        _serviceAnalyses[analysisIndex] = analysis;
+        _serviceAnalyses[analysisIndex].UpdateVerdict(analysis.Verdict);
+        _serviceAnalyses[analysisIndex].UpdateThreatScore(analysis.ThreatScore);
+        _serviceAnalyses[analysisIndex].UpdateStatus(analysis.Status);
         UpdateAverageVerdict();
         UpdateAverageThreatZone();
         UpdateAverageThreatScore();

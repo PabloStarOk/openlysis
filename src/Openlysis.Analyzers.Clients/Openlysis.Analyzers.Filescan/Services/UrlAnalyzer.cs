@@ -137,6 +137,15 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             verdict = Maps.VerdictMap[filescanReport.FinalVerdict?.Verdict
                 ?? FilescanVerdict.Unknown];
             threatLevel = filescanReport.FinalVerdict?.ThreatLevel;
+
+#if DEBUG
+            _logger.LogDebug(
+                "Filescan Results:"
+                + "\n\tVerdict: {Verdict}"
+                + "\n\tThreatScore: {ThreatScore}",
+                filescanReport.FinalVerdict?.Verdict,
+                filescanReport.FinalVerdict?.ThreatLevel);
+#endif
         }
 
         AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];

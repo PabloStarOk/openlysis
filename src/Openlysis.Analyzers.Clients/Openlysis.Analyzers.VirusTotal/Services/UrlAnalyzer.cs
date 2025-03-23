@@ -115,6 +115,21 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         }
 
         GetAnalysisResponse analysis = result.Value;
+#if DEBUG
+        _logger.LogDebug(
+            "VirusTotal Results:"
+            + "\n\tHarmless: {Harmless}"
+            + "\n\tUndetected: {Undetected}"
+            + "\n\tSuspicious: {Suspicious}"
+            + "\n\tMalicious: {Malicious}"
+            + "\n\tTimeout: {Timeout}",
+            analysis.Attributes.Stats.Harmless,
+            analysis.Attributes.Stats.Undetected,
+            analysis.Attributes.Stats.Suspicious,
+            analysis.Attributes.Stats.Malicious,
+            analysis.Attributes.Stats.Timeout);
+#endif
+
         AnalysisStatus status = Maps.AnalysisStatusMap[analysis.Attributes.Status];
         Verdict verdict = _verdictCalculator.Calculate(analysis.Attributes.Stats);
         return UrlServiceAnalysis.Create(

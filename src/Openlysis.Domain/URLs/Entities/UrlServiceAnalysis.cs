@@ -44,7 +44,7 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
     /// Gets the threat score of the analysis.
     /// </summary>
     [Range(.0f, 1.0f)]
-    public float? ThreatScore { get; }
+    public float? ThreatScore { get; private set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlServiceAnalysis"/> class.
@@ -63,9 +63,9 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
         : base(id)
     {
         ServiceName = serviceName;
-        Status = status;
         UpdateVerdict(verdict);
         ThreatScore = threatScore;
+        Status = status;
     }
 
     // For EF core.
@@ -132,12 +132,32 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
     /// </remarks>
     public void UpdateVerdict(Verdict newVerdict)
     {
-        if (Status is not AnalysisStatus.Queued and AnalysisStatus.InProgress)
+        if (Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
         {
             return;
         }
 
         Verdict = newVerdict;
         ThreatZone = ThreatZoneMapping.Map[newVerdict];
+    }
+
+    /// <summary>
+    /// Updates the threat score of the analysis.
+    /// </summary>
+    /// <param name="threatScore">The new threat score to set.</param>
+    /// <remarks>
+    /// The threat score must be between 0.0 and 1.0.
+    /// </remarks>
+    public void UpdateThreatScore(float? threatScore)
+    {
+        if (Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
+        {
+            return;
+        }
+
+        if (threatScore is > .0f and < 1.0f)
+        {
+            ThreatScore = threatScore;
+        }
     }
 }

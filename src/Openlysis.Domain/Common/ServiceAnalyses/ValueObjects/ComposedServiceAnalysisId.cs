@@ -66,7 +66,8 @@ public record ComposedServiceAnalysisId
             throw new InvalidOperationException($"Composed ID contains less or more than two values separated by {IdCharSeparator}");
         }
 
-        return Create(values[0], values[1]);
+        string? jobId = string.IsNullOrWhiteSpace(values[1]) ? null : values[1];
+        return Create(values[0], jobId);
     }
 
     /// <inheritdoc/>

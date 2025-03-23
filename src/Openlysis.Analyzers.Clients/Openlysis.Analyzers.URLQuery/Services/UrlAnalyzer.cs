@@ -178,9 +178,20 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         GetReportOverviewResponse overviewResponse = reportResult.Value;
         Stats stats = statsResult.Value;
 
+#if DEBUG
+        _logger.LogDebug(
+            "UrlQuery Results:"
+            + "\n\tUrlQuery Alerts: {UrlQuery}"
+            + "\n\tNetwork Intrusion Detection Alerts: {Ids}"
+            + "\n\tThreat Detection System Alerts: {Tds}",
+            stats.UrlQueryAlerts,
+            stats.IdsAlerts,
+            stats.ThreatDetectionSystemsAlerts);
+#endif
+
         AnalysisStatus status = Maps.AnalysisStatusMap[overviewResponse.Status];
         Verdict verdict = _verdictCalculator.Calculate(stats);
-        return UrlServiceAnalysis.Create(overviewResponse.ReportId, ServiceName, status, verdict);
+        return UrlServiceAnalysis.Create(overviewResponse.ReportId, ServiceName, status, verdict, id.Job);
     }
 
     /// <summary>
