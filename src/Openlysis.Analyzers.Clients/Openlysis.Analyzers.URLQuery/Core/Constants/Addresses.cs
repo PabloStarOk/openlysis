@@ -21,6 +21,11 @@ internal static class Addresses
     internal const string SubmitStatusEndpoint = "submit/status/{0,0}";
 
     /// <summary>
+    /// The endpoint for getting a detailed report of a URL.
+    /// </summary>
+    internal const string ReportEndpoint = "report/{0,0}";
+
+    /// <summary>
     /// The endpoint for getting an overview report of a URL.
     /// </summary>
     internal const string ReportOverviewEndpoint = "report/{0,0}/overview";
