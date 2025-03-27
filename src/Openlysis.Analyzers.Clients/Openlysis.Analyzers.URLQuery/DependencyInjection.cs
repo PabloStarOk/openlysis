@@ -44,7 +44,9 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(verdictCalculationOptionsSection);
 
         services.Configure<UrlQueryAnalyzerOptions>(analyzerOptionsSection);
-        services.Configure<VerdictCalculationOptions>(verdictCalculationOptionsSection);
+        services.AddOptionsWithValidateOnStart<VerdictCalculationOptions>()
+            .Bind(verdictCalculationOptionsSection)
+            .ValidateDataAnnotations();
 
         // Add http client
         services.ConfigureHttpClient(secretOptions, analyzerOptions);

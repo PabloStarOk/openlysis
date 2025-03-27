@@ -11,7 +11,7 @@ public interface IVerdictCalculator
     /// <summary>
     /// Calculates a verdict based on the provided alert statistics.
     /// </summary>
-    /// <param name="alertStats">The statistics of the alert to base the verdict on.</param>
+    /// <param name="sensors">The statistics of the sensors to base the verdict on.</param>
     /// <returns>A <see cref="Verdict"/> representing the calculated verdict.</returns>
-    public Verdict Calculate(Stats alertStats);
+    public Verdict Calculate(Sensors sensors);
 }

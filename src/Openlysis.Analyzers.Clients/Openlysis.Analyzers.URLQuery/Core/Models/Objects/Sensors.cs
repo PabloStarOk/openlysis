@@ -34,7 +34,7 @@ public record Sensors(
 
                 foreach (var alert in alerts)
                 {
-                    stringBuilder.AppendLine($"\tAlert: {{ Severity: {alert.Severity} }}");
+                    stringBuilder.AppendLine($"\tAlert: {{ Severity: {alert.Severity}, Message: {alert.Message} }}");
                 }
             }
         }
@@ -52,7 +52,7 @@ public record Sensors(
 
                 foreach (var alert in alerts)
                 {
-                    stringBuilder.AppendLine($"\tAlert: {{ Verdict: {alert.Verdict}, Severity: {alert.Severity} }}");
+                    stringBuilder.AppendLine($"\tAlert: {{ Verdict: {alert.Verdict}, Severity: {alert.Severity}, Message: {alert.Message} }}");
                 }
             }
         }
@@ -66,7 +66,7 @@ public record Sensors(
         stringBuilder.AppendLine("URLQuery Alerts:");
         foreach (var alert in UrlQueryAlerts)
         {
-            stringBuilder.AppendLine($"\tURL Query Alert: {{ Verdict: {alert.Verdict}, Severity: {alert.Severity} }}");
+            stringBuilder.AppendLine($"\tURL Query Alert: {{ Verdict: {alert.Verdict}, Severity: {alert.Severity}, Message: {alert.Message} }}");
         }
 
         return stringBuilder.ToString();

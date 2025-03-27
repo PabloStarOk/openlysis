@@ -2,13 +2,14 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
+using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 using Openlysis.Analyzers.URLQuery.Core.Models.Objects;
 using Openlysis.Domain.Common.Enums;
 
 namespace Openlysis.Analyzers.URLQuery.Infrastructure.Services;
 
 /// <summary>
-/// Calculates a <see cref="Verdict"/> from <see cref="Stats"/>.
+/// Calculates a <see cref="Verdict"/> from <see cref="Sensors"/>.
 /// </summary>
 public class VerdictCalculator : IVerdictCalculator
 {
@@ -24,52 +25,184 @@ public class VerdictCalculator : IVerdictCalculator
     }
 
     /// <inheritdoc/>
-    public Verdict Calculate(Stats alertStats)
+    public Verdict Calculate(Sensors sensors)
     {
         VerdictCalculationOptions options = _options.CurrentValue;
 
-        int uqAlerts = alertStats.UrlQueryAlerts;
-        int idsAlerts = alertStats.IdsAlerts;
-        int tdsAlerts = alertStats.ThreatDetectionSystemsAlerts;
+        // Get verdicts
+        Verdict idsVerdict = GetIdsVerdict(sensors.IdsSensors ?? []);
+        Verdict tdsVerdict = GetTdsVerdict(sensors.TdsSensors ?? []);
+        Verdict urlqueryVerdict = GetUrlqueryVerdict(sensors.UrlQueryAlerts ?? []);
 
-        Verdict uqVerdict = GetVerdict(
-            uqAlerts,
-            options.UqSuspiciousThreshold,
-            options.UqMaliciousThreshold);
+        // Populate according to weight.
+        var verdicts = new List<Verdict>();
+        for (int i = 0; i < options.SensorWeights.Ids; i++)
+        {
+            verdicts.Add(idsVerdict);
+        }
 
-        Verdict idsVerdict = GetVerdict(
-            idsAlerts,
-            options.IdsSuspiciousThreshold,
-            options.IdsMaliciousThreshold);
+        for (int i = 0; i < options.SensorWeights.Tds; i++)
+        {
+            verdicts.Add(tdsVerdict);
+        }
 
-        Verdict tdsVerdict = GetVerdict(
-            tdsAlerts,
-            options.TdsSuspiciousThreshold,
-            options.TdsMaliciousThreshold);
+        for (int i = 0; i < options.SensorWeights.Urlquery; i++)
+        {
+            verdicts.Add(urlqueryVerdict);
+        }
 
-        Verdict[] verdicts = [uqVerdict, idsVerdict, tdsVerdict];
-        return (Verdict)((int)verdicts.Average(v => (int)v));
+        // Calculate verdict.
+        int maliciousVerdictsCount = verdicts.Count(v => v is Verdict.Malicious);
+        if (maliciousVerdictsCount >= options.MaliciousVerdictCountThreshold)
+        {
+            return Verdict.Malicious;
+        }
+
+        int suspiciousVerdictsCount = verdicts.Count(v => v is Verdict.Suspicious);
+        return suspiciousVerdictsCount >= options.SuspiciousVerdictCountThreshold
+            ? Verdict.Suspicious
+            : Verdict.Undetected;
     }
 
     /// <summary>
-    /// Determines the verdict based on the number of alerts and specified thresholds.
+    /// Calculates the verdict for IDS sensors.
     /// </summary>
-    /// <param name="alerts">The number of alerts.</param>
-    /// <param name="suspiciousThreshold">The threshold for a suspicious verdict.</param>
-    /// <param name="maliciousThreshold">The threshold for a malicious verdict.</param>
-    /// <returns>
-    /// A <see cref="Verdict"/> value indicating the result of the calculation.
-    /// </returns>
-    private static Verdict GetVerdict(
-        int alerts,
-        int suspiciousThreshold,
-        int maliciousThreshold)
+    /// <param name="sensors">Array of IDS sensors.</param>
+    /// <returns>The calculated verdict.</returns>
+    private Verdict GetIdsVerdict(IdsSensor[] sensors)
     {
-        if (alerts >= suspiciousThreshold)
+        VerdictCalculationOptions options = _options.CurrentValue;
+
+        if (sensors.Length is 0)
         {
-            return Verdict.Suspicious;
+            return Verdict.Undetected;
         }
 
-        return alerts >= maliciousThreshold ? Verdict.Malicious : Verdict.Undetected;
+        int maliciousMessagesCount = sensors.Sum(s => CountMaliciousAlertMessages(s.Alerts ?? []));
+        int highSeverityCount = sensors.Sum(s => s.Alerts?.Count(a => a.Severity == Severity.High) ?? 0);
+        if (highSeverityCount >= options.AlertSeverityThresholds.HighSeverityMaliciousThreshold
+            || maliciousMessagesCount >= options.MaliciousAlertMessageThreshold)
+        {
+            return Verdict.Malicious;
+        }
+
+        int suspiciousMessagesCount = sensors.Sum(s => CountSuspiciousAlertMessages(s.Alerts ?? []));
+        int mediumSeverityCount = sensors.Sum(s => s.Alerts?.Count(a => a.Severity == Severity.Medium) ?? 0);
+        return mediumSeverityCount >= options.AlertSeverityThresholds.MediumSeveritySuspiciousThreshold
+        || suspiciousMessagesCount >= options.SuspiciousAlertMessageThreshold
+            ? Verdict.Suspicious
+            : Verdict.Undetected;
+    }
+
+    /// <summary>
+    /// Calculates the verdict for TDS sensors.
+    /// </summary>
+    /// <param name="tdsSensors">Array of TDS sensors.</param>
+    /// <returns>The calculated verdict.</returns>
+    private Verdict GetTdsVerdict(TdsSensor[] tdsSensors)
+    {
+        return CalculateAnalyzerAlertsVerdict(
+            tdsSensors.SelectMany(s => s.Alerts ?? []).ToArray(),
+            _options.CurrentValue.TdsAlertThresholds);
+    }
+
+    /// <summary>
+    /// Calculates the verdict for URL query alerts.
+    /// </summary>
+    /// <param name="urlqueryAlerts">Array of URL query alerts.</param>
+    /// <returns>The calculated verdict.</returns>
+    private Verdict GetUrlqueryVerdict(AnalyzerAlert[] urlqueryAlerts)
+    {
+        return CalculateAnalyzerAlertsVerdict(
+            urlqueryAlerts,
+            _options.CurrentValue.UrlqueryAlertThresholds);
+    }
+
+    /// <summary>
+    /// Counts the number of malicious alert messages.
+    /// </summary>
+    /// <param name="alerts">Array of alerts.</param>
+    /// <returns>The count of malicious alert messages.</returns>
+    private int CountMaliciousAlertMessages(Alert[] alerts)
+    {
+        string[] maliciousMessages = _options.CurrentValue.AlertMessages.Malicious;
+        return alerts
+            .Count(a => maliciousMessages
+                .Contains(VerdictCalculationOptions.NormalizeAlertString(a.Message)));
+    }
+
+    /// <summary>
+    /// Counts the number of suspicious alert messages.
+    /// </summary>
+    /// <param name="alerts">Array of alerts.</param>
+    /// <returns>The count of suspicious alert messages.</returns>
+    private int CountSuspiciousAlertMessages(Alert[] alerts)
+    {
+        string[] suspiciousMessages = _options.CurrentValue.AlertMessages.Suspicious;
+
+        return alerts
+            .Count(a => suspiciousMessages
+                .Contains(VerdictCalculationOptions.NormalizeAlertString(a.Message)));
+    }
+
+    /// <summary>
+    /// Calculates the verdict for analyzer alerts based on thresholds.
+    /// </summary>
+    /// <param name="alerts">Array of analyzer alerts.</param>
+    /// <param name="thresholdsOptions">Threshold options for alert counts.</param>
+    /// <returns>The calculated verdict.</returns>
+    private Verdict CalculateAnalyzerAlertsVerdict(
+        AnalyzerAlert[] alerts,
+        AlertCountThresholdsOptions thresholdsOptions)
+    {
+        if (alerts.Length is 0)
+        {
+            return Verdict.Undetected;
+        }
+
+        Verdict[] verdicts = alerts
+            .Select(CalculateAnalyzerAlertVerdict)
+            .ToArray();
+
+        int maliciousVerdictsCount = verdicts.Count(v => v is Verdict.Malicious);
+        if (maliciousVerdictsCount >= thresholdsOptions.MaliciousAlertThreshold)
+        {
+            return Verdict.Malicious;
+        }
+
+        int suspiciousVerdictsCount = verdicts.Count(v => v is Verdict.Suspicious);
+        return suspiciousVerdictsCount >= thresholdsOptions.SuspiciousAlertThreshold
+            ? Verdict.Suspicious
+            : Verdict.Undetected;
+    }
+
+    /// <summary>
+    /// Calculates the verdict for a single analyzer alert.
+    /// </summary>
+    /// <param name="alert">The analyzer alert.</param>
+    /// <returns>The calculated verdict.</returns>
+    private Verdict CalculateAnalyzerAlertVerdict(AnalyzerAlert alert)
+    {
+        VerdictCalculationOptions options = _options.CurrentValue;
+        string normalizedVerdict = VerdictCalculationOptions.NormalizeAlertString(alert.Verdict);
+        string normalizedMessage = VerdictCalculationOptions.NormalizeAlertString(alert.Message);
+
+        if (options.AlertVerdicts.Malicious.Contains(normalizedVerdict)
+            || options.AlertMessages.Malicious.Contains(normalizedMessage))
+        {
+            return Verdict.Malicious;
+        }
+
+        if (options.AlertVerdicts.Suspicious.Contains(normalizedVerdict)
+            || options.AlertMessages.Suspicious.Contains(normalizedMessage))
+        {
+            return alert.Severity is Severity.High
+                ? Verdict.Malicious
+                : Verdict.Suspicious;
+        }
+
+        return options.AlertVerdicts.Undetected.Contains(normalizedVerdict)
+            ? Verdict.Undetected
+            : Verdict.Unknown;
     }
 }

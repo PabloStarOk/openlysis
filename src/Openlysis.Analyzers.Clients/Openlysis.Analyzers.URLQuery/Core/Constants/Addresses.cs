@@ -6,11 +6,6 @@ namespace Openlysis.Analyzers.URLQuery.Core.Constants;
 internal static class Addresses
 {
     /// <summary>
-    /// The base URL for the URLQuery API.
-    /// </summary>
-    internal const string Base = "https://api.urlquery.net/public/v1/";
-
-    /// <summary>
     /// The endpoint for submitting a URL.
     /// </summary>
     internal const string SubmitUrlEndpoint = "submit/url";
@@ -24,9 +19,4 @@ internal static class Addresses
     /// The endpoint for getting a detailed report of a URL.
     /// </summary>
     internal const string ReportEndpoint = "report/{0,0}";
-
-    /// <summary>
-    /// The endpoint for getting an overview report of a URL.
-    /// </summary>
-    internal const string ReportOverviewEndpoint = "report/{0,0}/overview";
 }

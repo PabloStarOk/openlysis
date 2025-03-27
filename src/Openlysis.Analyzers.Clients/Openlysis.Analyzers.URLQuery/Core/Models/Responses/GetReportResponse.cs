@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 
+using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 using Openlysis.Analyzers.URLQuery.Core.Models.Objects;
 
 namespace Openlysis.Analyzers.URLQuery.Core.Models.Responses;
@@ -9,6 +10,8 @@ namespace Openlysis.Analyzers.URLQuery.Core.Models.Responses;
 /// </summary>
 /// <param name="ReportId">The unique identifier of the report.</param>
 /// <param name="Sensors">The sensors associated with the report.</param>
-public record GetReportResponse(
+/// <param name="Status">The status of the report.</param>
+internal record GetReportResponse(
     [property: JsonPropertyName("report_id")] string ReportId,
+    [property: JsonPropertyName("status")] Status Status,
     [property: JsonPropertyName("sensors")] Sensors Sensors);

@@ -15,7 +15,6 @@ using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
 using Openlysis.Analyzers.URLQuery.Core.Constants;
 using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
-using Openlysis.Analyzers.URLQuery.Core.Models.Objects;
 using Openlysis.Analyzers.URLQuery.Core.Models.Requests;
 using Openlysis.Analyzers.URLQuery.Core.Models.Responses;
 using Openlysis.Domain.Common.Enums;
@@ -38,6 +37,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         {
             new JsonStringEnumConverter<Access>(JsonNamingPolicy.CamelCase),
             new JsonStringEnumConverter<Status>(JsonNamingPolicy.CamelCase),
+            new JsonStringEnumConverter<Severity>(JsonNamingPolicy.CamelCase),
         },
     };
 
@@ -148,7 +148,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         ComposedServiceAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        string formattedUrl = string.Format(Addresses.ReportOverviewEndpoint, id.Primary.Value);
+        string formattedUrl = string.Format(Addresses.ReportEndpoint, id.Primary.Value);
         using HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
@@ -156,13 +156,17 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             return await LogAndReturnStatusCodeErrorAsync(response, cancellationToken);
         }
 
-        ErrorOr<GetReportOverviewResponse> reportResult;
-        ErrorOr<Stats> statsResult;
+#if DEBUG
+        _logger.LogDebug(
+            "UrlQuery Analysis Report: {Body}",
+            await response.Content.ReadAsStringAsync(cancellationToken));
+#endif
+
+        ErrorOr<GetReportResponse> reportResult;
         await using (var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken))
         using (var jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken))
         {
-            reportResult = DeserializeResponse<GetReportOverviewResponse>(jsonDocument.RootElement);
-            statsResult = ParseStats(jsonDocument.RootElement);
+            reportResult = DeserializeResponse<GetReportResponse>(jsonDocument.RootElement);
         }
 
         if (reportResult.IsError)
@@ -170,28 +174,17 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             return reportResult.Errors;
         }
 
-        if (statsResult.IsError)
-        {
-            return statsResult.Errors;
-        }
-
-        GetReportOverviewResponse overviewResponse = reportResult.Value;
-        Stats stats = statsResult.Value;
+        GetReportResponse report = reportResult.Value;
 
 #if DEBUG
         _logger.LogDebug(
-            "UrlQuery Results:"
-            + "\n\tUrlQuery Alerts: {UrlQuery}"
-            + "\n\tNetwork Intrusion Detection Alerts: {Ids}"
-            + "\n\tThreat Detection System Alerts: {Tds}",
-            stats.UrlQueryAlerts,
-            stats.IdsAlerts,
-            stats.ThreatDetectionSystemsAlerts);
+            "UrlQuery Report Sensors:\n{Body}",
+            report.Sensors);
 #endif
 
-        AnalysisStatus status = Maps.AnalysisStatusMap[overviewResponse.Status];
-        Verdict verdict = _verdictCalculator.Calculate(stats);
-        return UrlServiceAnalysis.Create(overviewResponse.ReportId, ServiceName, status, verdict, id.Job);
+        AnalysisStatus status = Maps.AnalysisStatusMap[report.Status];
+        Verdict verdict = _verdictCalculator.Calculate(report.Sensors);
+        return UrlServiceAnalysis.Create(report.ReportId, ServiceName, status, verdict, id.Job);
     }
 
     /// <summary>
@@ -214,34 +207,6 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         }
 
         return model is null ? LogAndReturnNullError(typeof(TModel)) : model;
-    }
-
-    /// <summary>
-    /// Parses the statistics from the HTTP response.
-    /// </summary>
-    /// <param name="rootElement">The root JSON element containing the response data.</param>
-    /// <returns>An <see cref="ErrorOr{Stats}"/> containing the parsed statistics or an error.</returns>
-    private ErrorOr<Stats> ParseStats(JsonElement rootElement)
-    {
-        Stats? stats;
-        try
-        {
-            stats = rootElement
-                .GetProperty("stats")
-                .GetProperty("alert_count")
-                .Deserialize<Stats>(_jsonSerializerOptions);
-        }
-        catch (Exception ex)
-        {
-            return LogAndReturnDeserializationException(ex, typeof(Stats));
-        }
-
-        if (stats is not null)
-        {
-            return stats;
-        }
-
-        return stats is null ? LogAndReturnNullError(typeof(Stats)) : stats;
     }
 
     /// <summary>
