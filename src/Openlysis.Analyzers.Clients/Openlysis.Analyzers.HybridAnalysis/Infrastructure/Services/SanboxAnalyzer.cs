@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -60,7 +61,11 @@ public class SandboxAnalyzer : ISandboxAnalyzer
 
         if (!response.IsSuccessStatusCode)
         {
-            return await LogAndReturnStatusCodeErrorAsync(response, cancellationToken);
+            await LogStatusCodeErrorAsync(response, cancellationToken);
+
+            return response.StatusCode is HttpStatusCode.TooManyRequests
+                ? Error.Failure(code: ErrorCodes.TooManyRequests)
+                : GetUnexpectedStatusCodeError();
         }
 
         await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -78,7 +83,8 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         using HttpResponseMessage response = await httpClient.GetAsync(formattedAddress, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            return await LogAndReturnStatusCodeErrorAsync(response, cancellationToken);
+            await LogStatusCodeErrorAsync(response, cancellationToken);
+            return GetUnexpectedStatusCodeError();
         }
 
         await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -123,13 +129,53 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         using HttpResponseMessage response = await httpClient.GetAsync(formattedAddress, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            return await LogAndReturnStatusCodeErrorAsync(response, cancellationToken);
+            await LogStatusCodeErrorAsync(response, cancellationToken);
+            return GetUnexpectedStatusCodeError();
         }
 
         // 4. Map report.
         await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken);
         return DeserializeResponse<SanboxReportSummary>(jsonDocument.RootElement);
+    }
+
+    /// <inheritdoc/>
+    public async Task<ErrorOr<string>> CheckUrlHashAsync(
+        HttpClient httpClient,
+        Uri url,
+        CancellationToken cancellationToken = default)
+    {
+        var dictionary = new Dictionary<string, string>(1)
+        {
+            { "url", url.AbsoluteUri },
+        };
+        using var formUrlEncoded = new FormUrlEncodedContent(dictionary);
+        using HttpResponseMessage response = await httpClient.PostAsync(Addresses.SubmitHashForUrl, formUrlEncoded, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            return GetUnexpectedStatusCodeError();
+        }
+
+        await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+        using var jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken);
+        string? hash = jsonDocument.RootElement.GetProperty("sha256").GetString();
+
+        if (hash is null)
+        {
+            throw new InvalidOperationException("Hash was null when checking SHA-256 for a URL at Hybrid Analysis Sandbox service.");
+        }
+
+        return hash;
+    }
+
+    /// <summary>
+    /// Returns an error indicating that the HTTP response status code was not successful.
+    /// </summary>
+    /// <returns>An <see cref="Error"/> indicating an unsuccessful response status code.</returns>
+    private static Error GetUnexpectedStatusCodeError()
+    {
+        return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
     }
 
     /// <summary>
@@ -227,8 +273,9 @@ public class SandboxAnalyzer : ISandboxAnalyzer
     /// </summary>
     /// <param name="response">The HTTP response message containing the error status code.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>An <see cref="Error"/> indicating the unsuccessful status code.</returns>
-    private async Task<Error> LogAndReturnStatusCodeErrorAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
+    private async Task LogStatusCodeErrorAsync(
+        HttpResponseMessage response,
+        CancellationToken cancellationToken = default)
     {
         string responseString = await response.Content.ReadAsStringAsync(cancellationToken);
         string requestString = await GetRequestLogAsync(response, cancellationToken);
@@ -243,7 +290,6 @@ public class SandboxAnalyzer : ISandboxAnalyzer
             response.StatusCode,
             responseString,
             requestString);
-        return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
     }
 
     /// <summary>

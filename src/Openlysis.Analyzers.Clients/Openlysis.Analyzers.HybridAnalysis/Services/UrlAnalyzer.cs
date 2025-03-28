@@ -67,6 +67,31 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             submitUrlRequest,
             cancellationToken);
 
+        if (result.Errors.Any(e => e.Code is ErrorCodes.TooManyRequests))
+        {
+            // Get last analysis report.
+            ErrorOr<string> checkHashResult = await _sandboxAnalyzer
+                .CheckUrlHashAsync(httpClient, request.Url, cancellationToken);
+            if (checkHashResult.IsError)
+            {
+                return checkHashResult.Errors;
+            }
+
+            string hash = checkHashResult.Value;
+            int sandboxEnvironmentId = (int)_hybridOptions.CurrentValue.DefaultSandboxEnvironment;
+            string id = $"{hash}:{sandboxEnvironmentId}";
+
+            ErrorOr<SanboxReportSummary> reportResult =
+                await _sandboxAnalyzer.GetReportSummaryAsync(httpClient, id, cancellationToken);
+
+            if (reportResult.IsError)
+            {
+                return reportResult.Errors;
+            }
+
+            return MapServiceAnalysis(reportResult.Value);
+        }
+
         if (result.IsError)
         {
             return result.Errors;
@@ -131,6 +156,16 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             reportSummary.ThreatScore);
 #endif
 
+        return MapServiceAnalysis(reportSummary);
+    }
+
+    /// <summary>
+    /// Maps from <see cref="SanboxReportSummary"/> to an <see cref="UrlServiceAnalysis"/> object.
+    /// </summary>
+    /// <param name="reportSummary">The summary of the sandbox report.</param>
+    /// <returns>A UrlServiceAnalysis object containing the mapped data.</returns>
+    private UrlServiceAnalysis MapServiceAnalysis(SanboxReportSummary reportSummary)
+    {
         AnalysisStatus status = Maps.AnalysisStatusMap[reportSummary.Status];
         Verdict verdict = Maps.VerdictMap[reportSummary.Verdict];
         return UrlServiceAnalysis.Create(
