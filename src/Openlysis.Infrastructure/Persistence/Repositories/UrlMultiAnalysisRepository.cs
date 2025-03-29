@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
@@ -11,8 +12,6 @@ namespace Openlysis.Infrastructure.Persistence.Repositories;
 /// <summary>
 /// Repository for managing <see cref="UrlMultiAnalysis"/> entities.
 /// </summary>
-/// <typeparam name="UrlMultiAnalysis">The type of the entity.</typeparam>
-/// <typeparam name="MultiAnalysisId">The type of the entity's identifier.</typeparam>
 public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAnalysisId>
 {
     private readonly AnalysesDbContext _dbContext;
@@ -35,6 +34,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
 
         return await _dbContext.UrlMultiAnalyses
             .AsSplitQuery()
+            .Include(u => u.ServiceAnalyses)
             .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
     }
 
@@ -45,7 +45,8 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
         Func<IQueryable<UrlMultiAnalysis>, IOrderedQueryable<UrlMultiAnalysis>>? orderBy = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<UrlMultiAnalysis> query = _dbContext.UrlMultiAnalyses;
+        IQueryable<UrlMultiAnalysis> query = _dbContext.UrlMultiAnalyses
+            .Include(u => u.ServiceAnalyses);
 
         if (filter is not null)
         {
@@ -76,7 +77,9 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
             _dbContext.Attach(model.UrlHashSet).State = EntityState.Unchanged;
         }
 
-        await _dbContext.AddAsync(model, cancellationToken);
+        EntityEntry<UrlMultiAnalysis> multiAnalysisEntry = await _dbContext.AddAsync(model, cancellationToken);
+        await SyncServiceAnalysesAsync(multiAnalysisEntry, cancellationToken);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -85,16 +88,18 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
     {
         ArgumentNullException.ThrowIfNull(model);
 
-        bool analysisExists = await _dbContext.UrlMultiAnalyses
-            .AsSplitQuery()
-            .AnyAsync(u => u.Id == model.Id, cancellationToken);
-
-        if (!analysisExists)
+        var multiAnalysis = await _dbContext.UrlMultiAnalyses
+            .Include(u => u.ServiceAnalyses)
+            .FirstOrDefaultAsync(m => m == model, cancellationToken);
+        if (multiAnalysis is null)
         {
-            return;
+            throw new InvalidOperationException("UrlMultiAnalysis not found.");
         }
 
-        _dbContext.UrlMultiAnalyses.Update(model);
+        EntityEntry<UrlMultiAnalysis> multiAnalysisEntry = _dbContext.Entry(multiAnalysis);
+        multiAnalysisEntry.CurrentValues.SetValues(model);
+        await SyncServiceAnalysesAsync(multiAnalysisEntry, cancellationToken);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -102,5 +107,37 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
     public async Task<bool> ExistsAsync(MultiAnalysisId id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.UrlMultiAnalyses.AnyAsync(u => u.Id == id, cancellationToken);
+    }
+
+    /// <summary>
+    /// References existing service analyses and updates their state if necessary.
+    /// </summary>
+    /// <param name="multiAnalysisEntry">The entity entry of the UrlMultiAnalysis.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async Task SyncServiceAnalysesAsync(
+        EntityEntry<UrlMultiAnalysis> multiAnalysisEntry,
+        CancellationToken cancellationToken = default)
+    {
+        var existingAnalyses = _dbContext.UrlServiceAnalyses
+            .Where(u => multiAnalysisEntry.Entity.ServiceAnalyses.Contains(u));
+
+        foreach (var incomingAnalysis in multiAnalysisEntry.Entity.ServiceAnalyses)
+        {
+            var existingAnalysis = await existingAnalyses
+                .AsNoTracking()
+                .SingleOrDefaultAsync(e => e == incomingAnalysis, cancellationToken);
+
+            if (existingAnalysis is null)
+            {
+                continue;
+            }
+
+            _dbContext.Entry(incomingAnalysis).State =
+                incomingAnalysis.Verdict == existingAnalysis.Verdict
+                && incomingAnalysis.ThreatScore.Equals(existingAnalysis.ThreatScore)
+                && incomingAnalysis.Status == existingAnalysis.Status
+                ? EntityState.Unchanged
+                : EntityState.Modified;
+        }
     }
 }

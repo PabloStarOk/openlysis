@@ -16,11 +16,6 @@ namespace Openlysis.Domain.URLs.Entities;
 public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
 {
     /// <summary>
-    /// Gets the unique identifier for the URL service analysis.
-    /// </summary>
-    public string UrlServiceAnalysisId => Id.Primary.Value;
-
-    /// <summary>
     /// Gets the name of the service.
     /// </summary>
     public string ServiceName { get; }

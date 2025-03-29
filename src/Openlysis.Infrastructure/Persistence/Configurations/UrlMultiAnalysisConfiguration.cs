@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Domain.Users.ValueObjects;
@@ -15,7 +14,6 @@ namespace Openlysis.Infrastructure.Persistence.Configurations;
 /// </summary>
 public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAnalysis>
 {
-    private const string VarcharType = "VARCHAR";
     private const string NvarcharType = "NVARCHAR";
     private const string TinyIntType = "TINYINT";
 
@@ -23,7 +21,6 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
     public void Configure(EntityTypeBuilder<UrlMultiAnalysis> builder)
     {
         ConfigureMultiAnalysis(builder);
-        builder.OwnsMany(u => u.ServiceAnalyses, ConfigureServiceAnalysis);
     }
 
     /// <summary>
@@ -38,7 +35,7 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
 
         builder.Property(u => u.Id)
             .HasColumnName("UrlMultiAnalysisId")
-            .HasColumnType(VarcharType)
+            .HasColumnType("VARCHAR")
             .HasMaxLength(36)
             .IsRequired()
             .ValueGeneratedNever()
@@ -104,55 +101,16 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
 
         builder.HasIndex(u => u.UserId)
             .IsClustered();
-    }
 
-    /// <summary>
-    /// Configures the properties and relationships of the UrlServiceAnalysis entity.
-    /// </summary>
-    /// <param name="builder">The builder used to configure the UrlServiceAnalysis entity.</param>
-    private static void ConfigureServiceAnalysis(OwnedNavigationBuilder<UrlMultiAnalysis, UrlServiceAnalysis> builder)
-    {
-        builder.ToTable("UrlServiceAnalyses");
-
-        builder.HasKey(u => u.Id);
-
-        builder.Property(u => u.Id)
-            .HasColumnName("UrlServiceAnalysisId")
-            .HasColumnType(NvarcharType)
-            .HasMaxLength(100)
-            .IsRequired()
-            .ValueGeneratedNever()
-            .HasConversion(
-                id => id.ToString(),
-                id => ComposedServiceAnalysisId.Create(id));
-
-        builder.Property(u => u.ServiceName)
-            .HasColumnName("ServiceName")
-            .HasColumnType(NvarcharType)
-            .HasMaxLength(30)
-            .IsRequired();
-
-        builder.Property(u => u.Status)
-            .HasColumnName("Status")
-            .HasColumnType(TinyIntType)
-            .IsRequired();
-
-        builder.Property(u => u.Verdict)
-            .HasColumnName("Verdict")
-            .HasColumnType(TinyIntType)
-            .IsRequired();
-
-        builder.Property(u => u.ThreatZone)
-            .HasColumnName("ThreatZone")
-            .HasColumnType(TinyIntType)
-            .IsRequired();
-
-        builder.Property(u => u.ThreatScore)
-            .HasColumnName("ThreatScore")
-            .HasColumnType("FLOAT")
-            .HasMaxLength(25);
-
-        builder.WithOwner()
-            .HasForeignKey("UrlMultiAnalysisId");
+        builder.HasMany(u => u.ServiceAnalyses)
+            .WithMany()
+            .UsingEntity(
+                "UrlAnalyses",
+                r => r.HasOne(typeof(UrlServiceAnalysis)).WithMany().HasForeignKey("ServiceAnalysisId"),
+                l => l.HasOne(typeof(UrlMultiAnalysis)).WithMany().HasForeignKey("MultiAnalysisId"),
+                joinEntity =>
+                {
+                    joinEntity.HasKey("MultiAnalysisId", "ServiceAnalysisId");
+                });
     }
 }

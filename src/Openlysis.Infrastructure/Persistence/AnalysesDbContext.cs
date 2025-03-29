@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.URLs;
+using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Persistence.Configurations;
 
 namespace Openlysis.Infrastructure.Persistence;
@@ -28,6 +29,11 @@ public class AnalysesDbContext : DbContext
     public DbSet<UrlMultiAnalysis> UrlMultiAnalyses { get; init; } = null!;
 
     /// <summary>
+    /// Gets the URL service analyses set of the database.
+    /// </summary>
+    public DbSet<UrlServiceAnalysis> UrlServiceAnalyses { get; init; } = null!;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="AnalysesDbContext"/> class.
     /// </summary>
     /// <param name="options">Options of the database context.</param>
@@ -41,6 +47,7 @@ public class AnalysesDbContext : DbContext
     {
         modelBuilder.ApplyConfiguration(new ContentHashSetConfiguration());
         modelBuilder.ApplyConfiguration(new FileAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new UrlServiceAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new UrlMultiAnalysisConfiguration());
     }
 }
