@@ -35,19 +35,19 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// Initializes a new instance of the <see cref="UrlAnalyzer"/> class.
     /// </summary>
     /// <param name="options">The options monitor for VirusTotal analyzer configuration.</param>
-    /// <param name="requestLimitTracker">The request limit tracker.</param>
+    /// <param name="rateQuotaService">The request limit tracker.</param>
     /// <param name="httpClientFactory">The HTTP client factory used for creating HTTP clients.</param>
     /// <param name="logger">The logger instance for logging.</param>
     /// <param name="vtAnalyzer">The VirusTotal analyzer instance.</param>
     /// <param name="verdictCalculator">The verdict calculator instance.</param>
     public UrlAnalyzer(
         IOptionsMonitor<VirusTotalAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
         IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
         IVirusTotalAnalyzer vtAnalyzer,
         IVerdictCalculator verdictCalculator)
-        : base(options, requestLimitTracker, httpClientFactory, logger)
+        : base(options, rateQuotaService, httpClientFactory, logger)
     {
         _vtAnalyzer = vtAnalyzer;
         _verdictCalculator = verdictCalculator;

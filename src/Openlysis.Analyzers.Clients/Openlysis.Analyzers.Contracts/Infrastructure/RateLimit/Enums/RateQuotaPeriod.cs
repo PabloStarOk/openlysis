@@ -1,27 +1,27 @@
 namespace Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Enums;
 
 /// <summary>
-/// Specifies the period for request limits.
+/// Specifies the time period type for rate limits and usage quotas.
 /// </summary>
-public enum RequestLimitPeriod
+public enum RateQuotaPeriod
 {
     /// <summary>
-    /// Limit requests per minute.
+    /// Applies to rate limits (per-minute constraints)
     /// </summary>
     Minute,
 
     /// <summary>
-    /// Limit requests per hour.
+    /// Applies to rate limits (per-hour constraints).
     /// </summary>
     Hour,
 
     /// <summary>
-    /// Limit requests per day.
+    /// Applies to daily usage quotas
     /// </summary>
     Day,
 
     /// <summary>
-    /// Limit requests per month.
+    /// Applies to monthly usage quotas
     /// </summary>
-    Month
+    Month,
 }

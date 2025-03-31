@@ -27,22 +27,4 @@ public record AnalyzerOptions
     /// Gets the timeout for requests in milliseconds.
     /// </summary>
     required public int RequestsTimeoutMs { get; init; }
-
-    /// <summary>
-    /// Gets a value indicating whether to analyze consume requests.
-    /// </summary>
-    [AllowedValues(true, false)]
-    required public bool AnalyzeConsumeRequest { get; init; }
-
-    /// <summary>
-    /// Gets a value indicating whether to get status consume requests.
-    /// </summary>
-    [AllowedValues(true, false)]
-    required public bool GetStatusConsumeRequest { get; init; }
-
-    /// <summary>
-    /// Gets a value indicating whether to get analysis consume requests.
-    /// </summary>
-    [AllowedValues(true, false)]
-    required public bool GetAnalysisConsumeRequest { get; init; }
 }

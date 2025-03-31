@@ -37,17 +37,17 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// Initializes a new instance of the <see cref="UrlAnalyzer"/> class.
     /// </summary>
     /// <param name="options">The options monitor for <see cref="FilescanAnalyzerOptions"/>.</param>
-    /// <param name="requestLimitTracker">The request limit tracker for the service.</param>
+    /// <param name="rateQuotaService">The request limit tracker for the service.</param>
     /// <param name="httpClientFactory">The HTTP client factory for creating HTTP clients.</param>
     /// <param name="logger">The logger for logging information.</param>
     /// <param name="filescanAnalyzer">The filescan analyzer for analyzing files.</param>
     public UrlAnalyzer(
         IOptionsMonitor<FilescanAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
         IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
         IFilescanAnalyzer filescanAnalyzer)
-        : base(options, requestLimitTracker, httpClientFactory, logger)
+        : base(options, rateQuotaService, httpClientFactory, logger)
     {
         _filescanAnalyzer = filescanAnalyzer;
     }

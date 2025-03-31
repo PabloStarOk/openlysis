@@ -36,17 +36,17 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// Initializes a new instance of the <see cref="UrlAnalyzer"/> class.
     /// </summary>
     /// <param name="options">The options monitor for <see cref="HybridAnalyzerOptions"/>.</param>
-    /// <param name="requestLimitTracker">The request limit tracker.</param>
+    /// <param name="rateQuotaService">The request limit tracker.</param>
     /// <param name="httpClientFactory">The HTTP client factory.</param>
     /// <param name="logger">The logger instance.</param>
     /// <param name="sandboxAnalyzer">The sandbox analyzer.</param>
     public UrlAnalyzer(
         IOptionsMonitor<HybridAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRequestLimitTracker requestLimitTracker,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
         IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
         ISandboxAnalyzer sandboxAnalyzer)
-        : base(options, requestLimitTracker, httpClientFactory, logger)
+        : base(options, rateQuotaService, httpClientFactory, logger)
     {
         _hybridOptions = options;
         _sandboxAnalyzer = sandboxAnalyzer;

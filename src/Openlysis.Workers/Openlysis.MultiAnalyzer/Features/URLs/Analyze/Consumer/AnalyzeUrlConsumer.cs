@@ -74,7 +74,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
         var request = new AnalyzeUrlRequest(_context.Message.Url);
         await Parallel.ForEachAsync(_analyzers.Values, cancellationToken, async (analyzer, ct) =>
         {
-            if (!analyzer.IsAvailable)
+            if (!analyzer.CanAnalyze)
             {
                 return;
             }
@@ -130,7 +130,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
         await Parallel.ForEachAsync(_serviceAnalyses.Values, cancellationToken, async (analysis, ct) =>
         {
             var analyzer = _analyzers[analysis.ServiceName];
-            if (!analyzer.IsAvailable)
+            if (!analyzer.CanGetAnalysisStatus)
             {
                 return;
             }
@@ -149,6 +149,11 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
             if (getStatusResult.Value
                 is AnalysisStatus.Queued
                 or AnalysisStatus.InProgress)
+            {
+                return;
+            }
+
+            if (!analyzer.CanGetAnalysis)
             {
                 return;
             }

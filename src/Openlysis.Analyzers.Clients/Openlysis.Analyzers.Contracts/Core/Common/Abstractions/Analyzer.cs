@@ -7,6 +7,7 @@ using Openlysis.Analyzers.Contracts.Core.Common.Models;
 using Openlysis.Analyzers.Contracts.Core.Configuration;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Enums;
+using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Models;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 
@@ -27,37 +28,53 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     public string ServiceName => _options.CurrentValue.ServiceName;
 
     /// <summary>
-    /// Gets a value indicating whether the service is available.
+    /// Gets a value indicating whether the analyzer can perform analysis.
     /// </summary>
-    public bool IsAvailable { get; private set; } = true;
+    public bool CanAnalyze { get; private set; } = true;
 
+    /// <summary>
+    /// Gets a value indicating whether the analyzer can get the status of an analysis.
+    /// </summary>
+    public bool CanGetAnalysisStatus { get; private set; } = true;
+
+    /// <summary>
+    /// Gets a value indicating whether the analyzer can get the analysis.
+    /// </summary>
+    public bool CanGetAnalysis { get; private set; } = true;
+
+    /// <summary>
+    /// Logger instance for the analyzer.
+    /// </summary>
     protected readonly ILogger<Analyzer<TAnalysis, TRequest>> _logger;
+
+    /// <summary>
+    /// Options monitor for <see cref="AnalyzerOptions"/>.
+    /// </summary>
     protected readonly IOptionsMonitor<AnalyzerOptions> _options;
 
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IRequestLimitTracker? _requestLimitTracker;
-    private readonly HashSet<RequestLimitPeriod> _limitPeriodsReached = new (Enum.GetValues<RequestLimitPeriod>().Length);
+    private readonly IRateQuotaService? _rateQuotaService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Analyzer{TAnalysis, TRequest}"/> class.
     /// </summary>
     /// <param name="options">The options monitor for <see cref="AnalyzerOptions"/>.</param>
-    /// <param name="requestLimitTracker">The request limit manager.</param>
+    /// <param name="rateQuotaService">The request limit manager.</param>
     /// <param name="httpClientFactory">The HTTP client factory instance.</param>
     /// <param name="logger">The logger instance.</param>
     protected Analyzer(
         IOptionsMonitor<AnalyzerOptions> options,
-        IRequestLimitTracker requestLimitTracker,
+        IRateQuotaService rateQuotaService,
         IHttpClientFactory httpClientFactory,
         ILogger<Analyzer<TAnalysis, TRequest>> logger)
     {
         _options = options;
-        _requestLimitTracker = requestLimitTracker;
+        _rateQuotaService = rateQuotaService;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
 
-        _requestLimitTracker.OnLimitReached += OnLimitReached;
-        _requestLimitTracker.OnRateReduced += OnRateReduced;
+        _rateQuotaService.LimitExceed += OnCapacityExhausted;
+        _rateQuotaService.LimitRecovered += OnCapacityRestored;
     }
 
     /// <summary>
@@ -95,18 +112,18 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (!IsAvailable)
+        if (!CanAnalyze)
         {
-            return Error.Failure(description: $"{ServiceName} analysis service is not available.");
+            return Error.Failure(description: $"{ServiceName} analysis service is not available to analyze.");
         }
 
         try
         {
             HttpClient httpClient = _httpClientFactory.CreateClient(ServiceName);
             ErrorOr<TAnalysis> result = await OnAnalyzeAsync(httpClient, request, cancellationToken);
-            if (!result.IsError && _options.CurrentValue.AnalyzeConsumeRequest)
+            if (!result.IsError)
             {
-                _requestLimitTracker?.AddRequest();
+                _rateQuotaService?.Track(AnalysisEndpointType.Analyze);
             }
 
             return result;
@@ -135,18 +152,18 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id.Primary.Value);
 
-        if (!IsAvailable)
+        if (!CanGetAnalysisStatus)
         {
-            return Error.Failure(description: $"{ServiceName} analysis service is not available.");
+            return Error.Failure(description: $"{ServiceName} analysis service is not available to get the status of an analysis.");
         }
 
         try
         {
             HttpClient httpClient = _httpClientFactory.CreateClient(ServiceName);
             ErrorOr<AnalysisStatus> result = await OnGetStatusAsync(httpClient, id, cancellationToken);
-            if (!result.IsError && _options.CurrentValue.GetStatusConsumeRequest)
+            if (!result.IsError)
             {
-                _requestLimitTracker?.AddRequest();
+                _rateQuotaService?.Track(AnalysisEndpointType.GetStatus);
             }
 
             return result;
@@ -175,18 +192,18 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id.Primary.Value);
 
-        if (!IsAvailable)
+        if (!CanGetAnalysis)
         {
-            return Error.Failure(description: $"{ServiceName} analysis service is not available.");
+            return Error.Failure(description: $"{ServiceName} analysis service is not available to get an analysis.");
         }
 
         try
         {
             HttpClient httpClient = _httpClientFactory.CreateClient(ServiceName);
             ErrorOr<TAnalysis> result = await OnGetAnalysisAsync(httpClient, id, cancellationToken);
-            if (!result.IsError && _options.CurrentValue.GetAnalysisConsumeRequest)
+            if (!result.IsError)
             {
-                _requestLimitTracker?.AddRequest();
+                _rateQuotaService?.Track(AnalysisEndpointType.GetResults);
             }
 
             return result;
@@ -209,13 +226,13 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <param name="disposing">A boolean value indicating whether the method is called from the Dispose method.</param>
     protected virtual void Dispose(bool disposing)
     {
-        if (_requestLimitTracker is null)
+        if (_rateQuotaService is null)
         {
             return;
         }
 
-        _requestLimitTracker.OnLimitReached -= OnLimitReached;
-        _requestLimitTracker.OnRateReduced -= OnRateReduced;
+        _rateQuotaService.LimitExceed -= OnCapacityExhausted;
+        _rateQuotaService.LimitRecovered -= OnCapacityRestored;
     }
 
     /// <summary>
@@ -255,36 +272,78 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Handles the event when a request limit is reached.
+    /// Handles the event when the request capacity is exhausted.
     /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="limitPeriod">The period for which the limit was reached.</param>
-    private void OnLimitReached(object? sender, RequestLimitPeriod limitPeriod)
+    /// <param name="endpointTypes">The set of analysis endpoint types that have exhausted their capacity.</param>
+    /// <param name="rateQuotaPeriod">The rate quota period during which the capacity was exhausted.</param>
+    private void OnCapacityExhausted(
+        HashSet<AnalysisEndpointType> endpointTypes,
+        RateQuotaPeriod rateQuotaPeriod)
     {
-        if (!_limitPeriodsReached.Add(limitPeriod))
-        {
-            return;
-        }
+        UpdateAvailability(endpointTypes, false);
 
-        IsAvailable = false;
         _logger.LogWarning(
-            "{ServiceName} analyzer service is not available due to a {LimitPeriod} limit reached.",
+            "{ServiceName}: analyzer service is not available due to a {RateQuotaPeriod} limit reached on {EndpointTypes} analysis endpoints.",
             ServiceName,
-            limitPeriod);
+            rateQuotaPeriod,
+            endpointTypes);
     }
 
     /// <summary>
-    /// Handles the event when the rate limit is reduced.
+    /// Handles the event when the request capacity is restored.
     /// </summary>
-    /// <param name="sender">The source of the event.</param>
-    /// <param name="limitPeriod">The period for which the limit was reduced.</param>
-    private void OnRateReduced(object? sender, RequestLimitPeriod limitPeriod)
+    /// <param name="tracker">The rate quota tracker that indicates the restored capacity.</param>
+    private void OnCapacityRestored(RateQuotaTracker tracker)
     {
-        _limitPeriodsReached.Remove(limitPeriod);
-
-        if (_limitPeriodsReached.Count == 0)
+        if (_rateQuotaService is null)
         {
-            IsAvailable = true;
+#if DEBUG
+            _logger.LogDebug("{ServiceName}: No limit tracker configured.", ServiceName);
+#endif
+            return;
+        }
+
+        if (_rateQuotaService.AreAvailable(tracker.EndpointTypes))
+        {
+            UpdateAvailability(tracker.EndpointTypes, true);
+        }
+
+#if DEBUG
+        _logger.LogDebug(
+            "{ServiceName}: Capacity restored for {EndpointTypes} analyses endpoints.",
+            ServiceName,
+            tracker.EndpointTypes);
+#endif
+    }
+
+    /// <summary>
+    /// Updates the availability status of the specified analysis endpoint types.
+    /// </summary>
+    /// <param name="endpointTypes">The set of analysis endpoint types to update.</param>
+    /// <param name="value">The availability status to set.</param>
+    private void UpdateAvailability(
+        HashSet<AnalysisEndpointType> endpointTypes,
+        bool value)
+    {
+        foreach (var endpointType in endpointTypes)
+        {
+            switch (endpointType)
+            {
+                case AnalysisEndpointType.Analyze:
+                    CanAnalyze = value;
+                    break;
+
+                case AnalysisEndpointType.GetStatus:
+                    CanGetAnalysisStatus = value;
+                    break;
+
+                case AnalysisEndpointType.GetResults:
+                    CanGetAnalysis = value;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(endpointTypes), endpointTypes, null);
+            }
         }
     }
 }
