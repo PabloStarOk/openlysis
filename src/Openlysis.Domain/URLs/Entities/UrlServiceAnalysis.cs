@@ -129,7 +129,7 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
     {
         if (Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
         {
-            return;
+            throw new InvalidOperationException("Trying to update verdict of UrlServiceAnalysis when analysis status is not queued or in-progress.");
         }
 
         Verdict = newVerdict;
@@ -147,7 +147,7 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
     {
         if (Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
         {
-            return;
+            throw new InvalidOperationException("Trying to update threat score of the UrlServiceAnalysis when analysis status is not queued or in-progress.");
         }
 
         if (threatScore is > .0f and < 1.0f)

@@ -136,11 +136,12 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
     /// Adds a new service file analysis to the collection.
     /// </summary>
     /// <param name="analysis">The service file analysis to add.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the multi-analysis already contains the same service analysis to be added.</exception>
     public void AddServiceAnalysis(UrlServiceAnalysis analysis)
     {
         if (_serviceAnalyses.Contains(analysis))
         {
-            return;
+            throw new InvalidOperationException("UrlMultiAnalysis already contains the given UrlServiceAnalysis.");
         }
 
         _serviceAnalyses.Add(analysis);
@@ -154,11 +155,12 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
     /// Updates an existing service file analysis in the collection.
     /// </summary>
     /// <param name="analysis">The service file analysis to update.</param>
+    /// <exception cref="InvalidOperationException">Thrown when the multi-analysis doesn't contain the given service analysis to be updated.</exception>
     public void UpdateServiceAnalysis(UrlServiceAnalysis analysis)
     {
         if (!_serviceAnalyses.Contains(analysis))
         {
-            return;
+            throw new InvalidOperationException("UrlMultiAnalysis does not contain the given UrlServiceAnalysis.");
         }
 
         int analysisIndex = _serviceAnalyses.IndexOf(analysis);
