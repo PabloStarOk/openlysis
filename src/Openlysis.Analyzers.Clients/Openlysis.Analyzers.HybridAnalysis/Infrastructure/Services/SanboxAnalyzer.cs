@@ -6,6 +6,7 @@ using ErrorOr;
 
 using Microsoft.Extensions.Options;
 
+using Openlysis.Analyzers.Contracts.Core.Common.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
@@ -63,7 +64,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
             return response.StatusCode is HttpStatusCode.TooManyRequests
                 ? Error.Failure(code: ErrorCodes.TooManyRequests)
-                : GetUnexpectedStatusCodeError();
+                : AnalyzerErrors.NonSuccessStatusCode;
         }
 
         await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -82,7 +83,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return GetUnexpectedStatusCodeError();
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -113,7 +114,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return GetUnexpectedStatusCodeError();
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         // 4. Map report.
@@ -138,7 +139,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return GetUnexpectedStatusCodeError();
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -151,15 +152,6 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         }
 
         return hash;
-    }
-
-    /// <summary>
-    /// Returns an error indicating that the HTTP response status code was not successful.
-    /// </summary>
-    /// <returns>An <see cref="Error"/> indicating an unsuccessful response status code.</returns>
-    private static Error GetUnexpectedStatusCodeError()
-    {
-        return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
     }
 
     /// <summary>
@@ -206,7 +198,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         catch (Exception ex)
         {
             _analyzerLogger.LogDeserializationFailure(typeof(TModel), ex, jsonElement);
-            return Error.Unexpected("Response.DeserializationError", "Exception caught while trying to deserialize a response.");
+            return AnalyzerErrors.DeserializationFailure;
         }
 
         if (model is not null)
@@ -215,6 +207,6 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         }
 
         _analyzerLogger.LogUnexpectedNullResult(typeof(TModel));
-        return Error.Unexpected("Response.NullDeserialization", "An object was null after deserialization.");
+        return AnalyzerErrors.DeserializationNull;
     }
 }

@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 using ErrorOr;
 
+using Openlysis.Analyzers.Contracts.Core.Common.Constants;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
@@ -54,7 +55,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         JsonElement dataElement;
@@ -79,7 +80,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         JsonElement dataElement;
@@ -109,7 +110,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
         catch (Exception ex)
         {
             _analyzerLogger.LogDeserializationFailure(typeof(TModel), ex, jsonElement);
-            return Error.Unexpected("Response.DeserializationError", "Exception caught while trying to deserialize a response.");
+            return AnalyzerErrors.DeserializationFailure;
         }
 
         if (model is not null)
@@ -118,6 +119,6 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
         }
 
         _analyzerLogger.LogUnexpectedNullResult(typeof(TModel));
-        return Error.Unexpected("Response.NullDeserialization", "An object was null after deserialization.");
+        return AnalyzerErrors.DeserializationNull;
     }
 }

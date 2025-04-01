@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
+using Openlysis.Analyzers.Contracts.Core.Common.Constants;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
@@ -91,7 +92,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         ErrorOr<SubmitUrlResponse> result;
@@ -131,7 +132,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         ErrorOr<SubmitUrlResponse> result;
@@ -161,7 +162,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
 #if DEBUG
@@ -212,7 +213,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         catch (Exception ex)
         {
             _analyzerLogger.LogDeserializationFailure(typeof(TModel), ex, jsonElement);
-            return Error.Unexpected("Response.DeserializationError", "Exception caught while trying to deserialize a response.");
+            return AnalyzerErrors.DeserializationFailure;
         }
 
         if (model is not null)
@@ -221,6 +222,6 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         }
 
         _analyzerLogger.LogUnexpectedNullResult(typeof(TModel));
-        return Error.Unexpected("Response.NullDeserialization", "An object was null after deserialization.");
+        return AnalyzerErrors.DeserializationNull;
     }
 }

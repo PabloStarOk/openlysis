@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 
 using ErrorOr;
 
+using Openlysis.Analyzers.Contracts.Core.Common.Constants;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Constants;
@@ -55,7 +56,7 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -98,7 +99,7 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
+            return AnalyzerErrors.NonSuccessStatusCode;
         }
 
         await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
@@ -123,7 +124,7 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
         catch (Exception ex)
         {
             _analyzerLogger.LogDeserializationFailure(typeof(TModel), ex, jsonElement);
-            return Error.Unexpected("Response.DeserializationError", "Exception caught while trying to deserialize a response.");
+            return AnalyzerErrors.DeserializationFailure;
         }
 
         if (model is not null)
@@ -132,6 +133,6 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
         }
 
         _analyzerLogger.LogUnexpectedNullResult(typeof(TModel));
-        return Error.Unexpected("Response.NullDeserialization", "An object was null after deserialization.");
+        return AnalyzerErrors.DeserializationNull;
     }
 }
