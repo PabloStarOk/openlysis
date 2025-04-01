@@ -1,3 +1,6 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -5,10 +8,12 @@ using Microsoft.Extensions.Options;
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Client;
+using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
+using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Validators;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 using Openlysis.Analyzers.VirusTotal.Services;
@@ -57,7 +62,20 @@ public static class DependencyInjection
         services.AddSingleton<IVirusTotalAnalyzer, VirusTotalAnalyzer>();
 
         // Add analyzer logger.
-        services.AddAnalyzerLogger<VirusTotalAnalyzerOptions>();
+        services.AddAnalyzerLogger<VirusTotalAnalyzerOptions>(
+            VirusTotalAnalyzer.KeyedServicesKey);
+
+        // Add analyzer deserializer.
+        services.AddAnalyzerDeserializer<VirusTotalAnalyzerOptions>(
+            VirusTotalAnalyzer.KeyedServicesKey,
+            () => new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters =
+                {
+                    new JsonStringEnumConverter<Status>(JsonNamingPolicy.KebabCaseLower),
+                },
+            });
 
         // Add http client.
         services.ConfigureHttpClient(secretOptions, analyzerOptions);

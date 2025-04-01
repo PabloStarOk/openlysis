@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
 
 /// <summary>
@@ -16,21 +14,4 @@ public interface IAnalyzerLogger
     public Task LogNonSuccessStatusCodeAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Logs failures that occur during JSON deserialization with contextual data.
-    /// </summary>
-    /// <param name="targetType">The type attempting to deserialize into.</param>
-    /// <param name="exception">The specific exception thrown during deserialization.</param>
-    /// <param name="problematicJson">The JSON fragment that caused deserialization failure.</param>
-    public void LogDeserializationFailure(
-        Type targetType,
-        Exception exception,
-        JsonElement problematicJson);
-
-    /// <summary>
-    /// Logs situations where deserialization completes but returns null for non-nullable types.
-    /// </summary>
-    /// <param name="targetType">The expected type that received null.</param>
-    public void LogUnexpectedNullResult(Type targetType);
 }

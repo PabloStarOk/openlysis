@@ -1,15 +1,17 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Client;
-using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
-using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
-using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Services;
+using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
+using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 using Openlysis.Analyzers.HybridAnalysis.Services;
 using Openlysis.Domain.URLs.Entities;
@@ -56,6 +58,18 @@ public static class DependencyInjection
 
         // Add analyzer logger
         services.AddSingleton<SandboxAnalyzerLogger>();
+
+        // Add analyzer deserializer.
+        services.AddAnalyzerDeserializer<HybridAnalyzerOptions>(
+            SandboxAnalyzer.KeyedServicesKey,
+            () => new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters =
+                {
+                    new JsonStringEnumConverter<Status>(JsonNamingPolicy.SnakeCaseUpper),
+                },
+            });
 
         // Add http client
         services.ConfigureHttpClient(secretOptions, analyzerOptions, client =>

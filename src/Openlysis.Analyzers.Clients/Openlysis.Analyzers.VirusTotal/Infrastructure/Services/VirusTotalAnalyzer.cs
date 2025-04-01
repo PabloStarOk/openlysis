@@ -1,13 +1,14 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using ErrorOr;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using Openlysis.Analyzers.Contracts.Core.Common.Constants;
+using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization.Abstractions;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
-using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Objects;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Responses;
 
@@ -18,24 +19,25 @@ namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 /// </summary>
 public class VirusTotalAnalyzer : IVirusTotalAnalyzer
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new ()
-    {
-        PropertyNameCaseInsensitive = true,
-        Converters =
-        {
-            new JsonStringEnumConverter<Status>(JsonNamingPolicy.KebabCaseLower),
-        },
-    };
+    /// <summary>
+    /// Key used to identify VirusTotal services.
+    /// </summary>
+    public const string KeyedServicesKey = "VirusTotalServices";
 
     private readonly IAnalyzerLogger _analyzerLogger;
+    private readonly IAnalyzerDeserializer _analyzerDeserializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VirusTotalAnalyzer"/> class.
     /// </summary>
     /// <param name="analyzerLogger">The analyzer logger instance to use for logging analysis-specific information.</param>
-    public VirusTotalAnalyzer(IAnalyzerLogger analyzerLogger)
+    /// <param name="analyzerDeserializer">The analyzer deserializer instance to use for deserializing analysis responses.</param>
+    public VirusTotalAnalyzer(
+        [FromKeyedServices(KeyedServicesKey)] IAnalyzerLogger analyzerLogger,
+        [FromKeyedServices(KeyedServicesKey)] IAnalyzerDeserializer analyzerDeserializer)
     {
         _analyzerLogger = analyzerLogger;
+        _analyzerDeserializer = analyzerDeserializer;
     }
 
     /// <inheritdoc/>
@@ -65,7 +67,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
             dataElement = jsonDocument.RootElement.GetProperty("data").Clone();
         }
 
-        return DeserializeResponse<AnalyzeUrlResponse>(dataElement);
+        return _analyzerDeserializer.Deserialize<AnalyzeUrlResponse>(dataElement);
     }
 
     /// <inheritdoc/>
@@ -90,35 +92,6 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
             dataElement = jsonDocument.RootElement.GetProperty("data").Clone();
         }
 
-        return DeserializeResponse<GetAnalysisResponse>(dataElement);
-    }
-
-    /// <summary>
-    /// Deserializes the HTTP response content to a specified model type.
-    /// </summary>
-    /// <typeparam name="TModel">The type of the model to deserialize to.</typeparam>
-    /// <param name="jsonElement">The JSON element containing the response data.</param>
-    /// <returns>An <see cref="ErrorOr{TModel}"/> containing the deserialized model or an error.</returns>
-    private ErrorOr<TModel> DeserializeResponse<TModel>(JsonElement jsonElement)
-        where TModel : notnull
-    {
-        TModel? model;
-        try
-        {
-            model = jsonElement.Deserialize<TModel>(_jsonSerializerOptions);
-        }
-        catch (Exception ex)
-        {
-            _analyzerLogger.LogDeserializationFailure(typeof(TModel), ex, jsonElement);
-            return AnalyzerErrors.DeserializationFailure;
-        }
-
-        if (model is not null)
-        {
-            return model;
-        }
-
-        _analyzerLogger.LogUnexpectedNullResult(typeof(TModel));
-        return AnalyzerErrors.DeserializationNull;
+        return _analyzerDeserializer.Deserialize<GetAnalysisResponse>(dataElement);
     }
 }

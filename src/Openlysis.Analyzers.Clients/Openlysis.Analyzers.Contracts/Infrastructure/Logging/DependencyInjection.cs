@@ -16,10 +16,12 @@ public static class DependencyInjection
     /// </summary>
     /// <typeparam name="TOptions">The type of the analyzer options.</typeparam>
     /// <param name="services">The service collection to add the logger to.</param>
+    /// <param name="serviceKey">The key used to register the logger service.</param>
     public static void AddAnalyzerLogger<TOptions>(
-        this IServiceCollection services)
+        this IServiceCollection services,
+        string serviceKey)
         where TOptions : AnalyzerOptions
     {
-        services.AddSingleton<IAnalyzerLogger, AnalyzerLogger<TOptions>>();
+        services.AddKeyedSingleton<IAnalyzerLogger, AnalyzerLogger<TOptions>>(serviceKey);
     }
 }

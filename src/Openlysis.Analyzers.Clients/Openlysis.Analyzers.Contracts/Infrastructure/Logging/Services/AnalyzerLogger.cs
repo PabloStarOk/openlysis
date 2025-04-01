@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -58,29 +57,6 @@ public class AnalyzerLogger<TOptions> : IAnalyzerLogger
             response.StatusCode,
             responseString,
             requestString);
-    }
-
-    /// <inheritdoc/>
-    public void LogDeserializationFailure(
-        Type targetType,
-        Exception exception,
-        JsonElement problematicJson)
-    {
-        _logger.LogError(
-            exception,
-            "{ServiceName}: Exception caught while trying to deserialize a response of type {ResponseType}.\n\tJSON Content: {JsonContent}",
-            _options.CurrentValue.ServiceName,
-            targetType.Name,
-            problematicJson.GetRawText());
-    }
-
-    /// <inheritdoc/>
-    public void LogUnexpectedNullResult(Type targetType)
-    {
-        _logger.LogError(
-            "{ServiceName}: Object of type {Type} was null after deserialization.",
-            _options.CurrentValue.ServiceName,
-            targetType.Name);
     }
 
     /// <summary>

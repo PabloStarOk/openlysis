@@ -1,14 +1,19 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Client;
+using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Configuration;
+using Openlysis.Analyzers.Filescan.Core.Models.Enums;
 using Openlysis.Analyzers.Filescan.Infrastructure.Services;
 using Openlysis.Analyzers.Filescan.Services;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
@@ -45,7 +50,21 @@ public static class DependencyInjection
         services.Configure<FilescanAnalyzerOptions>(analyzerOptionsSection);
 
         // Add analyzer logger
-        services.AddAnalyzerLogger<FilescanAnalyzerOptions>();
+        services.AddAnalyzerLogger<FilescanAnalyzerOptions>(
+            FilescanAnalyzer.KeyedServicesKey);
+
+        // Add analyzer deserializer.
+        services.AddAnalyzerDeserializer<FilescanAnalyzerOptions>(
+            FilescanAnalyzer.KeyedServicesKey,
+            () => new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters =
+                {
+                    new JsonStringEnumConverter<Status>(JsonNamingPolicy.CamelCase),
+                    new JsonStringEnumConverter<FilescanVerdict>(JsonNamingPolicy.SnakeCaseUpper),
+                },
+            });
 
         // Add HTTP Client
         services.ConfigureHttpClient(secretOptions, analyzerOptions);

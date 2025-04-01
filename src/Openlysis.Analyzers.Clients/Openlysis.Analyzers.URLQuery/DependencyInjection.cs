@@ -1,12 +1,17 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Client;
+using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
+using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 using Openlysis.Analyzers.URLQuery.Infrastructure.Services;
 using Openlysis.Analyzers.URLQuery.Services;
 using Openlysis.Domain.URLs.Entities;
@@ -50,7 +55,22 @@ public static class DependencyInjection
             .ValidateDataAnnotations();
 
         // Add analyzer logger.
-        services.AddAnalyzerLogger<UrlQueryAnalyzerOptions>();
+        services.AddAnalyzerLogger<UrlQueryAnalyzerOptions>(
+            UrlAnalyzer.KeyedServicesKey);
+
+        // Add analyzer deserializer.
+        services.AddAnalyzerDeserializer<UrlQueryAnalyzerOptions>(
+            UrlAnalyzer.KeyedServicesKey,
+            () => new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters =
+                {
+                    new JsonStringEnumConverter<Access>(JsonNamingPolicy.CamelCase),
+                    new JsonStringEnumConverter<Status>(JsonNamingPolicy.CamelCase),
+                    new JsonStringEnumConverter<Severity>(JsonNamingPolicy.CamelCase),
+                },
+            });
 
         // Add http client
         services.ConfigureHttpClient(secretOptions, analyzerOptions);

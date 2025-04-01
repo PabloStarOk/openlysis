@@ -5,12 +5,14 @@ using System.Text.Json.Serialization;
 
 using ErrorOr;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.Common.Constants;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
+using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization.Abstractions;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
@@ -29,8 +31,15 @@ namespace Openlysis.Analyzers.URLQuery.Services;
 /// </summary>
 public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 {
+    /// <summary>
+    /// The key used to retrieve keyed services for the URL analyzer.
+    /// </summary>
+    public const string KeyedServicesKey = "UrlqueryServices";
+
     private readonly IOptionsMonitor<UrlQueryAnalyzerOptions> _urlQueryOptions;
     private readonly IVerdictCalculator _verdictCalculator;
+    private readonly IAnalyzerLogger _analyzerLogger;
+    private readonly IAnalyzerDeserializer _analyzerDeserializer;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new ()
     {
         PropertyNameCaseInsensitive = true,
@@ -42,8 +51,6 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         },
     };
 
-    private readonly IAnalyzerLogger _analyzerLogger;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlAnalyzer"/> class.
     /// </summary>
@@ -52,17 +59,20 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="logger">The logger for logging information.</param>
     /// <param name="verdictCalculator">The calculator for determining the verdict of the URL analysis.</param>
     /// <param name="analyzerLogger">The logger for logging analyzer-specific information.</param>
+    /// <param name="analyzerDeserializer">The deserializer for analyzing responses.</param>
     public UrlAnalyzer(
         IOptionsMonitor<UrlQueryAnalyzerOptions> options,
         IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
         IVerdictCalculator verdictCalculator,
-        IAnalyzerLogger analyzerLogger)
+        [FromKeyedServices(KeyedServicesKey)] IAnalyzerLogger analyzerLogger,
+        [FromKeyedServices(KeyedServicesKey)] IAnalyzerDeserializer analyzerDeserializer)
         : base(options, httpClientFactory, logger)
     {
         _urlQueryOptions = options;
         _verdictCalculator = verdictCalculator;
         _analyzerLogger = analyzerLogger;
+        _analyzerDeserializer = analyzerDeserializer;
     }
 
     /// <inheritdoc/>
@@ -95,12 +105,8 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 
-        ErrorOr<SubmitUrlResponse> result;
-        await using (var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken))
-        using (var jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken))
-        {
-            result = DeserializeResponse<SubmitUrlResponse>(jsonDocument.RootElement);
-        }
+        ErrorOr<SubmitUrlResponse> result = await _analyzerDeserializer
+            .DeserializeAsync<SubmitUrlResponse>(response, cancellationToken);
 
         if (result.IsError)
         {
@@ -135,12 +141,8 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 
-        ErrorOr<SubmitUrlResponse> result;
-        await using (var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken))
-        using (var jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken))
-        {
-            result = DeserializeResponse<SubmitUrlResponse>(jsonDocument.RootElement);
-        }
+        ErrorOr<SubmitUrlResponse> result = await _analyzerDeserializer
+            .DeserializeAsync<SubmitUrlResponse>(response, cancellationToken);
 
         if (result.IsError)
         {
@@ -171,12 +173,8 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             await response.Content.ReadAsStringAsync(cancellationToken));
 #endif
 
-        ErrorOr<GetReportResponse> reportResult;
-        await using (var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken))
-        using (var jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken))
-        {
-            reportResult = DeserializeResponse<GetReportResponse>(jsonDocument.RootElement);
-        }
+        ErrorOr<GetReportResponse> reportResult = await _analyzerDeserializer
+            .DeserializeAsync<GetReportResponse>(response, cancellationToken);
 
         if (reportResult.IsError)
         {
@@ -194,34 +192,5 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         AnalysisStatus status = Maps.AnalysisStatusMap[report.Status];
         Verdict verdict = _verdictCalculator.Calculate(report.Sensors);
         return UrlServiceAnalysis.Create(report.ReportId, ServiceName, status, verdict, id.Job);
-    }
-
-    /// <summary>
-    /// Deserializes the HTTP response content to a specified model type.
-    /// </summary>
-    /// <typeparam name="TModel">The type of the model to deserialize to.</typeparam>
-    /// <param name="jsonElement">The JSON element containing the response data.</param>
-    /// <returns>An <see cref="ErrorOr{TModel}"/> containing the deserialized model or an error.</returns>
-    private ErrorOr<TModel> DeserializeResponse<TModel>(JsonElement jsonElement)
-        where TModel : notnull
-    {
-        TModel? model;
-        try
-        {
-            model = jsonElement.Deserialize<TModel>(_jsonSerializerOptions);
-        }
-        catch (Exception ex)
-        {
-            _analyzerLogger.LogDeserializationFailure(typeof(TModel), ex, jsonElement);
-            return AnalyzerErrors.DeserializationFailure;
-        }
-
-        if (model is not null)
-        {
-            return model;
-        }
-
-        _analyzerLogger.LogUnexpectedNullResult(typeof(TModel));
-        return AnalyzerErrors.DeserializationNull;
     }
 }

@@ -1,14 +1,14 @@
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using ErrorOr;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using Openlysis.Analyzers.Contracts.Core.Common.Constants;
+using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization.Abstractions;
 using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Constants;
-using Openlysis.Analyzers.Filescan.Core.Models.Enums;
 using Openlysis.Analyzers.Filescan.Core.Models.Objects;
 using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
@@ -20,25 +20,25 @@ namespace Openlysis.Analyzers.Filescan.Infrastructure.Services;
 /// </summary>
 public sealed class FilescanAnalyzer : IFilescanAnalyzer
 {
-    private readonly JsonSerializerOptions _jsonSerializerOptions = new ()
-    {
-        PropertyNameCaseInsensitive = true,
-        Converters =
-        {
-            new JsonStringEnumConverter<Status>(JsonNamingPolicy.CamelCase),
-            new JsonStringEnumConverter<FilescanVerdict>(JsonNamingPolicy.SnakeCaseUpper),
-        },
-    };
+    /// <summary>
+    /// Key used for identifying Filescan services.
+    /// </summary>
+    public const string KeyedServicesKey = "FilescanServices";
 
     private readonly IAnalyzerLogger _analyzerLogger;
+    private readonly IAnalyzerDeserializer _analyzerDeserializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FilescanAnalyzer"/> class.
     /// </summary>
     /// <param name="analyzerLogger">The analyzer logger instance for custom logging.</param>
-    public FilescanAnalyzer(IAnalyzerLogger analyzerLogger)
+    /// <param name="analyzerDeserializer">The analyzer deserializer instance for custom deserialization.</param>
+    public FilescanAnalyzer(
+        [FromKeyedServices(KeyedServicesKey)] IAnalyzerLogger analyzerLogger,
+        [FromKeyedServices(KeyedServicesKey)] IAnalyzerDeserializer analyzerDeserializer)
     {
         _analyzerLogger = analyzerLogger;
+        _analyzerDeserializer = analyzerDeserializer;
     }
 
     /// <inheritdoc/>
@@ -59,9 +59,8 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 
-        await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken);
-        return DeserializeResponse<ScanResponse>(jsonDocument.RootElement);
+        return await _analyzerDeserializer
+            .DeserializeAsync<ScanResponse>(response, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -102,37 +101,7 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 
-        await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var jsonDocument = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken);
-        return DeserializeResponse<GetAnalysisResponse>(jsonDocument.RootElement);
-    }
-
-    /// <summary>
-    /// Deserializes the HTTP response content to a specified model type.
-    /// </summary>
-    /// <typeparam name="TModel">The type of the model to deserialize to.</typeparam>
-    /// <param name="jsonElement">The JSON element containing the response data.</param>
-    /// <returns>An <see cref="ErrorOr{TModel}"/> containing the deserialized model or an error.</returns>
-    private ErrorOr<TModel> DeserializeResponse<TModel>(JsonElement jsonElement)
-        where TModel : notnull
-    {
-        TModel? model;
-        try
-        {
-            model = jsonElement.Deserialize<TModel>(_jsonSerializerOptions);
-        }
-        catch (Exception ex)
-        {
-            _analyzerLogger.LogDeserializationFailure(typeof(TModel), ex, jsonElement);
-            return AnalyzerErrors.DeserializationFailure;
-        }
-
-        if (model is not null)
-        {
-            return model;
-        }
-
-        _analyzerLogger.LogUnexpectedNullResult(typeof(TModel));
-        return AnalyzerErrors.DeserializationNull;
+        return await _analyzerDeserializer
+            .DeserializeAsync<GetAnalysisResponse>(response, cancellationToken);
     }
 }
