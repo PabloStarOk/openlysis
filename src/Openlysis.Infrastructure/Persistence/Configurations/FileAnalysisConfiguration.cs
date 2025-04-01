@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Reports;
+using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
@@ -60,7 +60,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
         builder.Property(f => f.AverageThreatZone)
             .HasColumnName("AverageThreatZone")
             .HasColumnType(VarcharType)
-            .HasMaxLength(6)
+            .HasMaxLength(7)
             .IsRequired()
             .HasConversion(
                 zone => zone.ToString(),
@@ -129,7 +129,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
                 .ValueGeneratedNever()
                 .HasConversion(
                     id => id.Value,
-                    dbValue => ServiceFileAnalysisId.Create(dbValue));
+                    dbValue => ServiceAnalysisId.Create(dbValue));
 
             analysesBuilder.Property(s => s.ServiceName)
                 .HasColumnName("ServiceName")
@@ -140,7 +140,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
             analysesBuilder.Property(s => s.Status)
                 .HasColumnName("Status")
                 .HasColumnType(VarcharType)
-                .HasMaxLength(8)
+                .HasMaxLength(10)
                 .IsRequired()
                 .HasConversion(
                     status => status.ToString(),
@@ -181,7 +181,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
         reportBuilder.Property(r => r.ThreatZone)
             .HasColumnName("ThreatZone")
             .HasColumnType(VarcharType)
-            .HasMaxLength(6)
+            .HasMaxLength(7)
             .IsRequired()
             .HasConversion(
                 zone => zone.ToString(),

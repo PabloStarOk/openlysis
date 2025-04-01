@@ -9,9 +9,10 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using Openlysis.Analyzers.Contracts.Core.Files.Requests;
 using Openlysis.Analyzers.Contracts.Interfaces;
-using Openlysis.Analyzers.Contracts.Requests;
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
@@ -35,13 +36,13 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     public const string EndpointName = "analyze-file";
 
     private readonly ILogger<AnalyzeFileConsumer> _logger;
-    private readonly IOptionsMonitor<AnalyzeFileConsumerSettings> _options;
+    private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> _analyzers;
+    private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
-    private readonly Dictionary<ServiceFileAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
+    private readonly Dictionary<ServiceAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
     private readonly Func<ServiceFileAnalysis, bool> _analysisFinished = s =>
-        s.Status is AnalysisStatus.Finished or AnalysisStatus.Timeout;
+        s.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
 
     private FileMultiAnalysisId _multiAnalysisId;
     private ConsumeContext<Contracts.AnalyzeFile> _context;
@@ -57,9 +58,9 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     public AnalyzeFileConsumer(
         ILogger<AnalyzeFileConsumer> logger,
         IEndpointUriProvider endpointUriProvider,
-        IOptionsMonitor<AnalyzeFileConsumerSettings> options,
+        IOptionsMonitor<AnalyzeConsumerOptions> options,
         IFileStorageProvider fileStorageProvider,
-        IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceFileAnalysisId>> analyzers)
+        IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>> analyzers)
     {
         _logger = logger;
         _endpointUriProvider = endpointUriProvider;
@@ -144,7 +145,7 @@ public class AnalyzeFileConsumer : IConsumer<Contracts.AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task RunRequestsBatchAsync(CancellationToken cancellationToken)
     {
-        for (int i = 0; i < _options.CurrentValue.MaxRequestsPerBatch; i++)
+        for (int i = 0; i < _options.CurrentValue.RequestsPerBatch; i++)
         {
             await RunBatchCycleAsync(cancellationToken);
             if (_serviceFileAnalyses.Values.All(_analysisFinished))

@@ -1,8 +1,13 @@
+using System.Text.Json;
+
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 using NSwag;
 
@@ -72,13 +77,13 @@ public static class DependencyInjection
             opt =>
             {
                 opt.ReleaseVersion = 1;
+                opt.EnableJWTBearerAuth = false;
                 opt.DocumentSettings = s =>
                 {
                     s.DocumentName = "Version 1";
                     s.Title = "Openlysis API";
                     s.Description = "API of openlysis.";
                     s.Version = "v1";
-
                     s.PostProcess = document =>
                     {
                         document.Info = new OpenApiInfo
@@ -90,7 +95,27 @@ public static class DependencyInjection
                             },
                         };
                     };
+
+                    s.AddAuth("API Key", new OpenApiSecurityScheme
+                        {
+                            Name = "X-Api-Key",
+                            In = OpenApiSecurityApiKeyLocation.Header,
+                            Type = OpenApiSecuritySchemeType.ApiKey,
+                            Description = "API Key authentication.",
+                        });
                 };
+
+                opt.SerializerSettings = s =>
+                {
+                    s.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                };
+
+                opt.NewtonsoftSettings = s =>
+                {
+                    s.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy(), false));
+                };
+
+                opt.ShortSchemaNames = true;
                 opt.RemoveEmptyRequestSchema = true;
             });
 

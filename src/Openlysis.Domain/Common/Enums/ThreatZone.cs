@@ -6,9 +6,9 @@ namespace Openlysis.Domain.Common.Enums;
 public enum ThreatZone
 {
     /// <summary>
-    /// There's no report zone.
+    /// The threat zone is unknown.
     /// </summary>
-    None,
+    Unknown,
 
     /// <summary>
     /// Scan didn't detect anything.

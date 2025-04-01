@@ -87,6 +87,8 @@ internal static class DependencyInjection
                     options.Converters.Add(new FileMultiAnalysisIdJsonConverter());
                     options.Converters.Add(new ServiceFileAnalysisJsonConverter());
                     options.Converters.Add(new ReportJsonConverter());
+                    options.Converters.Add(new MultiAnalysisIdConverter());
+                    options.Converters.Add(new UrlServiceAnalysisConverter());
                     return options;
                 });
 

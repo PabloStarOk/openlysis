@@ -80,6 +80,7 @@ public class ApiKeySchemeHandler : AuthenticationHandler<ApiKeySchemeOptions>
         Claim[] claims =
         [
             new (ClaimTypes.IsPersistent, "false"),
+            new (ClaimTypes.NameIdentifier, user.Id),
             new (ClaimTypes.Name, user.UserName),
             new (ClaimTypes.Email, user.Email),
         ];

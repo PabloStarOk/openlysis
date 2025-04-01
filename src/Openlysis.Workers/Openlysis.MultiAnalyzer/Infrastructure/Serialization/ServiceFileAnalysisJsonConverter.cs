@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
 
 namespace Openlysis.MultiAnalyzer.Infrastructure.Serialization;

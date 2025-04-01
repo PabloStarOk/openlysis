@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Models;
-using Openlysis.Domain.Common.Reports;
+using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
 namespace Openlysis.Domain.FileAnalyses.Entities;
@@ -8,7 +8,7 @@ namespace Openlysis.Domain.FileAnalyses.Entities;
 /// <summary>
 /// Represents a file analysis of a service.
 /// </summary>
-public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
+public class ServiceFileAnalysis : Entity<ServiceAnalysisId>
 {
     private readonly List<Report> _reports = [];
 
@@ -35,7 +35,7 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
     private ServiceFileAnalysis(
-        ServiceFileAnalysisId id,
+        ServiceAnalysisId id,
         string serviceName,
         AnalysisStatus status,
         List<Report> reports)
@@ -70,7 +70,7 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
         List<Report> reports)
     {
         return new ServiceFileAnalysis(
-            ServiceFileAnalysisId.Create(id),
+            ServiceAnalysisId.Create(id),
             serviceName,
             status,
             reports);
@@ -89,7 +89,7 @@ public class ServiceFileAnalysis : Entity<ServiceFileAnalysisId>
         AnalysisStatus status)
     {
         return new ServiceFileAnalysis(
-            ServiceFileAnalysisId.Create(id),
+            ServiceAnalysisId.Create(id),
             serviceName,
             status,
             []);

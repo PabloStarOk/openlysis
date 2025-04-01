@@ -3,10 +3,11 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.MultiAnalyzer.Infrastructure;
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.MultiAnalyzer.Application.Services;
+using Openlysis.MultiAnalyzer.Features.Repositories.URLs.Consumer;
 using Openlysis.MultiAnalyzer.Features.UpdateFileMultiAnalysis.Consumer;
+using Openlysis.MultiAnalyzer.Infrastructure;
 
 namespace Openlysis.MultiAnalyzer.Application;
 
@@ -28,8 +29,10 @@ public static class DependencyInjection
             {
                 x.SetKebabCaseEndpointNameFormatter();
                 x.AddConsumer<UpdateFileMultiAnalysisConsumer, UpdateFileMultiAnalysisConsumerDefinition>();
+                x.AddConsumer<UpdateUrlMultiAnalysisConsumer, UpdateUrlMultiAnalysisConsumerDefinition>();
                 x.AddRabbitMqBroker(services);
             });
         services.AddScoped<IFileMultiAnalysisService, FileMultiAnalysisService>();
+        services.AddScoped<IUrlMultiAnalyzer, UrlMultiAnalyzer>();
     }
 }

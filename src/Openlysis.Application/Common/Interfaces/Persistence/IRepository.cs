@@ -44,10 +44,10 @@ public interface IRepository<TModel, in TModelId>
     /// <summary>
     /// Updates an existing model in the repository.
     /// </summary>
-    /// <param name="analysis">The model to update.</param>
+    /// <param name="model">The model to update.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    public Task UpdateAsync(TModel analysis, CancellationToken cancellationToken = default);
+    public Task UpdateAsync(TModel model, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Checks if a model with the specified identifier exists in the repository.
