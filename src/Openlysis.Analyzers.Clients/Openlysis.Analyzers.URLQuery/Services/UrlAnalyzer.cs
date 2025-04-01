@@ -1,6 +1,5 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -11,6 +10,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
+using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
 using Openlysis.Analyzers.URLQuery.Core.Constants;
@@ -41,6 +41,8 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         },
     };
 
+    private readonly IAnalyzerLogger _analyzerLogger;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlAnalyzer"/> class.
     /// </summary>
@@ -48,15 +50,18 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="httpClientFactory">The HTTP client factory for creating HTTP clients.</param>
     /// <param name="logger">The logger for logging information.</param>
     /// <param name="verdictCalculator">The calculator for determining the verdict of the URL analysis.</param>
+    /// <param name="analyzerLogger">The logger for logging analyzer-specific information.</param>
     public UrlAnalyzer(
         IOptionsMonitor<UrlQueryAnalyzerOptions> options,
         IHttpClientFactory httpClientFactory,
         ILogger<UrlAnalyzer> logger,
-        IVerdictCalculator verdictCalculator)
+        IVerdictCalculator verdictCalculator,
+        IAnalyzerLogger analyzerLogger)
         : base(options, httpClientFactory, logger)
     {
         _urlQueryOptions = options;
         _verdictCalculator = verdictCalculator;
+        _analyzerLogger = analyzerLogger;
     }
 
     /// <inheritdoc/>
@@ -85,7 +90,8 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         if (!response.IsSuccessStatusCode)
         {
-            return await LogAndReturnStatusCodeErrorAsync(response, cancellationToken);
+            await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
         }
 
         ErrorOr<SubmitUrlResponse> result;
@@ -124,7 +130,8 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         if (!response.IsSuccessStatusCode)
         {
-            return await LogAndReturnStatusCodeErrorAsync(response, cancellationToken);
+            await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
         }
 
         ErrorOr<SubmitUrlResponse> result;
@@ -153,7 +160,8 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         if (!response.IsSuccessStatusCode)
         {
-            return await LogAndReturnStatusCodeErrorAsync(response, cancellationToken);
+            await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
         }
 
 #if DEBUG
@@ -203,82 +211,16 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         }
         catch (Exception ex)
         {
-            return LogAndReturnDeserializationException(ex, typeof(TModel));
+            _analyzerLogger.LogDeserializationFailure(typeof(TModel), ex, jsonElement);
+            return Error.Unexpected("Response.DeserializationError", "Exception caught while trying to deserialize a response.");
         }
 
-        return model is null ? LogAndReturnNullError(typeof(TModel)) : model;
-    }
-
-    /// <summary>
-    /// Logs an error for an unsuccessful HTTP response status code and returns an error.
-    /// </summary>
-    /// <param name="response">The HTTP response message containing the error status code.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>An <see cref="Error"/> indicating the unsuccessful status code.</returns>
-    private async Task<Error> LogAndReturnStatusCodeErrorAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
-    {
-        string responseString = await response.Content.ReadAsStringAsync(cancellationToken);
-        var stringBuilder = new StringBuilder();
-
-        if (response.RequestMessage?.Method is not null)
+        if (model is not null)
         {
-            stringBuilder.AppendLine($"Method: {response.RequestMessage.Method}");
+            return model;
         }
 
-        if (response.RequestMessage?.RequestUri is not null)
-        {
-            stringBuilder.AppendLine($"Request URI: {response.RequestMessage.RequestUri.AbsoluteUri}");
-        }
-
-        if (response.RequestMessage is not null)
-        {
-            bool containsApiKeyHeader = response.RequestMessage.Headers
-                .Any(h => h.Key == _urlQueryOptions.CurrentValue.ApiKeyHeaderName
-                    && !string.IsNullOrWhiteSpace(h.Value.ToString()));
-            stringBuilder.AppendLine($"Contains API Key: {containsApiKeyHeader.ToString()}");
-        }
-
-        if (response.RequestMessage?.Content is not null)
-        {
-            string requestString = await response.RequestMessage.Content.ReadAsStringAsync(cancellationToken);
-            stringBuilder.AppendLine($"Request Body: {requestString}");
-        }
-
-        _logger.LogError(
-            "Response status code was not successful: \nStatusCode: {StatusCode}\nResponse: {Response}\n{Request}",
-            response.StatusCode,
-            responseString,
-            stringBuilder.ToString());
-        return Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");
-    }
-
-    /// <summary>
-    /// Logs an exception and returns an error indicating a deserialization exception.
-    /// </summary>
-    /// <param name="exception">The exception that was caught during deserialization.</param>
-    /// <param name="type">The type of the response that was being deserialized.</param>
-    /// <returns>An <see cref="Error"/> indicating a deserialization exception.</returns>
-    private Error LogAndReturnDeserializationException(Exception exception, Type type)
-    {
-        _logger.LogError(
-            exception,
-            "Exception caught while trying to deserialize a response of type {ResponseType} at {ServiceName}",
-            type.Name,
-            ServiceName);
-        return Error.Unexpected("Response.DeserializationError", "Exception caught while trying to deserialize a response.");
-    }
-
-    /// <summary>
-    /// Logs an error indicating that the deserialized object was null and returns an error.
-    /// </summary>
-    /// <param name="type">The type of the response that was being deserialized.</param>
-    /// <returns>An <see cref="Error"/> indicating a null object after deserialization.</returns>
-    private Error LogAndReturnNullError(Type type)
-    {
-        _logger.LogError(
-            "{ResponseType} was null after deserialization at {ServiceName} analyzer service.",
-            type.Name,
-            ServiceName);
+        _analyzerLogger.LogUnexpectedNullResult(typeof(TModel));
         return Error.Unexpected("Response.NullDeserialization", "An object was null after deserialization.");
     }
 }

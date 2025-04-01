@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Client;
+using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
@@ -54,6 +55,9 @@ public static class DependencyInjection
 
         // Add VT Analyzer.
         services.AddSingleton<IVirusTotalAnalyzer, VirusTotalAnalyzer>();
+
+        // Add analyzer logger.
+        services.AddAnalyzerLogger<VirusTotalAnalyzerOptions>();
 
         // Add http client.
         services.ConfigureHttpClient(secretOptions, analyzerOptions);

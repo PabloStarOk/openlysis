@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Client;
+using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
 using Openlysis.Analyzers.URLQuery.Infrastructure.Services;
@@ -47,6 +48,9 @@ public static class DependencyInjection
         services.AddOptionsWithValidateOnStart<VerdictCalculationOptions>()
             .Bind(verdictCalculationOptionsSection)
             .ValidateDataAnnotations();
+
+        // Add analyzer logger.
+        services.AddAnalyzerLogger<UrlQueryAnalyzerOptions>();
 
         // Add http client
         services.ConfigureHttpClient(secretOptions, analyzerOptions);

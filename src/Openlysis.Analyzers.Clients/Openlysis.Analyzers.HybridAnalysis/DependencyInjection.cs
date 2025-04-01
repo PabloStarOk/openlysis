@@ -4,6 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Client;
+using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
+using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
+using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Services;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
@@ -50,6 +53,9 @@ public static class DependencyInjection
             configuration,
             UrlAnalyzer.LimitTrackerServiceKey,
             analyzerOptions.ServiceName);
+
+        // Add analyzer logger
+        services.AddSingleton<SandboxAnalyzerLogger>();
 
         // Add http client
         services.ConfigureHttpClient(secretOptions, analyzerOptions, client =>

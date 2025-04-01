@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
 using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
 using Openlysis.Analyzers.Contracts.Infrastructure.Client;
+using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
 using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
 using Openlysis.Analyzers.Contracts.Interfaces;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
@@ -42,6 +43,9 @@ public static class DependencyInjection
 
         // Add options
         services.Configure<FilescanAnalyzerOptions>(analyzerOptionsSection);
+
+        // Add analyzer logger
+        services.AddAnalyzerLogger<FilescanAnalyzerOptions>();
 
         // Add HTTP Client
         services.ConfigureHttpClient(secretOptions, analyzerOptions);
