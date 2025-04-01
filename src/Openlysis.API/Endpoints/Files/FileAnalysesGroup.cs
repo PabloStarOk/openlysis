@@ -18,9 +18,8 @@ public sealed class FileAnalysesGroup : Group
                 {
                     b.WithGroupName("FileMultiAnalyses");
                     b.WithDisplayName("FileMultiAnalyses");
-                    b.WithTags("File");
+                    b.WithTags("Files");
                 });
-            ep.AllowAnonymous(); // TODO: Add and security.
         });
     }
 }

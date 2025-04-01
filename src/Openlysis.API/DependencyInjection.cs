@@ -1,7 +1,20 @@
+using System.Text.Json;
+
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+
 using NSwag;
+
+using Openlysis.API.Authentication;
+using Openlysis.API.Authentication.API;
+using Openlysis.API.Configuration.Options;
+using Openlysis.API.Middlewares.Exceptions;
 
 namespace Openlysis.API;
 
@@ -13,10 +26,37 @@ public static class DependencyInjection
     /// <summary>
     /// Adds all services needed for the API.
     /// </summary>
-    /// <param name="serviceCollection">Collection of services.</param>
-    public static void AddApi(this IServiceCollection serviceCollection)
+    /// <param name="services">Collection of services.</param>
+    /// <param name="configuration">Configuration settings.</param>
+    /// <param name="environment">Hosting environment information.</param>
+    public static void AddApi(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
-        serviceCollection.AddProblemDetails(
+        var fileUploadOptions = configuration
+            .GetRequiredSection("FileUploadOptions")
+            .Get<FileUploadOptions>();
+        ArgumentNullException.ThrowIfNull(fileUploadOptions);
+
+        // Server options
+        services.Configure<KestrelServerOptions>(
+            options =>
+            {
+                options.Limits.MaxRequestBodySize = fileUploadOptions.MaxRequestBodySize;
+            });
+
+        // Add authentication and authorization
+        services.AddApiAuthentication(configuration, environment);
+
+        // Request options
+        services.Configure<FormOptions>(
+            options =>
+            {
+                options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
+            });
+
+        services.AddProblemDetails(
             opt =>
             {
                 opt.CustomizeProblemDetails = context =>
@@ -25,24 +65,25 @@ public static class DependencyInjection
                 };
             });
 
-        serviceCollection.AddFastEndpoints(
+        services.AddFastEndpoints(
             opt =>
             {
                 opt.DisableAutoDiscovery = true;
                 opt.SourceGeneratorDiscoveredTypes.AddRange(typeof(Program).Assembly.DefinedTypes);
+                opt.MapAuthenticationEndpoints();
             });
 
-        serviceCollection.SwaggerDocument(
+        services.SwaggerDocument(
             opt =>
             {
                 opt.ReleaseVersion = 1;
+                opt.EnableJWTBearerAuth = false;
                 opt.DocumentSettings = s =>
                 {
                     s.DocumentName = "Version 1";
                     s.Title = "Openlysis API";
                     s.Description = "API of openlysis.";
                     s.Version = "v1";
-
                     s.PostProcess = document =>
                     {
                         document.Info = new OpenApiInfo
@@ -54,8 +95,30 @@ public static class DependencyInjection
                             },
                         };
                     };
+
+                    s.AddAuth("API Key", new OpenApiSecurityScheme
+                        {
+                            Name = "X-Api-Key",
+                            In = OpenApiSecurityApiKeyLocation.Header,
+                            Type = OpenApiSecuritySchemeType.ApiKey,
+                            Description = "API Key authentication.",
+                        });
                 };
+
+                opt.SerializerSettings = s =>
+                {
+                    s.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                };
+
+                opt.NewtonsoftSettings = s =>
+                {
+                    s.Converters.Add(new StringEnumConverter(new CamelCaseNamingStrategy(), false));
+                };
+
+                opt.ShortSchemaNames = true;
                 opt.RemoveEmptyRequestSchema = true;
             });
+
+        services.AddExceptionHandler<GlobalExceptionHandler>();
     }
 }

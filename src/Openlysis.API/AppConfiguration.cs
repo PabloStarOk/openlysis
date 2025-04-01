@@ -1,4 +1,10 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 using FastEndpoints;
+
+using Openlysis.Application.Common.Enums;
+using Openlysis.Domain.Common.Enums;
 
 namespace Openlysis.API;
 
@@ -13,6 +19,10 @@ public static class AppConfiguration
     /// <param name="app">The WebApplication instance to configure.</param>
     public static void ConfigureApi(this WebApplication app)
     {
+        app.UseExceptionHandler();
+
+        app.UseAuthentication().UseAuthorization();
+
         if (app.Environment.IsDevelopment())
         {
             app.UseOpenApi();
@@ -27,6 +37,10 @@ public static class AppConfiguration
                 c.Versioning.Prefix = "v";
                 c.Versioning.DefaultVersion = 1;
                 c.Versioning.PrependToRoute = true;
+                c.Serializer.Options.Converters.Add(new JsonStringEnumConverter<AnalysisStatus>(JsonNamingPolicy.CamelCase));
+                c.Serializer.Options.Converters.Add(new JsonStringEnumConverter<Verdict>(JsonNamingPolicy.CamelCase));
+                c.Serializer.Options.Converters.Add(new JsonStringEnumConverter<ThreatZone>(JsonNamingPolicy.CamelCase));
+                c.Serializer.Options.Converters.Add(new JsonStringEnumConverter<OrderType>(JsonNamingPolicy.CamelCase));
             });
     }
 }

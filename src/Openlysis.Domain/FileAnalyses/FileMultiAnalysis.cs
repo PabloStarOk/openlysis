@@ -1,7 +1,6 @@
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.Common.Models;
-using Openlysis.Domain.Common.Reports;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
@@ -116,7 +115,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
             serviceFileAnalyses,
             startedDate,
             Verdict.Unknown,
-            ThreatZone.None,
+            ThreatZone.Unknown,
             fileMetadata,
             contentHashSet);
     }
@@ -163,9 +162,9 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     {
         IEnumerable<ServiceFileAnalysis> analyses = _serviceFileAnalyses;
 
-        if (analyses.All(a => a.Status is AnalysisStatus.Finished))
+        if (analyses.All(a => a.Status is AnalysisStatus.Completed))
         {
-            Status = AnalysisStatus.Finished;
+            Status = AnalysisStatus.Completed;
             return;
         }
 
@@ -210,7 +209,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     {
         if (!AllReports.Any())
         {
-            AverageThreatZone = ThreatZone.None;
+            AverageThreatZone = ThreatZone.Unknown;
             return;
         }
 

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FastEndpoints" Version="5.34.0" />
+        <PackageReference Include="FastEndpoints" Version="5.35.0" />
         <PackageReference Include="FastEndpoints.Generator" Version="5.34.0">
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
@@ -23,8 +23,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Openlysis.API.Authentication\Openlysis.API.Authentication.csproj" />
       <ProjectReference Include="..\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj" />
-      <ProjectReference Include="..\workers\Openlysis.AnalysisWorker\Openlysis.AnalysisWorker.csproj" />
+      <ProjectReference Include="..\Openlysis.Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Endpoints\Files\Common\" />
     </ItemGroup>
 
 </Project>
