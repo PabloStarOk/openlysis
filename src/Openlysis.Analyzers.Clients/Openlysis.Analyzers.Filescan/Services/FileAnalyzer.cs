@@ -2,8 +2,8 @@ using ErrorOr;
 
 using Microsoft.Extensions.Logging;
 
-using Openlysis.Analyzers.Contracts.Core.Files.Requests;
-using Openlysis.Analyzers.Contracts.Interfaces;
+using Openlysis.Analyzers.Shared.Core.Files.Requests;
+using Openlysis.Analyzers.Shared.Interfaces;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Core.Models.Enums;

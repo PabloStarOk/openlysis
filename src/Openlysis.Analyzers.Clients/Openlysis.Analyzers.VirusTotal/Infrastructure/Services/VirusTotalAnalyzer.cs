@@ -4,9 +4,9 @@ using ErrorOr;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Analyzers.Contracts.Core.Common.Constants;
-using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization.Abstractions;
-using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
+using Openlysis.Analyzers.Shared.Core.Common.Constants;
+using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
+using Openlysis.Analyzers.Shared.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Objects;

@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj" />
+      <ProjectReference Include="..\Openlysis.Analyzers.Shared\Openlysis.Analyzers.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>

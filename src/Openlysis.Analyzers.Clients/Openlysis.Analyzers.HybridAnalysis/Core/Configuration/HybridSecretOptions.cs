@@ -1,4 +1,4 @@
-using Openlysis.Analyzers.Contracts.Core.Configuration;
+using Openlysis.Analyzers.Shared.Core.Configuration;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 

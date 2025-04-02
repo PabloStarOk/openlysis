@@ -1,4 +1,4 @@
-using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Core.Constants.Endpoints;

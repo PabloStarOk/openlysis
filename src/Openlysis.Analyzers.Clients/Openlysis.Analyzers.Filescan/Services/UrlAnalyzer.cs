@@ -4,9 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
-using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
-using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit.Abstractions;
+using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Configuration;
 using Openlysis.Analyzers.Filescan.Core.Constants;

@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Services;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
+using Openlysis.Analyzers.Shared.Infrastructure.Logging.Services;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 
@@ -11,7 +11,7 @@ namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 /// Represents a logger for the sandbox analyzer of Hybrid Analysis service.
 /// </summary>
 /// <remarks>
-/// Inherits from <see cref="AnalyzerLogger{HybridAnalyzerOptions}"/>.
+/// Inherits from <see cref="AnalyzerLogger{TOptions}"/>.
 /// </remarks>
 public class SandboxAnalyzerLogger : AnalyzerLogger<HybridAnalyzerOptions>
 {

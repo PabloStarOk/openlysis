@@ -9,11 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
-using Openlysis.Analyzers.Contracts.Core.Common.Constants;
-using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
-using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization.Abstractions;
-using Openlysis.Analyzers.Contracts.Infrastructure.Logging.Abstractions;
+using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Core.Common.Constants;
+using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
+using Openlysis.Analyzers.Shared.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
 using Openlysis.Analyzers.URLQuery.Core.Constants;

@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Filesca
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.MultiAnalyzer", "src\Openlysis.Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Contracts", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Shared", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.Shared\Openlysis.Analyzers.Shared.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API.Authentication", "src\Openlysis.API.Authentication\Openlysis.API.Authentication.csproj", "{48E79F4E-E6CD-490B-B44F-63775080B1D6}"
 EndProject

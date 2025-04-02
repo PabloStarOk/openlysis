@@ -1,4 +1,4 @@
-using Openlysis.Analyzers.Contracts.Core.Configuration;
+using Openlysis.Analyzers.Shared.Core.Configuration;
 using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 
 namespace Openlysis.Analyzers.URLQuery.Core.Configuration;

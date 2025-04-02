@@ -5,12 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Contracts.Core.Common.Abstractions;
-using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
-using Openlysis.Analyzers.Contracts.Infrastructure.Client;
-using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization;
-using Openlysis.Analyzers.Contracts.Infrastructure.Logging;
-using Openlysis.Analyzers.Contracts.Infrastructure.RateLimit;
+using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Infrastructure.Client;
+using Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
+using Openlysis.Analyzers.Shared.Infrastructure.Logging;
+using Openlysis.Analyzers.Shared.Infrastructure.RateLimit;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;

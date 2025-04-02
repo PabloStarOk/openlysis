@@ -1,4 +1,4 @@
-using Openlysis.Analyzers.Contracts.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Objects;

@@ -6,14 +6,14 @@ using ErrorOr;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Contracts.Core.Common.Constants;
-using Openlysis.Analyzers.Contracts.Infrastructure.Deserialization.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
+using Openlysis.Analyzers.Shared.Core.Common.Constants;
+using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 

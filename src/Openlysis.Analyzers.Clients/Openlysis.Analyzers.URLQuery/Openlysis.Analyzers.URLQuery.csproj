@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-      <ProjectReference Include="..\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj" />
+      <ProjectReference Include="..\Openlysis.Analyzers.Shared\Openlysis.Analyzers.Shared.csproj" />
     </ItemGroup>
 
     <ItemGroup>
