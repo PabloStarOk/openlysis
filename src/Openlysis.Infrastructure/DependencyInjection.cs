@@ -6,9 +6,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Phones;
+using Openlysis.Domain.Phones.Entities;
+using Openlysis.Domain.Phones.ValueObjects;
 using Openlysis.Domain.URLs;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
@@ -40,6 +45,7 @@ public static class DependencyInjection
         // Add repositories.
         services.AddScoped<IRepository<FileMultiAnalysis, FileMultiAnalysisId>, FileMultiAnalysisRepository>();
         services.AddScoped<IRepository<UrlMultiAnalysis, MultiAnalysisId>, UrlMultiAnalysisRepository>();
+        services.AddScoped<IRepository<PhoneMultiValidation, Id>, PhoneMultiValidationRepository>();
 
         // Add hash service.
         services.AddTransient<MD5>(_ => MD5.Create());
