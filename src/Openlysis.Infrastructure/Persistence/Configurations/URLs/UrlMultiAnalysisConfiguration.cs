@@ -6,7 +6,7 @@ using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Domain.Users.ValueObjects;
 
-namespace Openlysis.Infrastructure.Persistence.Configurations;
+namespace Openlysis.Infrastructure.Persistence.Configurations.URLs;
 
 /// <summary>
 /// Configuration class for the UrlMultiAnalysis entity.

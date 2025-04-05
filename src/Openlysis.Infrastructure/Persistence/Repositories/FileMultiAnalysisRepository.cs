@@ -13,13 +13,13 @@ namespace Openlysis.Infrastructure.Persistence.Repositories;
 /// </summary>
 public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMultiAnalysisId>
 {
-    private readonly AnalysesDbContext _dbContext;
+    private readonly ApplicationDbContext _dbContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMultiAnalysisRepository"/> class.
     /// </summary>
     /// <param name="dbContext">The database context to be used by the repository.</param>
-    public FileMultiAnalysisRepository(AnalysesDbContext dbContext)
+    public FileMultiAnalysisRepository(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

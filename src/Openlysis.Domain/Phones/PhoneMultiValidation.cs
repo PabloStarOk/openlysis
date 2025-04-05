@@ -16,7 +16,7 @@ public class PhoneMultiValidation : AggregateRoot<Id>
     /// <summary>
     /// Gets the date of the validation.
     /// </summary>
-    public DateTimeOffset ValidationDate { get; }
+    public DateTime ValidationDate { get; }
 
     /// <summary>
     /// Gets the average verdict of the validation.
@@ -42,7 +42,7 @@ public class PhoneMultiValidation : AggregateRoot<Id>
     /// <param name="averageThreatZone">The average threat zone of the validation.</param>
     private PhoneMultiValidation(
         Id id,
-        DateTimeOffset validationDate,
+        DateTime validationDate,
         Verdict averageVerdict,
         ThreatZone averageThreatZone)
         : base(id)
@@ -52,13 +52,22 @@ public class PhoneMultiValidation : AggregateRoot<Id>
         AverageThreatZone = averageThreatZone;
     }
 
+    // For EF core.
+#pragma warning disable CS8618
+#pragma warning disable S1144
+    private PhoneMultiValidation()
+    {
+    }
+#pragma warning restore S1144
+#pragma warning restore CS8618
+
     /// <summary>
     /// Creates a new instance of <see cref="PhoneMultiValidation"/> with the specified validation date.
     /// </summary>
     /// <param name="validationDate">The date of the validation.</param>
     /// <returns>A new instance of <see cref="PhoneMultiValidation"/>.</returns>
     public static PhoneMultiValidation Create(
-        DateTimeOffset validationDate)
+        DateTime validationDate)
     {
         Id id = Id.CreateUnique();
         return new PhoneMultiValidation(

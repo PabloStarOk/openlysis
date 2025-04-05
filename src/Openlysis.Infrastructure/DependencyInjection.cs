@@ -34,7 +34,7 @@ public static class DependencyInjection
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
         // Add analyses database.
-        services.AddDbContext<AnalysesDbContext>(options =>
+        services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
         // Add repositories.
