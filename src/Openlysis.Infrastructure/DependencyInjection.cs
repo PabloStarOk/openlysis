@@ -45,7 +45,7 @@ public static class DependencyInjection
         // Add repositories.
         services.AddScoped<IRepository<FileMultiAnalysis, FileMultiAnalysisId>, FileMultiAnalysisRepository>();
         services.AddScoped<IRepository<UrlMultiAnalysis, MultiAnalysisId>, UrlMultiAnalysisRepository>();
-        services.AddScoped<IRepository<PhoneMultiValidation, Id>, PhoneMultiValidationRepository>();
+        services.AddScoped<IRepository<PhoneMultiReputation, Id>, PhoneMultiReputationRepository>();
 
         // Add hash service.
         services.AddTransient<MD5>(_ => MD5.Create());

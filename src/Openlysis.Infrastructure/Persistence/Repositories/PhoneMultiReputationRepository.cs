@@ -9,40 +9,40 @@ using Openlysis.Domain.Phones;
 namespace Openlysis.Infrastructure.Persistence.Repositories;
 
 /// <summary>
-/// Repository for managing PhoneMultiValidation entities.
+/// Repository for managing <see cref="PhoneMultiReputation"/> entities.
 /// </summary>
-public class PhoneMultiValidationRepository : IRepository<PhoneMultiValidation, Id>
+public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, Id>
 {
     private readonly ApplicationDbContext _dbContext;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PhoneMultiValidationRepository"/> class.
+    /// Initializes a new instance of the <see cref="PhoneMultiReputationRepository"/> class.
     /// </summary>
     /// <param name="dbContext">The database context to be used by the repository.</param>
-    public PhoneMultiValidationRepository(
+    public PhoneMultiReputationRepository(
         ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
     /// <inheritdoc/>
-    public async Task<PhoneMultiValidation?> GetAsync(
+    public async Task<PhoneMultiReputation?> GetAsync(
         Id id,
         CancellationToken cancellationToken = default)
     {
-        return await _dbContext.PhoneMultiValidations
+        return await _dbContext.PhoneMultiReputations
             .AsSplitQuery()
             .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<PhoneMultiValidation>> GetManyAsync(
+    public async Task<IReadOnlyList<PhoneMultiReputation>> GetManyAsync(
         int amount = 10,
-        Expression<Func<PhoneMultiValidation, bool>>? filter = null,
-        Func<IQueryable<PhoneMultiValidation>, IOrderedQueryable<PhoneMultiValidation>>? orderBy = null,
+        Expression<Func<PhoneMultiReputation, bool>>? filter = null,
+        Func<IQueryable<PhoneMultiReputation>, IOrderedQueryable<PhoneMultiReputation>>? orderBy = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<PhoneMultiValidation> query = _dbContext.PhoneMultiValidations
+        IQueryable<PhoneMultiReputation> query = _dbContext.PhoneMultiReputations
             .AsSplitQuery();
 
         if (filter is not null)
@@ -61,29 +61,29 @@ public class PhoneMultiValidationRepository : IRepository<PhoneMultiValidation, 
     }
 
     /// <inheritdoc/>
-    public async Task AddAsync(PhoneMultiValidation model, CancellationToken cancellationToken = default)
+    public async Task AddAsync(PhoneMultiReputation model, CancellationToken cancellationToken = default)
     {
-        await _dbContext.PhoneMultiValidations.AddAsync(model, cancellationToken);
+        await _dbContext.PhoneMultiReputations.AddAsync(model, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc/>
-    public async Task UpdateAsync(PhoneMultiValidation model, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(PhoneMultiReputation model, CancellationToken cancellationToken = default)
     {
         bool exists = await ExistsAsync(model.Id, cancellationToken);
         if (!exists)
         {
-            throw new ArgumentException("Given PhoneMultiValidation doesn't exist in the database.");
+            throw new ArgumentException("Given PhoneMultiReputation doesn't exist in the database.");
         }
 
-        _dbContext.PhoneMultiValidations.Update(model);
+        _dbContext.PhoneMultiReputations.Update(model);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     /// <inheritdoc/>
     public async Task<bool> ExistsAsync(Id id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.PhoneMultiValidations
+        return await _dbContext.PhoneMultiReputations
             .AnyAsync(p => p.Id == id, cancellationToken);
     }
 }

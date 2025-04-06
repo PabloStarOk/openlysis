@@ -7,9 +7,9 @@ using Openlysis.Domain.Phones.ValueObjects;
 namespace Openlysis.Domain.Phones.Entities;
 
 /// <summary>
-/// Represents a phone service validation entity.
+/// Represents the reputation of a phone given by a service.
 /// </summary>
-public class PhoneServiceValidation : Entity<Id>
+public class PhoneServiceReputation : Entity<Id>
 {
     /// <summary>
     /// Gets the name of the service.
@@ -17,7 +17,7 @@ public class PhoneServiceValidation : Entity<Id>
     public string ServiceName { get; }
 
     /// <summary>
-    /// Gets the verdict of the service validation.
+    /// Gets the verdict of the service.
     /// </summary>
     public Verdict Verdict { get; }
 
@@ -27,19 +27,19 @@ public class PhoneServiceValidation : Entity<Id>
     public ThreatZone ThreatZone { get; }
 
     /// <summary>
-    /// Gets the phone information associated with the service validation.
+    /// Gets the phone information associated with the service.
     /// </summary>
     public PhoneInfo PhoneInfo { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PhoneServiceValidation"/> class.
+    /// Initializes a new instance of the <see cref="PhoneServiceReputation"/> class.
     /// </summary>
-    /// <param name="id">The unique identifier for the phone service validation.</param>
+    /// <param name="id">The unique identifier for the service.</param>
     /// <param name="serviceName">The name of the service.</param>
-    /// <param name="verdict">The verdict of the service validation.</param>
+    /// <param name="verdict">The verdict of the service.</param>
     /// <param name="threatZone">The threat zone associated with the verdict.</param>
-    /// <param name="phoneInfo">The phone information associated with the service validation.</param>
-    private PhoneServiceValidation(
+    /// <param name="phoneInfo">The phone information associated with the service.</param>
+    private PhoneServiceReputation(
         Id id,
         string serviceName,
         Verdict verdict,
@@ -56,27 +56,27 @@ public class PhoneServiceValidation : Entity<Id>
     // For EF core.
 #pragma warning disable CS8618
 #pragma warning disable S1144
-    private PhoneServiceValidation()
+    private PhoneServiceReputation()
     {
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of <see cref="PhoneServiceValidation"/>.
+    /// Creates a new instance of <see cref="PhoneServiceReputation"/>.
     /// </summary>
     /// <param name="serviceName">The name of the service.</param>
-    /// <param name="verdict">The verdict of the service validation.</param>
-    /// <param name="phoneInfo">The phone information associated with the service validation.</param>
-    /// <returns>A new instance of <see cref="PhoneServiceValidation"/>.</returns>
-    public static PhoneServiceValidation Create(
+    /// <param name="verdict">The verdict of the reputation.</param>
+    /// <param name="phoneInfo">The phone information associated with the reputation.</param>
+    /// <returns>A new instance of <see cref="PhoneServiceReputation"/>.</returns>
+    public static PhoneServiceReputation Create(
         string serviceName,
         Verdict verdict,
         PhoneInfo phoneInfo)
     {
         Id id = Id.CreateUnique();
         ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
-        return new PhoneServiceValidation(
+        return new PhoneServiceReputation(
             id,
             serviceName,
             verdict,

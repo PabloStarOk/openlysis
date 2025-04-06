@@ -8,32 +8,32 @@ using Openlysis.Domain.Phones.Entities;
 namespace Openlysis.Infrastructure.Persistence.Configurations.Phones;
 
 /// <summary>
-/// Configuration class for the PhoneMultiValidation entity.
+/// Configuration class for the PhoneMultiReputation entity.
 /// </summary>
-public class PhoneMultiValidationConfiguration : IEntityTypeConfiguration<PhoneMultiValidation>
+public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneMultiReputation>
 {
     private const string TinyintType = "TINYINT";
 
     /// <inheritdoc/>
-    public void Configure(EntityTypeBuilder<PhoneMultiValidation> builder)
+    public void Configure(EntityTypeBuilder<PhoneMultiReputation> builder)
     {
-        ConfigureMultiValidation(builder);
-        builder.OwnsMany(p => p.ServicesValidations, ConfigureServicesValidations);
+        ConfigureMultiReputation(builder);
+        builder.OwnsMany(p => p.ServicesReputations, ConfigureServicesReputations);
     }
 
     /// <summary>
-    /// Configures the properties and relationships of the PhoneMultiValidation entity.
+    /// Configures the properties and relationships of the PhoneMultiReputation entity.
     /// </summary>
-    /// <param name="builder">The builder used to configure the PhoneMultiValidation entity.</param>
-    private static void ConfigureMultiValidation(
-        EntityTypeBuilder<PhoneMultiValidation> builder)
+    /// <param name="builder">The builder used to configure the PhoneMultiReputation entity.</param>
+    private static void ConfigureMultiReputation(
+        EntityTypeBuilder<PhoneMultiReputation> builder)
     {
-        builder.ToTable("PhoneMultiValidations");
+        builder.ToTable("PhoneMultiReputations");
 
         builder.HasKey(p => p.Id);
 
         builder.Property(u => u.Id)
-            .HasColumnName("PhoneMultiValidationId")
+            .HasColumnName("PhoneMultiReputationId")
             .HasColumnType("CHAR")
             .HasMaxLength(36)
             .IsRequired()
@@ -42,8 +42,8 @@ public class PhoneMultiValidationConfiguration : IEntityTypeConfiguration<PhoneM
                 id => id.Value,
                 dbValue => Id.Create(dbValue));
 
-        builder.Property(p => p.ValidationDate)
-            .HasColumnName("ValidationDate")
+        builder.Property(p => p.AssessmentDate)
+            .HasColumnName("AssessmentDate")
             .HasColumnType("DATETIME2")
             .IsRequired();
 
@@ -57,23 +57,23 @@ public class PhoneMultiValidationConfiguration : IEntityTypeConfiguration<PhoneM
             .HasColumnType(TinyintType)
             .IsRequired();
 
-        builder.Navigation(p => p.ServicesValidations)
+        builder.Navigation(p => p.ServicesReputations)
             .AutoInclude();
     }
 
     /// <summary>
-    /// Configures the properties and relationships of the PhoneServiceValidation entity.
+    /// Configures the properties and relationships of the PhoneServiceReputation entity.
     /// </summary>
-    /// <param name="builder">The builder used to configure the PhoneServiceValidation entity.</param>
-    private static void ConfigureServicesValidations(
-        OwnedNavigationBuilder<PhoneMultiValidation, PhoneServiceValidation> builder)
+    /// <param name="builder">The builder used to configure the PhoneServiceReputation entity.</param>
+    private static void ConfigureServicesReputations(
+        OwnedNavigationBuilder<PhoneMultiReputation, PhoneServiceReputation> builder)
     {
-        builder.ToTable("PhoneServicesValidations");
+        builder.ToTable("PhoneServicesReputations");
 
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Id)
-            .HasColumnName("PhoneServiceValidationId")
+            .HasColumnName("PhoneServiceReputationId")
             .HasColumnType("CHAR")
             .HasMaxLength(36)
             .IsRequired()
@@ -125,6 +125,6 @@ public class PhoneMultiValidationConfiguration : IEntityTypeConfiguration<PhoneM
         });
 
         builder.WithOwner()
-            .HasForeignKey("PhoneMultiValidationId");
+            .HasForeignKey("PhoneMultiReputationId");
     }
 }

@@ -38,9 +38,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<UrlServiceAnalysis> UrlServiceAnalyses { get; init; } = null!;
 
     /// <summary>
-    /// Gets a database set of <see cref="PhoneMultiValidation"/>.
+    /// Gets a database set of <see cref="PhoneMultiReputation"/>.
     /// </summary>
-    public DbSet<PhoneMultiValidation> PhoneMultiValidations { get; init; } = null!;
+    public DbSet<PhoneMultiReputation> PhoneMultiReputations { get; init; } = null!;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ApplicationDbContext"/> class.
@@ -58,6 +58,6 @@ public class ApplicationDbContext : DbContext
         modelBuilder.ApplyConfiguration(new FileAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new UrlServiceAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new UrlMultiAnalysisConfiguration());
-        modelBuilder.ApplyConfiguration(new PhoneMultiValidationConfiguration());
+        modelBuilder.ApplyConfiguration(new PhoneMultiReputationConfiguration());
     }
 }
