@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.HybridA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.VirusTotal", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.VirusTotal\Openlysis.Analyzers.VirusTotal.csproj", "{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Assessors.Shared", "src\Openlysis.Assessors\Openlysis.Assessors.Shared\Openlysis.Assessors.Shared.csproj", "{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -76,6 +78,10 @@ Global
 		{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
