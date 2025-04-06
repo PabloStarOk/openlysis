@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Abstractions;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Models;
+using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Configuration;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Models;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Services;
+namespace Openlysis.Infrastructure.Shared.RateQuota.Services;
 
 /// <summary>
 /// Tracks rate and quota limits of external APIs according to <see cref="RateQuotaOptions"/>.

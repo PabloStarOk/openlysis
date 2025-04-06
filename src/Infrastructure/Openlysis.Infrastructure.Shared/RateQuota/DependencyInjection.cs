@@ -2,14 +2,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Abstractions;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Services;
+using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Configuration;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Services;
 
 using Quartz;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit;
+namespace Openlysis.Infrastructure.Shared.RateQuota;
 
 /// <summary>
 /// Provides extension methods for dependency injection.
@@ -23,7 +23,7 @@ public static class DependencyInjection
     /// <param name="configuration">The <see cref="IConfiguration"/> to retrieve the configuration settings from.</param>
     /// <param name="serviceKey">The key used to identify the <see cref="IRateQuotaService"/> service and configured <see cref="RateQuotaOptions"/>.</param>
     /// <param name="configSectionName">The name of the parent section in the configuration.</param>
-    public static void AddRequestLimitTracker(
+    public static void AddRateQuotaService(
         this IServiceCollection services,
         IConfiguration configuration,
         string serviceKey,

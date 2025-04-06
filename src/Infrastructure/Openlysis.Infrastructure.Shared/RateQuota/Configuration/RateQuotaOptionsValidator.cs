@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Configuration;
+namespace Openlysis.Infrastructure.Shared.RateQuota.Configuration;
 
 /// <summary>
 /// Validates <see cref="RateQuotaOptions"/>.

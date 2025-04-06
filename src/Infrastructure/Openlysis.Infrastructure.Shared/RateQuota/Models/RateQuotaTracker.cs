@@ -2,10 +2,10 @@ using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Configuration;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Models;
+namespace Openlysis.Infrastructure.Shared.RateQuota.Models;
 
 /// <summary>
 /// Manage the rate limits and quota usage for different periods (minute, hour, day, month).

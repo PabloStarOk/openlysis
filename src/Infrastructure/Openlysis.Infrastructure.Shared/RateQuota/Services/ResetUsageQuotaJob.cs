@@ -1,9 +1,9 @@
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Abstractions;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 using Quartz;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Services;
+namespace Openlysis.Infrastructure.Shared.RateQuota.Services;
 
 /// <summary>
 /// Represents a job that resets the usage quota for rate limiting.

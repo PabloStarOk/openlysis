@@ -10,7 +10,6 @@ using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;
@@ -18,6 +17,7 @@ using Openlysis.Analyzers.VirusTotal.Core.Models.Validators;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 using Openlysis.Analyzers.VirusTotal.Services;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.RateQuota;
 
 namespace Openlysis.Analyzers.VirusTotal;
 
@@ -81,7 +81,7 @@ public static class DependencyInjection
         services.ConfigureHttpClient(secretOptions, analyzerOptions);
 
         // Add limit tracker
-        services.AddRequestLimitTracker(
+        services.AddRateQuotaService(
             configuration,
             UrlAnalyzer.LimitTrackerServiceKey,
             analyzerOptions.ServiceName);

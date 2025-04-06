@@ -5,11 +5,11 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Core.Common.Models;
 using Openlysis.Analyzers.Shared.Core.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Abstractions;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Models;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Models;
 
 namespace Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 

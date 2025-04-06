@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Infrastructure\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj" />
     <ProjectReference Include="..\..\Openlysis.Analyzers.Clients\Openlysis.Analyzers.Filescan\Openlysis.Analyzers.Filescan.csproj" />
     <ProjectReference Include="..\..\Openlysis.Analyzers.Clients\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj" />
     <ProjectReference Include="..\..\Openlysis.Application\Openlysis.Application.csproj" />

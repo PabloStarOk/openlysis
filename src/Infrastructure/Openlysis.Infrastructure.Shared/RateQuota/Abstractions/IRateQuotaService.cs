@@ -1,7 +1,7 @@
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Models;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Models;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Abstractions;
+namespace Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
 
 /// <summary>
 /// Define a tracker of requests sent to an external service.

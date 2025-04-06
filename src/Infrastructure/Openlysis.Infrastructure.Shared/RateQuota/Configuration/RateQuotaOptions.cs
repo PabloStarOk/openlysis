@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Configuration;
+namespace Openlysis.Infrastructure.Shared.RateQuota.Configuration;
 
 /// <summary>
 /// Represents the configuration options for the analyzer.

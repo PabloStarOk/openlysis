@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Services;
+using Openlysis.Infrastructure.Shared.RateQuota.Services;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Configuration;
+namespace Openlysis.Infrastructure.Shared.RateQuota.Configuration;
 
 /// <summary>
 /// Options to configure a <see cref="RateQuotaService"/>.

@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
+namespace Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 /// <summary>
 /// Specifies the time period type for rate limits and usage quotas.
