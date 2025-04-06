@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Shared.Core.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging.Services;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 
 namespace Openlysis.Analyzers.Shared.Infrastructure.Logging;
 
@@ -22,6 +22,6 @@ public static class DependencyInjection
         string serviceKey)
         where TOptions : AnalyzerOptions
     {
-        services.AddKeyedSingleton<IAnalyzerLogger, AnalyzerLogger<TOptions>>(serviceKey);
+        services.AddKeyedSingleton<ServiceLogger, AnalyzerLogger<TOptions>>(serviceKey);
     }
 }

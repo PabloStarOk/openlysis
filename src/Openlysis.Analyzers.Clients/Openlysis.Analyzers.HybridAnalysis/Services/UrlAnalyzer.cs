@@ -10,6 +10,7 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Domain.Common.Enums;
@@ -44,7 +45,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         IOptionsMonitor<HybridAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        ILogger<UrlAnalyzer> logger,
+        SandboxAnalyzerLogger logger,
         ISandboxAnalyzer sandboxAnalyzer)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {

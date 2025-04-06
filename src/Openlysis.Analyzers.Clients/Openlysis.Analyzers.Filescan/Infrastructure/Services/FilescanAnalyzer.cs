@@ -11,7 +11,7 @@ using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
 using Openlysis.Analyzers.Shared.Core.Common.Constants;
 using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
-using Openlysis.Analyzers.Shared.Infrastructure.Logging.Abstractions;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 
 namespace Openlysis.Analyzers.Filescan.Infrastructure.Services;
 
@@ -25,19 +25,19 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
     /// </summary>
     public const string KeyedServicesKey = "FilescanServices";
 
-    private readonly IAnalyzerLogger _analyzerLogger;
+    private readonly ServiceLogger _serviceLogger;
     private readonly IAnalyzerDeserializer _analyzerDeserializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FilescanAnalyzer"/> class.
     /// </summary>
-    /// <param name="analyzerLogger">The analyzer logger instance for custom logging.</param>
+    /// <param name="serviceLogger">The analyzer logger instance for custom logging.</param>
     /// <param name="analyzerDeserializer">The analyzer deserializer instance for custom deserialization.</param>
     public FilescanAnalyzer(
-        [FromKeyedServices(KeyedServicesKey)] IAnalyzerLogger analyzerLogger,
+        [FromKeyedServices(KeyedServicesKey)] ServiceLogger serviceLogger,
         [FromKeyedServices(KeyedServicesKey)] IAnalyzerDeserializer analyzerDeserializer)
     {
-        _analyzerLogger = analyzerLogger;
+        _serviceLogger = serviceLogger;
         _analyzerDeserializer = analyzerDeserializer;
     }
 
@@ -55,7 +55,7 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
 
         if (!response.IsSuccessStatusCode)
         {
-            await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            await _serviceLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 
@@ -97,7 +97,7 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
 
         if (!response.IsSuccessStatusCode)
         {
-            await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            await _serviceLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 

@@ -7,6 +7,7 @@ using Openlysis.Analyzers.Shared.Core.Common.Models;
 using Openlysis.Analyzers.Shared.Core.Configuration;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 using Openlysis.Infrastructure.Shared.RateQuota.Models;
@@ -45,7 +46,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <summary>
     /// Logger instance for the analyzer.
     /// </summary>
-    protected readonly ILogger<Analyzer<TAnalysis, TRequest>> _logger;
+    protected readonly ServiceLogger _logger;
 
     /// <summary>
     /// Options monitor for <see cref="AnalyzerOptions"/>.
@@ -66,7 +67,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         IOptionsMonitor<AnalyzerOptions> options,
         IRateQuotaService rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        ILogger<Analyzer<TAnalysis, TRequest>> logger)
+        ServiceLogger logger)
     {
         _options = options;
         _rateQuotaService = rateQuotaService;
@@ -86,7 +87,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     protected Analyzer(
         IOptionsMonitor<AnalyzerOptions> options,
         IHttpClientFactory httpClientFactory,
-        ILogger<Analyzer<TAnalysis, TRequest>> logger)
+        ServiceLogger logger)
     {
         _options = options;
         _httpClientFactory = httpClientFactory;

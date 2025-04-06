@@ -13,7 +13,6 @@ using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Core.Common.Constants;
 using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
-using Openlysis.Analyzers.Shared.Infrastructure.Logging.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
 using Openlysis.Analyzers.URLQuery.Core.Constants;
@@ -23,6 +22,7 @@ using Openlysis.Analyzers.URLQuery.Core.Models.Responses;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 
 namespace Openlysis.Analyzers.URLQuery.Services;
 
@@ -38,7 +38,6 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
     private readonly IOptionsMonitor<UrlQueryAnalyzerOptions> _urlQueryOptions;
     private readonly IVerdictCalculator _verdictCalculator;
-    private readonly IAnalyzerLogger _analyzerLogger;
     private readonly IAnalyzerDeserializer _analyzerDeserializer;
     private readonly JsonSerializerOptions _jsonSerializerOptions = new ()
     {
@@ -56,22 +55,19 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// </summary>
     /// <param name="options">The options monitor for <see cref="UrlQueryAnalyzerOptions"/>.</param>
     /// <param name="httpClientFactory">The HTTP client factory for creating HTTP clients.</param>
-    /// <param name="logger">The logger for logging information.</param>
     /// <param name="verdictCalculator">The calculator for determining the verdict of the URL analysis.</param>
-    /// <param name="analyzerLogger">The logger for logging analyzer-specific information.</param>
+    /// <param name="logger">The logger for logging analyzer-specific information.</param>
     /// <param name="analyzerDeserializer">The deserializer for analyzing responses.</param>
     public UrlAnalyzer(
         IOptionsMonitor<UrlQueryAnalyzerOptions> options,
         IHttpClientFactory httpClientFactory,
-        ILogger<UrlAnalyzer> logger,
         IVerdictCalculator verdictCalculator,
-        [FromKeyedServices(KeyedServicesKey)] IAnalyzerLogger analyzerLogger,
+        [FromKeyedServices(KeyedServicesKey)] ServiceLogger logger,
         [FromKeyedServices(KeyedServicesKey)] IAnalyzerDeserializer analyzerDeserializer)
         : base(options, httpClientFactory, logger)
     {
         _urlQueryOptions = options;
         _verdictCalculator = verdictCalculator;
-        _analyzerLogger = analyzerLogger;
         _analyzerDeserializer = analyzerDeserializer;
     }
 
@@ -101,7 +97,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         if (!response.IsSuccessStatusCode)
         {
-            await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            await _logger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 
@@ -137,7 +133,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         if (!response.IsSuccessStatusCode)
         {
-            await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            await _logger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 
@@ -163,7 +159,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         if (!response.IsSuccessStatusCode)
         {
-            await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            await _logger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
             return AnalyzerErrors.NonSuccessStatusCode;
         }
 

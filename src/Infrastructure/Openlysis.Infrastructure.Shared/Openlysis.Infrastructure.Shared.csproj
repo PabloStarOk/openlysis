@@ -12,6 +12,10 @@
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.3" />
       <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.3" />
       <PackageReference Include="Quartz.Extensions.Hosting" Version="3.14.0" />
+      <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

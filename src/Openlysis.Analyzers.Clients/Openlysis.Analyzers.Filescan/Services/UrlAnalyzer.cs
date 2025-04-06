@@ -12,11 +12,13 @@ using Openlysis.Analyzers.Filescan.Core.Models.Objects;
 using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
 using Openlysis.Analyzers.Filescan.Infrastructure.Factories;
+using Openlysis.Analyzers.Filescan.Infrastructure.Services;
 using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
 
 namespace Openlysis.Analyzers.Filescan.Services;
@@ -45,7 +47,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         IOptionsMonitor<FilescanAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        ILogger<UrlAnalyzer> logger,
+        [FromKeyedServices(FilescanAnalyzer.KeyedServicesKey)] ServiceLogger logger,
         IFilescanAnalyzer filescanAnalyzer)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {

@@ -11,9 +11,11 @@ using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Responses;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Factories;
+using Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
 
 namespace Openlysis.Analyzers.VirusTotal.Services;
@@ -44,7 +46,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         IOptionsMonitor<VirusTotalAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        ILogger<UrlAnalyzer> logger,
+        [FromKeyedServices(VirusTotalAnalyzer.KeyedServicesKey)] ServiceLogger logger,
         IVirusTotalAnalyzer vtAnalyzer,
         IVerdictCalculator verdictCalculator)
         : base(options, rateQuotaService, httpClientFactory, logger)
