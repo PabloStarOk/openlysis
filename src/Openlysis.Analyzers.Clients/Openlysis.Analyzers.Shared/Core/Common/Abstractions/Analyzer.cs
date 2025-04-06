@@ -54,7 +54,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     protected readonly IOptionsMonitor<AnalyzerOptions> _options;
 
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IRateQuotaService? _rateQuotaService;
+    private readonly IRateQuotaService<AnalysisEndpointType>? _rateQuotaService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Analyzer{TAnalysis, TRequest}"/> class.
@@ -65,7 +65,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <param name="logger">The logger instance.</param>
     protected Analyzer(
         IOptionsMonitor<AnalyzerOptions> options,
-        IRateQuotaService rateQuotaService,
+        IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
         ServiceLogger logger)
     {
@@ -294,7 +294,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// Handles the event when the request capacity is restored.
     /// </summary>
     /// <param name="tracker">The rate quota tracker that indicates the restored capacity.</param>
-    private void OnCapacityRestored(RateQuotaTracker tracker)
+    private void OnCapacityRestored(RateQuotaTracker<AnalysisEndpointType> tracker)
     {
         if (_rateQuotaService is null)
         {

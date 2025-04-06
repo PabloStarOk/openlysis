@@ -8,22 +8,25 @@ using Openlysis.Infrastructure.Shared.RateQuota.Models;
 namespace Openlysis.Infrastructure.Shared.RateQuota.Services;
 
 /// <summary>
-/// Tracks rate and quota limits of external APIs according to <see cref="RateQuotaOptions"/>.
+/// Tracks rate and quota limits of external APIs according to <see cref="RateQuotaOptions{TEnum}"/>.
 /// </summary>
-public sealed class RateQuotaService : IRateQuotaService, IDisposable, IAsyncDisposable
+/// <typeparam name="TEnum">The type of the enumeration used for endpoint types.</typeparam>
+public sealed class RateQuotaService<TEnum>
+    : IRateQuotaService<TEnum>, IQuotaRestorable, IDisposable, IAsyncDisposable
+    where TEnum : Enum
 {
     /// <inheritdoc/>
-    public event Action<HashSet<AnalysisEndpointType>, RateQuotaPeriod>? LimitExceed;
+    public event Action<HashSet<TEnum>, RateQuotaPeriod>? LimitExceed;
 
     /// <inheritdoc/>
-    public event Action<RateQuotaTracker>? LimitRecovered;
+    public event Action<RateQuotaTracker<TEnum>>? LimitRecovered;
 
     private readonly TimeProvider _timeProvider;
-    private readonly List<RateQuotaTracker> _trackers = [];
+    private readonly List<RateQuotaTracker<TEnum>> _trackers = [];
     private readonly ITimer _refreshTimer;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RateQuotaService"/> class.
+    /// Initializes a new instance of the <see cref="RateQuotaService{TEnum}"/> class.
     /// </summary>
     /// <param name="optionsInstanceName">The name of the options instance.</param>
     /// <param name="limitTrackerOptions">The options monitor for limit tracker options.</param>
@@ -34,14 +37,14 @@ public sealed class RateQuotaService : IRateQuotaService, IDisposable, IAsyncDis
         string optionsInstanceName,
         IOptionsMonitor<LimitTrackerOptions> limitTrackerOptions,
         string[] rateQuotaOptionKeys,
-        IOptionsMonitor<RateQuotaOptions> rateQuotaOptions,
+        IOptionsMonitor<RateQuotaOptions<TEnum>> rateQuotaOptions,
         TimeProvider timeProvider)
     {
         _timeProvider = timeProvider;
 
         foreach (var key in rateQuotaOptionKeys)
         {
-            var tracker = new RateQuotaTracker(key, rateQuotaOptions);
+            var tracker = new RateQuotaTracker<TEnum>(key, rateQuotaOptions);
             tracker.CapacityExhausted += OnTrackerCapacityExhausted;
             tracker.CapacityRestored += OnTrackerCapacityRestored;
             _trackers.Add(tracker);
@@ -55,9 +58,9 @@ public sealed class RateQuotaService : IRateQuotaService, IDisposable, IAsyncDis
     }
 
     /// <inheritdoc/>
-    public void Track(AnalysisEndpointType endpointType)
+    public void Track(TEnum endpointType)
     {
-        RateQuotaTracker[] trackers = _trackers
+        RateQuotaTracker<TEnum>[] trackers = _trackers
             .Where(e => e.EndpointTypes.Contains(endpointType))
             .ToArray();
 
@@ -70,7 +73,7 @@ public sealed class RateQuotaService : IRateQuotaService, IDisposable, IAsyncDis
     /// <inheritdoc/>
     public void RestoreDailyUsage()
     {
-        foreach (RateQuotaTracker tracker in _trackers)
+        foreach (RateQuotaTracker<TEnum> tracker in _trackers)
         {
             tracker.ResetDailyQuotaUsage();
         }
@@ -79,16 +82,16 @@ public sealed class RateQuotaService : IRateQuotaService, IDisposable, IAsyncDis
     /// <inheritdoc/>
     public void RestoreMonthlyUsage()
     {
-        foreach (RateQuotaTracker tracker in _trackers)
+        foreach (RateQuotaTracker<TEnum> tracker in _trackers)
         {
             tracker.ResetMonthlyQuotaUsage();
         }
     }
 
     /// <inheritdoc/>
-    public bool AreAvailable(HashSet<AnalysisEndpointType> endpointTypes)
+    public bool AreAvailable(HashSet<TEnum> endpointTypes)
     {
-        RateQuotaTracker[] trackers = endpointTypes
+        RateQuotaTracker<TEnum>[] trackers = endpointTypes
             .SelectMany(e => _trackers.Where(t => t.EndpointTypes.Contains(e)))
             .ToArray();
 
@@ -99,7 +102,7 @@ public sealed class RateQuotaService : IRateQuotaService, IDisposable, IAsyncDis
     public void Dispose()
     {
         _refreshTimer.Dispose();
-        foreach (RateQuotaTracker tracker in _trackers)
+        foreach (RateQuotaTracker<TEnum> tracker in _trackers)
         {
             tracker.CapacityExhausted -= OnTrackerCapacityExhausted;
             tracker.CapacityRestored -= OnTrackerCapacityRestored;
@@ -110,7 +113,7 @@ public sealed class RateQuotaService : IRateQuotaService, IDisposable, IAsyncDis
     public async ValueTask DisposeAsync()
     {
         await _refreshTimer.DisposeAsync();
-        foreach (RateQuotaTracker tracker in _trackers)
+        foreach (RateQuotaTracker<TEnum> tracker in _trackers)
         {
             tracker.CapacityExhausted -= OnTrackerCapacityExhausted;
             tracker.CapacityRestored -= OnTrackerCapacityRestored;
@@ -124,20 +127,20 @@ public sealed class RateQuotaService : IRateQuotaService, IDisposable, IAsyncDis
     private void UpdateTrackers(object? state)
     {
         DateTimeOffset nowTime = _timeProvider.GetUtcNow();
-        foreach (RateQuotaTracker tracker in _trackers)
+        foreach (RateQuotaTracker<TEnum> tracker in _trackers)
         {
             tracker.RefreshRate(nowTime);
         }
     }
 
     private void OnTrackerCapacityExhausted(
-        HashSet<AnalysisEndpointType> endpointTypes,
+        HashSet<TEnum> endpointTypes,
         RateQuotaPeriod rateQuotaPeriod)
     {
         LimitExceed?.Invoke(endpointTypes, rateQuotaPeriod);
     }
 
-    private void OnTrackerCapacityRestored(RateQuotaTracker tracker)
+    private void OnTrackerCapacityRestored(RateQuotaTracker<TEnum> tracker)
     {
         LimitRecovered?.Invoke(tracker);
     }

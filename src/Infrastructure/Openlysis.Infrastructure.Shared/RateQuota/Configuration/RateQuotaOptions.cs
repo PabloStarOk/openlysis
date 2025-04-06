@@ -1,13 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 
-using Openlysis.Infrastructure.Shared.RateQuota.Enums;
-
 namespace Openlysis.Infrastructure.Shared.RateQuota.Configuration;
 
 /// <summary>
 /// Represents the configuration options for the analyzer.
 /// </summary>
-public record RateQuotaOptions
+public record RateQuotaOptions<TEnum>
+    where TEnum : Enum
 {
     /// <summary>
     /// The section name for the request limit options in the configuration.
@@ -19,7 +18,7 @@ public record RateQuotaOptions
     /// </summary>
     [Required]
     [MinLength(1, ErrorMessage = "EndpointTypes doesn't contain any value, either a misspelling error or unprovided values.")]
-    required public HashSet<AnalysisEndpointType> EndpointTypes { get; init; }
+    required public HashSet<TEnum> EndpointTypes { get; init; }
 
     /// <summary>
     /// Gets the maximum number of requests allowed per minute.

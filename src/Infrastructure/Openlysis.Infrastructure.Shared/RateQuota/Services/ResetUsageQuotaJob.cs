@@ -15,13 +15,13 @@ public class ResetUsageQuotaJob : IJob
     /// </summary>
     public const string JobDataMapKey = "RateQuotaPeriod";
 
-    private readonly IEnumerable<IRateQuotaService> _services;
+    private readonly IEnumerable<IQuotaRestorable> _services;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ResetUsageQuotaJob"/> class.
     /// </summary>
-    /// <param name="services">A collection of <see cref="IRateQuotaService"/>.</param>
-    public ResetUsageQuotaJob(IEnumerable<IRateQuotaService> services)
+    /// <param name="services">A collection of <see cref="IRateQuotaService{TEnum}"/>.</param>
+    public ResetUsageQuotaJob(IEnumerable<IQuotaRestorable> services)
     {
         _services = services;
     }

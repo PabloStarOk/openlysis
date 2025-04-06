@@ -17,17 +17,19 @@ namespace Openlysis.Infrastructure.Shared.RateQuota;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds the <see cref="IRateQuotaService"/> service to the specified <see cref="IServiceCollection"/>.
+    /// Adds the <see cref="IRateQuotaService{TEnum}"/> service to the specified <see cref="IServiceCollection"/>.
     /// </summary>
+    /// <typeparam name="TEnum">The type of the enumeration used for rate quota options.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <param name="configuration">The <see cref="IConfiguration"/> to retrieve the configuration settings from.</param>
-    /// <param name="serviceKey">The key used to identify the <see cref="IRateQuotaService"/> service and configured <see cref="RateQuotaOptions"/>.</param>
+    /// <param name="serviceKey">The key used to identify the <see cref="IRateQuotaService{TEnum}"/> service and configured <see cref="RateQuotaOptions{TEnum}"/>.</param>
     /// <param name="configSectionName">The name of the parent section in the configuration.</param>
-    public static void AddRateQuotaService(
+    public static void AddRateQuotaService<TEnum>(
         this IServiceCollection services,
         IConfiguration configuration,
         string serviceKey,
         string configSectionName)
+        where TEnum : Enum
     {
         // Get options.
         var limitTrackerOptionsSection = configuration
@@ -37,7 +39,7 @@ public static class DependencyInjection
         var rateQuotaOptionsSection = configuration
             .GetRequiredSection(configSectionName)
             .GetRequiredSection(LimitTrackerOptions.SectionName)
-            .GetRequiredSection(RateQuotaOptions.SectionName);
+            .GetRequiredSection(RateQuotaOptions<TEnum>.SectionName);
 
         ArgumentNullException.ThrowIfNull(limitTrackerOptionsSection);
         ArgumentNullException.ThrowIfNull(rateQuotaOptionsSection);
@@ -51,32 +53,32 @@ public static class DependencyInjection
         foreach (var childSection in rateQuotaOptionsSection.GetChildren())
         {
             string key = $"{configSectionName}{childSection.Key}";
-            services.AddOptionsWithValidateOnStart<RateQuotaOptions>(key)
+            services.AddOptionsWithValidateOnStart<RateQuotaOptions<TEnum>>(key)
                 .Bind(childSection)
                 .ValidateDataAnnotations();
             rateQuotaOptionKeys.Add(key);
         }
 
-        services.AddSingleton<RateQuotaOptionsValidator>();
+        services.AddSingleton<RateQuotaOptionsValidator<TEnum>>();
 
         // Get options monitor
         IOptionsMonitor<LimitTrackerOptions> limitTrackerOptions;
-        IOptionsMonitor<RateQuotaOptions> rateQuotaOptions;
+        IOptionsMonitor<RateQuotaOptions<TEnum>> rateQuotaOptions;
         using (ServiceProvider serviceProvider = services.BuildServiceProvider())
         {
             limitTrackerOptions = serviceProvider.GetRequiredService<IOptionsMonitor<LimitTrackerOptions>>();
-            rateQuotaOptions = serviceProvider.GetRequiredService<IOptionsMonitor<RateQuotaOptions>>();
+            rateQuotaOptions = serviceProvider.GetRequiredService<IOptionsMonitor<RateQuotaOptions<TEnum>>>();
         }
 
         // Add limit tracker
-        var limitTracker = new RateQuotaService(
+        var limitTracker = new RateQuotaService<TEnum>(
             serviceKey,
             limitTrackerOptions,
             rateQuotaOptionKeys.ToArray(),
             rateQuotaOptions,
             TimeProvider.System);
-        services.AddSingleton<IRateQuotaService>(limitTracker);
-        services.AddKeyedSingleton<IRateQuotaService>(serviceKey, limitTracker);
+        services.AddSingleton<IRateQuotaService<TEnum>>(limitTracker);
+        services.AddKeyedSingleton<IRateQuotaService<TEnum>>(serviceKey, limitTracker);
     }
 
     /// <summary>

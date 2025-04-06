@@ -17,6 +17,7 @@ using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 namespace Openlysis.Analyzers.VirusTotal.Services;
 
@@ -44,7 +45,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="verdictCalculator">The verdict calculator instance.</param>
     public UrlAnalyzer(
         IOptionsMonitor<VirusTotalAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
         [FromKeyedServices(VirusTotalAnalyzer.KeyedServicesKey)] ServiceLogger logger,
         IVirusTotalAnalyzer vtAnalyzer,

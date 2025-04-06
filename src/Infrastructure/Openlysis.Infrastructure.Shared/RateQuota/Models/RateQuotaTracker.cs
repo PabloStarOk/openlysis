@@ -8,28 +8,30 @@ using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 namespace Openlysis.Infrastructure.Shared.RateQuota.Models;
 
 /// <summary>
-/// Manage the rate limits and quota usage for different periods (minute, hour, day, month).
+/// Manages the rate limits and quota usage for different periods (minute, hour, day, month).
 /// </summary>
-public class RateQuotaTracker
+/// <typeparam name="TEnum">The type of the enumeration used for endpoint types.</typeparam>
+public class RateQuotaTracker<TEnum>
+    where TEnum : Enum
 {
     /// <summary>
     /// Occurs when the capacity is exhausted for the specified endpoint types and period.
     /// </summary>
-    public event Action<HashSet<AnalysisEndpointType>, RateQuotaPeriod>? CapacityExhausted;
+    public event Action<HashSet<TEnum>, RateQuotaPeriod>? CapacityExhausted;
 
     /// <summary>
     /// Occurs when the capacity is restored for the specified endpoint types and period.
     /// </summary>
-    public event Action<RateQuotaTracker>? CapacityRestored;
+    public event Action<RateQuotaTracker<TEnum>>? CapacityRestored;
 
     /// <summary>
     /// Gets the type of the analysis endpoint which this class tracks for.
     /// </summary>
-    public HashSet<AnalysisEndpointType> EndpointTypes =>
+    public HashSet<TEnum> EndpointTypes =>
         _rateQuotaOptions.Get(_optionsKey).EndpointTypes;
 
     private readonly string _optionsKey;
-    private readonly IOptionsMonitor<RateQuotaOptions> _rateQuotaOptions;
+    private readonly IOptionsMonitor<RateQuotaOptions<TEnum>> _rateQuotaOptions;
     private readonly ConcurrentQueue<DateTimeOffset> _minuteRateWindow = [];
     private readonly ConcurrentQueue<DateTimeOffset> _hourlyRateWindow = [];
     private int _dailyQuotaUsage;
@@ -38,13 +40,17 @@ public class RateQuotaTracker
     private bool _isHourlyCapacityExhausted;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="RateQuotaTracker"/> class.
+    /// Initializes a new instance of the <see cref="RateQuotaTracker{TEnum}"/> class.
     /// </summary>
     /// <param name="optionsKey">The key to retrieve the rate limit options.</param>
     /// <param name="rateQuotaOptions">The options monitor for rate and quota limit configurations.</param>
+    /// <remarks>
+    /// The <paramref name="optionsKey"/> is used to fetch the specific rate and quota configurations
+    /// from the <paramref name="rateQuotaOptions"/> monitor.
+    /// </remarks>
     public RateQuotaTracker(
         string optionsKey,
-        IOptionsMonitor<RateQuotaOptions> rateQuotaOptions)
+        IOptionsMonitor<RateQuotaOptions<TEnum>> rateQuotaOptions)
     {
         _optionsKey = optionsKey;
         _rateQuotaOptions = rateQuotaOptions;
@@ -102,7 +108,7 @@ public class RateQuotaTracker
     /// </returns>
     public bool HasAvailableCapacity()
     {
-        RateQuotaOptions options = _rateQuotaOptions.Get(_optionsKey);
+        RateQuotaOptions<TEnum> options = _rateQuotaOptions.Get(_optionsKey);
 
         bool hasMinuteRateCapacity =
             options.MinuteRate <= 0 || _minuteRateWindow.Count < options.MinuteRate;
@@ -148,7 +154,7 @@ public class RateQuotaTracker
     /// </summary>
     private void EvaluateExhaustedCapacity()
     {
-        RateQuotaOptions options = _rateQuotaOptions.Get(_optionsKey);
+        RateQuotaOptions<TEnum> options = _rateQuotaOptions.Get(_optionsKey);
 
         if (options.MonthlyQuota > 0
             && _monthlyQuotaUsage >= options.MonthlyQuota)

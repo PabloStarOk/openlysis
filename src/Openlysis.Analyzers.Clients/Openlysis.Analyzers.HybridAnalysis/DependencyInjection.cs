@@ -15,6 +15,7 @@ using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.RateQuota;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 namespace Openlysis.Analyzers.HybridAnalysis;
 
@@ -51,7 +52,7 @@ public static class DependencyInjection
         services.AddSingleton<ISandboxAnalyzer, SandboxAnalyzer>();
 
         // Add request limit tracker
-        services.AddRateQuotaService(
+        services.AddRateQuotaService<AnalysisEndpointType>(
             configuration,
             UrlAnalyzer.LimitTrackerServiceKey,
             analyzerOptions.ServiceName);

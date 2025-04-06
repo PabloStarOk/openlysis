@@ -18,6 +18,7 @@ using Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 using Openlysis.Analyzers.VirusTotal.Services;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.RateQuota;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 namespace Openlysis.Analyzers.VirusTotal;
 
@@ -81,7 +82,7 @@ public static class DependencyInjection
         services.ConfigureHttpClient(secretOptions, analyzerOptions);
 
         // Add limit tracker
-        services.AddRateQuotaService(
+        services.AddRateQuotaService<AnalysisEndpointType>(
             configuration,
             UrlAnalyzer.LimitTrackerServiceKey,
             analyzerOptions.ServiceName);

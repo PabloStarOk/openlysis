@@ -3,12 +3,15 @@ using Microsoft.Extensions.Options;
 namespace Openlysis.Infrastructure.Shared.RateQuota.Configuration;
 
 /// <summary>
-/// Validates <see cref="RateQuotaOptions"/>.
+/// Validates <see cref="RateQuotaOptions{TEnum}"/>.
 /// </summary>
-public class RateQuotaOptionsValidator : IValidateOptions<RateQuotaOptions>
+/// <typeparam name="TEnum">The enum type used for rate quota options.</typeparam>
+public class RateQuotaOptionsValidator<TEnum>
+    : IValidateOptions<RateQuotaOptions<TEnum>>
+    where TEnum : Enum
 {
     /// <inheritdoc/>
-    public ValidateOptionsResult Validate(string? name, RateQuotaOptions options)
+    public ValidateOptionsResult Validate(string? name, RateQuotaOptions<TEnum> options)
     {
         int total = options.MinuteRate + options.HourlyRate
             + options.DailyQuota + options.MonthlyQuota;

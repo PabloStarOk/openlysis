@@ -20,6 +20,7 @@ using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 namespace Openlysis.Analyzers.Filescan.Services;
 
@@ -45,7 +46,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="filescanAnalyzer">The filescan analyzer for analyzing files.</param>
     public UrlAnalyzer(
         IOptionsMonitor<FilescanAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
         [FromKeyedServices(FilescanAnalyzer.KeyedServicesKey)] ServiceLogger logger,
         IFilescanAnalyzer filescanAnalyzer)

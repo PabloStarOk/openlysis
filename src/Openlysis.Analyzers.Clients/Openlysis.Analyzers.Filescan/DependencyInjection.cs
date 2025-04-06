@@ -19,6 +19,7 @@ using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.RateQuota;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 namespace Openlysis.Analyzers.Filescan;
 
@@ -70,7 +71,7 @@ public static class DependencyInjection
         services.ConfigureHttpClient(secretOptions, analyzerOptions);
 
         // Add request limit tracker
-        services.AddRateQuotaService(
+        services.AddRateQuotaService<AnalysisEndpointType>(
             configuration,
             UrlAnalyzer.LimitTrackerServiceKey,
             analyzerOptions.ServiceName);

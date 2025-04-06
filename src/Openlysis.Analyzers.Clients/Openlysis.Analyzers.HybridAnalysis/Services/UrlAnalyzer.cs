@@ -17,6 +17,7 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Services;
 
@@ -43,7 +44,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="sandboxAnalyzer">The sandbox analyzer.</param>
     public UrlAnalyzer(
         IOptionsMonitor<HybridAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
         SandboxAnalyzerLogger logger,
         ISandboxAnalyzer sandboxAnalyzer)
