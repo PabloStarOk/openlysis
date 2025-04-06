@@ -17,7 +17,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Infrastructure\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj" />
       <ProjectReference Include="..\..\Openlysis.Application\Openlysis.Application.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Infrastructure\RateQuota\" />
     </ItemGroup>
 
 </Project>

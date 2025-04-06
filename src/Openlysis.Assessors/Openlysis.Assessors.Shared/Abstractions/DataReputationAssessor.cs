@@ -5,7 +5,13 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Application.Common.Interfaces.Services;
 using Openlysis.Assessors.Shared.Configuration;
+using Openlysis.Assessors.Shared.Infrastructure.Logging.Services;
+using Openlysis.Assessors.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Assessors.Shared.Models.Common;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Models;
 
 namespace Openlysis.Assessors.Shared.Abstractions;
 
@@ -15,7 +21,7 @@ namespace Openlysis.Assessors.Shared.Abstractions;
 /// <typeparam name="TData">The type of data to be assessed.</typeparam>
 /// <typeparam name="TModel">The type of model to be returned after assessment.</typeparam>
 public abstract class DataReputationAssessor<TData, TModel>
-    : IDataReputationAssessor<TData, TModel>
+    : IDataReputationAssessor<TData, TModel>, IDisposable
     where TData : AssessedData
     where TModel : notnull
 {
@@ -25,13 +31,41 @@ public abstract class DataReputationAssessor<TData, TModel>
     /// <inheritdoc/>
     public bool IsAvailable { get; private set; }
 
-    // TODO: Add RateQuotaService.
-    // TODO: Add AnalyzerLogger.
-    private readonly ILogger<DataReputationAssessor<TData, TModel>> _logger;
+    private readonly ServiceLogger _logger;
     private readonly IOptionsMonitor<DataAssessorOptions> _options;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IRateQuotaService<AssessorEndpointType>? _rateQuotaService;
     private readonly IEndpointAddressFactory<TData> _endpointAddressFactory;
     private readonly IResponseParser<TModel> _responseParser;
+    private bool _isDisposed;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DataReputationAssessor{TData, TModel}"/> class.
+    /// </summary>
+    /// <param name="logger">The logger instance to use for logging.</param>
+    /// <param name="options">The options monitor for accessing configuration settings.</param>
+    /// <param name="httpClientFactory">The factory to create HTTP clients.</param>
+    /// <param name="rateQuotaService">The service to manage rate quotas for assessor endpoints.</param>
+    /// <param name="endpointAddressFactory">The factory to create endpoint addresses for the given data type.</param>
+    /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
+    protected DataReputationAssessor(
+        ServiceLogger logger,
+        IOptionsMonitor<DataAssessorOptions> options,
+        IHttpClientFactory httpClientFactory,
+        IRateQuotaService<AssessorEndpointType> rateQuotaService,
+        IEndpointAddressFactory<TData> endpointAddressFactory,
+        IResponseParser<TModel> responseParser)
+    {
+        _logger = logger;
+        _options = options;
+        _httpClientFactory = httpClientFactory;
+        _rateQuotaService = rateQuotaService;
+        _endpointAddressFactory = endpointAddressFactory;
+        _responseParser = responseParser;
+
+        _rateQuotaService.LimitExceed += OnLimitExceed;
+        _rateQuotaService.LimitRecovered += OnLimitRecovered;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DataReputationAssessor{TData, TModel}"/> class.
@@ -42,7 +76,7 @@ public abstract class DataReputationAssessor<TData, TModel>
     /// <param name="endpointAddressFactory">The factory to create endpoint addresses for the given data type.</param>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
     protected DataReputationAssessor(
-        ILogger<DataReputationAssessor<TData, TModel>> logger,
+        AssessorLogger logger,
         IOptionsMonitor<DataAssessorOptions> options,
         IHttpClientFactory httpClientFactory,
         IEndpointAddressFactory<TData> endpointAddressFactory,
@@ -82,13 +116,13 @@ public abstract class DataReputationAssessor<TData, TModel>
 
             if (!response.IsSuccessStatusCode)
             {
-                // TODO: Log non success status code.
+                await _logger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
                 return Error.Unexpected(
                     "Response.NotSuccessful",
                     "Response status code was not successful.");
             }
 
-            // TODO: Track request.
+            _rateQuotaService?.Track(AssessorEndpointType.AssessData);
             return await _responseParser.ParseAsync(response, cancellationToken);
         }
         catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
@@ -101,5 +135,82 @@ public abstract class DataReputationAssessor<TData, TModel>
             _logger.LogWarning(ex, "A timeout exception occurred while analyzing at {ServiceName} service analyzer.", ServiceName);
             return Error.Failure(description: "Timeout exception occurred.");
         }
+    }
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// Releases the unmanaged resources used by the <see cref="DataReputationAssessor{TData, TModel}"/> and optionally releases the managed resources.
+    /// </summary>
+    /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        _isDisposed = true;
+
+        if (_rateQuotaService is null)
+        {
+            return;
+        }
+
+        _rateQuotaService.LimitExceed -= OnLimitExceed;
+        _rateQuotaService.LimitRecovered -= OnLimitRecovered;
+    }
+
+    /// <summary>
+    /// Event handler for when the rate quota limit is exceeded.
+    /// </summary>
+    /// <param name="endpointTypes">The set of endpoint types that exceeded the rate quota limit.</param>
+    /// <param name="rateQuotaPeriod">The period during which the rate quota limit was exceeded.</param>
+    private void OnLimitExceed(
+        HashSet<AssessorEndpointType> endpointTypes,
+        RateQuotaPeriod rateQuotaPeriod)
+    {
+        IsAvailable = false;
+
+        _logger.LogWarning(
+            "{ServiceName}: analyzer service is not available due to a {RateQuotaPeriod} limit reached on {EndpointTypes} analysis endpoints.",
+            ServiceName,
+            rateQuotaPeriod,
+            endpointTypes);
+    }
+
+    /// <summary>
+    /// Event handler for when the rate quota limit is recovered.
+    /// </summary>
+    /// <param name="rateQuotaTracker">The rate quota tracker containing the endpoint types and their capacities.</param>
+    private void OnLimitRecovered(
+        RateQuotaTracker<AssessorEndpointType> rateQuotaTracker)
+    {
+        if (_rateQuotaService is null)
+        {
+#if DEBUG
+            _logger.LogDebug("{ServiceName}: No limit tracker configured.", ServiceName);
+#endif
+            return;
+        }
+
+        if (!rateQuotaTracker.HasAvailableCapacity())
+        {
+            return;
+        }
+
+        IsAvailable = true;
+
+#if DEBUG
+        _logger.LogDebug(
+            "{ServiceName}: Capacity restored for {EndpointTypes} analyses endpoints.",
+            ServiceName,
+            rateQuotaTracker.EndpointTypes);
+#endif
     }
 }
