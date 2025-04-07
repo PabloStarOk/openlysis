@@ -12,8 +12,8 @@ using Openlysis.Analyzers.HybridAnalysis.Services;
 using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Deserialization;
 using Openlysis.Infrastructure.Shared.RateQuota;
 using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
@@ -61,7 +61,7 @@ public static class DependencyInjection
         services.AddSingleton<SandboxAnalyzerLogger>();
 
         // Add analyzer deserializer.
-        services.AddAnalyzerDeserializer<HybridAnalyzerOptions>(
+        services.AddServiceDeserializer<HybridAnalyzerOptions>(
             SandboxAnalyzer.KeyedServicesKey,
             () => new JsonSerializerOptions()
             {

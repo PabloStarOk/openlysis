@@ -12,8 +12,8 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
-using Openlysis.Analyzers.Shared.Core.Common.Constants;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
+using Openlysis.Infrastructure.Shared.Constants;
+using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 
@@ -29,22 +29,22 @@ public class SandboxAnalyzer : ISandboxAnalyzer
 
     private readonly IOptionsMonitor<HybridAnalyzerOptions> _options;
     private readonly SandboxAnalyzerLogger _analyzerLogger;
-    private readonly IAnalyzerDeserializer _analyzerDeserializer;
+    private readonly IServiceDeserializer _serviceDeserializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SandboxAnalyzer"/> class.
     /// </summary>
     /// <param name="options">The options monitor instance to access configuration settings.</param>
     /// <param name="analyzerLogger">The logger instance to log analyzer activities.</param>
-    /// <param name="analyzerDeserializer">The deserializer instance to handle response deserialization.</param>
+    /// <param name="serviceDeserializer">The deserializer instance to handle response deserialization.</param>
     public SandboxAnalyzer(
         IOptionsMonitor<HybridAnalyzerOptions> options,
         SandboxAnalyzerLogger analyzerLogger,
-        [FromKeyedServices(KeyedServicesKey)] IAnalyzerDeserializer analyzerDeserializer)
+        [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
     {
         _options = options;
         _analyzerLogger = analyzerLogger;
-        _analyzerDeserializer = analyzerDeserializer;
+        _serviceDeserializer = serviceDeserializer;
     }
 
     /// <inheritdoc/>
@@ -62,14 +62,14 @@ public class SandboxAnalyzer : ISandboxAnalyzer
 
         if (response.IsSuccessStatusCode)
         {
-            return await _analyzerDeserializer
+            return await _serviceDeserializer
                 .DeserializeAsync<SandboxSubmitResponse>(response, cancellationToken);
         }
 
         await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
         return response.StatusCode is HttpStatusCode.TooManyRequests
             ? Error.Failure(code: ErrorCodes.TooManyRequests)
-            : AnalyzerErrors.NonSuccessStatusCode;
+            : ServiceErrors.NonSuccessStatusCode;
     }
 
     /// <inheritdoc/>
@@ -83,10 +83,10 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return AnalyzerErrors.NonSuccessStatusCode;
+            return ServiceErrors.NonSuccessStatusCode;
         }
 
-        ErrorOr<ReportStateResponse> result = await _analyzerDeserializer
+        ErrorOr<ReportStateResponse> result = await _serviceDeserializer
             .DeserializeAsync<ReportStateResponse>(response, cancellationToken);
 
         if (result.IsError)
@@ -114,10 +114,10 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return AnalyzerErrors.NonSuccessStatusCode;
+            return ServiceErrors.NonSuccessStatusCode;
         }
 
-        return await _analyzerDeserializer
+        return await _serviceDeserializer
             .DeserializeAsync<SanboxReportSummary>(response, cancellationToken);
     }
 
@@ -137,7 +137,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _analyzerLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return AnalyzerErrors.NonSuccessStatusCode;
+            return ServiceErrors.NonSuccessStatusCode;
         }
 
         await using Stream responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);

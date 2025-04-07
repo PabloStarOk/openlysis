@@ -4,12 +4,12 @@ using ErrorOr;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Analyzers.Shared.Core.Common.Constants;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Objects;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Responses;
+using Openlysis.Infrastructure.Shared.Constants;
+using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
 using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 
 namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
@@ -25,19 +25,19 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
     public const string KeyedServicesKey = "VirusTotalServices";
 
     private readonly ServiceLogger _serviceLogger;
-    private readonly IAnalyzerDeserializer _analyzerDeserializer;
+    private readonly IServiceDeserializer _serviceDeserializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VirusTotalAnalyzer"/> class.
     /// </summary>
     /// <param name="serviceLogger">The analyzer logger instance to use for logging analysis-specific information.</param>
-    /// <param name="analyzerDeserializer">The analyzer deserializer instance to use for deserializing analysis responses.</param>
+    /// <param name="serviceDeserializer">The analyzer deserializer instance to use for deserializing analysis responses.</param>
     public VirusTotalAnalyzer(
         [FromKeyedServices(KeyedServicesKey)] ServiceLogger serviceLogger,
-        [FromKeyedServices(KeyedServicesKey)] IAnalyzerDeserializer analyzerDeserializer)
+        [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
     {
         _serviceLogger = serviceLogger;
-        _analyzerDeserializer = analyzerDeserializer;
+        _serviceDeserializer = serviceDeserializer;
     }
 
     /// <inheritdoc/>
@@ -57,7 +57,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _serviceLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return AnalyzerErrors.NonSuccessStatusCode;
+            return ServiceErrors.NonSuccessStatusCode;
         }
 
         JsonElement dataElement;
@@ -67,7 +67,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
             dataElement = jsonDocument.RootElement.GetProperty("data").Clone();
         }
 
-        return _analyzerDeserializer.Deserialize<AnalyzeUrlResponse>(dataElement);
+        return _serviceDeserializer.Deserialize<AnalyzeUrlResponse>(dataElement);
     }
 
     /// <inheritdoc/>
@@ -82,7 +82,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _serviceLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return AnalyzerErrors.NonSuccessStatusCode;
+            return ServiceErrors.NonSuccessStatusCode;
         }
 
         JsonElement dataElement;
@@ -92,6 +92,6 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
             dataElement = jsonDocument.RootElement.GetProperty("data").Clone();
         }
 
-        return _analyzerDeserializer.Deserialize<GetAnalysisResponse>(dataElement);
+        return _serviceDeserializer.Deserialize<GetAnalysisResponse>(dataElement);
     }
 }

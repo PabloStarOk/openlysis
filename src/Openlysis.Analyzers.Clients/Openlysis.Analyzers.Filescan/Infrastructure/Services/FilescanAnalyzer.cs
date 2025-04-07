@@ -9,8 +9,8 @@ using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Core.Models.Objects;
 using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
-using Openlysis.Analyzers.Shared.Core.Common.Constants;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
+using Openlysis.Infrastructure.Shared.Constants;
+using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
 using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 
 namespace Openlysis.Analyzers.Filescan.Infrastructure.Services;
@@ -26,19 +26,19 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
     public const string KeyedServicesKey = "FilescanServices";
 
     private readonly ServiceLogger _serviceLogger;
-    private readonly IAnalyzerDeserializer _analyzerDeserializer;
+    private readonly IServiceDeserializer _serviceDeserializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FilescanAnalyzer"/> class.
     /// </summary>
     /// <param name="serviceLogger">The analyzer logger instance for custom logging.</param>
-    /// <param name="analyzerDeserializer">The analyzer deserializer instance for custom deserialization.</param>
+    /// <param name="serviceDeserializer">The analyzer deserializer instance for custom deserialization.</param>
     public FilescanAnalyzer(
         [FromKeyedServices(KeyedServicesKey)] ServiceLogger serviceLogger,
-        [FromKeyedServices(KeyedServicesKey)] IAnalyzerDeserializer analyzerDeserializer)
+        [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
     {
         _serviceLogger = serviceLogger;
-        _analyzerDeserializer = analyzerDeserializer;
+        _serviceDeserializer = serviceDeserializer;
     }
 
     /// <inheritdoc/>
@@ -56,10 +56,10 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _serviceLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return AnalyzerErrors.NonSuccessStatusCode;
+            return ServiceErrors.NonSuccessStatusCode;
         }
 
-        return await _analyzerDeserializer
+        return await _serviceDeserializer
             .DeserializeAsync<ScanResponse>(response, cancellationToken);
     }
 
@@ -98,10 +98,10 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
         if (!response.IsSuccessStatusCode)
         {
             await _serviceLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
-            return AnalyzerErrors.NonSuccessStatusCode;
+            return ServiceErrors.NonSuccessStatusCode;
         }
 
-        return await _analyzerDeserializer
+        return await _serviceDeserializer
             .DeserializeAsync<GetAnalysisResponse>(response, cancellationToken);
     }
 }

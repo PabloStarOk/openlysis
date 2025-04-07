@@ -1,12 +1,14 @@
 using System.Text.Json;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Openlysis.Analyzers.Shared.Core.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Services;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
+using Openlysis.Infrastructure.Shared.Configuration;
+using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
+using Openlysis.Infrastructure.Shared.Deserialization.Services;
+
+namespace Openlysis.Infrastructure.Shared.Deserialization;
 
 /// <summary>
 /// Provides extension methods for adding deserialization services to the dependency injection container.
@@ -14,23 +16,23 @@ namespace Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds the analyzer deserializer service to the dependency injection container.
+    /// Adds the deserializer service to the dependency injection container.
     /// </summary>
-    /// <typeparam name="TOptions">The type of the analyzer options.</typeparam>
+    /// <typeparam name="TOptions">An implementation of <see cref="ServiceOptions"/>.</typeparam>
     /// <param name="services">The service collection to add the service to.</param>
     /// <param name="serviceKey">The key to identify the service.</param>
     /// <param name="configureOptions">A function to configure the JsonSerializerOptions.</param>
-    public static void AddAnalyzerDeserializer<TOptions>(
+    public static void AddServiceDeserializer<TOptions>(
         this IServiceCollection services,
         string serviceKey,
         Func<JsonSerializerOptions> configureOptions)
-        where TOptions : AnalyzerOptions
+        where TOptions : ServiceOptions
     {
         using var serviceProvider = services.BuildServiceProvider();
-        var logger = serviceProvider.GetRequiredService<ILogger<AnalyzerDeserializer<TOptions>>>();
+        var logger = serviceProvider.GetRequiredService<ILogger<ServiceDeserializer<TOptions>>>();
         var optionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<TOptions>>();
 
-        var deserializer = new AnalyzerDeserializer<TOptions>(logger, optionsMonitor, configureOptions());
-        services.AddKeyedSingleton<IAnalyzerDeserializer>(serviceKey, deserializer);
+        var deserializer = new ServiceDeserializer<TOptions>(logger, optionsMonitor, configureOptions());
+        services.AddKeyedSingleton<IServiceDeserializer>(serviceKey, deserializer);
     }
 }

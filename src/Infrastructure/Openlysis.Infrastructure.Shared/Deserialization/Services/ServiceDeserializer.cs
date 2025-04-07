@@ -5,36 +5,36 @@ using ErrorOr;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Shared.Core.Common.Constants;
-using Openlysis.Analyzers.Shared.Core.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
+using Openlysis.Infrastructure.Shared.Configuration;
+using Openlysis.Infrastructure.Shared.Constants;
+using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Services;
+namespace Openlysis.Infrastructure.Shared.Deserialization.Services;
 
 /// <summary>
 /// Deserializer class for analyzing JSON responses.
 /// </summary>
-/// <typeparam name="TOptions">The type of options used for the analyzer.</typeparam>
-public class AnalyzerDeserializer<TOptions> : IAnalyzerDeserializer
-    where TOptions : AnalyzerOptions
+/// <typeparam name="TOptions">The type of service options used for the deserializer.</typeparam>
+public class ServiceDeserializer<TOptions> : IServiceDeserializer
+    where TOptions : ServiceOptions
 {
-    private readonly ILogger<AnalyzerDeserializer<TOptions>> _logger;
-    private readonly IOptionsMonitor<AnalyzerOptions> _analyzerOptions;
+    private readonly ILogger<ServiceDeserializer<TOptions>> _logger;
+    private readonly IOptionsMonitor<TOptions> _serviceOptions;
     private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AnalyzerDeserializer{TOptions}"/> class.
+    /// Initializes a new instance of the <see cref="ServiceDeserializer{TOptions}"/> class.
     /// </summary>
     /// <param name="logger">The logger instance for logging errors and information.</param>
-    /// <param name="analyzerOptions">The options monitor for accessing analyzer options.</param>
+    /// <param name="serviceOptions">The options monitor for accessing service options.</param>
     /// <param name="jsonSerializerOptions">The JSON serializer options for deserialization.</param>
-    public AnalyzerDeserializer(
-        ILogger<AnalyzerDeserializer<TOptions>> logger,
-        IOptionsMonitor<AnalyzerOptions> analyzerOptions,
+    public ServiceDeserializer(
+        ILogger<ServiceDeserializer<TOptions>> logger,
+        IOptionsMonitor<TOptions> serviceOptions,
         JsonSerializerOptions jsonSerializerOptions)
     {
         _logger = logger;
-        _analyzerOptions = analyzerOptions;
+        _serviceOptions = serviceOptions;
         _jsonSerializerOptions = jsonSerializerOptions;
     }
 
@@ -53,10 +53,10 @@ public class AnalyzerDeserializer<TOptions> : IAnalyzerDeserializer
             _logger.LogError(
                 ex,
                 "{ServiceName}: Exception caught while trying to deserialize a response of type {ResponseType}.\n\tJSON Content: {JsonContent}",
-                _analyzerOptions.CurrentValue.ServiceName,
+                _serviceOptions.CurrentValue.ServiceName,
                 typeof(TModel).Name,
                 rootElement.GetRawText());
-            return AnalyzerErrors.DeserializationFailure;
+            return ServiceErrors.DeserializationFailure;
         }
 
         if (model is not null)
@@ -66,9 +66,9 @@ public class AnalyzerDeserializer<TOptions> : IAnalyzerDeserializer
 
         _logger.LogError(
             "{ServiceName}: Object of type {Type} was null after deserialization.",
-            _analyzerOptions.CurrentValue.ServiceName,
+            _serviceOptions.CurrentValue.ServiceName,
             typeof(TModel).Name);
-        return AnalyzerErrors.DeserializationNull;
+        return ServiceErrors.DeserializationNull;
     }
 
     /// <inheritdoc/>

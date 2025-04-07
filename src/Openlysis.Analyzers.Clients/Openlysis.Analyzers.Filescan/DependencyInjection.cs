@@ -12,12 +12,12 @@ using Openlysis.Analyzers.Filescan.Services;
 using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
 using Openlysis.Analyzers.Shared.Interfaces;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.FileAnalyses.Entities;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Deserialization;
 using Openlysis.Infrastructure.Shared.RateQuota;
 using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
@@ -55,7 +55,7 @@ public static class DependencyInjection
             FilescanAnalyzer.KeyedServicesKey);
 
         // Add analyzer deserializer.
-        services.AddAnalyzerDeserializer<FilescanAnalyzerOptions>(
+        services.AddServiceDeserializer<FilescanAnalyzerOptions>(
             FilescanAnalyzer.KeyedServicesKey,
             () => new JsonSerializerOptions()
             {

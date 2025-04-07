@@ -2,12 +2,12 @@ using System.Text.Json;
 
 using ErrorOr;
 
-namespace Openlysis.Analyzers.Shared.Infrastructure.Deserialization.Abstractions;
+namespace Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
 
 /// <summary>
-/// Defines a deserializer for analyzers.
+/// Defines a deserializer for infrastructure services.
 /// </summary>
-public interface IAnalyzerDeserializer
+public interface IServiceDeserializer
 {
     /// <summary>
     /// Deserializes a JSON element into an instance of the specified model type.

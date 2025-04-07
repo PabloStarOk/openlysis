@@ -1,11 +1,11 @@
 using ErrorOr;
 
-namespace Openlysis.Analyzers.Shared.Core.Common.Constants;
+namespace Openlysis.Infrastructure.Shared.Constants;
 
 /// <summary>
-/// Contains error constants used throughout the application.
+/// Contains error constants used throughout the infrastructure services.
 /// </summary>
-public static class AnalyzerErrors
+public static class ServiceErrors
 {
     /// <summary>
     /// Error indicating that the response status code was not successful.

@@ -8,7 +8,6 @@ using Microsoft.Extensions.Options;
 using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
@@ -17,6 +16,7 @@ using Openlysis.Analyzers.VirusTotal.Core.Models.Validators;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 using Openlysis.Analyzers.VirusTotal.Services;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Deserialization;
 using Openlysis.Infrastructure.Shared.RateQuota;
 using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
@@ -67,7 +67,7 @@ public static class DependencyInjection
             VirusTotalAnalyzer.KeyedServicesKey);
 
         // Add analyzer deserializer.
-        services.AddAnalyzerDeserializer<VirusTotalAnalyzerOptions>(
+        services.AddServiceDeserializer<VirusTotalAnalyzerOptions>(
             VirusTotalAnalyzer.KeyedServicesKey,
             () => new JsonSerializerOptions
             {
