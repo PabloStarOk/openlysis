@@ -1,4 +1,4 @@
-using Openlysis.Analyzers.Shared.Core.Configuration;
+using Openlysis.Infrastructure.Shared.Configuration;
 
 namespace Openlysis.Analyzers.VirusTotal.Core.Configuration;
 
