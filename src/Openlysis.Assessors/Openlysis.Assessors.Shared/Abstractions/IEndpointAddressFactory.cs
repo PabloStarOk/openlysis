@@ -1,4 +1,4 @@
-using Openlysis.Assessors.Shared.Models.Common;
+using Openlysis.Application.Common.Requests;
 
 namespace Openlysis.Assessors.Shared.Abstractions;
 
@@ -7,12 +7,12 @@ namespace Openlysis.Assessors.Shared.Abstractions;
 /// </summary>
 /// <typeparam name="TData">The type of data to be assessed.</typeparam>
 public interface IEndpointAddressFactory<in TData>
-    where TData : AssessedData
+    where TData : AssessData
 {
     /// <summary>
-    /// Creates a URI for the given data content.
+    /// Creates a URI for the given data.
     /// </summary>
-    /// <param name="content">The data content to create the URI for.</param>
-    /// <returns>A URI for the given data content.</returns>
-    public Uri Create(TData content);
+    /// <param name="data">The data to create the URI for.</param>
+    /// <returns>A URI for the given data.</returns>
+    public Uri Create(TData data);
 }

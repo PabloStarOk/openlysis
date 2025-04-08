@@ -1,10 +1,10 @@
-namespace Openlysis.Assessors.Shared.Models.Common;
+namespace Openlysis.Application.Common.Requests;
 
 /// <summary>
-/// Represents a data entity such as a phone number, email, etc.
+/// Represents a data entity such as a phone number, email, etc., to be assessed.
 /// </summary>
 /// <param name="Value">The value of the data entity.</param>
-public abstract record AssessedData(string Value)
+public abstract record AssessData(string Value)
 {
     /// <summary>
     /// Validates the format of data entity.

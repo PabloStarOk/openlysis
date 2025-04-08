@@ -1,14 +1,16 @@
 using ErrorOr;
 
-namespace Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Application.Common.Requests;
+
+namespace Openlysis.Application.Phones.Services;
 
 /// <summary>
 /// Interface for assessing data of type <typeparamref name="TData"/> and returning a model of type <typeparamref name="TModel"/>.
 /// </summary>
 /// <typeparam name="TData">The type of the data to assess.</typeparam>
 /// <typeparam name="TModel">The type of the model to return after assessment.</typeparam>
-public interface IDataReputationAssessor<in TData, TModel>
-    where TData : notnull
+public interface IReputationAssessor<in TData, TModel>
+    where TData : AssessData
     where TModel : notnull
 {
     /// <summary>

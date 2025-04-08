@@ -70,15 +70,16 @@ public static class DependencyInjection
             rateQuotaOptions = serviceProvider.GetRequiredService<IOptionsMonitor<RateQuotaOptions<TEnum>>>();
         }
 
-        // Add limit tracker
-        var limitTracker = new RateQuotaService<TEnum>(
+        // Add rate quota service
+        var rateQuotaService = new RateQuotaService<TEnum>(
             serviceKey,
             limitTrackerOptions,
             rateQuotaOptionKeys.ToArray(),
             rateQuotaOptions,
             TimeProvider.System);
-        services.AddSingleton<IRateQuotaService<TEnum>>(limitTracker);
-        services.AddKeyedSingleton<IRateQuotaService<TEnum>>(serviceKey, limitTracker);
+        services.AddSingleton<IQuotaRestorable>(rateQuotaService);
+        services.AddSingleton<IRateQuotaService<TEnum>>(rateQuotaService);
+        services.AddKeyedSingleton<IRateQuotaService<TEnum>>(serviceKey, rateQuotaService);
     }
 
     /// <summary>

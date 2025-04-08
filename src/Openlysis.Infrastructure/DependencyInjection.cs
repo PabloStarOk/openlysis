@@ -6,18 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
-using Openlysis.Domain.Common.Enums;
+using Openlysis.Assessors.Ipqs;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 using Openlysis.Domain.Phones;
-using Openlysis.Domain.Phones.Entities;
-using Openlysis.Domain.Phones.ValueObjects;
 using Openlysis.Domain.URLs;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
 using Openlysis.Infrastructure.Services;
+using Openlysis.Infrastructure.Shared.RateQuota;
 
 namespace Openlysis.Infrastructure;
 
@@ -53,5 +52,11 @@ public static class DependencyInjection
         services.AddTransient<SHA256>(_ => SHA256.Create());
         services.AddTransient<SHA512>(_ => SHA512.Create());
         services.AddScoped<IHashService, HashService>();
+
+        // Add phone number assessors.
+        services.AddIpqsAssessors(configuration);
+
+        // Add rate quota service jobs.
+        services.AddLimitTrackerJobs();
     }
 }

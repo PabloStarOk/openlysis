@@ -13,16 +13,18 @@ public abstract record ServiceOptions
     /// <summary>
     /// Gets the name of the service.
     /// </summary>
+    [Required]
     required public string ServiceName { get; init; }
 
     /// <summary>
     /// Gets the base address of the service.
     /// </summary>
-    [Url]
+    [Required]
     required public Uri BaseAddress { get; init; }
 
     /// <summary>
     /// Gets the timeout for requests in milliseconds.
     /// </summary>
+    [Required]
     required public int RequestsTimeoutMs { get; init; }
 }

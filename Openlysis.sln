@@ -29,6 +29,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Assessors.Shared"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure.Shared", "src\Infrastructure\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj", "{CC6549E5-ABC5-4EA2-B680-B150D267F472}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Assessors.Ipqs", "src\Openlysis.Assessors\Openlysis.Assessors.Ipqs\Openlysis.Assessors.Ipqs.csproj", "{36B3603F-D153-488C-ACD9-5AE3A5488807}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +90,10 @@ Global
 		{CC6549E5-ABC5-4EA2-B680-B150D267F472}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CC6549E5-ABC5-4EA2-B680-B150D267F472}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CC6549E5-ABC5-4EA2-B680-B150D267F472}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36B3603F-D153-488C-ACD9-5AE3A5488807}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36B3603F-D153-488C-ACD9-5AE3A5488807}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36B3603F-D153-488C-ACD9-5AE3A5488807}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36B3603F-D153-488C-ACD9-5AE3A5488807}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

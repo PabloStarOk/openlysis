@@ -11,21 +11,23 @@ namespace Openlysis.Assessors.Shared.Infrastructure.Logging.Services;
 /// <summary>
 /// Provides logging functionality for analyzers with specified options.
 /// </summary>
-public class AssessorLogger : ServiceLogger
+/// <typeparam name="TOptions">The type of the options used by the analyzer.</typeparam>
+public class AssessorLogger<TOptions> : ServiceLogger
+    where TOptions : DataAssessorOptions
 {
     /// <summary>
     /// The options monitor for accessing the current analyzer options.
     /// </summary>
-    private readonly IOptionsMonitor<DataAssessorOptions> _options;
+    private readonly IOptionsMonitor<TOptions> _options;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AssessorLogger"/> class.
+    /// Initializes a new instance of the <see cref="AssessorLogger{TOptions}"/> class.
     /// </summary>
     /// <param name="logger">The logger instance to use for logging.</param>
     /// <param name="options">The options for the analyzer.</param>
     public AssessorLogger(
-        ILogger<AssessorLogger> logger,
-        IOptionsMonitor<DataAssessorOptions> options)
+        ILogger<AssessorLogger<TOptions>> logger,
+        IOptionsMonitor<TOptions> options)
         : base(logger)
     {
         _options = options;

@@ -1,15 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
-using Openlysis.Assessors.Shared.Models.Common;
+using Openlysis.Application.Common.Requests;
 
-namespace Openlysis.Assessors.Shared.Models.Phones;
+namespace Openlysis.Application.Phones.Requests;
 
 /// <summary>
-/// Represents a phone number to be assessed a service.
+/// Represents a phone number to be assessed by a service.
 /// </summary>
-/// <param name="Value">The phone number value.</param>
-public record AssessedPhoneNumber(string Value)
-    : AssessedData(Value)
+/// <param name="Value">The phone number.</param>
+public record AssessPhoneNumber(string Value)
+    : AssessData(Value)
 {
     /// <inheritdoc/>
     public override bool IsFormatValid()

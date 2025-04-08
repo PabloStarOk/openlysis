@@ -3,11 +3,10 @@ using ErrorOr;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Application.Common.Requests;
+using Openlysis.Application.Phones.Services;
 using Openlysis.Assessors.Shared.Configuration;
-using Openlysis.Assessors.Shared.Infrastructure.Logging.Services;
 using Openlysis.Assessors.Shared.Infrastructure.RateQuota.Enums;
-using Openlysis.Assessors.Shared.Models.Common;
 using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Enums;
@@ -20,16 +19,16 @@ namespace Openlysis.Assessors.Shared.Abstractions;
 /// </summary>
 /// <typeparam name="TData">The type of data to be assessed.</typeparam>
 /// <typeparam name="TModel">The type of model to be returned after assessment.</typeparam>
-public abstract class DataReputationAssessor<TData, TModel>
-    : IDataReputationAssessor<TData, TModel>, IDisposable
-    where TData : AssessedData
+public abstract class ReputationAssessor<TData, TModel>
+    : IReputationAssessor<TData, TModel>, IDisposable
+    where TData : AssessData
     where TModel : notnull
 {
     /// <inheritdoc/>
     public string ServiceName => _options.CurrentValue.ServiceName;
 
     /// <inheritdoc/>
-    public bool IsAvailable { get; private set; }
+    public bool IsAvailable { get; private set; } = true;
 
     private readonly ServiceLogger _logger;
     private readonly IOptionsMonitor<DataAssessorOptions> _options;
@@ -40,7 +39,7 @@ public abstract class DataReputationAssessor<TData, TModel>
     private bool _isDisposed;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DataReputationAssessor{TData, TModel}"/> class.
+    /// Initializes a new instance of the <see cref="ReputationAssessor{TData,TModel}"/> class.
     /// </summary>
     /// <param name="logger">The logger instance to use for logging.</param>
     /// <param name="options">The options monitor for accessing configuration settings.</param>
@@ -48,7 +47,7 @@ public abstract class DataReputationAssessor<TData, TModel>
     /// <param name="rateQuotaService">The service to manage rate quotas for assessor endpoints.</param>
     /// <param name="endpointAddressFactory">The factory to create endpoint addresses for the given data type.</param>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
-    protected DataReputationAssessor(
+    protected ReputationAssessor(
         ServiceLogger logger,
         IOptionsMonitor<DataAssessorOptions> options,
         IHttpClientFactory httpClientFactory,
@@ -68,15 +67,15 @@ public abstract class DataReputationAssessor<TData, TModel>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="DataReputationAssessor{TData, TModel}"/> class.
+    /// Initializes a new instance of the <see cref="ReputationAssessor{TData,TModel}"/> class.
     /// </summary>
     /// <param name="logger">The logger instance to use for logging.</param>
     /// <param name="options">The options monitor for accessing configuration settings.</param>
     /// <param name="httpClientFactory">The factory to create HTTP clients.</param>
     /// <param name="endpointAddressFactory">The factory to create endpoint addresses for the given data type.</param>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
-    protected DataReputationAssessor(
-        AssessorLogger logger,
+    protected ReputationAssessor(
+        ServiceLogger logger,
         IOptionsMonitor<DataAssessorOptions> options,
         IHttpClientFactory httpClientFactory,
         IEndpointAddressFactory<TData> endpointAddressFactory,
@@ -145,7 +144,7 @@ public abstract class DataReputationAssessor<TData, TModel>
     }
 
     /// <summary>
-    /// Releases the unmanaged resources used by the <see cref="DataReputationAssessor{TData, TModel}"/> and optionally releases the managed resources.
+    /// Releases the unmanaged resources used by the <see cref="ReputationAssessor{TData,TModel}"/> and optionally releases the managed resources.
     /// </summary>
     /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing)
