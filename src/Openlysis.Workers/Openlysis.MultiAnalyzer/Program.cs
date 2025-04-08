@@ -30,7 +30,9 @@ builder.ConfigureServices((context, services) =>
     services.AddVirusTotalAnalyzers(context.Configuration);
 
     // Add limit tracker jobs
-    services.AddLimitTrackerJobs();
+    services.AddRateQuotaRestorerJobs(
+        schedulerId: "MultiAnalyzerSchedulerId",
+        schedulerName: "MultiAnalyzerScheduler");
 
     // Add message broker
     services.AddMassTransit(

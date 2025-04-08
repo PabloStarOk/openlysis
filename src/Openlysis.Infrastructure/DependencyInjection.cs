@@ -57,6 +57,8 @@ public static class DependencyInjection
         services.AddIpqsAssessors(configuration);
 
         // Add rate quota service jobs.
-        services.AddLimitTrackerJobs();
+        services.AddRateQuotaRestorerJobs(
+            schedulerId: "InfrastructureSchedulerId",
+            schedulerName: "InfrastructureScheduler");
     }
 }

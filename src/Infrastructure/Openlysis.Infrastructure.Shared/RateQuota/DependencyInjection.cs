@@ -83,17 +83,25 @@ public static class DependencyInjection
     }
 
     /// <summary>
-    /// Adds Quartz jobs for resetting daily and quota usage.
+    /// Adds Quartz jobs for restoring daily and monthly quota usage.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the jobs to.</param>
-    public static void AddLimitTrackerJobs(this IServiceCollection services)
+    /// <param name="schedulerId">The unique identifier for the Quartz scheduler.</param>
+    /// <param name="schedulerName">The name of the Quartz scheduler.</param>
+    /// <remarks>
+    /// This extension method must be used in executable projects, not single libraries that can be reused across various projects.
+    /// </remarks>
+    public static void AddRateQuotaRestorerJobs(
+        this IServiceCollection services,
+        string schedulerId,
+        string schedulerName)
     {
         services.AddQuartz(
             q =>
             {
                 // Add job
-                q.SchedulerId = "AnalyzerScheduler";
-                q.SchedulerName = "AnalyzerScheduler";
+                q.SchedulerId = schedulerId;
+                q.SchedulerName = schedulerName;
                 var jobKey = new JobKey("DailyResetJob");
                 q.AddJob<ResetUsageQuotaJob>(jobKey);
 
