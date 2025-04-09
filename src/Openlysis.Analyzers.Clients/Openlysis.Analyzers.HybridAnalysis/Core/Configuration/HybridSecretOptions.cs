@@ -1,13 +1,12 @@
-using Openlysis.Analyzers.Shared.Core.Configuration;
+using Openlysis.Infrastructure.Shared.Configuration;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 
 /// <summary>
 /// Represents the options for Hybrid Analysis secret configuration.
 /// </summary>
-/// <param name="ApiKey">The API key for Hybrid Analysis.</param>
-public record HybridSecretOptions(string ApiKey)
-    : SecretOptions(ApiKey)
+public record HybridSecretOptions
+    : SecretOptions
 {
     /// <summary>
     /// The section name for Hybrid Analysis configuration.

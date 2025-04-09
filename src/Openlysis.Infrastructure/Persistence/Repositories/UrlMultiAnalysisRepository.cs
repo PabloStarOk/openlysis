@@ -14,13 +14,13 @@ namespace Openlysis.Infrastructure.Persistence.Repositories;
 /// </summary>
 public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAnalysisId>
 {
-    private readonly AnalysesDbContext _dbContext;
+    private readonly ApplicationDbContext _dbContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlMultiAnalysisRepository"/> class.
     /// </summary>
     /// <param name="dbContext">The database context used for accessing the data store.</param>
-    public UrlMultiAnalysisRepository(AnalysesDbContext dbContext)
+    public UrlMultiAnalysisRepository(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }

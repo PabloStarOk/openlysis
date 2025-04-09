@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Core.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.Logging.Abstractions;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 
 namespace Openlysis.Analyzers.Shared.Infrastructure.Logging.Services;
 
@@ -12,14 +12,9 @@ namespace Openlysis.Analyzers.Shared.Infrastructure.Logging.Services;
 /// Provides logging functionality for analyzers with specified options.
 /// </summary>
 /// <typeparam name="TOptions">The type of the analyzer options.</typeparam>
-public class AnalyzerLogger<TOptions> : IAnalyzerLogger
+public class AnalyzerLogger<TOptions> : ServiceLogger
     where TOptions : AnalyzerOptions
 {
-    /// <summary>
-    /// The logger instance used for logging messages.
-    /// </summary>
-    protected readonly ILogger<AnalyzerLogger<TOptions>> _logger;
-
     /// <summary>
     /// The options monitor for accessing the current analyzer options.
     /// </summary>
@@ -33,13 +28,13 @@ public class AnalyzerLogger<TOptions> : IAnalyzerLogger
     public AnalyzerLogger(
         ILogger<AnalyzerLogger<TOptions>> logger,
         IOptionsMonitor<TOptions> options)
+        : base(logger)
     {
         _options = options;
-        _logger = logger;
     }
 
     /// <inheritdoc/>
-    public async Task LogNonSuccessStatusCodeAsync(
+    public override async Task LogNonSuccessStatusCodeAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken = default)
     {

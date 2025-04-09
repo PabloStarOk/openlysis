@@ -6,13 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Assessors.Ipqs;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
 using Openlysis.Infrastructure.Services;
+using Openlysis.Infrastructure.Shared.RateQuota;
 
 namespace Openlysis.Infrastructure;
 
@@ -34,12 +38,13 @@ public static class DependencyInjection
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
         // Add analyses database.
-        services.AddDbContext<AnalysesDbContext>(options =>
+        services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
         // Add repositories.
         services.AddScoped<IRepository<FileMultiAnalysis, FileMultiAnalysisId>, FileMultiAnalysisRepository>();
         services.AddScoped<IRepository<UrlMultiAnalysis, MultiAnalysisId>, UrlMultiAnalysisRepository>();
+        services.AddScoped<IRepository<PhoneMultiReputation, Id>, PhoneMultiReputationRepository>();
 
         // Add hash service.
         services.AddTransient<MD5>(_ => MD5.Create());
@@ -47,5 +52,13 @@ public static class DependencyInjection
         services.AddTransient<SHA256>(_ => SHA256.Create());
         services.AddTransient<SHA512>(_ => SHA512.Create());
         services.AddScoped<IHashService, HashService>();
+
+        // Add phone number assessors.
+        services.AddIpqsAssessors(configuration);
+
+        // Add rate quota service jobs.
+        services.AddRateQuotaRestorerJobs(
+            schedulerId: "InfrastructureSchedulerId",
+            schedulerName: "InfrastructureScheduler");
     }
 }

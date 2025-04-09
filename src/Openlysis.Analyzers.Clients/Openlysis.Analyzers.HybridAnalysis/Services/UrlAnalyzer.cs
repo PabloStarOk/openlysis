@@ -4,18 +4,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
-using Openlysis.Analyzers.Shared.Core.URLs.Requests;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
+using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Services;
 
@@ -42,9 +44,9 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="sandboxAnalyzer">The sandbox analyzer.</param>
     public UrlAnalyzer(
         IOptionsMonitor<HybridAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService rateQuotaService,
+        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        ILogger<UrlAnalyzer> logger,
+        SandboxAnalyzerLogger logger,
         ISandboxAnalyzer sandboxAnalyzer)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {

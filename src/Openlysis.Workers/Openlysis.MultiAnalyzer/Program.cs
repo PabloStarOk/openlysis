@@ -4,9 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Openlysis.Analyzers.Filescan;
 using Openlysis.Analyzers.HybridAnalysis;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit;
 using Openlysis.Analyzers.URLQuery;
 using Openlysis.Analyzers.VirusTotal;
+using Openlysis.Infrastructure.Shared.RateQuota;
 using Openlysis.MultiAnalyzer.Core;
 using Openlysis.MultiAnalyzer.Features.AnalyzeFile.Consumer;
 using Openlysis.MultiAnalyzer.Features.URLs.Analyze.Consumer;
@@ -30,7 +30,9 @@ builder.ConfigureServices((context, services) =>
     services.AddVirusTotalAnalyzers(context.Configuration);
 
     // Add limit tracker jobs
-    services.AddLimitTrackerJobs();
+    services.AddRateQuotaRestorerJobs(
+        schedulerId: "MultiAnalyzerSchedulerId",
+        schedulerName: "MultiAnalyzerScheduler");
 
     // Add message broker
     services.AddMassTransit(

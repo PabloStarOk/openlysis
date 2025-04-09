@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
@@ -15,6 +14,7 @@ using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 using Openlysis.Analyzers.URLQuery.Infrastructure.Services;
 using Openlysis.Analyzers.URLQuery.Services;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Deserialization;
 
 namespace Openlysis.Analyzers.URLQuery;
 
@@ -59,7 +59,7 @@ public static class DependencyInjection
             UrlAnalyzer.KeyedServicesKey);
 
         // Add analyzer deserializer.
-        services.AddAnalyzerDeserializer<UrlQueryAnalyzerOptions>(
+        services.AddServiceDeserializer<UrlQueryAnalyzerOptions>(
             UrlAnalyzer.KeyedServicesKey,
             () => new JsonSerializerOptions
             {

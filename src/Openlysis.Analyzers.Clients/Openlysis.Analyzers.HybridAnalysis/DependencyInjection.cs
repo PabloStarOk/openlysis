@@ -4,17 +4,18 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
-using Openlysis.Analyzers.Shared.Core.URLs.Requests;
-using Openlysis.Analyzers.Shared.Infrastructure.Client;
-using Openlysis.Analyzers.Shared.Infrastructure.Deserialization;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 using Openlysis.Analyzers.HybridAnalysis.Services;
+using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Deserialization;
+using Openlysis.Infrastructure.Shared.RateQuota;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
 
 namespace Openlysis.Analyzers.HybridAnalysis;
 
@@ -51,7 +52,7 @@ public static class DependencyInjection
         services.AddSingleton<ISandboxAnalyzer, SandboxAnalyzer>();
 
         // Add request limit tracker
-        services.AddRequestLimitTracker(
+        services.AddRateQuotaService<AnalysisEndpointType>(
             configuration,
             UrlAnalyzer.LimitTrackerServiceKey,
             analyzerOptions.ServiceName);
@@ -60,7 +61,7 @@ public static class DependencyInjection
         services.AddSingleton<SandboxAnalyzerLogger>();
 
         // Add analyzer deserializer.
-        services.AddAnalyzerDeserializer<HybridAnalyzerOptions>(
+        services.AddServiceDeserializer<HybridAnalyzerOptions>(
             SandboxAnalyzer.KeyedServicesKey,
             () => new JsonSerializerOptions()
             {

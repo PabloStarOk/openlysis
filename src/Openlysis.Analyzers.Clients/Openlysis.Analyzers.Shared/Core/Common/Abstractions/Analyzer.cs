@@ -5,11 +5,12 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Core.Common.Models;
 using Openlysis.Analyzers.Shared.Core.Configuration;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Abstractions;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Enums;
-using Openlysis.Analyzers.Shared.Infrastructure.RateLimit.Models;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+using Openlysis.Infrastructure.Shared.Logging.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.RateQuota.Models;
 
 namespace Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 
@@ -45,7 +46,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <summary>
     /// Logger instance for the analyzer.
     /// </summary>
-    protected readonly ILogger<Analyzer<TAnalysis, TRequest>> _logger;
+    protected readonly ServiceLogger _logger;
 
     /// <summary>
     /// Options monitor for <see cref="AnalyzerOptions"/>.
@@ -53,7 +54,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     protected readonly IOptionsMonitor<AnalyzerOptions> _options;
 
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IRateQuotaService? _rateQuotaService;
+    private readonly IRateQuotaService<AnalysisEndpointType>? _rateQuotaService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Analyzer{TAnalysis, TRequest}"/> class.
@@ -64,9 +65,9 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <param name="logger">The logger instance.</param>
     protected Analyzer(
         IOptionsMonitor<AnalyzerOptions> options,
-        IRateQuotaService rateQuotaService,
+        IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        ILogger<Analyzer<TAnalysis, TRequest>> logger)
+        ServiceLogger logger)
     {
         _options = options;
         _rateQuotaService = rateQuotaService;
@@ -86,7 +87,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     protected Analyzer(
         IOptionsMonitor<AnalyzerOptions> options,
         IHttpClientFactory httpClientFactory,
-        ILogger<Analyzer<TAnalysis, TRequest>> logger)
+        ServiceLogger logger)
     {
         _options = options;
         _httpClientFactory = httpClientFactory;
@@ -293,7 +294,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// Handles the event when the request capacity is restored.
     /// </summary>
     /// <param name="tracker">The rate quota tracker that indicates the restored capacity.</param>
-    private void OnCapacityRestored(RateQuotaTracker tracker)
+    private void OnCapacityRestored(RateQuotaTracker<AnalysisEndpointType> tracker)
     {
         if (_rateQuotaService is null)
         {

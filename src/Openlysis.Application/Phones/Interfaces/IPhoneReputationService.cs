@@ -1,0 +1,27 @@
+using ErrorOr;
+
+using Openlysis.Application.Phones.Requests;
+using Openlysis.Domain.Phones;
+
+namespace Openlysis.Application.Phones.Interfaces;
+
+/// <summary>
+/// Interface for assessing the reputation of a phone number.
+/// </summary>
+public interface IPhoneReputationService
+{
+    /// <summary>
+    /// Gets a value indicating whether the service is available for assessing phone reputations.
+    /// </summary>
+    public bool IsAvailable { get; }
+
+    /// <summary>
+    /// Asynchronously assesses the reputation of a phone number.
+    /// </summary>
+    /// <param name="assessPhoneNumber">An object containing the phone number and related details to assess.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests during the asynchronous operation.</param>
+    /// <returns>A task that represents the asynchronous operation, containing the phone number's reputation details as a <see cref="PhoneMultiReputation"/> object.</returns>
+    public Task<ErrorOr<PhoneMultiReputation>> AssessAsync(
+        AssessPhoneNumber assessPhoneNumber,
+        CancellationToken cancellationToken = default);
+}
