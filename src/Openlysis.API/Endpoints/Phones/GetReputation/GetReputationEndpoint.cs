@@ -36,6 +36,26 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, PhoneMultiRe
     public override void Configure()
     {
         Get("phone-numbers/{phone-number}");
+        Description(
+            builder =>
+            {
+                builder.WithName("GetPhoneNumberReputation");
+                builder.WithDisplayName("GetPhoneNumberReputation");
+                builder.Accepts<GetReputationRequest>();
+                builder.Produces<PhoneMultiReputationDto>();
+                builder.ProducesValidationProblem();
+                builder.ProducesProblem(statusCode: StatusCodes.Status503ServiceUnavailable);
+                builder.ProducesProblem(statusCode: StatusCodes.Status500InternalServerError);
+            },
+            clearDefaults: true);
+        Summary(
+            endpointSummary =>
+            {
+                endpointSummary.Summary = "Gets reputation of a phone number";
+                endpointSummary.Description = "Gets reputation of a phone number.";
+                endpointSummary.ExampleRequest = new GetReputationRequest("+1 555 123 4567");
+                endpointSummary.RequestParam(r => r.PhoneNumber, "A phone number in E.164 format.");
+            });
         DontThrowIfValidationFails();
     }
 
