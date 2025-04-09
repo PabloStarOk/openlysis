@@ -164,6 +164,11 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
         }
 
         int analysisIndex = _serviceAnalyses.IndexOf(analysis);
+        if (_serviceAnalyses[analysisIndex] is not { Status: AnalysisStatus.Queued or AnalysisStatus.InProgress })
+        {
+            return;
+        }
+
         _serviceAnalyses[analysisIndex].UpdateVerdict(analysis.Verdict);
         _serviceAnalyses[analysisIndex].UpdateThreatScore(analysis.ThreatScore);
         _serviceAnalyses[analysisIndex].UpdateStatus(analysis.Status);
