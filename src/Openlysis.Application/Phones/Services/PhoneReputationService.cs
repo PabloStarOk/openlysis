@@ -20,7 +20,7 @@ internal class PhoneReputationService : IPhoneReputationService
 
     private readonly ILogger<PhoneReputationService> _logger;
     private readonly TimeProvider _timeProvider;
-    private readonly IEnumerable<IReputationAssessor<AssessPhoneNumber, PhoneServiceReputation>> _reputationAssessors;
+    private readonly IEnumerable<IReputationEvaluator<EvaluatePhoneReputation, PhoneServiceReputation>> _reputationAssessors;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PhoneReputationService"/> class.
@@ -33,7 +33,7 @@ internal class PhoneReputationService : IPhoneReputationService
     public PhoneReputationService(
         ILogger<PhoneReputationService> logger,
         TimeProvider timeProvider,
-        IEnumerable<IReputationAssessor<AssessPhoneNumber, PhoneServiceReputation>> reputationAssessors)
+        IEnumerable<IReputationEvaluator<EvaluatePhoneReputation, PhoneServiceReputation>> reputationAssessors)
     {
         _logger = logger;
         _timeProvider = timeProvider;
@@ -42,7 +42,7 @@ internal class PhoneReputationService : IPhoneReputationService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<PhoneMultiReputation>> AssessAsync(
-        AssessPhoneNumber assessPhoneNumber,
+        EvaluatePhoneReputation evaluatePhoneReputation,
         CancellationToken cancellationToken = default)
     {
         if (!IsAvailable)
@@ -58,7 +58,7 @@ internal class PhoneReputationService : IPhoneReputationService
         await Parallel.ForEachAsync(_reputationAssessors, cancellationToken, async (assessor, ct) =>
         {
             ErrorOr<PhoneServiceReputation> result = await assessor
-                .AssessAsync(assessPhoneNumber, ct);
+                .EvaluateAsync(evaluatePhoneReputation, ct);
 
             if (result.IsError)
             {

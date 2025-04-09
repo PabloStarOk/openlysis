@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Openlysis.Application\Openlysis.Application.csproj" />
-      <ProjectReference Include="..\Openlysis.Assessors\Openlysis.Assessors.Ipqs\Openlysis.Assessors.Ipqs.csproj" />
+      <ProjectReference Include="..\Openlysis.Evaluators\Openlysis.Evaluators.Ipqs\Openlysis.Evaluators.Ipqs.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,0 +1,77 @@
+using System.Text.Json;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+
+using Openlysis.Application.Phones.Interfaces;
+using Openlysis.Application.Phones.Requests;
+using Openlysis.Domain.Phones.Entities;
+using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
+using Openlysis.Evaluators.Ipqs.Core.Configuration.Phones;
+using Openlysis.Evaluators.Ipqs.Core.Constants;
+using Openlysis.Evaluators.Ipqs.Core.Models;
+using Openlysis.Evaluators.Shared.Abstractions;
+using Openlysis.Infrastructure.Shared.Deserialization;
+
+namespace Openlysis.Evaluators.Ipqs.Services.Phones;
+
+/// <summary>
+/// Provides methods for registering a client to use phone reputation validation services of IPQS with the dependency injection container.
+/// </summary>
+internal static class DependencyInjection
+{
+    /// <summary>
+    /// Adds the dependencies of <see cref="PhoneReputationEvaluator"/> to the specified <see cref="IServiceCollection"/>.
+    /// </summary>
+    /// <param name="services">The <see cref="IServiceCollection"/> to add the services to.</param>
+    /// <param name="configuration">The <see cref="IConfiguration"/> instance used to configure the services.</param>
+    internal static void AddPhoneReputationEvaluator(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        // Get options.
+        var calculationOptionsSection = configuration
+            .GetRequiredSection(PhoneVerdictCalculationOptions.SectionName);
+
+        ArgumentNullException.ThrowIfNull(calculationOptionsSection);
+
+        // Add options.
+        services.AddOptionsWithValidateOnStart<PhoneVerdictCalculationOptions>()
+            .Bind(calculationOptionsSection)
+            .ValidateDataAnnotations();
+
+        services.AddSingleton<
+            IValidateOptions<PhoneVerdictCalculationOptions>,
+            PhoneVerdictCalculationOptionsValidator>();
+
+        // Add service deserializer.
+        services.AddServiceDeserializer<IpqsEvaluatorOptions>(
+            KeyedServices.PhoneKey,
+            () => new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                PropertyNameCaseInsensitive = true,
+            });
+
+        // Add endpoint address factory.
+        services.AddKeyedScoped<
+            IEndpointAddressFactory<EvaluatePhoneReputation>,
+            PhoneEndpointAddressFactory>(KeyedServices.PhoneKey);
+
+        // Add verdict calculator
+        services.AddScoped<
+            IVerdictCalculator<ValidatePhoneResponse>,
+            PhoneVerdictCalculator>();
+
+        // Add response parser
+        services.AddKeyedScoped<
+            IResponseParser<PhoneServiceReputation>,
+            PhoneResponseParser>(KeyedServices.PhoneKey);
+
+        // Add evaluator.
+        services.AddScoped<
+            IReputationEvaluator<EvaluatePhoneReputation, PhoneServiceReputation>,
+            PhoneReputationEvaluator>();
+    }
+}

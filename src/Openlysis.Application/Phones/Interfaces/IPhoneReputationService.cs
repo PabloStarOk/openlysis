@@ -18,10 +18,10 @@ public interface IPhoneReputationService
     /// <summary>
     /// Asynchronously assesses the reputation of a phone number.
     /// </summary>
-    /// <param name="assessPhoneNumber">An object containing the phone number and related details to assess.</param>
+    /// <param name="evaluatePhoneReputation">An object containing the phone number and related details to assess.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests during the asynchronous operation.</param>
     /// <returns>A task that represents the asynchronous operation, containing the phone number's reputation details as a <see cref="PhoneMultiReputation"/> object.</returns>
     public Task<ErrorOr<PhoneMultiReputation>> AssessAsync(
-        AssessPhoneNumber assessPhoneNumber,
+        EvaluatePhoneReputation evaluatePhoneReputation,
         CancellationToken cancellationToken = default);
 }

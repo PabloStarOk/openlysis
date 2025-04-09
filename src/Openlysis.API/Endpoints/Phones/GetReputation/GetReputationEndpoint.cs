@@ -78,7 +78,7 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, PhoneMultiRe
             await SendResultAsync(result);
         }
 
-        var assessPhoneNumber = new AssessPhoneNumber(req.NormalizedPhoneNumber);
+        var assessPhoneNumber = new EvaluatePhoneReputation(req.NormalizedPhoneNumber);
         ErrorOr<PhoneMultiReputation> assessResult =
             await _reputationService.AssessAsync(assessPhoneNumber, ct);
 
