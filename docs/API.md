@@ -1,57 +1,86 @@
-# API Endpoints
+# API Quick Reference
 
-## Summary
+- API URL: `https://[domain]/api/v1`
 
-- File
-  - `POST` `/api/analyses/file` Submits a file to be analyzed.
-  - `GET` `/api/analyses/file/{id}` Gets a file analysis by its id.
-  - `GET` `/api/analyses/file/hash/{md5, sha1, sha256, sha512}` Gets a file analysis by hash.
-  - `GET` `/api/analyses/file/{id}/report/{id}` Gets a report of file analysis.
-- URL
-  - `POST` `/api/analyses/url` Submits an URL to be analyzed.
-  - `GET` `/api/analyses/url/{id}` Gets an URL analysis.
+## Authentication
 
-### File
+All endpoints require an API key in a header.
 
-- **`POST`** `/api/analyses/file`: Submits a file to be analyzed and gets a `FileAnalysis` ID.
-- `GET` `/api/analyses/file/{id}` Gets a `FileAnalysis` with the following structure:
+- Header Name: 'X-Api-Key'
+- Value: An api key.
 
-### `FileAnalysis` DTO response object
+### Sign Up
 
-```json
-{
-    "id": "string",
-    "lastScanDate": "Datetime",
-    "reportsAmount": "int",
-    "verdict": "undetected" | "suspicious" | "malicious",
-    "file": {
-        "hashSet": {
-            "md5": "string",
-            "sha1": "string",
-            "sha256": "string",
-            "sha512": "string"
-        },
-        "info": {
-            "name": "string",
-            "mimeType": "string",
-            "size": "int",
-            "creationDate": "Datetime",
-        }
-    },
-    "reports": [
-        {
-            "id": "string",
-            "serviceName": "string",
-            "scanState": "queued" | "started" | "finished" | "timeout",
-            "scanStartDate": "Datetime",
-            "scanEndDate": "Datetime?",
-            "verdict": "string",
-            "detectionInfo": {
-                "isEmpty": "bool",
-                "type": "string",
-                "zone":  "none" | "green" | "yellow" | "red"
-            }
-        }
-    ]
-}
-```
+- HTTP method: `POST`
+- Full endpoint path: `https://[domain]/api/v1/auth/sign-up`
+- Endpoint path: `/auth/sign-up`
+- API Key required: No
+
+### Sign In
+
+- HTTP method: `POST`
+- Full endpoint path: `https://[domain]/api/v1/auth/sign-in`
+- Endpoint path: `/auth/sign-in`
+- API Key required: No
+
+### Api Key Reset
+
+- HTTP method: `POST`
+- Full endpoint path: `https://[domain]/api/v1/auth/api-key-reset`
+- Endpoint path: `/auth/api-key-reset`
+- API Key required: No
+
+## Files
+
+### Upload to analyze a file
+
+- HTTP method: `POST`
+- Full endpoint path: `https://[domain]/api/v1/files`
+- Endpoint path: `/files`
+- API Key required: Yes
+
+### Get file multi analysis by ID
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/files/analyses/{id}`
+- Endpoint path: `/files/analyses/{id}`
+- API Key required: Yes
+
+### Get file multi analysis by hash
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/files/{hash}/analyses`
+- Endpoint path: `/files/{hash}/analyses`
+- API Key required: Yes
+
+## URLs
+
+### Upload to analyze an URL
+
+- HTTP method: `POST`
+- Full endpoint path: `https://[domain]/api/v1/urls`
+- Endpoint path: `/urls`
+- API Key required: Yes
+
+### Get URL multi analysis by ID
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/urls/analyses/{id}`
+- Endpoint path: `/urls/analyses/{id}`
+- API Key required: Yes
+
+### Get URL multi analysis by hash
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/urls/{hash}/analyses`
+- Endpoint path: `/urls/{hash}/analyses`
+- API Key required: Yes
+
+## Phone Numbers
+
+### Sends a phone number to get its reputation
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/phone-numbers/{phone-number}`
+- Endpoint path: `/phone-numbers/{phone-numbers}`
+- API Key required: Yes
