@@ -74,8 +74,8 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         _httpClientFactory = httpClientFactory;
         _logger = logger;
 
-        _rateQuotaService.LimitExceed += OnCapacityExhausted;
-        _rateQuotaService.LimitRecovered += OnCapacityRestored;
+        _rateQuotaService.LimitExceed += OnLimitExceed;
+        _rateQuotaService.LimitRecovered += OnLimitRecovered;
     }
 
     /// <summary>
@@ -232,8 +232,8 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
             return;
         }
 
-        _rateQuotaService.LimitExceed -= OnCapacityExhausted;
-        _rateQuotaService.LimitRecovered -= OnCapacityRestored;
+        _rateQuotaService.LimitExceed -= OnLimitExceed;
+        _rateQuotaService.LimitRecovered -= OnLimitRecovered;
     }
 
     /// <summary>
@@ -273,11 +273,11 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Handles the event when the request capacity is exhausted.
+    /// Handles the event when the rate or quota limits are reached.
     /// </summary>
     /// <param name="endpointTypes">The set of analysis endpoint types that have exhausted their capacity.</param>
     /// <param name="rateQuotaPeriod">The rate quota period during which the capacity was exhausted.</param>
-    private void OnCapacityExhausted(
+    private void OnLimitExceed(
         HashSet<AnalysisEndpointType> endpointTypes,
         RateQuotaPeriod rateQuotaPeriod)
     {
@@ -291,10 +291,10 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     }
 
     /// <summary>
-    /// Handles the event when the request capacity is restored.
+    /// Handles the event when the rate or quota limits are restored.
     /// </summary>
     /// <param name="tracker">The rate quota tracker that indicates the restored capacity.</param>
-    private void OnCapacityRestored(RateQuotaTracker<AnalysisEndpointType> tracker)
+    private void OnLimitRecovered(RateQuotaTracker<AnalysisEndpointType> tracker)
     {
         if (_rateQuotaService is null)
         {
