@@ -31,7 +31,7 @@ public abstract class ReputationEvaluator<TRequest, TModel>
     /// <inheritdoc/>
     public bool IsAvailable { get; private set; } = true;
 
-    private readonly ServiceLogger _logger;
+    private readonly IServiceLogger<ReputationEvaluator<TRequest, TModel>> _logger;
     private readonly IOptionsMonitor<ReputationEvaluatorOptions> _options;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IRateQuotaService<ReputationEndpointType>? _rateQuotaService;
@@ -49,7 +49,7 @@ public abstract class ReputationEvaluator<TRequest, TModel>
     /// <param name="endpointAddressFactory">The factory to create endpoint addresses for the given data type.</param>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
     protected ReputationEvaluator(
-        ServiceLogger logger,
+        IServiceLogger<ReputationEvaluator<TRequest, TModel>> logger,
         IOptionsMonitor<ReputationEvaluatorOptions> options,
         IHttpClientFactory httpClientFactory,
         IRateQuotaService<ReputationEndpointType> rateQuotaService,
@@ -76,7 +76,7 @@ public abstract class ReputationEvaluator<TRequest, TModel>
     /// <param name="endpointAddressFactory">The factory to create endpoint addresses for the given data type.</param>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
     protected ReputationEvaluator(
-        ServiceLogger logger,
+        IServiceLogger<ReputationEvaluator<TRequest, TModel>> logger,
         IOptionsMonitor<ReputationEvaluatorOptions> options,
         IHttpClientFactory httpClientFactory,
         IEndpointAddressFactory<TRequest> endpointAddressFactory,

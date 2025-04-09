@@ -46,7 +46,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         IOptionsMonitor<HybridAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        SandboxAnalyzerLogger logger,
+        SandboxAnalyzerLogger<UrlAnalyzer> logger,
         ISandboxAnalyzer sandboxAnalyzer)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {

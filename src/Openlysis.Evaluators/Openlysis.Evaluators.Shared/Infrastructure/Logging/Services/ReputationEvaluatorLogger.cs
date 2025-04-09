@@ -11,47 +11,81 @@ namespace Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 /// <summary>
 /// Provides logging functionality for analyzers with specified options.
 /// </summary>
-/// <typeparam name="TOptions">The type of the options used by the analyzer.</typeparam>
-public class ReputationEvaluatorLogger<TOptions> : ServiceLogger
-    where TOptions : ReputationEvaluatorOptions
+/// <typeparam name="TCategoryName">The category name type used for logging.</typeparam>
+/// <remarks>
+/// This logger is designed to work with analyzers that require specific configuration options
+/// and provides methods for logging HTTP responses and other events.
+/// </remarks>
+public class ReputationEvaluatorLogger<TCategoryName>
+    : IServiceLogger<TCategoryName>
+    where TCategoryName : notnull
 {
     /// <summary>
-    /// The options monitor for accessing the current analyzer options.
+    /// Gets the underlying logger instance used for logging operations.
     /// </summary>
-    private readonly IOptionsMonitor<TOptions> _options;
+    private ILogger<TCategoryName> Logger { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ReputationEvaluatorLogger{TOptions}"/> class.
+    /// Gets the options monitor for accessing the current evaluator options.
+    /// </summary>
+    private IOptionsMonitor<ReputationEvaluatorOptions> Options { get; }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ReputationEvaluatorLogger{TCategoryName}"/> class.
     /// </summary>
     /// <param name="logger">The logger instance to use for logging.</param>
-    /// <param name="options">The options for the analyzer.</param>
+    /// <param name="options">The options for the evaluator.</param>
     public ReputationEvaluatorLogger(
-        ILogger<ReputationEvaluatorLogger<TOptions>> logger,
-        IOptionsMonitor<TOptions> options)
-        : base(logger)
+        ILogger<TCategoryName> logger,
+        IOptionsMonitor<ReputationEvaluatorOptions> options)
     {
-        _options = options;
+        Logger = logger;
+        Options = options;
     }
 
     /// <inheritdoc/>
-    public override async Task LogNonSuccessStatusCodeAsync(
+    public async Task LogNonSuccessStatusCodeAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken = default)
     {
         string requestString = await GetFormattedHttpRequestAsync(response.RequestMessage, cancellationToken);
         string responseString = await response.Content.ReadAsStringAsync(cancellationToken);
 
-        _logger.LogError(
+        Logger.LogError(
             "{ServiceName}: Response status code was not successful: "
             + "\nResponse:"
             + "\t\nStatusCode: {StatusCode}"
             + "\t\nResponse Content: {Response}"
             + "\nRequest:"
             + "\t\n{Request}",
-            _options.CurrentValue.ServiceName,
+            Options.CurrentValue.ServiceName,
             response.StatusCode,
             responseString,
             requestString);
+    }
+
+    /// <inheritdoc/>
+    public void Log<TState>(
+        LogLevel logLevel,
+        EventId eventId,
+        TState state,
+        Exception? exception,
+        Func<TState, Exception?, string> formatter)
+    {
+        Logger.Log(logLevel, eventId, state, exception, formatter);
+    }
+
+    /// <inheritdoc/>
+    public bool IsEnabled(LogLevel logLevel)
+    {
+        return Logger.IsEnabled(logLevel);
+    }
+
+    /// <inheritdoc/>
+    public IDisposable? BeginScope<TState>(TState state)
+        where TState : notnull
+    {
+        return Logger.BeginScope(state);
     }
 
     /// <summary>

@@ -55,7 +55,7 @@ public static class DependencyInjection
             .ValidateDataAnnotations();
 
         // Add analyzer logger.
-        services.AddAnalyzerLogger<UrlQueryAnalyzerOptions>(
+        services.AddAnalyzerLogger<UrlAnalyzer, UrlQueryAnalyzerOptions>(
             UrlAnalyzer.KeyedServicesKey);
 
         // Add analyzer deserializer.

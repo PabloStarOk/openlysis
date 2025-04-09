@@ -57,8 +57,9 @@ public static class DependencyInjection
             UrlAnalyzer.LimitTrackerServiceKey,
             analyzerOptions.ServiceName);
 
-        // Add analyzer logger
-        services.AddSingleton<SandboxAnalyzerLogger>();
+        // Add analyzer loggers
+        services.AddSingleton<SandboxAnalyzerLogger<SandboxAnalyzer>>();
+        services.AddSingleton<SandboxAnalyzerLogger<UrlAnalyzer>>();
 
         // Add analyzer deserializer.
         services.AddServiceDeserializer<HybridAnalyzerOptions>(

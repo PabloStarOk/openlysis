@@ -63,7 +63,9 @@ public static class DependencyInjection
         services.AddSingleton<IVirusTotalAnalyzer, VirusTotalAnalyzer>();
 
         // Add analyzer logger.
-        services.AddAnalyzerLogger<VirusTotalAnalyzerOptions>(
+        services.AddAnalyzerLogger<VirusTotalAnalyzer, VirusTotalAnalyzerOptions>(
+            VirusTotalAnalyzer.KeyedServicesKey);
+        services.AddAnalyzerLogger<UrlAnalyzer, VirusTotalAnalyzerOptions>(
             VirusTotalAnalyzer.KeyedServicesKey);
 
         // Add analyzer deserializer.

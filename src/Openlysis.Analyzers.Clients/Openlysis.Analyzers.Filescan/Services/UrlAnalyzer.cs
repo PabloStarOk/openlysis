@@ -48,7 +48,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         IOptionsMonitor<FilescanAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        [FromKeyedServices(FilescanAnalyzer.KeyedServicesKey)] ServiceLogger logger,
+        [FromKeyedServices(FilescanAnalyzer.KeyedServicesKey)] IServiceLogger<UrlAnalyzer> logger,
         IFilescanAnalyzer filescanAnalyzer)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {

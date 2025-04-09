@@ -62,7 +62,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         IOptionsMonitor<UrlQueryAnalyzerOptions> options,
         IHttpClientFactory httpClientFactory,
         IVerdictCalculator verdictCalculator,
-        [FromKeyedServices(KeyedServicesKey)] ServiceLogger logger,
+        [FromKeyedServices(KeyedServicesKey)] IServiceLogger<UrlAnalyzer> logger,
         [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
         : base(options, httpClientFactory, logger)
     {

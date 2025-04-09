@@ -46,7 +46,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <summary>
     /// Logger instance for the analyzer.
     /// </summary>
-    protected readonly ServiceLogger _logger;
+    protected readonly IServiceLogger<Analyzer<TAnalysis, TRequest>> _logger;
 
     /// <summary>
     /// Options monitor for <see cref="AnalyzerOptions"/>.
@@ -67,7 +67,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         IOptionsMonitor<AnalyzerOptions> options,
         IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        ServiceLogger logger)
+        IServiceLogger<Analyzer<TAnalysis, TRequest>> logger)
     {
         _options = options;
         _rateQuotaService = rateQuotaService;
@@ -87,7 +87,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     protected Analyzer(
         IOptionsMonitor<AnalyzerOptions> options,
         IHttpClientFactory httpClientFactory,
-        ServiceLogger logger)
+        IServiceLogger<Analyzer<TAnalysis, TRequest>> logger)
     {
         _options = options;
         _httpClientFactory = httpClientFactory;

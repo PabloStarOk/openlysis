@@ -25,7 +25,7 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
     /// </summary>
     public const string KeyedServicesKey = "FilescanServices";
 
-    private readonly ServiceLogger _serviceLogger;
+    private readonly IServiceLogger<FilescanAnalyzer> _serviceLogger;
     private readonly IServiceDeserializer _serviceDeserializer;
 
     /// <summary>
@@ -34,7 +34,7 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
     /// <param name="serviceLogger">The analyzer logger instance for custom logging.</param>
     /// <param name="serviceDeserializer">The analyzer deserializer instance for custom deserialization.</param>
     public FilescanAnalyzer(
-        [FromKeyedServices(KeyedServicesKey)] ServiceLogger serviceLogger,
+        [FromKeyedServices(KeyedServicesKey)] IServiceLogger<FilescanAnalyzer> serviceLogger,
         [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
     {
         _serviceLogger = serviceLogger;

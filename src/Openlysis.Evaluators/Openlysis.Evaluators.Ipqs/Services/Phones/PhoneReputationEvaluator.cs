@@ -27,7 +27,7 @@ public class PhoneReputationEvaluator
     /// <param name="endpointAddressFactory">The endpoint address factory for creating endpoint addresses.</param>
     /// <param name="responseParser">The response parser for parsing service responses.</param>
     public PhoneReputationEvaluator(
-        ReputationEvaluatorLogger<IpqsEvaluatorOptions> logger,
+        ReputationEvaluatorLogger<PhoneReputationEvaluator> logger,
         IOptionsMonitor<IpqsEvaluatorOptions> options,
         IHttpClientFactory httpClientFactory,
         [FromKeyedServices(KeyedServices.GlobalKey)] IRateQuotaService<ReputationEndpointType> rateQuotaService,

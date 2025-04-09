@@ -50,8 +50,10 @@ public static class DependencyInjection
         // Add options
         services.Configure<FilescanAnalyzerOptions>(analyzerOptionsSection);
 
-        // Add analyzer logger
-        services.AddAnalyzerLogger<FilescanAnalyzerOptions>(
+        // Add analyzer loggers
+        services.AddAnalyzerLogger<FilescanAnalyzer, FilescanAnalyzerOptions>(
+            FilescanAnalyzer.KeyedServicesKey);
+        services.AddAnalyzerLogger<UrlAnalyzer, FilescanAnalyzerOptions>(
             FilescanAnalyzer.KeyedServicesKey);
 
         // Add analyzer deserializer.

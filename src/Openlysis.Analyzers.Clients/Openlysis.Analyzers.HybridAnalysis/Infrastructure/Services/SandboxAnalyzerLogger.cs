@@ -8,20 +8,26 @@ using Openlysis.Analyzers.Shared.Infrastructure.Logging.Services;
 namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 
 /// <summary>
-/// Represents a logger for the sandbox analyzer of Hybrid Analysis service.
+/// Represents a logger for the sandbox analyzer of the Hybrid Analysis service.
 /// </summary>
+/// <typeparam name="TCategoryName">
+/// The category name type used for logging. Must be a non-nullable type.
+/// </typeparam>
 /// <remarks>
-/// Inherits from <see cref="AnalyzerLogger{TOptions}"/>.
+/// This class extends <see cref="AnalyzerLogger{TCategoryName, HybridAnalyzerOptions}"/>
+/// to provide logging functionality specific to the sandbox analyzer.
 /// </remarks>
-public class SandboxAnalyzerLogger : AnalyzerLogger<HybridAnalyzerOptions>
+public class SandboxAnalyzerLogger<TCategoryName>
+    : AnalyzerLogger<TCategoryName, HybridAnalyzerOptions>
+    where TCategoryName : notnull
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="SandboxAnalyzerLogger"/> class.
+    /// Initializes a new instance of the <see cref="SandboxAnalyzerLogger{TCategoryName}"/> class.
     /// </summary>
     /// <param name="logger">The logger instance.</param>
     /// <param name="options">The options monitor for <see cref="HybridAnalyzerOptions"/>.</param>
     public SandboxAnalyzerLogger(
-        ILogger<SandboxAnalyzerLogger> logger,
+        ILogger<TCategoryName> logger,
         IOptionsMonitor<HybridAnalyzerOptions> options)
         : base(logger, options)
     {
@@ -41,7 +47,7 @@ public class SandboxAnalyzerLogger : AnalyzerLogger<HybridAnalyzerOptions>
     {
         string requestLog = await GetFormattedHttpRequestAsync(response.RequestMessage, cancellationToken);
 
-        _logger.LogError(
+        Logger.LogError(
             "Report status was Error at {ServiceName} sandbox service analyzer."
             + "\nRequest:"
             + "\t\n{Request}"
@@ -49,7 +55,7 @@ public class SandboxAnalyzerLogger : AnalyzerLogger<HybridAnalyzerOptions>
             + "\n\tError Type: {ErrorType}"
             + "\n\tError Origin: {ErrorOrigin}"
             + "\n\tError Description: {Error}",
-            _options.CurrentValue.ServiceName,
+            Options.CurrentValue.ServiceName,
             requestLog,
             reportState.ErrorType,
             reportState.ErrorOrigin,

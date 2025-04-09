@@ -47,7 +47,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         IOptionsMonitor<VirusTotalAnalyzerOptions> options,
         [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        [FromKeyedServices(VirusTotalAnalyzer.KeyedServicesKey)] ServiceLogger logger,
+        [FromKeyedServices(VirusTotalAnalyzer.KeyedServicesKey)] IServiceLogger<UrlAnalyzer> logger,
         IVirusTotalAnalyzer vtAnalyzer,
         IVerdictCalculator verdictCalculator)
         : base(options, rateQuotaService, httpClientFactory, logger)

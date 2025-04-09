@@ -28,7 +28,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
     public const string KeyedServicesKey = "HybridAnalysisServices";
 
     private readonly IOptionsMonitor<HybridAnalyzerOptions> _options;
-    private readonly SandboxAnalyzerLogger _analyzerLogger;
+    private readonly SandboxAnalyzerLogger<SandboxAnalyzer> _analyzerLogger;
     private readonly IServiceDeserializer _serviceDeserializer;
 
     /// <summary>
@@ -39,7 +39,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
     /// <param name="serviceDeserializer">The deserializer instance to handle response deserialization.</param>
     public SandboxAnalyzer(
         IOptionsMonitor<HybridAnalyzerOptions> options,
-        SandboxAnalyzerLogger analyzerLogger,
+        SandboxAnalyzerLogger<SandboxAnalyzer> analyzerLogger,
         [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
     {
         _options = options;

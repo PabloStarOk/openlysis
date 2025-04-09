@@ -14,14 +14,22 @@ public static class DependencyInjection
     /// <summary>
     /// Adds an analyzer logger to the service collection.
     /// </summary>
-    /// <typeparam name="TOptions">The type of the analyzer options.</typeparam>
-    /// <param name="services">The service collection to add the logger to.</param>
+    /// <typeparam name="TCategoryName">
+    /// The type representing the category name for the logger. Must be non-null.
+    /// </typeparam>
+    /// <typeparam name="TOptions">
+    /// The type of the analyzer options. Must inherit from <see cref="AnalyzerOptions"/>.
+    /// </typeparam>
+    /// <param name="services">The <see cref="IServiceCollection"/> to which the logger will be added.</param>
     /// <param name="serviceKey">The key used to register the logger service.</param>
-    public static void AddAnalyzerLogger<TOptions>(
+    public static void AddAnalyzerLogger<TCategoryName, TOptions>(
         this IServiceCollection services,
         string serviceKey)
+        where TCategoryName : notnull
         where TOptions : AnalyzerOptions
     {
-        services.AddKeyedSingleton<ServiceLogger, AnalyzerLogger<TOptions>>(serviceKey);
+        services.AddKeyedSingleton<
+            IServiceLogger<TCategoryName>,
+            AnalyzerLogger<TCategoryName, TOptions>>(serviceKey);
     }
 }

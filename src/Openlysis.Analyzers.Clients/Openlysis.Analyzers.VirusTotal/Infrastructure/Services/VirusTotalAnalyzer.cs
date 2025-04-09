@@ -24,19 +24,19 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
     /// </summary>
     public const string KeyedServicesKey = "VirusTotalServices";
 
-    private readonly ServiceLogger _serviceLogger;
+    private readonly IServiceLogger<VirusTotalAnalyzer> _logger;
     private readonly IServiceDeserializer _serviceDeserializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="VirusTotalAnalyzer"/> class.
     /// </summary>
-    /// <param name="serviceLogger">The analyzer logger instance to use for logging analysis-specific information.</param>
+    /// <param name="logger">The analyzer logger instance to use for logging analysis-specific information.</param>
     /// <param name="serviceDeserializer">The analyzer deserializer instance to use for deserializing analysis responses.</param>
     public VirusTotalAnalyzer(
-        [FromKeyedServices(KeyedServicesKey)] ServiceLogger serviceLogger,
+        [FromKeyedServices(KeyedServicesKey)] IServiceLogger<VirusTotalAnalyzer> logger,
         [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
     {
-        _serviceLogger = serviceLogger;
+        _logger = logger;
         _serviceDeserializer = serviceDeserializer;
     }
 
@@ -56,7 +56,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
 
         if (!response.IsSuccessStatusCode)
         {
-            await _serviceLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            await _logger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
             return ServiceErrors.NonSuccessStatusCode;
         }
 
@@ -81,7 +81,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
 
         if (!response.IsSuccessStatusCode)
         {
-            await _serviceLogger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
+            await _logger.LogNonSuccessStatusCodeAsync(response, cancellationToken);
             return ServiceErrors.NonSuccessStatusCode;
         }
 

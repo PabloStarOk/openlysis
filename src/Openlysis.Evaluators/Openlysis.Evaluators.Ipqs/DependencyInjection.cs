@@ -55,7 +55,7 @@ public static class DependencyInjection
             .ValidateDataAnnotations();
 
         // Add service logger.
-        services.AddScoped<ReputationEvaluatorLogger<IpqsEvaluatorOptions>>();
+        services.AddScoped<ReputationEvaluatorLogger<PhoneReputationEvaluator>>();
 
         // Add http client.
         services.ConfigureHttpClient(evaluatorOptions);
