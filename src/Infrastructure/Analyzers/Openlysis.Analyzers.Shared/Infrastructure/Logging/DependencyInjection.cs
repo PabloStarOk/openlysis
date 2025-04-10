@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Analyzers.Shared.Core.Configuration;
+using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging.Services;
-using Openlysis.Infrastructure.Shared.Logging.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 
 namespace Openlysis.Analyzers.Shared.Infrastructure.Logging;
 

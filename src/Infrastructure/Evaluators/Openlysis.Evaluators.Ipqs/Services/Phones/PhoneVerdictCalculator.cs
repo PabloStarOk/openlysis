@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Phones;
 using Openlysis.Evaluators.Ipqs.Core.Models;
-using Openlysis.Evaluators.Shared.Abstractions;
+using Openlysis.Evaluators.Shared.Contracts.Abstractions;
 
 namespace Openlysis.Evaluators.Ipqs.Services.Phones;
 

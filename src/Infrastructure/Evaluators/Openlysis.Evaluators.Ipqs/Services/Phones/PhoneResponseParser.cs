@@ -10,8 +10,8 @@ using Openlysis.Domain.Phones.ValueObjects;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
 using Openlysis.Evaluators.Ipqs.Core.Models;
-using Openlysis.Evaluators.Shared.Abstractions;
-using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
+using Openlysis.Evaluators.Shared.Contracts.Abstractions;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
 namespace Openlysis.Evaluators.Ipqs.Services.Phones;
 

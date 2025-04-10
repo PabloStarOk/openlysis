@@ -22,4 +22,8 @@
       <ProjectReference Include="..\..\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Contracts\" />
+    </ItemGroup>
+
 </Project>

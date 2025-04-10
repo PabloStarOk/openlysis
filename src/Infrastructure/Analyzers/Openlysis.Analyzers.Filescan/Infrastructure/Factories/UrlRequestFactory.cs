@@ -1,8 +1,8 @@
-using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Core.Constants.Endpoints;
 using Openlysis.Analyzers.Filescan.Core.Models.Objects;
+using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 
 namespace Openlysis.Analyzers.Filescan.Infrastructure.Factories;
 

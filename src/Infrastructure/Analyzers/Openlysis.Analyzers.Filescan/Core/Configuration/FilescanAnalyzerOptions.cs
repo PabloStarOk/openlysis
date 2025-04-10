@@ -1,4 +1,4 @@
-using Openlysis.Analyzers.Shared.Core.Configuration;
+using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
 
 namespace Openlysis.Analyzers.Filescan.Core.Configuration;
 

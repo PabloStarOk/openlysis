@@ -9,8 +9,8 @@ using MassTransit;
 
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
-using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;

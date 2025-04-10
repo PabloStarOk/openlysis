@@ -2,8 +2,8 @@ using System.Net;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Analyzers.Shared.Core.Configuration;
-using Openlysis.Infrastructure.Shared.Configuration;
+using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 
 namespace Openlysis.Analyzers.Shared.Infrastructure.Client;
 

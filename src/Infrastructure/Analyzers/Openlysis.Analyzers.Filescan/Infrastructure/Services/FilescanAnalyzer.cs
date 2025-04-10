@@ -9,9 +9,9 @@ using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Core.Models.Objects;
 using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
-using Openlysis.Infrastructure.Shared.Constants;
-using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
-using Openlysis.Infrastructure.Shared.Logging.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
 namespace Openlysis.Analyzers.Filescan.Infrastructure.Services;
 

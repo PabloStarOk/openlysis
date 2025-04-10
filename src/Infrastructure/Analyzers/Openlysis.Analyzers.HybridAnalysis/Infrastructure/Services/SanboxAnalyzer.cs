@@ -12,8 +12,8 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
-using Openlysis.Infrastructure.Shared.Constants;
-using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 

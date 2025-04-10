@@ -9,13 +9,13 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 using Openlysis.Analyzers.HybridAnalysis.Services;
-using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
-using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
+using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.URLs.Entities;
-using Openlysis.Infrastructure.Shared.Deserialization;
-using Openlysis.Infrastructure.Shared.RateQuota;
-using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
+using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
 namespace Openlysis.Analyzers.HybridAnalysis;
 

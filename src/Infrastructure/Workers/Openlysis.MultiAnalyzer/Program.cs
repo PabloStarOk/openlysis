@@ -6,7 +6,7 @@ using Openlysis.Analyzers.Filescan;
 using Openlysis.Analyzers.HybridAnalysis;
 using Openlysis.Analyzers.URLQuery;
 using Openlysis.Analyzers.VirusTotal;
-using Openlysis.Infrastructure.Shared.RateQuota;
+using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 using Openlysis.MultiAnalyzer.Core;
 using Openlysis.MultiAnalyzer.Features.AnalyzeFile.Consumer;
 using Openlysis.MultiAnalyzer.Features.URLs.Analyze.Consumer;

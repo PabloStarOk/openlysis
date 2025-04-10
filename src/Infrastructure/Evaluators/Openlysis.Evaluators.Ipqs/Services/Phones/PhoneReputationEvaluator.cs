@@ -4,10 +4,10 @@ using Openlysis.Application.Phones.Requests;
 using Openlysis.Domain.Phones.Entities;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
-using Openlysis.Evaluators.Shared.Abstractions;
+using Openlysis.Evaluators.Shared.Contracts.Abstractions;
 using Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
-using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
+using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
 namespace Openlysis.Evaluators.Ipqs.Services.Phones;
 

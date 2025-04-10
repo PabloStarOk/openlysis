@@ -4,8 +4,8 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
-using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
@@ -14,7 +14,7 @@ using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 using Openlysis.Analyzers.URLQuery.Infrastructure.Services;
 using Openlysis.Analyzers.URLQuery.Services;
 using Openlysis.Domain.URLs.Entities;
-using Openlysis.Infrastructure.Shared.Deserialization;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
 
 namespace Openlysis.Analyzers.URLQuery;
 

@@ -15,7 +15,7 @@ using Openlysis.Evaluators.Ipqs;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
 using Openlysis.Infrastructure.Services;
-using Openlysis.Infrastructure.Shared.RateQuota;
+using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
 namespace Openlysis.Infrastructure;
 

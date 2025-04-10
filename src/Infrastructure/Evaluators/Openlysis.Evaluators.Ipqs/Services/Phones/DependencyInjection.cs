@@ -11,8 +11,8 @@ using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Phones;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
 using Openlysis.Evaluators.Ipqs.Core.Models;
-using Openlysis.Evaluators.Shared.Abstractions;
-using Openlysis.Infrastructure.Shared.Deserialization;
+using Openlysis.Evaluators.Shared.Contracts.Abstractions;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
 
 namespace Openlysis.Evaluators.Ipqs.Services.Phones;
 

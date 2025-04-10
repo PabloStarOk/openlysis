@@ -8,9 +8,9 @@ using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Objects;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Responses;
-using Openlysis.Infrastructure.Shared.Constants;
-using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;
-using Openlysis.Infrastructure.Shared.Logging.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
 namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 

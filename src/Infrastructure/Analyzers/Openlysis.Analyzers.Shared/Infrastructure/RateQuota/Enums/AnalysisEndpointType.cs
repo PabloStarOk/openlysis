@@ -1,4 +1,4 @@
-namespace Openlysis.Infrastructure.Shared.RateQuota.Enums;
+namespace Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 
 /// <summary>
 /// Represents the types of requests that can be made.

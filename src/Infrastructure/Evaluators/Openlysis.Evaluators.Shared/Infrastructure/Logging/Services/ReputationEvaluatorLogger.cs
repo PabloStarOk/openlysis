@@ -3,8 +3,8 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Evaluators.Shared.Configuration;
-using Openlysis.Infrastructure.Shared.Logging.Abstractions;
+using Openlysis.Evaluators.Shared.Contracts.Configuration;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 
 namespace Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 

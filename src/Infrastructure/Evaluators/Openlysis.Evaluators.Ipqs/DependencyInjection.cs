@@ -7,7 +7,7 @@ using Openlysis.Evaluators.Ipqs.Services.Phones;
 using Openlysis.Evaluators.Shared.Infrastructure.Client;
 using Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
-using Openlysis.Infrastructure.Shared.RateQuota;
+using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
 namespace Openlysis.Evaluators.Ipqs;
 

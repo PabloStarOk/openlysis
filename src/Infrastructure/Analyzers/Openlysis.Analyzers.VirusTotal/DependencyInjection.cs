@@ -5,10 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
-using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
+using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;
@@ -16,9 +17,8 @@ using Openlysis.Analyzers.VirusTotal.Core.Models.Validators;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 using Openlysis.Analyzers.VirusTotal.Services;
 using Openlysis.Domain.URLs.Entities;
-using Openlysis.Infrastructure.Shared.Deserialization;
-using Openlysis.Infrastructure.Shared.RateQuota;
-using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
+using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
 namespace Openlysis.Analyzers.VirusTotal;
 

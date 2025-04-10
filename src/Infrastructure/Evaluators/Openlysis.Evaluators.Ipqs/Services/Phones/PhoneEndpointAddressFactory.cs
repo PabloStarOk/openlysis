@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using Openlysis.Application.Phones.Requests;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
-using Openlysis.Evaluators.Shared.Abstractions;
+using Openlysis.Evaluators.Shared.Contracts.Abstractions;
 
 namespace Openlysis.Evaluators.Ipqs.Services.Phones;
 

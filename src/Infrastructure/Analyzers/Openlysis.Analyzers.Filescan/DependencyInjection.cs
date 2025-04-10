@@ -9,17 +9,16 @@ using Openlysis.Analyzers.Filescan.Core.Configuration;
 using Openlysis.Analyzers.Filescan.Core.Models.Enums;
 using Openlysis.Analyzers.Filescan.Infrastructure.Services;
 using Openlysis.Analyzers.Filescan.Services;
-using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
-using Openlysis.Analyzers.Shared.Core.URLs.Requests;
+using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
-using Openlysis.Analyzers.Shared.Interfaces;
+using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.URLs.Entities;
-using Openlysis.Infrastructure.Shared.Deserialization;
-using Openlysis.Infrastructure.Shared.RateQuota;
-using Openlysis.Infrastructure.Shared.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
+using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
 namespace Openlysis.Analyzers.Filescan;
 

@@ -2,7 +2,7 @@ using System.Net;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Evaluators.Shared.Configuration;
+using Openlysis.Evaluators.Shared.Contracts.Configuration;
 
 namespace Openlysis.Evaluators.Shared.Infrastructure.Client;
 

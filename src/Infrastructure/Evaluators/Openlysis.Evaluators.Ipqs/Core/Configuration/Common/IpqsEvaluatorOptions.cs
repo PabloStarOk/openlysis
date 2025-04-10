@@ -1,4 +1,4 @@
-using Openlysis.Evaluators.Shared.Configuration;
+using Openlysis.Evaluators.Shared.Contracts.Configuration;
 
 namespace Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 
