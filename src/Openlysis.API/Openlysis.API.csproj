@@ -5,7 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>ef94f7b8-50cd-4943-b8c5-1058f97df21b</UserSecretsId>
-  </PropertyGroup>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FastEndpoints" Version="5.35.0" />
@@ -23,13 +23,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Infrastructure\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj" />
+      <ProjectReference Include="..\Infrastructure\Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj" />
       <ProjectReference Include="..\Openlysis.API.Authentication\Openlysis.API.Authentication.csproj" />
-      <ProjectReference Include="..\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj" />
-      <ProjectReference Include="..\Openlysis.Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Endpoints\Files\Common\" />
     </ItemGroup>
 
 </Project>

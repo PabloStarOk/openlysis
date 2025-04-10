@@ -7,11 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Openlysis.Application\Openlysis.Application.csproj" />
-      <ProjectReference Include="..\Openlysis.Evaluators\Openlysis.Evaluators.Ipqs\Openlysis.Evaluators.Ipqs.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.1" />
       <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.3" />
@@ -22,9 +17,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="Microsoft.AspNetCore.Http">
-        <HintPath>..\..\..\..\..\..\..\.dotnet\shared\Microsoft.AspNetCore.App\8.0.8\Microsoft.AspNetCore.Http.dll</HintPath>
-      </Reference>
+      <ProjectReference Include="..\..\Openlysis.Application\Openlysis.Application.csproj" />
+      <ProjectReference Include="..\Evaluators\Openlysis.Evaluators.Ipqs\Openlysis.Evaluators.Ipqs.csproj" />
+      <ProjectReference Include="..\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj" />
     </ItemGroup>
 
 </Project>

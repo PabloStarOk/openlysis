@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <ItemGroup>
-      <ProjectReference Include="..\Openlysis.Analyzers.Shared\Openlysis.Analyzers.Shared.csproj" />
-    </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
@@ -11,10 +13,8 @@
       </PackageReference>
     </ItemGroup>
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Openlysis.Analyzers.Shared\Openlysis.Analyzers.Shared.csproj" />
+    </ItemGroup>
 
 </Project>

@@ -7,29 +7,29 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Domain", "src\Ope
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Application", "src\Openlysis.Application\Openlysis.Application.csproj", "{4ED7738B-9246-47D9-9351-ECAE2EB4D0C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure", "src\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj", "{E5EBF866-0154-421C-BC87-209A3269645A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure", "src\Infrastructure\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj", "{E5EBF866-0154-421C-BC87-209A3269645A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API", "src\Openlysis.API\Openlysis.API.csproj", "{56C77A97-4A8E-48DC-B14D-45935FFC177C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Filescan", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.Filescan\Openlysis.Analyzers.Filescan.csproj", "{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Filescan", "src\Infrastructure\Analyzers\Openlysis.Analyzers.Filescan\Openlysis.Analyzers.Filescan.csproj", "{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.MultiAnalyzer", "src\Openlysis.Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.MultiAnalyzer", "src\Infrastructure\Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Shared", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.Shared\Openlysis.Analyzers.Shared.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Shared", "src\Infrastructure\Analyzers\Openlysis.Analyzers.Shared\Openlysis.Analyzers.Shared.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API.Authentication", "src\Openlysis.API.Authentication\Openlysis.API.Authentication.csproj", "{48E79F4E-E6CD-490B-B44F-63775080B1D6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.URLQuery", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj", "{CB37658F-C911-41EC-BB74-A3956FA601DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.URLQuery", "src\Infrastructure\Analyzers\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj", "{CB37658F-C911-41EC-BB74-A3956FA601DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.HybridAnalysis", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.HybridAnalysis\Openlysis.Analyzers.HybridAnalysis.csproj", "{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.HybridAnalysis", "src\Infrastructure\Analyzers\Openlysis.Analyzers.HybridAnalysis\Openlysis.Analyzers.HybridAnalysis.csproj", "{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.VirusTotal", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.VirusTotal\Openlysis.Analyzers.VirusTotal.csproj", "{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.VirusTotal", "src\Infrastructure\Analyzers\Openlysis.Analyzers.VirusTotal\Openlysis.Analyzers.VirusTotal.csproj", "{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Evaluators.Shared", "src\Openlysis.Evaluators\Openlysis.Evaluators.Shared\Openlysis.Evaluators.Shared.csproj", "{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Evaluators.Shared", "src\Infrastructure\Evaluators\Openlysis.Evaluators.Shared\Openlysis.Evaluators.Shared.csproj", "{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure.Shared", "src\Infrastructure\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj", "{CC6549E5-ABC5-4EA2-B680-B150D267F472}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Evaluators.Ipqs", "src\Openlysis.Evaluators\Openlysis.Evaluators.Ipqs\Openlysis.Evaluators.Ipqs.csproj", "{36B3603F-D153-488C-ACD9-5AE3A5488807}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Evaluators.Ipqs", "src\Infrastructure\Evaluators\Openlysis.Evaluators.Ipqs\Openlysis.Evaluators.Ipqs.csproj", "{36B3603F-D153-488C-ACD9-5AE3A5488807}"
 EndProject
 
 Global

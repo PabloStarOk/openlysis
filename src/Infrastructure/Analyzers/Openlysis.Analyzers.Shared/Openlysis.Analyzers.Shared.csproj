@@ -22,8 +22,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Infrastructure\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj" />
-      <ProjectReference Include="..\..\Openlysis.Domain\Openlysis.Domain.csproj" />
+      <ProjectReference Include="..\..\..\Openlysis.Domain\Openlysis.Domain.csproj" />
+      <ProjectReference Include="..\..\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj" />
     </ItemGroup>
 
 </Project>
