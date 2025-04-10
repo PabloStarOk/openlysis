@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.FileAnalyses.ValueObjects;
+namespace Openlysis.Domain.Files.ValueObjects;
 
 /// <summary>
 /// Metadata of a file.

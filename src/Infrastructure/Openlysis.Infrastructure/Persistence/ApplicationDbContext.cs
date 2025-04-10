@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
-using Openlysis.Domain.Common.Hash;
-using Openlysis.Domain.FileAnalyses;
+using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Files;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;

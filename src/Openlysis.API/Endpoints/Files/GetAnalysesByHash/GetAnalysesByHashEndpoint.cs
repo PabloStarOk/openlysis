@@ -4,7 +4,7 @@ using MediatR;
 
 using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.Application.Files.Queries;
-using Openlysis.Domain.FileAnalyses;
+using Openlysis.Domain.Files;
 
 namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 

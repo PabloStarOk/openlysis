@@ -6,8 +6,8 @@ using MediatR;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
-using Openlysis.Domain.Common.Hash;
-using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
+using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
 
 namespace Openlysis.Application.URLs.Commands;

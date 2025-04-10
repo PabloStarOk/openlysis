@@ -1,6 +1,6 @@
+using Openlysis.Domain.Common.Abstractions;
+using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Models;
-using Openlysis.Domain.Common.ServiceAnalyses.Mappings;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Phones.ValueObjects;
 

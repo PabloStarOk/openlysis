@@ -1,4 +1,4 @@
-using Openlysis.Domain.Common.Hash;
+using Openlysis.Domain.Common.Entities;
 
 namespace Openlysis.Application.Common.Abstractions.Services;
 

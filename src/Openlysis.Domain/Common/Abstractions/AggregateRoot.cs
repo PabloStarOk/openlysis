@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.Common.Models;
+namespace Openlysis.Domain.Common.Abstractions;
 
 /// <summary>
 /// Represents an aggregate root which encapsulates entities

@@ -6,8 +6,8 @@ using MediatR;
 
 using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.Application.Files.Queries;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.GetAnalysisById;
 

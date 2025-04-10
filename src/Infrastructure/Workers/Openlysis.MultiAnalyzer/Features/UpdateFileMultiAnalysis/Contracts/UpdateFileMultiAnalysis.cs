@@ -1,5 +1,5 @@
-using Openlysis.Domain.FileAnalyses.Entities;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files.Entities;
+using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.MultiAnalyzer.Features.UpdateFileMultiAnalysis.Contracts;
 

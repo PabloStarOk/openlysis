@@ -18,7 +18,7 @@ using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 using Openlysis.Analyzers.URLQuery.Core.Models.Requests;
 using Openlysis.Analyzers.URLQuery.Core.Models.Responses;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Constants;
 using Openlysis.Infrastructure.Shared.Deserialization.Abstractions;

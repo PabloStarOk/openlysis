@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
+namespace Openlysis.Domain.Common.ValueObjects;
 
 public record MultiAnalysisId
 {

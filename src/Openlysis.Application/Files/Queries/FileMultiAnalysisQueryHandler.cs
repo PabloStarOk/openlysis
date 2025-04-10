@@ -3,8 +3,8 @@ using ErrorOr;
 using MediatR;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Application.Files.Queries;
 

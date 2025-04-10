@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations;

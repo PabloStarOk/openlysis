@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+namespace Openlysis.Domain.Common.ValueObjects;
 
 /// <summary>
 /// Represents a unique identifier for an analysis of an external service.

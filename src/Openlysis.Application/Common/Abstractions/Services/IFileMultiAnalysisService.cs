@@ -1,4 +1,4 @@
-using Openlysis.Domain.FileAnalyses;
+using Openlysis.Domain.Files;
 
 namespace Openlysis.Application.Common.Abstractions.Services;
 

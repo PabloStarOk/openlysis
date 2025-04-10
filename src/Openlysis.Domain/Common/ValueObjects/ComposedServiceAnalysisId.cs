@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+namespace Openlysis.Domain.Common.ValueObjects;
 
 /// <summary>
 /// Represents a composed service analysis identifier which contains the ID of the analysis

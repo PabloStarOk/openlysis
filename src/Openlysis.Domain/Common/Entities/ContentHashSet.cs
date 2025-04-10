@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.Common.Hash;
+namespace Openlysis.Domain.Common.Entities;
 
 /// <summary>
 /// A set of different hashes.

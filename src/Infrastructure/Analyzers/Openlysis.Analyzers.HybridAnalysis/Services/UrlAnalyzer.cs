@@ -14,7 +14,7 @@ using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
 using Openlysis.Analyzers.Shared.Core.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Core.URLs.Requests;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Enums;

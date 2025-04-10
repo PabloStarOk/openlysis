@@ -6,10 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
-using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
 using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Evaluators.Ipqs;

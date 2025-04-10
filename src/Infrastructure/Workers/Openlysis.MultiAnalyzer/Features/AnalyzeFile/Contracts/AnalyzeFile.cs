@@ -1,4 +1,4 @@
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.MultiAnalyzer.Features.AnalyzeFile.Contracts;
 

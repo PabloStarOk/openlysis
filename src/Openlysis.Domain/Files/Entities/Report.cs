@@ -1,8 +1,8 @@
+using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Models;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files.ValueObjects;
 
-namespace Openlysis.Domain.FileAnalyses.Entities;
+namespace Openlysis.Domain.Files.Entities;
 
 /// <summary>
 /// Represents a single report.

@@ -12,8 +12,8 @@ using Openlysis.Analyzers.Filescan.Core.Models.Responses;
 using Openlysis.Analyzers.Filescan.Core.Models.Scans;
 using Openlysis.Analyzers.Filescan.Infrastructure.Factories;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
-using Openlysis.Domain.FileAnalyses.Entities;
+using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Domain.Files.Entities;
 
 namespace Openlysis.Analyzers.Filescan.Services;
 

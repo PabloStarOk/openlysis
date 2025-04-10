@@ -1,6 +1,6 @@
-using Openlysis.Domain.Common.Hash;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.Common.Responses;
 

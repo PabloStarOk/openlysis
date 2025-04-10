@@ -1,4 +1,4 @@
-using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.Application.Common.Abstractions.Services;
 

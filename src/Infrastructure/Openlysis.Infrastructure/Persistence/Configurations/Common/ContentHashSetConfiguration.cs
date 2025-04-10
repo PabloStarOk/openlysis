@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using Openlysis.Domain.Common.Hash;
+using Openlysis.Domain.Common.Entities;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations;
 

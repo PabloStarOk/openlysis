@@ -1,5 +1,5 @@
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.URLs;
 
 namespace Openlysis.API.Endpoints.URLs.Common;

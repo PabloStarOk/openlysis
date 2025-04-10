@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 using Openlysis.Analyzers.Shared.Core.Common.Models;
 using Openlysis.Analyzers.Shared.Core.Configuration;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Infrastructure.Shared.Logging.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Abstractions;
 using Openlysis.Infrastructure.Shared.RateQuota.Enums;

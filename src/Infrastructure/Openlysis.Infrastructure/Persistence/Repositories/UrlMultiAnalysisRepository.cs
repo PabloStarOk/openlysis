@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
-using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
 
 namespace Openlysis.Infrastructure.Persistence.Repositories;

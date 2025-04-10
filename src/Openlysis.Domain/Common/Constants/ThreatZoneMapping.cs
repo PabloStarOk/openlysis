@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.Enums;
 
-namespace Openlysis.Domain.Common.ServiceAnalyses.Mappings;
+namespace Openlysis.Domain.Common.Constants;
 
 /// <summary>
 /// Provides a mapping between verdicts and threat zones.

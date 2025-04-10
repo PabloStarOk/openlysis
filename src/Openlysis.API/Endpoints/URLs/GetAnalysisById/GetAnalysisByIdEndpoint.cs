@@ -8,7 +8,7 @@ using MediatR;
 
 using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.URLs.Queries;
-using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.Users.ValueObjects;
 

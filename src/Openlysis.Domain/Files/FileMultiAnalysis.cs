@@ -1,10 +1,10 @@
+using Openlysis.Domain.Common.Abstractions;
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Hash;
-using Openlysis.Domain.Common.Models;
-using Openlysis.Domain.FileAnalyses.Entities;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files.Entities;
+using Openlysis.Domain.Files.ValueObjects;
 
-namespace Openlysis.Domain.FileAnalyses;
+namespace Openlysis.Domain.Files;
 
 /// <summary>
 /// Represents a report for a file.

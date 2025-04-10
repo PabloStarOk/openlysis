@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.FileAnalyses.ValueObjects;
+namespace Openlysis.Domain.Files.ValueObjects;
 
 /// <summary>
 /// Represents the ID of a file report.

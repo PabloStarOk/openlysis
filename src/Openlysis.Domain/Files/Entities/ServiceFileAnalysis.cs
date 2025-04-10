@@ -1,9 +1,8 @@
+using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Models;
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 
-namespace Openlysis.Domain.FileAnalyses.Entities;
+namespace Openlysis.Domain.Files.Entities;
 
 /// <summary>
 /// Represents a file analysis of a service.

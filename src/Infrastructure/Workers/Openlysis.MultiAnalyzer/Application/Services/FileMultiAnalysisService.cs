@@ -6,8 +6,8 @@ using MassTransit;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.MultiAnalyzer.Core.Abstractions;
 using Openlysis.MultiAnalyzer.Features.AnalyzeFile.Contracts;
 

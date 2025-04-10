@@ -1,6 +1,6 @@
 using MediatR;
 
-using Openlysis.Domain.FileAnalyses;
+using Openlysis.Domain.Files;
 
 namespace Openlysis.Application.Files.Queries;
 

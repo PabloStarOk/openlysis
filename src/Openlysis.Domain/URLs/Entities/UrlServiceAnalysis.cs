@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 
+using Openlysis.Domain.Common.Abstractions;
+using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Models;
-using Openlysis.Domain.Common.ServiceAnalyses.Mappings;
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.Domain.URLs.Entities;
 

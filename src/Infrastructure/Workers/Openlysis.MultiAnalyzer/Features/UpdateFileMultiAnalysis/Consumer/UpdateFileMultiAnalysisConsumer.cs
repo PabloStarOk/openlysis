@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using MassTransit;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.MultiAnalyzer.Features.UpdateFileMultiAnalysis.Contracts;
 
 namespace Openlysis.MultiAnalyzer.Features.UpdateFileMultiAnalysis.Consumer;

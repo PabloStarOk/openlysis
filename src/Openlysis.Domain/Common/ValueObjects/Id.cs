@@ -1,5 +1,3 @@
-using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
-
 namespace Openlysis.Domain.Common.ValueObjects;
 
 /// <summary>

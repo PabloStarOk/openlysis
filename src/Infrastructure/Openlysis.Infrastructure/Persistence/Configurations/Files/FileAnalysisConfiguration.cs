@@ -2,10 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.ServiceAnalyses.ValueObjects;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.Entities;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.Entities;
+using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations.Files;
 
