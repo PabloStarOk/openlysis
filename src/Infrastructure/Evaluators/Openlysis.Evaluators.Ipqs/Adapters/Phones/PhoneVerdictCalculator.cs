@@ -2,10 +2,10 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Phones;
-using Openlysis.Evaluators.Ipqs.Core.Models;
+using Openlysis.Evaluators.Ipqs.Core.Models.Requests;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;
 
-namespace Openlysis.Evaluators.Ipqs.Services.Phones;
+namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
 
 /// <summary>
 /// A calculator for determining the verdict of a phone number based on various criteria.

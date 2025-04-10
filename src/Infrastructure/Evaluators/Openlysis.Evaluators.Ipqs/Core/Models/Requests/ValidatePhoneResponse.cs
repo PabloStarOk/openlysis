@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Openlysis.Evaluators.Ipqs.Core.Models;
+namespace Openlysis.Evaluators.Ipqs.Core.Models.Requests;
 
 /// <summary>
 /// Response returned by IPQualityScore service when validating a phone number.

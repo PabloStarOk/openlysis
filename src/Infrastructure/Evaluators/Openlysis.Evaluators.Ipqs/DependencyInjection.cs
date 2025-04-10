@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.Evaluators.Ipqs.Adapters.Phones;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
-using Openlysis.Evaluators.Ipqs.Services.Phones;
 using Openlysis.Evaluators.Shared.Infrastructure.Client;
 using Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;

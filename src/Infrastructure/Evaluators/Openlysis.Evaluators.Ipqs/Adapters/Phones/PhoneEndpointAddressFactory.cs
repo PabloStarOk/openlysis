@@ -5,7 +5,7 @@ using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;
 
-namespace Openlysis.Evaluators.Ipqs.Services.Phones;
+namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
 
 /// <summary>
 /// Factory class for creating endpoint address to validate a phone number using IPQualityScore service.

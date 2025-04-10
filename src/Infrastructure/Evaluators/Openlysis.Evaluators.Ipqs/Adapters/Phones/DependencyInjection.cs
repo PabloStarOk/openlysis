@@ -10,11 +10,11 @@ using Openlysis.Domain.Phones.Entities;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Phones;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
-using Openlysis.Evaluators.Ipqs.Core.Models;
+using Openlysis.Evaluators.Ipqs.Core.Models.Requests;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
 
-namespace Openlysis.Evaluators.Ipqs.Services.Phones;
+namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
 
 /// <summary>
 /// Provides methods for registering a client to use phone reputation validation services of IPQS with the dependency injection container.

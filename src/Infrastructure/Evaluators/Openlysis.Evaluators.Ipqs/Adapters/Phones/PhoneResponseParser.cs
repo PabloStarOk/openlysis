@@ -9,11 +9,11 @@ using Openlysis.Domain.Phones.Entities;
 using Openlysis.Domain.Phones.ValueObjects;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
-using Openlysis.Evaluators.Ipqs.Core.Models;
+using Openlysis.Evaluators.Ipqs.Core.Models.Requests;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
-namespace Openlysis.Evaluators.Ipqs.Services.Phones;
+namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
 
 /// <summary>
 /// Parses the response from the IPQS phone service and converts it into a <see cref="PhoneServiceReputation"/> object.

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+
 using Openlysis.Application.Phones.Requests;
 using Openlysis.Domain.Phones.Entities;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
@@ -9,7 +10,7 @@ using Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
-namespace Openlysis.Evaluators.Ipqs.Services.Phones;
+namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
 
 /// <summary>
 /// Evaluates the reputation of phone numbers using the IPQS service.
