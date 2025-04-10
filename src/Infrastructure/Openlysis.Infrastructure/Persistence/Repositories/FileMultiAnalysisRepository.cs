@@ -2,7 +2,7 @@ using System.Linq.Expressions;
 
 using Microsoft.EntityFrameworkCore;
 
-using Openlysis.Application.Common.Interfaces.Persistence;
+using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 

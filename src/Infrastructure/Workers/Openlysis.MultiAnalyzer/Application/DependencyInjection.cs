@@ -3,7 +3,7 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.MultiAnalyzer.Application.Services;
 using Openlysis.MultiAnalyzer.Features.Repositories.URLs.Consumer;
 using Openlysis.MultiAnalyzer.Features.UpdateFileMultiAnalysis.Consumer;

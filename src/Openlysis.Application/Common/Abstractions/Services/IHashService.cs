@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.Hash;
 
-namespace Openlysis.Application.Common.Interfaces.Services;
+namespace Openlysis.Application.Common.Abstractions.Services;
 
 /// <summary>
 /// Defines a service to hash data.

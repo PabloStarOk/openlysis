@@ -1,6 +1,6 @@
 using Openlysis.Domain.FileAnalyses;
 
-namespace Openlysis.Application.Common.Interfaces.Services;
+namespace Openlysis.Application.Common.Abstractions.Services;
 
 /// <summary>
 /// Defines a service to analyze a file.

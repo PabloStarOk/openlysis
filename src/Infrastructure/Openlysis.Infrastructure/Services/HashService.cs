@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.Common.Hash;
 
 namespace Openlysis.Infrastructure.Services;

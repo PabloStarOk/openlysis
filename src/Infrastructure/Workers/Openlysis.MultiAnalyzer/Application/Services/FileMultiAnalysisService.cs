@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 using MassTransit;
 
-using Openlysis.Application.Common.Interfaces.Persistence;
-using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 using Openlysis.MultiAnalyzer.Core.Abstractions;

@@ -3,7 +3,7 @@ using ErrorOr;
 using Openlysis.Application.Phones.Requests;
 using Openlysis.Domain.Phones;
 
-namespace Openlysis.Application.Phones.Interfaces;
+namespace Openlysis.Application.Phones.Services;
 
 /// <summary>
 /// Interface for assessing the reputation of a phone number.

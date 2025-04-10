@@ -1,7 +1,7 @@
 using MediatR;
 
+using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Enums;
-using Openlysis.Application.Common.Interfaces.Persistence;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
 using Openlysis.Domain.URLs;
 

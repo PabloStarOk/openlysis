@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-using Openlysis.Application.Common.Interfaces.Persistence;
+using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
 using Openlysis.Domain.URLs;
 

@@ -4,7 +4,7 @@ using MediatR;
 
 using Openlysis.Domain.FileAnalyses;
 
-namespace Openlysis.Application.FileAnalyses.Commands;
+namespace Openlysis.Application.Files.Commands;
 
 /// <summary>
 /// Command to analyze a file.

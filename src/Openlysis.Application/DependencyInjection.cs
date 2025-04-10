@@ -1,6 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Application.Phones.Interfaces;
 using Openlysis.Application.Phones.Services;
 
 namespace Openlysis.Application;

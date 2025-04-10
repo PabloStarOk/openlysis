@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace Openlysis.Application.Common.Interfaces.Persistence;
+namespace Openlysis.Application.Common.Abstractions.Persistence;
 
 /// <summary>
 /// Defines a generic repository for data access operations.

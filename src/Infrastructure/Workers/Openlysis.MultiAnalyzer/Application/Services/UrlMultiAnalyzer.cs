@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using MassTransit;
 
-using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
 using Openlysis.MultiAnalyzer.Core.Abstractions;
 using Openlysis.MultiAnalyzer.Features.URLs.Analyze.Contracts;

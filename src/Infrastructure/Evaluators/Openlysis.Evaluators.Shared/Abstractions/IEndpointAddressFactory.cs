@@ -1,4 +1,4 @@
-using Openlysis.Application.Common.Requests;
+using Openlysis.Application.Phones.Requests;
 
 namespace Openlysis.Evaluators.Shared.Abstractions;
 

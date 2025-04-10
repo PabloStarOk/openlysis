@@ -2,12 +2,12 @@ using ErrorOr;
 
 using MediatR;
 
-using Openlysis.Application.Common.Interfaces.Persistence;
-using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.Application.FileAnalyses.Commands;
+namespace Openlysis.Application.Files.Commands;
 
 /// <summary>
 /// Handles <see cref="AnalyzeFileCommand"/>.

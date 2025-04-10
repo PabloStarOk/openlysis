@@ -4,7 +4,7 @@ using FastEndpoints;
 
 using MediatR;
 
-using Openlysis.Application.FileAnalyses.Commands;
+using Openlysis.Application.Files.Commands;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
 

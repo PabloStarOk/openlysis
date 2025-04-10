@@ -2,7 +2,7 @@ using MediatR;
 
 using Openlysis.Domain.FileAnalyses;
 
-namespace Openlysis.Application.FileAnalyses.Queries;
+namespace Openlysis.Application.Files.Queries;
 
 /// <summary>
 /// Query to retrieve many multi analysis of a file identified by hash.

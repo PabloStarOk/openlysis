@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 using MassTransit;
 
-using Openlysis.Application.Common.Interfaces.Persistence;
+using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;

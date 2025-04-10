@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Application.Common.Interfaces.Persistence;
-using Openlysis.Application.Common.Interfaces.Services;
+using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.FileAnalyses;

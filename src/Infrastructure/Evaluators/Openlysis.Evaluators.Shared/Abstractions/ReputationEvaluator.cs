@@ -3,8 +3,8 @@ using ErrorOr;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Application.Common.Requests;
-using Openlysis.Application.Phones.Interfaces;
+using Openlysis.Application.Phones.Contracts;
+using Openlysis.Application.Phones.Requests;
 using Openlysis.Evaluators.Shared.Configuration;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Infrastructure.Shared.Logging.Abstractions;

@@ -2,11 +2,11 @@ using ErrorOr;
 
 using MediatR;
 
-using Openlysis.Application.Common.Interfaces.Persistence;
+using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.Application.FileAnalyses.Queries;
+namespace Openlysis.Application.Files.Queries;
 
 /// <summary>
 /// Handles <see cref="FileMultiAnalysisQuery"/>.

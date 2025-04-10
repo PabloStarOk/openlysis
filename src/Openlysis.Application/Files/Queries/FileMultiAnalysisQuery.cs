@@ -5,7 +5,7 @@ using MediatR;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
-namespace Openlysis.Application.FileAnalyses.Queries;
+namespace Openlysis.Application.Files.Queries;
 
 /// <summary>
 /// Query to retrieve a file analysis by its id.

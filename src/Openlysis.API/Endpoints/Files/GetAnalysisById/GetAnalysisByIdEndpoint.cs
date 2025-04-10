@@ -5,7 +5,7 @@ using FastEndpoints;
 using MediatR;
 
 using Openlysis.API.Endpoints.Files.Common.Responses;
-using Openlysis.Application.FileAnalyses.Queries;
+using Openlysis.Application.Files.Queries;
 using Openlysis.Domain.FileAnalyses;
 using Openlysis.Domain.FileAnalyses.ValueObjects;
 
