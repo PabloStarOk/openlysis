@@ -6,7 +6,7 @@ using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Objects;
 using Openlysis.Domain.Common.Enums;
 
-namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
+namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Calculations;
 
 /// <summary>
 /// Represents a calculator for determining verdicts based on alert statistics.

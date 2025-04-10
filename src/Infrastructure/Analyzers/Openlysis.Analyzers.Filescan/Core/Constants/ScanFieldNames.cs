@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.Filescan.Core.Constants.Endpoints;
+namespace Openlysis.Analyzers.Filescan.Core.Constants;
 
 /// <summary>
 /// Contains constant field names used for scanning operations.

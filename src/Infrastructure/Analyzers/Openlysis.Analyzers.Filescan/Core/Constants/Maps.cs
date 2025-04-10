@@ -3,8 +3,6 @@ using Openlysis.Domain.Common.Enums;
 
 namespace Openlysis.Analyzers.Filescan.Core.Constants;
 
-
-
 /// <summary>
 /// Provides maps between Filescan service and Openlysis domain models.
 /// </summary>

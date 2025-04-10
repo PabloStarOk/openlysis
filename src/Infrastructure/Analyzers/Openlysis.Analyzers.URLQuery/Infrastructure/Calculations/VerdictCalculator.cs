@@ -6,7 +6,7 @@ using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 using Openlysis.Analyzers.URLQuery.Core.Models.Objects;
 using Openlysis.Domain.Common.Enums;
 
-namespace Openlysis.Analyzers.URLQuery.Infrastructure.Services;
+namespace Openlysis.Analyzers.URLQuery.Infrastructure.Calculations;
 
 /// <summary>
 /// Calculates a <see cref="Verdict"/> from <see cref="Sensors"/>.

@@ -1,4 +1,4 @@
-using Openlysis.Analyzers.Filescan.Core.Models.Scans;
+using Openlysis.Analyzers.Filescan.Core.Models.Objects;
 
 namespace Openlysis.Analyzers.Filescan.Core.Models.Requests;
 

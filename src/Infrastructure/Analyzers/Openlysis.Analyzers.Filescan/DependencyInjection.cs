@@ -4,11 +4,11 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.Analyzers.Filescan.Adapters;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Configuration;
 using Openlysis.Analyzers.Filescan.Core.Models.Enums;
-using Openlysis.Analyzers.Filescan.Infrastructure.Services;
-using Openlysis.Analyzers.Filescan.Services;
+using Openlysis.Analyzers.Filescan.Infrastructure.Analysis;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;

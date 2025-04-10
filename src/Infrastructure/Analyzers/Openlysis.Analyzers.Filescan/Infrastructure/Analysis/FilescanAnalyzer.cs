@@ -13,7 +13,7 @@ using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
-namespace Openlysis.Analyzers.Filescan.Infrastructure.Services;
+namespace Openlysis.Analyzers.Filescan.Infrastructure.Analysis;
 
 /// <summary>
 /// Client to scan files.

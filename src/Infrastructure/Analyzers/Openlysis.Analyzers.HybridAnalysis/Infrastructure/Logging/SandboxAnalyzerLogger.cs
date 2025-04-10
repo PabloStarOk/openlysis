@@ -5,7 +5,7 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging.Services;
 
-namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
+namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
 
 /// <summary>
 /// Represents a logger for the sandbox analyzer of the Hybrid Analysis service.

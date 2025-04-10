@@ -10,7 +10,7 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
-using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
@@ -19,7 +19,7 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
-namespace Openlysis.Analyzers.HybridAnalysis.Services;
+namespace Openlysis.Analyzers.HybridAnalysis.Adapters;
 
 /// <summary>
 /// Analyzer of URLs.

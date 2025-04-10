@@ -2,7 +2,6 @@ using System.Net.Http.Headers;
 
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Constants;
-using Openlysis.Analyzers.Filescan.Core.Constants.Endpoints;
 using Openlysis.Analyzers.Filescan.Core.Models.Objects;
 using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 

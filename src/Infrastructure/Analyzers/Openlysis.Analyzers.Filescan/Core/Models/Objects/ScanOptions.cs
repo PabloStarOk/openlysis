@@ -1,4 +1,4 @@
-namespace Openlysis.Analyzers.Filescan.Core.Models.Scans;
+namespace Openlysis.Analyzers.Filescan.Core.Models.Objects;
 
 /// <summary>
 /// Represents the options for a scan.

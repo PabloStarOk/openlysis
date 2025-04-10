@@ -1,8 +1,6 @@
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.VirusTotal.Core.Configuration;
-
-namespace Openlysis.Analyzers.VirusTotal.Core.Models.Validators;
+namespace Openlysis.Analyzers.VirusTotal.Core.Configuration;
 
 /// <summary>
 /// Validates the <see cref="VerdictCalculationOptions"/> to ensure the sum of threshold percentages is 100.

@@ -11,8 +11,8 @@ using Openlysis.Analyzers.Filescan.Core.Models.Enums;
 using Openlysis.Analyzers.Filescan.Core.Models.Objects;
 using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
+using Openlysis.Analyzers.Filescan.Infrastructure.Analysis;
 using Openlysis.Analyzers.Filescan.Infrastructure.Factories;
-using Openlysis.Analyzers.Filescan.Infrastructure.Services;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
@@ -22,7 +22,7 @@ using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
-namespace Openlysis.Analyzers.Filescan.Services;
+namespace Openlysis.Analyzers.Filescan.Adapters;
 
 /// <summary>
 /// Represents an analyzer for URLs, inheriting from the base Analyzer class.

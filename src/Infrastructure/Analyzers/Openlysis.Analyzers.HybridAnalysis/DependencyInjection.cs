@@ -4,11 +4,12 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.Analyzers.HybridAnalysis.Adapters;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
-using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
-using Openlysis.Analyzers.HybridAnalysis.Services;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analysis;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;

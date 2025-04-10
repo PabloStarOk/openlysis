@@ -11,15 +11,15 @@ using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Responses;
+using Openlysis.Analyzers.VirusTotal.Infrastructure.Analysis;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Factories;
-using Openlysis.Analyzers.VirusTotal.Infrastructure.Services;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
-namespace Openlysis.Analyzers.VirusTotal.Services;
+namespace Openlysis.Analyzers.VirusTotal.Adapters;
 
 /// <summary>
 /// URL analyzer for VirusTotal service.

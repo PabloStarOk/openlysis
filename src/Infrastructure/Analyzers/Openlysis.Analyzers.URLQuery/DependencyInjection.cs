@@ -8,11 +8,11 @@ using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
+using Openlysis.Analyzers.URLQuery.Adapters;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
 using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
-using Openlysis.Analyzers.URLQuery.Infrastructure.Services;
-using Openlysis.Analyzers.URLQuery.Services;
+using Openlysis.Analyzers.URLQuery.Infrastructure.Calculations;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
 

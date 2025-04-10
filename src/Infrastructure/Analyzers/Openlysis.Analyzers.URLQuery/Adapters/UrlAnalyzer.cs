@@ -24,7 +24,7 @@ using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
-namespace Openlysis.Analyzers.URLQuery.Services;
+namespace Openlysis.Analyzers.URLQuery.Adapters;
 
 /// <summary>
 /// Analyzer of URLs using the 'urlquery.net' service.

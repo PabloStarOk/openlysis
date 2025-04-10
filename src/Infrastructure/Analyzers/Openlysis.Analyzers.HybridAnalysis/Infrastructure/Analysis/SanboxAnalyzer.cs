@@ -12,10 +12,11 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
-namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Services;
+namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analysis;
 
 /// <summary>
 /// Represents an analyzer which sends request to Hybrid Analysis to analyze Files or URLs.
