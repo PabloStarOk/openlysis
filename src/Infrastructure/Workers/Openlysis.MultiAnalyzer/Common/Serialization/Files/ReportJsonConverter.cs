@@ -53,7 +53,8 @@ public class ReportJsonConverter : JsonConverter<Report>
                     break;
 
                 case ThreatLevelKey:
-                    if (reader.TryGetDecimal(out decimal threatLevelDecimal))
+                    if (reader.TokenType is not JsonTokenType.Null
+                        && reader.TryGetDecimal(out decimal threatLevelDecimal))
                     {
                         threatLevel = (float)threatLevelDecimal;
                     }
