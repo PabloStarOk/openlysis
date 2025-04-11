@@ -73,11 +73,12 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
     /// <returns>A task representing the asynchronous operation.</returns>
     public override async Task HandleAsync(AnalyzeFileRequest request, CancellationToken ct)
     {
-        if (request.File.Length <= 0)
+        if (request is not { File.Length: > 0 })
         {
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
-                detail: "Provided file has no content."));
+                detail: "Must provide a file to be analyzed with a minimum length of 1 byte."));
+            return;
         }
 
         Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
