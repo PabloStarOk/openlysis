@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.Application.Files.Services;
 using Openlysis.Application.Phones.Services;
 
 namespace Openlysis.Application;
@@ -22,6 +23,9 @@ public static class DependencyInjection
                 config.RegisterServicesFromAssemblies(typeof(DependencyInjection).Assembly);
             });
         services.AddSingleton(TimeProvider.System);
+
+        // Add file multi analysis service.
+        services.AddScoped<IFileMultiAnalysisService, FileMultiAnalysisService>();
 
         // Add phone number reputation service
         services.AddScoped<IPhoneReputationService, PhoneReputationService>();

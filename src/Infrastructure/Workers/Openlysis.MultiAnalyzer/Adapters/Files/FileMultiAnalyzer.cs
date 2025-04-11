@@ -6,6 +6,8 @@ using MassTransit;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
+using Openlysis.Application.Files.Contracts;
+using Openlysis.Application.Files.Contracts.Abstractions;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
 using Openlysis.MultiAnalyzer.Common.Abstractions;
@@ -17,7 +19,7 @@ namespace Openlysis.MultiAnalyzer.Adapters.Files;
 /// <summary>
 /// Service to analyze a file using multi services.
 /// </summary>
-public class FileMultiAnalysisService : IFileMultiAnalysisService
+public class FileMultiAnalyzer : IFileMultiAnalyzer
 {
     private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly IRepository<FileMultiAnalysis, GlobalId> _multiAnalysisRepository;
@@ -25,13 +27,13 @@ public class FileMultiAnalysisService : IFileMultiAnalysisService
     private readonly ISendEndpointProvider _sendEndpointProvider;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileMultiAnalysisService"/> class.
+    /// Initializes a new instance of the <see cref="FileMultiAnalyzer"/> class.
     /// </summary>
     /// <param name="endpointUriProvider">The provider for endpoint URIs.</param>
     /// <param name="sendEndpointProvider">The endpoint to send messages to.</param>
     /// <param name="fileStorageProvider">The provider for file storage operations.</param>
     /// <param name="multiAnalysisRepository">The repository for managing file multi-analysis entities.</param>
-    public FileMultiAnalysisService(
+    public FileMultiAnalyzer(
         IEndpointUriProvider endpointUriProvider,
         ISendEndpointProvider sendEndpointProvider,
         IFileStorageProvider fileStorageProvider,

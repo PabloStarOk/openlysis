@@ -4,6 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Application.Common.Abstractions.Services;
+using Openlysis.Application.Files.Contracts;
+using Openlysis.Application.Files.Contracts.Abstractions;
 using Openlysis.MultiAnalyzer.Adapters.Broker.Files;
 using Openlysis.MultiAnalyzer.Adapters.Broker.URLs;
 using Openlysis.MultiAnalyzer.Adapters.Files;
@@ -33,7 +35,7 @@ public static class DependencyInjection
                 x.AddConsumer<UpdateUrlMultiAnalysisConsumer, UpdateUrlMultiAnalysisConsumerDefinition>();
                 x.AddRabbitMqBroker(services);
             });
-        services.AddScoped<IFileMultiAnalysisService, FileMultiAnalysisService>();
+        services.AddScoped<IFileMultiAnalyzer, FileMultiAnalyzer>();
         services.AddScoped<IUrlMultiAnalyzer, UrlMultiAnalyzer>();
     }
 }

@@ -1,11 +1,11 @@
 using Openlysis.Domain.Files;
 
-namespace Openlysis.Application.Common.Abstractions.Services;
+namespace Openlysis.Application.Files.Contracts.Abstractions;
 
 /// <summary>
 /// Defines a service to analyze a file.
 /// </summary>
-public interface IFileMultiAnalysisService
+public interface IFileMultiAnalyzer
 {
     /// <summary>
     /// Starts a multi analysis job asynchronously.

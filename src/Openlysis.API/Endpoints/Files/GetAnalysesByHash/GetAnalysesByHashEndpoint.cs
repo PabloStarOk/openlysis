@@ -1,9 +1,7 @@
 using FastEndpoints;
 
-using MediatR;
-
 using Openlysis.API.Endpoints.Files.Common.Responses;
-using Openlysis.Application.Files.Queries;
+using Openlysis.Application.Files.Services;
 using Openlysis.Domain.Files;
 
 namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
@@ -13,7 +11,7 @@ namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 /// </summary>
 public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHash, IEnumerable<FileMultiAnalysisDto>>
 {
-    private readonly IMediator _mediator;
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Gets the name of the endpoint.
@@ -23,10 +21,10 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHash, IEnumerable
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAnalysesByHashEndpoint"/> class.
     /// </summary>
-    /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
-    public GetAnalysesByHashEndpoint(IMediator mediator)
+    /// <param name="multiAnalysisService">The service used to retrieve file multi-analyses.</param>
+    public GetAnalysesByHashEndpoint(IFileMultiAnalysisService multiAnalysisService)
     {
-        _mediator = mediator;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <summary>
@@ -72,20 +70,12 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHash, IEnumerable
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(request.StartedDateOrder)
-            && request.StartedDateOrder is not("asc" or "dsc"))
-        {
-            await SendResultAsync(Results.Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: "startDateOrder query param must be 'asc' or 'dsc'."));
-            return;
-        }
-
-        var query = new FileMultiAnalysesQueryByHash(
-            request.Hash,
-            request.Amount < 1 ? 10 : request.Amount,
-            request.StartedDateOrder);
-        IReadOnlyList<FileMultiAnalysis> multiAnalyses = await _mediator.Send(query, ct);
+        IReadOnlyList<FileMultiAnalysis> multiAnalyses = await _multiAnalysisService
+            .GetAnalysesByHashAsync(
+                request.Hash,
+                request.Amount < 1 ? 10 : request.Amount,
+                request.StartedDateOrder,
+                ct);
 
         if (multiAnalyses.Count < 1)
         {

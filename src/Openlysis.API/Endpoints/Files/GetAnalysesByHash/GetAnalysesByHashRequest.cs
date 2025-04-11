@@ -1,5 +1,7 @@
 using FastEndpoints;
 
+using Openlysis.Application.Common.Enums;
+
 namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 
 /// <summary>
@@ -23,5 +25,5 @@ public record GetAnalysesByHash
     /// Gets the order of the started date.
     /// </summary>
     [QueryParam]
-    public string StartedDateOrder { get; init; } = string.Empty;
+    public OrderType StartedDateOrder { get; init; } = OrderType.Dsc;
 }

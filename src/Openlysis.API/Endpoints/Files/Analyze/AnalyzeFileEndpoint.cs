@@ -4,9 +4,8 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using MediatR;
-
-using Openlysis.Application.Files.Commands;
+using Openlysis.Application.Files.Contracts.Models;
+using Openlysis.Application.Files.Services;
 using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
@@ -16,7 +15,7 @@ namespace Openlysis.API.Endpoints.Files.Analyze;
 /// </summary>
 public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileResponse>
 {
-    private readonly IMediator _mediator;
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Gets the name of the endpoint.
@@ -26,10 +25,10 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileEndpoint"/> class.
     /// </summary>
-    /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
-    public AnalyzeFileEndpoint(IMediator mediator)
+    /// <param name="multiAnalysisService">The service used for analyzing files.</param>
+    public AnalyzeFileEndpoint(IFileMultiAnalysisService multiAnalysisService)
     {
-        _mediator = mediator;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <summary>
@@ -84,22 +83,23 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
         Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
         var userId = UserId.Create(Guid.Parse(claim.Value));
 
-        await using var fileData = request.File.OpenReadStream();
-        var command = new AnalyzeFileCommand(
-            userId,
+        await using var stream = request.File.OpenReadStream();
+        var fileData = new FileData(
             request.File.FileName,
             request.File.ContentType,
-            fileData,
             request.FileDescription,
             request.FilePassword,
+            stream);
+        var result = await _multiAnalysisService.AnalyzeAsync(
+            userId,
             request.IsPrivateFile,
-            request.Reanalyze);
+            request.Reanalyze,
+            fileData,
+            ct);
 
-        var mediatorResult = await _mediator.Send(command, ct);
-
-        if (mediatorResult.IsError)
+        if (result.IsError)
         {
-            if (mediatorResult.Errors.Any(e => e.Type is ErrorType.Unexpected))
+            if (result.Errors.Any(e => e.Type is ErrorType.Unexpected))
             {
                 await SendResultAsync(Results.Problem(
                     statusCode: StatusCodes.Status500InternalServerError,
@@ -109,7 +109,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
             var extensions = new Dictionary<string, object?>
             {
                 {
-                    "errors", mediatorResult.Errors
+                    "errors", result.Errors
                 },
             };
             await SendResultAsync(Results.Problem(
@@ -119,11 +119,11 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
         }
 
         Response = new AnalyzeFileResponse(
-            mediatorResult.Value.Id.Value.ToString(),
-            mediatorResult.Value.DataHashSet.Md5,
-            mediatorResult.Value.DataHashSet.Sha1,
-            mediatorResult.Value.DataHashSet.Sha256,
-            mediatorResult.Value.DataHashSet.Sha512);
+            result.Value.Id.Value.ToString(),
+            result.Value.DataHashSet.Md5,
+            result.Value.DataHashSet.Sha1,
+            result.Value.DataHashSet.Sha256,
+            result.Value.DataHashSet.Sha512);
 
         var routeValues = new Dictionary<string, string>
         {

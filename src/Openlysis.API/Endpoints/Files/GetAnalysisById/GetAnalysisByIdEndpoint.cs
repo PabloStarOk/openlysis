@@ -2,10 +2,8 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using MediatR;
-
 using Openlysis.API.Endpoints.Files.Common.Responses;
-using Openlysis.Application.Files.Queries;
+using Openlysis.Application.Files.Services;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
 
@@ -16,7 +14,7 @@ namespace Openlysis.API.Endpoints.Files.GetAnalysisById;
 /// </summary>
 public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
 {
-    private readonly IMediator _mediator;
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Gets the name of the endpoint.
@@ -26,10 +24,12 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAnalysisByIdEndpoint"/> class.
     /// </summary>
-    /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
-    public GetAnalysisByIdEndpoint(IMediator mediator)
+    /// <param name="multiAnalysisService">
+    /// The service used to retrieve file analysis by ID.
+    /// </param>
+    public GetAnalysisByIdEndpoint(IFileMultiAnalysisService multiAnalysisService)
     {
-        _mediator = mediator;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <summary>
@@ -87,10 +87,8 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
             return;
         }
 
-        var fileAnalysisId = GlobalId.Parse(guid);
-        var query = new FileMultiAnalysisQuery(fileAnalysisId);
-
-        ErrorOr<FileMultiAnalysis> mediatorResult = await _mediator.Send(query, ct);
+        ErrorOr<FileMultiAnalysis> mediatorResult = await _multiAnalysisService
+            .GetAnalysisByIdAsync(GlobalId.Parse(guid), ct);
 
         if (mediatorResult.IsError)
         {
