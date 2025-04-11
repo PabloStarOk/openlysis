@@ -56,7 +56,7 @@ public class FileServiceAnalysis : ServiceAnalysis
         string serviceName,
         AnalysisStatus status,
         List<Report> reports,
-        string? jobId = "")
+        string? jobId = null)
     {
         return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
@@ -71,14 +71,16 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The initial status of the analysis.</param>
+    /// <param name="jobId">An optional job identifier associated with the analysis.</param>
     /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
     public static FileServiceAnalysis Create(
         string id,
         string serviceName,
-        AnalysisStatus status)
+        AnalysisStatus status,
+        string? jobId = null)
     {
         return new FileServiceAnalysis(
-            ComposedServiceAnalysisId.Create(id),
+            ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             status,
             []);

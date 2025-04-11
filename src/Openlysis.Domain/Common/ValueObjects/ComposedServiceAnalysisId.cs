@@ -19,7 +19,7 @@ public record ComposedServiceAnalysisId
     /// <summary>
     /// Gets an optional job identifier.
     /// </summary>
-    public string? Job { get; init; } = null;
+    public string? Job { get; init; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ComposedServiceAnalysisId"/> class.
@@ -38,41 +38,54 @@ public record ComposedServiceAnalysisId
     /// <param name="id">The service analysis identifier as a string.</param>
     /// <param name="jobId">The job identifier.</param>
     /// <returns>A new instance of the <see cref="ComposedServiceAnalysisId"/> record.</returns>
-    public static ComposedServiceAnalysisId Create(string id, string? jobId = null)
+    public static ComposedServiceAnalysisId Create(
+        string id,
+        string? jobId = null)
     {
+        string? normalizedJobId = string.IsNullOrWhiteSpace(jobId) ? null : jobId;
         return new ComposedServiceAnalysisId(
             ServiceAnalysisId.Create(id),
-            jobId);
+            normalizedJobId);
     }
 
     /// <summary>
-    /// Creates a new instance of the <see cref="ComposedServiceAnalysisId"/> record from a composed identifier string.
+    /// Parses a composed service analysis identifier from its string representation.
     /// </summary>
-    /// <param name="composedId">The composed identifier string containing the primary ID and job ID separated by a colon.</param>
-    /// <returns>A new instance of the <see cref="ComposedServiceAnalysisId"/> record.</returns>
-    /// <exception cref="ArgumentException">Thrown when the composed identifier string is not valid.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when the composed identifier string does not contain exactly two values separated by a colon.</exception>
-    public static ComposedServiceAnalysisId Create(string composedId)
+    /// <param name="input">
+    /// The string representation of the composed service analysis identifier.
+    /// It can contain a single ID or two IDs separated by the defined separator character.
+    /// </param>
+    /// <returns>
+    /// A new instance of the <see cref="ComposedServiceAnalysisId"/> record created from the input string.
+    /// </returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the input string contains more than two values separated by the defined separator character.
+    /// </exception>
+    /// <remarks>
+    /// The input string must follow the format: "PrimaryID[:JobID]".
+    /// </remarks>
+    public static ComposedServiceAnalysisId Parse(string input)
     {
-        if (!composedId.Contains(IdCharSeparator))
+        string[] values = input.Split(IdCharSeparator);
+        if (values is { Length: > 2 })
         {
-            throw new ArgumentException("Given composed id is not valid.", nameof(composedId));
+            throw new InvalidOperationException($"Composed ID contains more than two values separated by {IdCharSeparator}");
         }
 
-        string[] values = composedId.Split(IdCharSeparator);
-
-        if (values is { Length: > 2 or < 2 })
+        string? jobId = null;
+        if (values is { Length: > 1 })
         {
-            throw new InvalidOperationException($"Composed ID contains less or more than two values separated by {IdCharSeparator}");
+            jobId = string.IsNullOrWhiteSpace(values[1]) ? null : values[1];
         }
 
-        string? jobId = string.IsNullOrWhiteSpace(values[1]) ? null : values[1];
         return Create(values[0], jobId);
     }
 
     /// <inheritdoc/>
     public override string ToString()
     {
-        return $"{Primary.Value}{IdCharSeparator}{Job}";
+        return string.IsNullOrWhiteSpace(Job)
+            ? Primary.Value
+            : $"{Primary.Value}{IdCharSeparator}{Job}";
     }
 }

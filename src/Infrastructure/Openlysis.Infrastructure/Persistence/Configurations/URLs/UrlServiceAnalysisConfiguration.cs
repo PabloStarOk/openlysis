@@ -30,7 +30,7 @@ public class UrlServiceAnalysisConfiguration : IEntityTypeConfiguration<UrlServi
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.ToString(),
-                id => ComposedServiceAnalysisId.Create(id));
+                id => ComposedServiceAnalysisId.Parse(id));
 
         builder.Property(u => u.ServiceName)
             .HasColumnName("ServiceName")
