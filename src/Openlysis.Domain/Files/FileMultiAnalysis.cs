@@ -1,57 +1,27 @@
-using Openlysis.Domain.Common.Abstractions;
+using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.Files.ValueObjects;
+using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Domain.Files;
 
 /// <summary>
 /// Represents a report for a file.
 /// </summary>
-public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
+public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
 {
-    private readonly List<FileServiceAnalysis> _serviceFileAnalyses = [];
-
-    /// <summary>
-    /// Gets the date and time when the analysis started.
-    /// </summary>
-    public DateTime StartedDate { get; }
-
-    /// <summary>
-    /// Gets the verdict of the analysis.
-    /// </summary>
-    public Verdict AverageVerdict { get; private set; }
-
-    /// <summary>
-    /// Gets the summary threat zone of the analysis.
-    /// </summary>
-    public ThreatZone AverageThreatZone { get; private set; }
-
-    /// <summary>
-    /// Gets the status of the analysis.
-    /// </summary>
-    public AnalysisStatus Status { get; private set; }
-
     /// <summary>
     /// Gets the information of the file.
     /// </summary>
     public FileMetadata FileMetadata { get; init; }
 
     /// <summary>
-    /// Gets the set of hash of the file.
-    /// </summary>
-    public ContentHashSet ContentHashSet { get; init; }
-
-    /// <summary>
-    /// Gets the list of service file analyses.
-    /// </summary>
-    public IReadOnlyList<FileServiceAnalysis> ServiceFileAnalyses => _serviceFileAnalyses.AsReadOnly();
-
-    /// <summary>
     /// Gets all reports from the service file analyses.
     /// </summary>
-    public IReadOnlyList<Report> AllReports => _serviceFileAnalyses
+    public IReadOnlyList<Report> AllReports => ServiceAnalyses
         .SelectMany(s => s.Reports).ToList().AsReadOnly();
 
     /// <summary>
@@ -63,28 +33,27 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// Initializes a new instance of the <see cref="FileMultiAnalysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the file analysis.</param>
-    /// <param name="serviceFileAnalyses">The list of service file analyses.</param>
+    /// <param name="userId">The unique identifier of the user who initiated the analysis.</param>
+    /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
+    /// <param name="status">The current status of the analysis.</param>
     /// <param name="averageVerdict">The summary verdict of the analysis.</param>
     /// <param name="averageThreatZone">The summary threat zone of the analysis.</param>
-    /// <param name="fileMetadata">The metadata of the file.</param>
-    /// <param name="contentHashSet">The set of hash of the file.</param>
+    /// <param name="dataHashSet">The set of content hashes associated with the analysis.</param>
+    /// <param name="fileMetadata">The metadata of the file being analyzed.</param>
     private FileMultiAnalysis(
-        FileMultiAnalysisId id,
-        List<FileServiceAnalysis> serviceFileAnalyses,
+        GlobalId id,
+        UserId userId,
+        bool isPrivate,
         DateTime startedDate,
+        AnalysisStatus status,
         Verdict averageVerdict,
         ThreatZone averageThreatZone,
-        FileMetadata fileMetadata,
-        ContentHashSet contentHashSet)
-        : base(id)
+        ContentHashSet dataHashSet,
+        FileMetadata fileMetadata)
+        : base(id, userId, isPrivate, startedDate, status, averageVerdict, averageThreatZone, dataHashSet)
     {
-        _serviceFileAnalyses = serviceFileAnalyses;
-        StartedDate = startedDate;
-        AverageVerdict = averageVerdict;
-        AverageThreatZone = averageThreatZone;
         FileMetadata = fileMetadata;
-        ContentHashSet = contentHashSet;
     }
 
     // For EF core.
@@ -97,95 +66,53 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of the <see cref="FileMultiAnalysis"/> class with the specified file name, metadata, and reports.
+    /// Creates a new instance of the <see cref="FileMultiAnalysis"/> class.
     /// </summary>
+    /// <param name="userId">The unique identifier of the user who initiated the analysis.</param>
+    /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
-    /// <param name="fileMetadata">The metadata of the file.</param>
-    /// <param name="contentHashSet">The set of hash of the file.</param>
-    /// <param name="serviceFileAnalyses">The dictionary of service file analyses.</param>
+    /// <param name="dataHashSet">The set of content hashes associated with the analysis.</param>
+    /// <param name="fileMetadata">The metadata of the file being analyzed.</param>
     /// <returns>A new instance of the <see cref="FileMultiAnalysis"/> class.</returns>
     public static FileMultiAnalysis Create(
+        UserId userId,
+        bool isPrivate,
         DateTime startedDate,
-        FileMetadata fileMetadata,
-        ContentHashSet contentHashSet,
-        List<FileServiceAnalysis> serviceFileAnalyses)
+        ContentHashSet dataHashSet,
+        FileMetadata fileMetadata)
     {
         return new FileMultiAnalysis(
-            FileMultiAnalysisId.CreateUnique(),
-            serviceFileAnalyses,
+            GlobalId.CreateUnique(),
+            userId,
+            isPrivate,
             startedDate,
+            AnalysisStatus.Queued,
             Verdict.Unknown,
             ThreatZone.Unknown,
-            fileMetadata,
-            contentHashSet);
+            dataHashSet,
+            fileMetadata);
     }
 
-    /// <summary>
-    /// Adds a new service file analysis to the collection.
-    /// </summary>
-    /// <param name="analysis">The service file analysis to add.</param>
-    public void AddServiceAnalysis(FileServiceAnalysis analysis)
+    /// <inheritdoc/>
+    protected override void HandleServiceAnalysisUpdate(int index, FileServiceAnalysis analysis)
     {
-        if (_serviceFileAnalyses.Contains(analysis))
+        FileServiceAnalysis serviceAnalysis = InternalServiceAnalyses[index];
+        foreach (Report report in analysis.Reports)
         {
-            return;
+            if (serviceAnalysis.Reports.Contains(report))
+            {
+                serviceAnalysis.UpdateReport(report);
+                continue;
+            }
+
+            serviceAnalysis.AddReport(report);
         }
 
-        _serviceFileAnalyses.Add(analysis);
-        UpdateAvgVerdict();
-        UpdateAvgThreatZone();
-        UpdateStatus();
+        serviceAnalysis.UpdateStatus(analysis.Status);
     }
 
-    /// <summary>
-    /// Updates an existing service file analysis in the collection.
-    /// </summary>
-    /// <param name="analysis">The service file analysis to update.</param>
-    public void UpdateServiceAnalysis(FileServiceAnalysis analysis)
-    {
-        if (!_serviceFileAnalyses.Contains(analysis))
-        {
-            return;
-        }
-
-        int analysisIndex = _serviceFileAnalyses.IndexOf(analysis);
-        _serviceFileAnalyses[analysisIndex] = analysis;
-        UpdateAvgVerdict();
-        UpdateAvgThreatZone();
-        UpdateStatus();
-    }
-
-    /// <summary>
-    /// Updates the status of the file analysis based on the statuses of all service file analyses.
-    /// </summary>
-    private void UpdateStatus()
-    {
-        IEnumerable<FileServiceAnalysis> analyses = _serviceFileAnalyses;
-
-        if (analyses.All(a => a.Status is AnalysisStatus.Completed))
-        {
-            Status = AnalysisStatus.Completed;
-            return;
-        }
-
-        if (analyses.Any(a => a.Status is AnalysisStatus.Timeout))
-        {
-            Status = AnalysisStatus.Timeout;
-            return;
-        }
-
-        var statusCount = analyses.GroupBy(a => a.Status)
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        Status = statusCount.OrderBy(s => s.Value)
-            .ThenBy(s => s.Key)
-            .First().Key;
-    }
-
-    /// <summary>
-    /// Updates the average verdict based on all reports.
-    /// </summary>
-    private void UpdateAvgVerdict()
+    /// <inheritdoc/>
+    protected override void HandleAverageVerdictUpdate()
     {
         if (!AllReports.Any())
         {
@@ -198,25 +125,6 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
 
         AverageVerdict = verdictCounts
             .OrderByDescending(pair => pair.Value)
-            .ThenByDescending(pair => pair.Key)
-            .First().Key;
-    }
-
-    /// <summary>
-    /// Updates the average threat zone based on all reports.
-    /// </summary>
-    private void UpdateAvgThreatZone()
-    {
-        if (!AllReports.Any())
-        {
-            AverageThreatZone = ThreatZone.Unknown;
-            return;
-        }
-
-        var threatZoneCounts = AllReports.GroupBy(r => r.ThreatZone)
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        AverageThreatZone = threatZoneCounts.OrderByDescending(pair => pair.Value)
             .ThenByDescending(pair => pair.Key)
             .First().Key;
     }

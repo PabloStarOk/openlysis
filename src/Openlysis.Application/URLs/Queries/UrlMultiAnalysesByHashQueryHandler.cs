@@ -17,14 +17,14 @@ namespace Openlysis.Application.URLs.Queries;
 public class UrlMultiAnalysesByHashQueryHandler
     : IRequestHandler<UrlMultiAnalysesByHashQuery, IReadOnlyList<UrlMultiAnalysis>>
 {
-    private readonly IRepository<UrlMultiAnalysis, MultiAnalysisId> _repository;
+    private readonly IRepository<UrlMultiAnalysis, GlobalId> _repository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlMultiAnalysesByHashQueryHandler"/> class.
     /// </summary>
     /// <param name="repository">The repository for accessing <see cref="UrlMultiAnalysis"/> entities.</param>
     public UrlMultiAnalysesByHashQueryHandler(
-        IRepository<UrlMultiAnalysis, MultiAnalysisId> repository)
+        IRepository<UrlMultiAnalysis, GlobalId> repository)
     {
         _repository = repository;
     }
@@ -36,10 +36,10 @@ public class UrlMultiAnalysesByHashQueryHandler
     {
         var analyses = await _repository.GetManyAsync(
             request.Amount,
-            u => (u.UrlHashSet.Sha256 == request.Hash
-            || u.UrlHashSet.Md5 == request.Hash
-            || u.UrlHashSet.Sha1 == request.Hash
-            || u.UrlHashSet.Sha512 == request.Hash)
+            u => (u.DataHashSet.Sha256 == request.Hash
+            || u.DataHashSet.Md5 == request.Hash
+            || u.DataHashSet.Sha1 == request.Hash
+            || u.DataHashSet.Sha512 == request.Hash)
             && (!u.IsPrivate || (u.IsPrivate && u.UserId == request.UserId)),
             OrderBy,
             cancellationToken);

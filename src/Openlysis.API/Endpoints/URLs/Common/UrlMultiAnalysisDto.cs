@@ -49,7 +49,7 @@ public record UrlMultiAnalysisDto(
             source.AverageThreatZone,
             source.AverageThreatScore,
             source.Url,
-            source.UrlHashSet,
+            source.DataHashSet,
             serviceAnalyses);
     }
 }

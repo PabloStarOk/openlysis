@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using MassTransit;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.MultiAnalyzer.Adapters.Broker.Files;
 
@@ -23,14 +23,14 @@ public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis
     /// </summary>
     public const string EndpointName = "update-file-multi-analysis";
 
-    private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _multiAnalysisRepository;
+    private readonly IRepository<FileMultiAnalysis, GlobalId> _multiAnalysisRepository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFileMultiAnalysisConsumer"/> class.
     /// </summary>
     /// <param name="multiAnalysisRepository">An <see cref="IRepository{TModel,TModelId}"/> to save <see cref="FileMultiAnalysis"/> entities.</param>
     public UpdateFileMultiAnalysisConsumer(
-        IRepository<FileMultiAnalysis, FileMultiAnalysisId> multiAnalysisRepository)
+        IRepository<FileMultiAnalysis, GlobalId> multiAnalysisRepository)
     {
         _multiAnalysisRepository = multiAnalysisRepository;
     }
@@ -44,7 +44,7 @@ public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis
 
         foreach (var serviceAnalysis in request.ServiceFileAnalyses)
         {
-            if (fileMultiAnalysis.ServiceFileAnalyses.Contains(serviceAnalysis))
+            if (fileMultiAnalysis.ServiceAnalyses.Contains(serviceAnalysis))
             {
                 fileMultiAnalysis.UpdateServiceAnalysis(serviceAnalysis);
                 continue;

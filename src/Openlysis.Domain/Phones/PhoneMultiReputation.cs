@@ -9,7 +9,7 @@ namespace Openlysis.Domain.Phones;
 /// <summary>
 /// Represents multiple reputations for a phone from different services.
 /// </summary>
-public class PhoneMultiReputation : AggregateRoot<Id>
+public class PhoneMultiReputation : AggregateRoot<GlobalId>
 {
     private readonly List<PhoneServiceReputation> _servicesReputations = [];
 
@@ -41,7 +41,7 @@ public class PhoneMultiReputation : AggregateRoot<Id>
     /// <param name="averageVerdict">The average verdict of the reputation.</param>
     /// <param name="averageThreatZone">The average threat zone of the reputation.</param>
     private PhoneMultiReputation(
-        Id id,
+        GlobalId id,
         DateTime assessmentDate,
         Verdict averageVerdict,
         ThreatZone averageThreatZone)
@@ -69,9 +69,9 @@ public class PhoneMultiReputation : AggregateRoot<Id>
     public static PhoneMultiReputation Create(
         DateTime assessmentDate)
     {
-        Id id = Id.CreateUnique();
+        GlobalId globalId = GlobalId.CreateUnique();
         return new PhoneMultiReputation(
-            id,
+            globalId,
             assessmentDate,
             Verdict.Unknown,
             ThreatZone.Unknown);

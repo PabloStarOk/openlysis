@@ -4,6 +4,7 @@ using MediatR;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.ValueObjects;
 
@@ -14,7 +15,7 @@ namespace Openlysis.Application.Files.Commands;
 /// </summary>
 public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, ErrorOr<FileMultiAnalysis>>
 {
-    private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _fileMultiAnalysisRepository;
+    private readonly IRepository<FileMultiAnalysis, GlobalId> _fileMultiAnalysisRepository;
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
     private readonly IFileMultiAnalysisService _multiAnalysisService;
@@ -27,7 +28,7 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
     /// <param name="timeProvider">Provider of time.</param>
     /// <param name="hashService">Service to hash data.</param>
     public AnalyzeFileCommandHandler(
-        IRepository<FileMultiAnalysis, FileMultiAnalysisId> fileMultiAnalysisRepository,
+        IRepository<FileMultiAnalysis, GlobalId> fileMultiAnalysisRepository,
         IFileMultiAnalysisService multiAnalysisService,
         TimeProvider timeProvider,
         IHashService hashService)
@@ -46,7 +47,7 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
         // Check if the file has already been analyzed.
         var existingAnalyses = await _fileMultiAnalysisRepository.GetManyAsync(
             1,
-            f => f.ContentHashSet == hashSet,
+            f => f.DataHashSet == hashSet,
             q => q.OrderByDescending(f => f.StartedDate),
             cancellationToken);
 
@@ -61,10 +62,11 @@ public class AnalyzeFileCommandHandler : IRequestHandler<AnalyzeFileCommand, Err
             command.FileContentType,
             command.FileData.Length);
         var multiAnalysis = FileMultiAnalysis.Create(
+            command.UserId,
+            command.IsPrivateFile,
             _timeProvider.GetUtcNow().DateTime,
-            fileMetadata,
             hashSet,
-            []);
+            fileMetadata);
 
         await _multiAnalysisService.StartAnalysisAsync(
             multiAnalysis,

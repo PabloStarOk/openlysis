@@ -8,7 +8,6 @@ using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Evaluators.Ipqs;
@@ -41,9 +40,9 @@ public static class DependencyInjection
             options.UseSqlServer(connectionString));
 
         // Add repositories.
-        services.AddScoped<IRepository<FileMultiAnalysis, FileMultiAnalysisId>, FileMultiAnalysisRepository>();
-        services.AddScoped<IRepository<UrlMultiAnalysis, MultiAnalysisId>, UrlMultiAnalysisRepository>();
-        services.AddScoped<IRepository<PhoneMultiReputation, Id>, PhoneMultiReputationRepository>();
+        services.AddScoped<IRepository<FileMultiAnalysis, GlobalId>, FileMultiAnalysisRepository>();
+        services.AddScoped<IRepository<UrlMultiAnalysis, GlobalId>, UrlMultiAnalysisRepository>();
+        services.AddScoped<IRepository<PhoneMultiReputation, GlobalId>, PhoneMultiReputationRepository>();
 
         // Add hash service.
         services.AddTransient<MD5>(_ => MD5.Create());

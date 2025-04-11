@@ -11,5 +11,5 @@ namespace Openlysis.MultiAnalyzer.Core.Broker.URLs;
 /// <param name="MultiAnalysisId">The identifier of the multi-analysis which <see cref="UrlServiceAnalysis"/> belong to.</param>
 /// <param name="Url">The URL to be analyzed.</param>
 public record AnalyzeUrl(
-    MultiAnalysisId MultiAnalysisId,
+    GlobalId MultiAnalysisId,
     Uri Url);

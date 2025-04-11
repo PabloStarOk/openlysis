@@ -14,6 +14,6 @@ namespace Openlysis.Application.URLs.Queries;
 /// <param name="Id">The ID of the multi-analysis.</param>
 /// <param name="UserId">The ID of the user requesting the analysis.</param>
 public record UrlMultiAnalysisQuery(
-    MultiAnalysisId Id,
+    GlobalId Id,
     UserId UserId)
     : IRequest<ErrorOr<UrlMultiAnalysis>>;

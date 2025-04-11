@@ -15,7 +15,7 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.Entities;
-using Openlysis.Domain.Files.ValueObjects;
+using Openlysis.MultiAnalyzer.Adapters.Broker.Files;
 using Openlysis.MultiAnalyzer.Common.Abstractions;
 using Openlysis.MultiAnalyzer.Core.Abstractions;
 using Openlysis.MultiAnalyzer.Core.Configuration;
@@ -44,7 +44,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private readonly Func<FileServiceAnalysis, bool> _analysisFinished = s =>
         s.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
 
-    private FileMultiAnalysisId _multiAnalysisId;
+    private GlobalId _multiAnalysisId;
     private ConsumeContext<AnalyzeFile> _context;
 
     /// <summary>
@@ -201,7 +201,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task SendUpdateAsync()
     {
-        var request = new Adapters.Broker.Files.UpdateFileMultiAnalysis(
+        var request = new UpdateFileMultiAnalysis(
             _multiAnalysisId,
             _serviceFileAnalyses.Values.ToArray());
         await _context.Send(_endpointUriProvider.UpdateMultiAnalysisUri, request);

@@ -1,5 +1,4 @@
-using Openlysis.Domain.Common.Abstractions;
-using Openlysis.Domain.Common.Constants;
+using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
@@ -11,39 +10,12 @@ namespace Openlysis.Domain.URLs;
 /// <summary>
 /// Represents a multi-analysis of a URL, containing multiple service analyses.
 /// </summary>
-public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
+public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
 {
-    private readonly List<UrlServiceAnalysis> _serviceAnalyses = [];
-
     /// <summary>
-    /// Gets the user ID associated with the analysis.
+    /// Gets the URL being analyzed.
     /// </summary>
-    public UserId UserId { get; }
-
-    /// <summary>
-    /// Gets a value indicating whether the analysis is private.
-    /// </summary>
-    public bool IsPrivate { get; }
-
-    /// <summary>
-    /// Gets the date when the analysis started.
-    /// </summary>
-    public DateTime StartedDate { get; }
-
-    /// <summary>
-    /// Gets the current status of the analysis.
-    /// </summary>
-    public AnalysisStatus Status { get; private set; } = AnalysisStatus.Queued;
-
-    /// <summary>
-    /// Gets the average verdict of the analysis.
-    /// </summary>
-    public Verdict AverageVerdict { get; private set; } = Verdict.Unknown;
-
-    /// <summary>
-    /// Gets the average threat zone of the analysis.
-    /// </summary>
-    public ThreatZone AverageThreatZone { get; private set; } = ThreatZone.Unknown;
+    public Uri Url { get; }
 
     /// <summary>
     /// Gets the overall threat score of the <see cref="UrlServiceAnalysis"/>.
@@ -51,46 +23,33 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
     public float? AverageThreatScore { get; private set; }
 
     /// <summary>
-    /// Gets the URL being analyzed.
-    /// </summary>
-    public Uri Url { get; }
-
-    /// <summary>
-    /// Gets the hash set of the URL content.
-    /// </summary>
-    public ContentHashSet UrlHashSet { get; }
-
-    /// <summary>
-    /// Gets the list of service analyses.
-    /// </summary>
-    public IReadOnlyList<UrlServiceAnalysis> ServiceAnalyses => _serviceAnalyses;
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="UrlMultiAnalysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the multi-analysis.</param>
-    /// <param name="serviceAnalyses">The list of service analyses.</param>
     /// <param name="userId">The user ID associated with the analysis.</param>
     /// <param name="isPrivate">A value indicating whether the analysis is private.</param>
-    /// <param name="startedDate">The date when the analysis started.</param>
-    /// <param name="url">The URL being analyzed.</param>
+    /// <param name="startedDate">The date and time when the analysis started.</param>
+    /// <param name="status">The current status of the analysis.</param>
+    /// <param name="averageVerdict">The average verdict of the analysis.</param>
+    /// <param name="averageThreatZone">The average threat zone of the analysis.</param>
     /// <param name="urlHashSet">The hash set of the URL content.</param>
+    /// <param name="averageThreatScore">The average threat score of the analysis.</param>
+    /// <param name="url">The URL being analyzed.</param>
     private UrlMultiAnalysis(
-        MultiAnalysisId id,
-        List<UrlServiceAnalysis> serviceAnalyses,
+        GlobalId id,
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
+        AnalysisStatus status,
+        Verdict averageVerdict,
+        ThreatZone averageThreatZone,
+        ContentHashSet urlHashSet,
         Uri url,
-        ContentHashSet urlHashSet)
-        : base(id)
+        float? averageThreatScore)
+        : base(id, userId, isPrivate, startedDate, status, averageVerdict, averageThreatZone, urlHashSet)
     {
-        _serviceAnalyses = serviceAnalyses;
-        UserId = userId;
-        IsPrivate = isPrivate;
-        StartedDate = startedDate;
         Url = url;
-        UrlHashSet = urlHashSet;
+        AverageThreatScore = averageThreatScore;
     }
 
     // For EF core.
@@ -105,138 +64,56 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
     /// <summary>
     /// Creates a new instance of the <see cref="UrlMultiAnalysis"/> class.
     /// </summary>
-    /// <param name="maxServiceAnalysesAmount">The maximum number of service analyses allowed.</param>
     /// <param name="userId">The user ID associated with the analysis.</param>
     /// <param name="isPrivate">A value indicating whether the analysis is private.</param>
-    /// <param name="startedDate">The date when the analysis started.</param>
+    /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="url">The URL being analyzed.</param>
     /// <param name="urlHashSet">The hash set of the URL content.</param>
     /// <returns>A new instance of the <see cref="UrlMultiAnalysis"/> class.</returns>
     public static UrlMultiAnalysis Create(
-        int maxServiceAnalysesAmount,
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
         Uri url,
         ContentHashSet urlHashSet)
     {
-        List<UrlServiceAnalysis> serviceAnalyses = new (maxServiceAnalysesAmount);
-
         return new UrlMultiAnalysis(
-            MultiAnalysisId.CreateUnique(),
-            serviceAnalyses,
+            GlobalId.CreateUnique(),
             userId,
             isPrivate,
             startedDate,
+            AnalysisStatus.Queued,
+            Verdict.Unknown,
+            ThreatZone.Unknown,
+            urlHashSet,
             url,
-            urlHashSet);
+            null);
     }
 
-    /// <summary>
-    /// Adds a new service file analysis to the collection.
-    /// </summary>
-    /// <param name="analysis">The service file analysis to add.</param>
-    /// <exception cref="InvalidOperationException">Thrown when the multi-analysis already contains the same service analysis to be added.</exception>
-    public void AddServiceAnalysis(UrlServiceAnalysis analysis)
+    /// <inheritdoc/>
+    protected override void HandleServiceAnalysisUpdate(int index, UrlServiceAnalysis analysis)
     {
-        if (_serviceAnalyses.Contains(analysis))
-        {
-            throw new InvalidOperationException("UrlMultiAnalysis already contains the given UrlServiceAnalysis.");
-        }
+        InternalServiceAnalyses[index].UpdateVerdict(analysis.Verdict);
+        InternalServiceAnalyses[index].UpdateThreatScore(analysis.ThreatScore);
+        InternalServiceAnalyses[index].UpdateStatus(analysis.Status);
+    }
 
-        _serviceAnalyses.Add(analysis);
-        UpdateAverageVerdict();
-        UpdateAverageThreatZone();
+    /// <inheritdoc/>
+    protected override void OnUpdateInformation()
+    {
         UpdateAverageThreatScore();
-        UpdateStatus();
     }
 
-    /// <summary>
-    /// Updates an existing service file analysis in the collection.
-    /// </summary>
-    /// <param name="analysis">The service file analysis to update.</param>
-    /// <exception cref="InvalidOperationException">Thrown when the multi-analysis doesn't contain the given service analysis to be updated.</exception>
-    public void UpdateServiceAnalysis(UrlServiceAnalysis analysis)
+    /// <inheritdoc/>
+    protected override void HandleAverageVerdictUpdate()
     {
-        if (!_serviceAnalyses.Contains(analysis))
-        {
-            throw new InvalidOperationException("UrlMultiAnalysis does not contain the given UrlServiceAnalysis.");
-        }
-
-        int analysisIndex = _serviceAnalyses.IndexOf(analysis);
-        if (_serviceAnalyses[analysisIndex] is not { Status: AnalysisStatus.Queued or AnalysisStatus.InProgress })
-        {
-            return;
-        }
-
-        _serviceAnalyses[analysisIndex].UpdateVerdict(analysis.Verdict);
-        _serviceAnalyses[analysisIndex].UpdateThreatScore(analysis.ThreatScore);
-        _serviceAnalyses[analysisIndex].UpdateStatus(analysis.Status);
-        UpdateAverageVerdict();
-        UpdateAverageThreatZone();
-        UpdateAverageThreatScore();
-        UpdateStatus();
-    }
-
-    /// <summary>
-    /// Updates the status of the file analysis based on the statuses of all service file analyses.
-    /// </summary>
-    private void UpdateStatus()
-    {
-        if (_serviceAnalyses.Count < 1)
-        {
-            return;
-        }
-
-        IEnumerable<UrlServiceAnalysis> analyses = _serviceAnalyses;
-
-        // If all timeout, set as timeout
-        if (analyses.All(a => a.Status is AnalysisStatus.Timeout))
-        {
-            Status = AnalysisStatus.Timeout;
-            return;
-        }
-
-        // If all failed, set as failed
-        if (analyses.All(a => a.Status is AnalysisStatus.Failed))
-        {
-            Status = AnalysisStatus.Failed;
-            return;
-        }
-
-        // If is not queued nor in-progress and there's at least one completed, set as completed.
-        if (analyses.All(a => a.Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
-            && analyses.Any(a => a.Status is AnalysisStatus.Completed))
-        {
-            Status = AnalysisStatus.Completed;
-            return;
-        }
-
-        // Queued or in progress according to most frequent or higher status.
-        var statusCount = analyses.GroupBy(a => a.Status)
-            .ToDictionary(g => g.Key, g => g.Count())
-            .Where(g => g.Key
-                is not AnalysisStatus.Completed
-                and not AnalysisStatus.Timeout
-                and not AnalysisStatus.Failed);
-
-        Status = statusCount.OrderByDescending(s => s.Value)
-            .ThenBy(s => s.Key)
-            .First().Key;
-    }
-
-    /// <summary>
-    /// Updates the average verdict based on all reports.
-    /// </summary>
-    private void UpdateAverageVerdict()
-    {
-        if (_serviceAnalyses.Count == 0)
+        if (InternalServiceAnalyses.Count == 0)
         {
             AverageVerdict = Verdict.Unknown;
             return;
         }
 
-        var verdictCounts = _serviceAnalyses
+        var verdictCounts = InternalServiceAnalyses
             .GroupBy(s => s.Verdict)
             .ToDictionary(g => g.Key, g => g.Count());
 
@@ -247,24 +124,16 @@ public sealed class UrlMultiAnalysis : AggregateRoot<MultiAnalysisId>
     }
 
     /// <summary>
-    /// Updates the average threat zone based on all reports.
-    /// </summary>
-    private void UpdateAverageThreatZone()
-    {
-        AverageThreatZone = ThreatZoneMapping.Map[AverageVerdict];
-    }
-
-    /// <summary>
     /// Updates the average threat score based on all service analyses.
     /// </summary>
     private void UpdateAverageThreatScore()
     {
-        if (!_serviceAnalyses.Any(s => s.ThreatScore is not null))
+        if (!InternalServiceAnalyses.Any(s => s.ThreatScore is not null))
         {
             return;
         }
 
-        AverageThreatScore = _serviceAnalyses
+        AverageThreatScore = InternalServiceAnalyses
             .Where(s => s.ThreatScore is not null)
             .Select(s => s.ThreatScore)
             .Average();

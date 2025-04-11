@@ -6,8 +6,8 @@ using MassTransit;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.MultiAnalyzer.Common.Abstractions;
 using Openlysis.MultiAnalyzer.Core.Abstractions;
 using Openlysis.MultiAnalyzer.Core.Broker.Files;
@@ -20,7 +20,7 @@ namespace Openlysis.MultiAnalyzer.Adapters.Files;
 public class FileMultiAnalysisService : IFileMultiAnalysisService
 {
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _multiAnalysisRepository;
+    private readonly IRepository<FileMultiAnalysis, GlobalId> _multiAnalysisRepository;
     private readonly IFileStorageProvider _fileStorageProvider;
     private readonly ISendEndpointProvider _sendEndpointProvider;
 
@@ -35,7 +35,7 @@ public class FileMultiAnalysisService : IFileMultiAnalysisService
         IEndpointUriProvider endpointUriProvider,
         ISendEndpointProvider sendEndpointProvider,
         IFileStorageProvider fileStorageProvider,
-        IRepository<FileMultiAnalysis, FileMultiAnalysisId> multiAnalysisRepository)
+        IRepository<FileMultiAnalysis, GlobalId> multiAnalysisRepository)
     {
         _endpointUriProvider = endpointUriProvider;
         _sendEndpointProvider = sendEndpointProvider;

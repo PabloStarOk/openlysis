@@ -2,8 +2,8 @@ using ErrorOr;
 
 using MediatR;
 
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Application.Files.Queries;
 
@@ -11,5 +11,5 @@ namespace Openlysis.Application.Files.Queries;
 /// Query to retrieve a file analysis by its id.
 /// </summary>
 /// <param name="FileMultiAnalysisId">A <see cref="FileMultiAnalysisId"/>.</param>
-public record FileMultiAnalysisQuery(FileMultiAnalysisId FileMultiAnalysisId)
+public record FileMultiAnalysisQuery(GlobalId FileMultiAnalysisId)
     : IRequest<ErrorOr<FileMultiAnalysis>>;

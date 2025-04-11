@@ -15,7 +15,7 @@ public interface IUrlMultiAnalyzer
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     public Task StartAnalysisAsync(
-        MultiAnalysisId multiAnalysisId,
+        GlobalId multiAnalysisId,
         Uri url,
         CancellationToken cancellationToken = default);
 }

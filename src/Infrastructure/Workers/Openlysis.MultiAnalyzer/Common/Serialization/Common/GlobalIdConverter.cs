@@ -7,14 +7,14 @@ using Openlysis.Domain.Common.ValueObjects;
 namespace Openlysis.MultiAnalyzer.Common.Serialization.Common;
 
 /// <summary>
-/// Converts a <see cref="MultiAnalysisId"/> object to and from JSON.
+/// Converts a <see cref="GlobalId"/> object to and from JSON.
 /// </summary>
-public class MultiAnalysisIdConverter : JsonConverter<MultiAnalysisId>
+public class GlobalIdConverter : JsonConverter<GlobalId>
 {
     private const string IdKey = "id";
 
     /// <inheritdoc/>
-    public override MultiAnalysisId Read(
+    public override GlobalId Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options)
@@ -29,17 +29,17 @@ public class MultiAnalysisIdConverter : JsonConverter<MultiAnalysisId>
 
         // Create ID object.
         Guid guid = Guid.Parse(id);
-        var multiAnalysisId = MultiAnalysisId.Create(guid);
+        var globalId = GlobalId.Parse(guid);
 
         // Read end of object
         reader.Read();
-        return multiAnalysisId;
+        return globalId;
     }
 
     /// <inheritdoc/>
     public override void Write(
         Utf8JsonWriter writer,
-        MultiAnalysisId value,
+        GlobalId value,
         JsonSerializerOptions options)
     {
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? IdKey;

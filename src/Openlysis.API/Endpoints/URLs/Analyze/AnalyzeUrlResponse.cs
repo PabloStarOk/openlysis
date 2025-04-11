@@ -26,9 +26,9 @@ public record AnalyzeUrlResponse(
     {
         return new AnalyzeUrlResponse(
             source.Id.Value.ToString(),
-            source.UrlHashSet.Sha256,
-            source.UrlHashSet.Md5,
-            source.UrlHashSet.Sha1,
-            source.UrlHashSet.Sha512);
+            source.DataHashSet.Sha256,
+            source.DataHashSet.Md5,
+            source.DataHashSet.Sha1,
+            source.DataHashSet.Sha512);
     }
 }

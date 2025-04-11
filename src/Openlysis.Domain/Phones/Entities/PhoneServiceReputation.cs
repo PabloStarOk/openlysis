@@ -9,7 +9,7 @@ namespace Openlysis.Domain.Phones.Entities;
 /// <summary>
 /// Represents the reputation of a phone given by a service.
 /// </summary>
-public class PhoneServiceReputation : Entity<Id>
+public class PhoneServiceReputation : Entity<GlobalId>
 {
     /// <summary>
     /// Gets the name of the service.
@@ -40,7 +40,7 @@ public class PhoneServiceReputation : Entity<Id>
     /// <param name="threatZone">The threat zone associated with the verdict.</param>
     /// <param name="phoneInfo">The phone information associated with the service.</param>
     private PhoneServiceReputation(
-        Id id,
+        GlobalId id,
         string serviceName,
         Verdict verdict,
         ThreatZone threatZone,
@@ -74,10 +74,10 @@ public class PhoneServiceReputation : Entity<Id>
         Verdict verdict,
         PhoneInfo phoneInfo)
     {
-        Id id = Id.CreateUnique();
+        GlobalId globalId = GlobalId.CreateUnique();
         ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
         return new PhoneServiceReputation(
-            id,
+            globalId,
             serviceName,
             verdict,
             threatZone,

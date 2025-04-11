@@ -24,14 +24,14 @@ public class UpdateUrlMultiAnalysisConsumer : IConsumer<UpdateUrlMultiAnalysis>
     /// </summary>
     public const string EndpointName = "update-url-multi-analysis";
 
-    private readonly IRepository<UrlMultiAnalysis, MultiAnalysisId> _repository;
+    private readonly IRepository<UrlMultiAnalysis, GlobalId> _repository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateUrlMultiAnalysisConsumer"/> class.
     /// </summary>
     /// <param name="repository">The repository for URL multi-analysis.</param>
     public UpdateUrlMultiAnalysisConsumer(
-        IRepository<UrlMultiAnalysis, MultiAnalysisId> repository)
+        IRepository<UrlMultiAnalysis, GlobalId> repository)
     {
         _repository = repository;
     }

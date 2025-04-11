@@ -1,5 +1,5 @@
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.MultiAnalyzer.Adapters.Broker.Files;
 
@@ -9,5 +9,5 @@ namespace Openlysis.MultiAnalyzer.Adapters.Broker.Files;
 /// <param name="Id">The unique identifier for the file multi-analysis.</param>
 /// <param name="ServiceFileAnalyses">An array of service file analyses associated with the update.</param>
 public record UpdateFileMultiAnalysis(
-    FileMultiAnalysisId Id,
+    GlobalId Id,
     FileServiceAnalysis[] ServiceFileAnalyses);

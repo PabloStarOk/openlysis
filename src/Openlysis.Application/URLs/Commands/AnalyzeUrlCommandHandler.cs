@@ -20,7 +20,7 @@ public class AnalyzeUrlCommandHandler : IRequestHandler<AnalyzeUrlCommand, Error
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
     private readonly IUrlMultiAnalyzer _urlMultiAnalyzer;
-    private readonly IRepository<UrlMultiAnalysis, MultiAnalysisId> _repository;
+    private readonly IRepository<UrlMultiAnalysis, GlobalId> _repository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeUrlCommandHandler"/> class.
@@ -33,7 +33,7 @@ public class AnalyzeUrlCommandHandler : IRequestHandler<AnalyzeUrlCommand, Error
         TimeProvider timeProvider,
         IHashService hashService,
         IUrlMultiAnalyzer urlMultiAnalyzer,
-        IRepository<UrlMultiAnalysis, MultiAnalysisId> repository)
+        IRepository<UrlMultiAnalysis, GlobalId> repository)
     {
         _timeProvider = timeProvider;
         _hashService = hashService;
@@ -54,7 +54,6 @@ public class AnalyzeUrlCommandHandler : IRequestHandler<AnalyzeUrlCommand, Error
         }
 
         var multiAnalysis = UrlMultiAnalysis.Create(
-            4,
             request.UserId,
             request.IsPrivate,
             _timeProvider.GetUtcNow().UtcDateTime,

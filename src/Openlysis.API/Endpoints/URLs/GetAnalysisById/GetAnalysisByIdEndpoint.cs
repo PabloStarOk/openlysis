@@ -75,7 +75,7 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
         UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
 
-        var multiAnalysisId = MultiAnalysisId.Create(req.Id);
+        var multiAnalysisId = GlobalId.Parse(req.Id);
 
         var query = new UrlMultiAnalysisQuery(
             multiAnalysisId,

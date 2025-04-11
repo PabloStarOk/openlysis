@@ -41,7 +41,7 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                dbValue => MultiAnalysisId.Create(dbValue));
+                dbValue => GlobalId.Parse(dbValue));
 
         builder.Property(u => u.IsPrivate)
             .HasColumnName("IsPrivate")
@@ -82,12 +82,12 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
                 u => u.AbsoluteUri,
                 dbValue => new Uri(dbValue));
 
-        builder.HasOne(u => u.UrlHashSet)
+        builder.HasOne(u => u.DataHashSet)
             .WithMany()
             .HasForeignKey("Sha256")
             .IsRequired();
 
-        builder.Navigation(u => u.UrlHashSet)
+        builder.Navigation(u => u.DataHashSet)
             .AutoInclude();
 
         builder.Property(u => u.UserId)

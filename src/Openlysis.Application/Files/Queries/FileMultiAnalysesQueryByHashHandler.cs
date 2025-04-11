@@ -1,8 +1,8 @@
 using MediatR;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Application.Files.Queries;
 
@@ -11,14 +11,14 @@ namespace Openlysis.Application.Files.Queries;
 /// </summary>
 public class FileMultiAnalysesQueryByHashHandler : IRequestHandler<FileMultiAnalysesQueryByHash, IReadOnlyList<FileMultiAnalysis>>
 {
-    private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _fileMultiAnalysisRepository;
+    private readonly IRepository<FileMultiAnalysis, GlobalId> _fileMultiAnalysisRepository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMultiAnalysesQueryByHashHandler"/> class.
     /// </summary>
     /// <param name="fileMultiAnalysisRepository">Repository of file analyses.</param>
     public FileMultiAnalysesQueryByHashHandler(
-        IRepository<FileMultiAnalysis, FileMultiAnalysisId> fileMultiAnalysisRepository)
+        IRepository<FileMultiAnalysis, GlobalId> fileMultiAnalysisRepository)
     {
         _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
     }
@@ -44,10 +44,10 @@ public class FileMultiAnalysesQueryByHashHandler : IRequestHandler<FileMultiAnal
 
         IReadOnlyList<FileMultiAnalysis> fileAnalyses = await _fileMultiAnalysisRepository.GetManyAsync(
             query.FileAnalysesAmount,
-            f => f.ContentHashSet.Sha256 == query.Hash
-                || f.ContentHashSet.Md5 == query.Hash
-                || f.ContentHashSet.Sha1 == query.Hash
-                || f.ContentHashSet.Sha512 == query.Hash,
+            f => f.DataHashSet.Sha256 == query.Hash
+                || f.DataHashSet.Md5 == query.Hash
+                || f.DataHashSet.Sha1 == query.Hash
+                || f.DataHashSet.Sha512 == query.Hash,
             orderBy,
             cancellationToken);
 

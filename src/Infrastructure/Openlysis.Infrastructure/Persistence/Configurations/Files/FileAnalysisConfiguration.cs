@@ -41,7 +41,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                dbValue => FileMultiAnalysisId.Create(dbValue));
+                dbValue => GlobalId.Parse(dbValue));
 
         builder.Property(f => f.StartedDate)
             .HasColumnName("StartedDate")
@@ -96,12 +96,12 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
                     .IsRequired();
             });
 
-        builder.HasOne(f => f.ContentHashSet)
+        builder.HasOne(f => f.DataHashSet)
             .WithMany()
             .HasForeignKey("Sha256")
             .IsRequired();
 
-        builder.Navigation(f => f.ContentHashSet)
+        builder.Navigation(f => f.DataHashSet)
             .AutoInclude();
 
         builder.Ignore(f => f.AllReports);
@@ -114,7 +114,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
     /// <param name="builder">The builder to be used to configure the entity.</param>
     private static void ConfigureServiceFileAnalysesTable(EntityTypeBuilder<FileMultiAnalysis> builder)
     {
-        builder.OwnsMany(f => f.ServiceFileAnalyses, analysesBuilder =>
+        builder.OwnsMany(f => f.ServiceAnalyses, analysesBuilder =>
         {
             analysesBuilder.ToTable("ServiceFileAnalyses");
             analysesBuilder.WithOwner().HasForeignKey("FileMultiAnalysisId");

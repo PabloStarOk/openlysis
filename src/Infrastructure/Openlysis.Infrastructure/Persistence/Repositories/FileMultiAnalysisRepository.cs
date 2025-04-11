@@ -3,15 +3,15 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Infrastructure.Persistence.Repositories;
 
 /// <summary>
 /// Repository to access <see cref="FileMultiAnalysis"/>.
 /// </summary>
-public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMultiAnalysisId>
+public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, GlobalId>
 {
     private readonly ApplicationDbContext _dbContext;
 
@@ -29,13 +29,13 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
     {
         var hashSetExists = await _dbContext.ContentHashSets
             .AnyAsync(
-                c => c.Sha256 == fileMultiAnalysis.ContentHashSet.Sha256,
+                c => c.Sha256 == fileMultiAnalysis.DataHashSet.Sha256,
                 cancellationToken);
 
         if (hashSetExists)
         {
             _dbContext.ChangeTracker.Clear();
-            _dbContext.Attach(fileMultiAnalysis.ContentHashSet).State = EntityState.Unchanged;
+            _dbContext.Attach(fileMultiAnalysis.DataHashSet).State = EntityState.Unchanged;
         }
 
         await _dbContext.AddAsync(fileMultiAnalysis, cancellationToken);
@@ -43,7 +43,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
     }
 
     /// <inheritdoc/>
-    public async Task<FileMultiAnalysis?> GetAsync(FileMultiAnalysisId fileMultiAnalysisId, CancellationToken cancellationToken = default)
+    public async Task<FileMultiAnalysis?> GetAsync(GlobalId fileMultiAnalysisId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.FileMultiAnalyses
             .AsSplitQuery()
@@ -91,7 +91,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, FileMu
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ExistsAsync(FileMultiAnalysisId id, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsAsync(GlobalId id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.FileMultiAnalyses.AnyAsync(f => f.Id == id, cancellationToken);
     }

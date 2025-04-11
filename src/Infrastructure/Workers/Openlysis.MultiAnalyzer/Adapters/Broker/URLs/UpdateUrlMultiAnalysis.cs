@@ -10,5 +10,5 @@ namespace Openlysis.MultiAnalyzer.Adapters.Broker.URLs;
 /// <param name="MultiAnalysisId">The ID of the multi-analysis.</param>
 /// <param name="Analyses">The analyses to be updated.</param>
 public record UpdateUrlMultiAnalysis(
-    MultiAnalysisId MultiAnalysisId,
+    GlobalId MultiAnalysisId,
     params UrlServiceAnalysis[] Analyses);

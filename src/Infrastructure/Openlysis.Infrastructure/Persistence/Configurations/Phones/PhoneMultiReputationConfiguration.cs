@@ -40,7 +40,7 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                dbValue => Id.Create(dbValue));
+                dbValue => GlobalId.Parse(dbValue));
 
         builder.Property(p => p.AssessmentDate)
             .HasColumnName("AssessmentDate")
@@ -80,7 +80,7 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                dbValue => Id.Create(dbValue));
+                dbValue => GlobalId.Parse(dbValue));
 
         builder.Property(p => p.ServiceName)
             .HasColumnName("ServiceName")

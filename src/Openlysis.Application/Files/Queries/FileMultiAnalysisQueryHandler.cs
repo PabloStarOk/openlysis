@@ -3,8 +3,8 @@ using ErrorOr;
 using MediatR;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Application.Files.Queries;
 
@@ -14,14 +14,14 @@ namespace Openlysis.Application.Files.Queries;
 public class FileMultiAnalysisQueryHandler
     : IRequestHandler<FileMultiAnalysisQuery, ErrorOr<FileMultiAnalysis>>
 {
-    private readonly IRepository<FileMultiAnalysis, FileMultiAnalysisId> _fileMultiAnalysisRepository;
+    private readonly IRepository<FileMultiAnalysis, GlobalId> _fileMultiAnalysisRepository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMultiAnalysisQueryHandler"/> class.
     /// </summary>
     /// <param name="fileMultiAnalysisRepository">Repository of file analyses.</param>
     public FileMultiAnalysisQueryHandler(
-        IRepository<FileMultiAnalysis, FileMultiAnalysisId> fileMultiAnalysisRepository)
+        IRepository<FileMultiAnalysis, GlobalId> fileMultiAnalysisRepository)
     {
         _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
     }

@@ -6,8 +6,8 @@ using MediatR;
 
 using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.Application.Files.Queries;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.GetAnalysisById;
 
@@ -87,7 +87,7 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
             return;
         }
 
-        var fileAnalysisId = FileMultiAnalysisId.Create(guid);
+        var fileAnalysisId = GlobalId.Parse(guid);
         var query = new FileMultiAnalysisQuery(fileAnalysisId);
 
         ErrorOr<FileMultiAnalysis> mediatorResult = await _mediator.Send(query, ct);

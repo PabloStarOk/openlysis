@@ -11,7 +11,7 @@ namespace Openlysis.Infrastructure.Persistence.Repositories;
 /// <summary>
 /// Repository for managing <see cref="PhoneMultiReputation"/> entities.
 /// </summary>
-public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, Id>
+public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, GlobalId>
 {
     private readonly ApplicationDbContext _dbContext;
 
@@ -27,12 +27,12 @@ public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, 
 
     /// <inheritdoc/>
     public async Task<PhoneMultiReputation?> GetAsync(
-        Id id,
+        GlobalId globalId,
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.PhoneMultiReputations
             .AsSplitQuery()
-            .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
+            .SingleOrDefaultAsync(p => p.Id == globalId, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -81,9 +81,9 @@ public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, 
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ExistsAsync(Id id, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsAsync(GlobalId globalId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.PhoneMultiReputations
-            .AnyAsync(p => p.Id == id, cancellationToken);
+            .AnyAsync(p => p.Id == globalId, cancellationToken);
     }
 }

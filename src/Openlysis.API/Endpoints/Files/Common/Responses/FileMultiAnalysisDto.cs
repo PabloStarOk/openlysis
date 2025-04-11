@@ -35,7 +35,7 @@ public record FileMultiAnalysisDto(
     public static FileMultiAnalysisDto Parse(FileMultiAnalysis source)
     {
         // Parse the service analyses from the source object
-        var serviceAnalyses = source.ServiceFileAnalyses.Select(
+        var serviceAnalyses = source.ServiceAnalyses.Select(
             s =>
             {
                 // Parse the reports from the service analysis
@@ -62,7 +62,7 @@ public record FileMultiAnalysisDto(
             source.AverageThreatZone.ToString(),
             source.Status.ToString(),
             source.FileMetadata,
-            source.ContentHashSet,
+            source.DataHashSet,
             serviceAnalyses,
             source.ReportsAmount);
     }

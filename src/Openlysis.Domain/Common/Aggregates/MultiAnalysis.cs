@@ -1,0 +1,248 @@
+using Openlysis.Domain.Common.Abstractions;
+using Openlysis.Domain.Common.Constants;
+using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Domain.Users.ValueObjects;
+
+namespace Openlysis.Domain.Common.Aggregates;
+
+/// <summary>
+/// Defines a base aggregate for multiple analyses from external services.
+/// </summary>
+/// <typeparam name="TServiceAnalysis">
+/// The type of service analysis associated with the multi-analysis.
+/// Must inherit from <see cref="ServiceAnalysis"/>.
+/// </typeparam>
+public abstract class MultiAnalysis<TServiceAnalysis>
+    : AggregateRoot<GlobalId>
+    where TServiceAnalysis : ServiceAnalysis
+{
+    /// <summary>
+    /// A collection of service analyses associated with the multi-analysis.
+    /// This list is used internally to manage the service analyses.
+    /// </summary>
+    protected readonly List<TServiceAnalysis> InternalServiceAnalyses = [];
+
+    /// <summary>
+    /// Gets the identifier of the user associated with the analysis.
+    /// </summary>
+    public UserId UserId { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the analysis is private.
+    /// </summary>
+    public bool IsPrivate { get; }
+
+    /// <summary>
+    /// Gets the date and time when the analysis started.
+    /// </summary>
+    public DateTime StartedDate { get; }
+
+    /// <summary>
+    /// Gets the current status of the analysis.
+    /// </summary>
+    public AnalysisStatus Status { get; private set; } = AnalysisStatus.Queued;
+
+    /// <summary>
+    /// Gets or sets the average verdict of the analysis.
+    /// </summary>
+    public Verdict AverageVerdict { get; protected set; } = Verdict.Unknown;
+
+    /// <summary>
+    /// Gets the average threat zone of the analysis.
+    /// </summary>
+    public ThreatZone AverageThreatZone { get; private set; } = ThreatZone.Unknown;
+
+    /// <summary>
+    /// Gets the set of data hashes associated with the analysis.
+    /// </summary>
+    public ContentHashSet DataHashSet { get; }
+
+    /// <summary>
+    /// Gets the list of service analyses associated with the analysis.
+    /// </summary>
+    public IReadOnlyList<TServiceAnalysis> ServiceAnalyses => InternalServiceAnalyses;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MultiAnalysis{TServiceAnalysis}"/> class.
+    /// </summary>
+    /// <param name="id">The unique identifier for the multi-analysis.</param>
+    /// <param name="userId">The identifier of the user associated with the analysis.</param>
+    /// <param name="isPrivate">Indicates whether the analysis is private.</param>
+    /// <param name="startedDate">The date and time when the analysis started.</param>
+    /// <param name="status">The current status of the analysis.</param>
+    /// <param name="averageVerdict">The average verdict of the analysis.</param>
+    /// <param name="averageThreatZone">The average threat zone of the analysis.</param>
+    /// <param name="dataHashSet">The set of data hashes associated with the analysis.</param>
+    protected MultiAnalysis(
+        GlobalId id,
+        UserId userId,
+        bool isPrivate,
+        DateTime startedDate,
+        AnalysisStatus status,
+        Verdict averageVerdict,
+        ThreatZone averageThreatZone,
+        ContentHashSet dataHashSet)
+        : base(id)
+    {
+        UserId = userId;
+        IsPrivate = isPrivate;
+        StartedDate = startedDate;
+        Status = status;
+        AverageVerdict = averageVerdict;
+        AverageThreatZone = averageThreatZone;
+        DataHashSet = dataHashSet;
+    }
+
+    // For EF Core.
+#pragma warning disable CS8618
+#pragma warning disable S1144
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MultiAnalysis{TServiceAnalysis}"/> class for EF Core.
+    /// </summary>
+    /// <remarks>
+    /// This constructor is required by EF Core and should not be used directly in application code.
+    /// </remarks>
+    protected MultiAnalysis()
+    {
+    }
+#pragma warning restore S1144
+#pragma warning restore CS8618
+
+    /// <summary>
+    /// Adds a new service analysis to the collection.
+    /// </summary>
+    /// <param name="analysis">The service analysis to add.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the provided analysis is null.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the analysis already exists in the collection.</exception>
+    public void AddServiceAnalysis(TServiceAnalysis analysis)
+    {
+        ArgumentNullException.ThrowIfNull(analysis);
+        if (InternalServiceAnalyses.Contains(analysis))
+        {
+            throw new InvalidOperationException("Service analysis already contains the given UrlServiceAnalysis.");
+        }
+
+        InternalServiceAnalyses.Add(analysis);
+        UpdateInformation();
+    }
+
+    /// <summary>
+    /// Updates an existing service analysis in the collection.
+    /// </summary>
+    /// <param name="analysis">The service analysis to update.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the service analysis does not exist in the collection.
+    /// </exception>
+    public void UpdateServiceAnalysis(TServiceAnalysis analysis)
+    {
+        if (!InternalServiceAnalyses.Contains(analysis))
+        {
+            throw new InvalidOperationException("Service analysis does not exist in the collection.");
+        }
+
+        int analysisIndex = InternalServiceAnalyses.IndexOf(analysis);
+        if (InternalServiceAnalyses[analysisIndex] is not { Status: AnalysisStatus.Queued or AnalysisStatus.InProgress })
+        {
+            return;
+        }
+
+        // TODO: Check if it can update without having to use index.
+        HandleServiceAnalysisUpdate(analysisIndex, analysis);
+        UpdateInformation();
+    }
+
+    /// <summary>
+    /// Invoked when an existing service analysis in the collection is updated.
+    /// </summary>
+    /// <param name="index">The index of the service analysis being updated.</param>
+    /// <param name="analysis">The updated service analysis.</param>
+    protected abstract void HandleServiceAnalysisUpdate(int index, TServiceAnalysis analysis);
+
+    /// <summary>
+    /// Invoked when the information of the multi-analysis is updated.
+    /// This method can be overridden in derived classes to implement custom update logic.
+    /// </summary>
+    protected virtual void OnUpdateInformation()
+    {
+    }
+
+    /// <summary>
+    /// Updates the average verdict of the analysis based on the associated service analyses.
+    /// </summary>
+    protected abstract void HandleAverageVerdictUpdate();
+
+    /// <summary>
+    /// Updates the average threat zone of the analysis based on the current average verdict.
+    /// </summary>
+    private void UpdateAverageThreatZone()
+    {
+        AverageThreatZone = ThreatZoneMapping.Map[AverageVerdict];
+    }
+
+    /// <summary>
+    /// Updates the overall status of the analysis based on the statuses of the associated service analyses.
+    /// </summary>
+    /// <remarks>
+    /// The method evaluates the statuses of all service analyses in the collection and determines the most appropriate
+    /// overall status for the analysis. It handles scenarios such as all analyses timing out, failing, or completing,
+    /// and prioritizes the most frequent or highest status for queued or in-progress analyses.
+    /// </remarks>
+    private void UpdateStatus()
+    {
+        if (InternalServiceAnalyses.Count < 1)
+        {
+            return;
+        }
+
+        IEnumerable<TServiceAnalysis> analyses = InternalServiceAnalyses;
+
+        // If all timeout, set as timeout
+        if (analyses.All(a => a.Status is AnalysisStatus.Timeout))
+        {
+            Status = AnalysisStatus.Timeout;
+            return;
+        }
+
+        // If all failed, set as failed
+        if (analyses.All(a => a.Status is AnalysisStatus.Failed))
+        {
+            Status = AnalysisStatus.Failed;
+            return;
+        }
+
+        // If is not queued nor in-progress and there's at least one completed, set as completed.
+        if (analyses.All(a => a.Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
+            && analyses.Any(a => a.Status is AnalysisStatus.Completed))
+        {
+            Status = AnalysisStatus.Completed;
+            return;
+        }
+
+        // Queued or in progress according to most frequent or higher status.
+        var statusCount = analyses.GroupBy(a => a.Status)
+            .ToDictionary(g => g.Key, g => g.Count())
+            .Where(g => g.Key
+                is not AnalysisStatus.Completed
+                and not AnalysisStatus.Timeout
+                and not AnalysisStatus.Failed);
+
+        Status = statusCount.OrderByDescending(s => s.Value)
+            .ThenBy(s => s.Key)
+            .First().Key;
+    }
+
+    /// <summary>
+    /// Updates the information of the multi-analysis, including the average verdict,
+    /// average threat zone, and overall status. This method also invokes any additional
+    /// update logic defined in <see cref="OnUpdateInformation"/>.
+    /// </summary>
+    private void UpdateInformation()
+    {
+        HandleAverageVerdictUpdate();
+        UpdateAverageThreatZone();
+        OnUpdateInformation();
+        UpdateStatus();
+    }
+}

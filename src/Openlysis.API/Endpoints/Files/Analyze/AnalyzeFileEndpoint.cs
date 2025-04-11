@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 using ErrorOr;
 
 using FastEndpoints;
@@ -5,6 +7,7 @@ using FastEndpoints;
 using MediatR;
 
 using Openlysis.Application.Files.Commands;
+using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
@@ -77,8 +80,12 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
                 detail: "Provided file has no content."));
         }
 
+        Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
+        var userId = UserId.Create(Guid.Parse(claim.Value));
+
         await using var fileData = request.File.OpenReadStream();
         var command = new AnalyzeFileCommand(
+            userId,
             request.File.FileName,
             request.File.ContentType,
             fileData,
@@ -112,10 +119,10 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
 
         Response = new AnalyzeFileResponse(
             mediatorResult.Value.Id.Value.ToString(),
-            mediatorResult.Value.ContentHashSet.Md5,
-            mediatorResult.Value.ContentHashSet.Sha1,
-            mediatorResult.Value.ContentHashSet.Sha256,
-            mediatorResult.Value.ContentHashSet.Sha512);
+            mediatorResult.Value.DataHashSet.Md5,
+            mediatorResult.Value.DataHashSet.Sha1,
+            mediatorResult.Value.DataHashSet.Sha256,
+            mediatorResult.Value.DataHashSet.Sha512);
 
         var routeValues = new Dictionary<string, string>
         {

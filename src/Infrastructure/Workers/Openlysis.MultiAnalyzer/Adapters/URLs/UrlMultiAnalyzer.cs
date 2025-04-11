@@ -34,7 +34,7 @@ public class UrlMultiAnalyzer : IUrlMultiAnalyzer
 
     /// <inheritdoc/>
     public async Task StartAnalysisAsync(
-        MultiAnalysisId multiAnalysisId,
+        GlobalId multiAnalysisId,
         Uri url,
         CancellationToken cancellationToken = default)
     {

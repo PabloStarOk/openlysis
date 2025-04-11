@@ -12,7 +12,7 @@ namespace Openlysis.Infrastructure.Persistence.Repositories;
 /// <summary>
 /// Repository for managing <see cref="UrlMultiAnalysis"/> entities.
 /// </summary>
-public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAnalysisId>
+public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId>
 {
     private readonly ApplicationDbContext _dbContext;
 
@@ -27,7 +27,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
 
     /// <inheritdoc/>
     public async Task<UrlMultiAnalysis?> GetAsync(
-        MultiAnalysisId id,
+        GlobalId id,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(id);
@@ -69,12 +69,12 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
         ArgumentNullException.ThrowIfNull(model);
 
         bool hashExists = await _dbContext.ContentHashSets
-            .AnyAsync(c => c.Sha256 == model.UrlHashSet.Sha256, cancellationToken);
+            .AnyAsync(c => c.Sha256 == model.DataHashSet.Sha256, cancellationToken);
 
         if (hashExists)
         {
             _dbContext.ChangeTracker.Clear();
-            _dbContext.Attach(model.UrlHashSet).State = EntityState.Unchanged;
+            _dbContext.Attach(model.DataHashSet).State = EntityState.Unchanged;
         }
 
         EntityEntry<UrlMultiAnalysis> multiAnalysisEntry = await _dbContext.AddAsync(model, cancellationToken);
@@ -104,7 +104,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, MultiAna
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ExistsAsync(MultiAnalysisId id, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsAsync(GlobalId id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.UrlMultiAnalyses.AnyAsync(u => u.Id == id, cancellationToken);
     }

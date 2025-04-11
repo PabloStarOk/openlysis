@@ -1,4 +1,4 @@
-using Openlysis.Domain.Files.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.MultiAnalyzer.Core.Broker.Files;
 
@@ -13,7 +13,7 @@ namespace Openlysis.MultiAnalyzer.Core.Broker.Files;
 /// <param name="FilePassword">The password for the file, if any.</param>
 /// <param name="IsPrivateFile">Indicates if the file is private.</param>
 public record AnalyzeFile(
-    FileMultiAnalysisId FileMultiAnalysisId,
+    GlobalId FileMultiAnalysisId,
     string FileName,
     string FileContentType,
     string FileId,
