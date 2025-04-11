@@ -7,7 +7,7 @@ namespace Openlysis.Domain.Files.Entities;
 /// <summary>
 /// Represents a file analysis of a service.
 /// </summary>
-public class ServiceFileAnalysis : ServiceAnalysis
+public class FileServiceAnalysis : ServiceAnalysis
 {
     private readonly List<Report> _reports = [];
 
@@ -17,13 +17,13 @@ public class ServiceFileAnalysis : ServiceAnalysis
     public IReadOnlyList<Report> Reports => _reports.AsReadOnly();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ServiceFileAnalysis"/> class.
+    /// Initializes a new instance of the <see cref="FileServiceAnalysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
-    private ServiceFileAnalysis(
+    private FileServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisStatus status,
@@ -36,29 +36,29 @@ public class ServiceFileAnalysis : ServiceAnalysis
     // For EF core.
 #pragma warning disable CS8618
 #pragma warning disable S1144
-    private ServiceFileAnalysis()
+    private FileServiceAnalysis()
     {
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of <see cref="ServiceFileAnalysis"/> with the specified parameters.
+    /// Creates a new instance of <see cref="FileServiceAnalysis"/> with the specified parameters.
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="reports">The list of reports associated with the analysis.</param>
     /// <param name="jobId">An optional job identifier associated with the analysis.</param>
-    /// <returns>A new instance of <see cref="ServiceFileAnalysis"/>.</returns>
-    public static ServiceFileAnalysis Create(
+    /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
+    public static FileServiceAnalysis Create(
         string id,
         string serviceName,
         AnalysisStatus status,
         List<Report> reports,
         string? jobId = "")
     {
-        return new ServiceFileAnalysis(
+        return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             status,
@@ -66,18 +66,18 @@ public class ServiceFileAnalysis : ServiceAnalysis
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="ServiceFileAnalysis"/> with the specified parameters.
+    /// Creates a new instance of <see cref="FileServiceAnalysis"/> with the specified parameters.
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The initial status of the analysis.</param>
-    /// <returns>A new instance of <see cref="ServiceFileAnalysis"/>.</returns>
-    public static ServiceFileAnalysis Create(
+    /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
+    public static FileServiceAnalysis Create(
         string id,
         string serviceName,
         AnalysisStatus status)
     {
-        return new ServiceFileAnalysis(
+        return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id),
             serviceName,
             status,

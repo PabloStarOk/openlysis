@@ -11,7 +11,7 @@ namespace Openlysis.Domain.Files;
 /// </summary>
 public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
 {
-    private readonly List<ServiceFileAnalysis> _serviceFileAnalyses = [];
+    private readonly List<FileServiceAnalysis> _serviceFileAnalyses = [];
 
     /// <summary>
     /// Gets the date and time when the analysis started.
@@ -46,7 +46,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// <summary>
     /// Gets the list of service file analyses.
     /// </summary>
-    public IReadOnlyList<ServiceFileAnalysis> ServiceFileAnalyses => _serviceFileAnalyses.AsReadOnly();
+    public IReadOnlyList<FileServiceAnalysis> ServiceFileAnalyses => _serviceFileAnalyses.AsReadOnly();
 
     /// <summary>
     /// Gets all reports from the service file analyses.
@@ -71,7 +71,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// <param name="contentHashSet">The set of hash of the file.</param>
     private FileMultiAnalysis(
         FileMultiAnalysisId id,
-        List<ServiceFileAnalysis> serviceFileAnalyses,
+        List<FileServiceAnalysis> serviceFileAnalyses,
         DateTime startedDate,
         Verdict averageVerdict,
         ThreatZone averageThreatZone,
@@ -108,7 +108,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
         DateTime startedDate,
         FileMetadata fileMetadata,
         ContentHashSet contentHashSet,
-        List<ServiceFileAnalysis> serviceFileAnalyses)
+        List<FileServiceAnalysis> serviceFileAnalyses)
     {
         return new FileMultiAnalysis(
             FileMultiAnalysisId.CreateUnique(),
@@ -124,7 +124,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// Adds a new service file analysis to the collection.
     /// </summary>
     /// <param name="analysis">The service file analysis to add.</param>
-    public void AddServiceAnalysis(ServiceFileAnalysis analysis)
+    public void AddServiceAnalysis(FileServiceAnalysis analysis)
     {
         if (_serviceFileAnalyses.Contains(analysis))
         {
@@ -141,7 +141,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// Updates an existing service file analysis in the collection.
     /// </summary>
     /// <param name="analysis">The service file analysis to update.</param>
-    public void UpdateServiceAnalysis(ServiceFileAnalysis analysis)
+    public void UpdateServiceAnalysis(FileServiceAnalysis analysis)
     {
         if (!_serviceFileAnalyses.Contains(analysis))
         {
@@ -160,7 +160,7 @@ public class FileMultiAnalysis : AggregateRoot<FileMultiAnalysisId>
     /// </summary>
     private void UpdateStatus()
     {
-        IEnumerable<ServiceFileAnalysis> analyses = _serviceFileAnalyses;
+        IEnumerable<FileServiceAnalysis> analyses = _serviceFileAnalyses;
 
         if (analyses.All(a => a.Status is AnalysisStatus.Completed))
         {

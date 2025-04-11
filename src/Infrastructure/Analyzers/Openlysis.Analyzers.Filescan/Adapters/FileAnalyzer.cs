@@ -20,7 +20,7 @@ namespace Openlysis.Analyzers.Filescan.Adapters;
 /// <summary>
 /// Represents a file scanner analyzer that implements the <see cref="IServiceAnalyzer{TAnalysis,TAnalysisId}"/> interface.
 /// </summary>
-public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ComposedServiceAnalysisId>
+public class FileAnalyzer : IServiceAnalyzer<FileServiceAnalysis, ComposedServiceAnalysisId>
 {
     /// <inheritdoc/>
     public string ServiceName => ServiceConstants.ServiceName;
@@ -74,7 +74,7 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ComposedServic
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<ServiceFileAnalysis>> GetAnalysisAsync(ComposedServiceAnalysisId analysisId, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<FileServiceAnalysis>> GetAnalysisAsync(ComposedServiceAnalysisId analysisId, CancellationToken cancellationToken = default)
     {
         var getScanRequest = new GetScanRequest(analysisId.Primary.Value);
 
@@ -101,7 +101,7 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ComposedServic
         }
 
         AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];
-        var serviceAnalysis = ServiceFileAnalysis.Create(
+        var serviceAnalysis = FileServiceAnalysis.Create(
             analysisResponse.FlowId,
             ServiceName,
             status);

@@ -38,10 +38,10 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private readonly ILogger<AnalyzeFileConsumer> _logger;
     private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ComposedServiceAnalysisId>> _analyzers;
+    private readonly IEnumerable<IServiceAnalyzer<FileServiceAnalysis, ComposedServiceAnalysisId>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
-    private readonly Dictionary<ComposedServiceAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
-    private readonly Func<ServiceFileAnalysis, bool> _analysisFinished = s =>
+    private readonly Dictionary<ComposedServiceAnalysisId, FileServiceAnalysis> _serviceFileAnalyses = [];
+    private readonly Func<FileServiceAnalysis, bool> _analysisFinished = s =>
         s.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
 
     private FileMultiAnalysisId _multiAnalysisId;
@@ -60,7 +60,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         IEndpointUriProvider endpointUriProvider,
         IOptionsMonitor<AnalyzeConsumerOptions> options,
         IFileStorageProvider fileStorageProvider,
-        IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ComposedServiceAnalysisId>> analyzers)
+        IEnumerable<IServiceAnalyzer<FileServiceAnalysis, ComposedServiceAnalysisId>> analyzers)
     {
         _logger = logger;
         _endpointUriProvider = endpointUriProvider;
@@ -114,7 +114,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
                 return;
             }
 
-            ServiceFileAnalysis analysis = analysisResult.Value;
+            FileServiceAnalysis analysis = analysisResult.Value;
             _serviceFileAnalyses.Add(analysis.Id, analysis);
         });
 
@@ -158,7 +158,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     }
 
     /// <summary>
-    /// Executes an HTTP request for each <see cref="ServiceFileAnalysis"/> to update them.
+    /// Executes an HTTP request for each <see cref="FileServiceAnalysis"/> to update them.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
@@ -179,7 +179,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
                     return;
                 }
 
-                ServiceFileAnalysis updatedAnalysis = result.Value;
+                FileServiceAnalysis updatedAnalysis = result.Value;
 
                 if (updatedAnalysis.Status != analysis.Status)
                 {
@@ -196,7 +196,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     }
 
     /// <summary>
-    /// Sends a request to update a <see cref="FileMultiAnalysis"/> using updated <see cref="ServiceFileAnalysis"/>.
+    /// Sends a request to update a <see cref="FileMultiAnalysis"/> using updated <see cref="FileServiceAnalysis"/>.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task SendUpdateAsync()

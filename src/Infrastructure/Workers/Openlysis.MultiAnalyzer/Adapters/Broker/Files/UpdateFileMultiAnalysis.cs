@@ -10,4 +10,4 @@ namespace Openlysis.MultiAnalyzer.Adapters.Broker.Files;
 /// <param name="ServiceFileAnalyses">An array of service file analyses associated with the update.</param>
 public record UpdateFileMultiAnalysis(
     FileMultiAnalysisId Id,
-    ServiceFileAnalysis[] ServiceFileAnalyses);
+    FileServiceAnalysis[] ServiceFileAnalyses);

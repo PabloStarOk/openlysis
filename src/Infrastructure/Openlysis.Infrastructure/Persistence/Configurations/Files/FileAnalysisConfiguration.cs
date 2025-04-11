@@ -154,7 +154,7 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
     /// Configures the Reports table.
     /// </summary>
     /// <param name="reportBuilder">The builder to be used to configure the entity.</param>
-    private static void ConfigureReportsTable(OwnedNavigationBuilder<ServiceFileAnalysis, Report> reportBuilder)
+    private static void ConfigureReportsTable(OwnedNavigationBuilder<FileServiceAnalysis, Report> reportBuilder)
     {
         reportBuilder.ToTable("Reports");
         reportBuilder.HasKey(r => r.Id);

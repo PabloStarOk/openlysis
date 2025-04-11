@@ -10,9 +10,9 @@ using Openlysis.Domain.Files.Entities;
 namespace Openlysis.MultiAnalyzer.Common.Serialization.Files;
 
 /// <summary>
-/// Converts a <see cref="ServiceFileAnalysis"/> object to and from JSON.
+/// Converts a <see cref="FileServiceAnalysis"/> object to and from JSON.
 /// </summary>
-public class ServiceFileAnalysisJsonConverter : JsonConverter<ServiceFileAnalysis>
+public class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnalysis>
 {
     private const string IdKey = "id";
     private const string ServiceNameKey = "servicename";
@@ -20,7 +20,7 @@ public class ServiceFileAnalysisJsonConverter : JsonConverter<ServiceFileAnalysi
     private const string ReportsKey = "reports";
 
     /// <inheritdoc/>
-    public override ServiceFileAnalysis Read(
+    public override FileServiceAnalysis Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options)
@@ -58,19 +58,19 @@ public class ServiceFileAnalysisJsonConverter : JsonConverter<ServiceFileAnalysi
             }
         }
 
-        return ServiceFileAnalysis.Create(id, serviceName, status, reports);
+        return FileServiceAnalysis.Create(id, serviceName, status, reports);
     }
 
     /// <inheritdoc/>
     public override void Write(
         Utf8JsonWriter writer,
-        ServiceFileAnalysis value,
+        FileServiceAnalysis value,
         JsonSerializerOptions options)
     {
-        string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? nameof(ServiceFileAnalysis.Id);
-        string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(ServiceFileAnalysis.ServiceName);
-        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(ServiceFileAnalysis.Status);
-        string reportsKey = options.PropertyNamingPolicy?.ConvertName(ReportsKey) ?? nameof(ServiceFileAnalysis.Reports);
+        string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? nameof(FileServiceAnalysis.Id);
+        string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(FileServiceAnalysis.ServiceName);
+        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(FileServiceAnalysis.Status);
+        string reportsKey = options.PropertyNamingPolicy?.ConvertName(ReportsKey) ?? nameof(FileServiceAnalysis.Reports);
 
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.ToString());
