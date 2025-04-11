@@ -6,6 +6,8 @@ namespace Openlysis.Domain.Common.ValueObjects;
 /// </summary>
 public record ComposedServiceAnalysisId
 {
+    private readonly string? _job;
+
     /// <summary>
     /// The character used to separate the primary ID and the job ID in a composed service analysis identifier.
     /// </summary>
@@ -19,7 +21,14 @@ public record ComposedServiceAnalysisId
     /// <summary>
     /// Gets an optional job identifier.
     /// </summary>
-    public string? Job { get; init; }
+    public string? Job
+    {
+        get => _job;
+        init
+        {
+            _job = string.IsNullOrWhiteSpace(value) ? null : value;
+        }
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ComposedServiceAnalysisId"/> class.
@@ -42,10 +51,9 @@ public record ComposedServiceAnalysisId
         string id,
         string? jobId = null)
     {
-        string? normalizedJobId = string.IsNullOrWhiteSpace(jobId) ? null : jobId;
         return new ComposedServiceAnalysisId(
             ServiceAnalysisId.Create(id),
-            normalizedJobId);
+            jobId);
     }
 
     /// <summary>
@@ -67,16 +75,12 @@ public record ComposedServiceAnalysisId
     public static ComposedServiceAnalysisId Parse(string input)
     {
         string[] values = input.Split(IdCharSeparator);
-        if (values is { Length: > 2 })
+        if (values.Length > 2)
         {
             throw new InvalidOperationException($"Composed ID contains more than two values separated by {IdCharSeparator}");
         }
 
-        string? jobId = null;
-        if (values is { Length: > 1 })
-        {
-            jobId = string.IsNullOrWhiteSpace(values[1]) ? null : values[1];
-        }
+        string? jobId = values.Length is 2 ? values[1] : null;
 
         return Create(values[0], jobId);
     }
@@ -84,7 +88,7 @@ public record ComposedServiceAnalysisId
     /// <inheritdoc/>
     public override string ToString()
     {
-        return string.IsNullOrWhiteSpace(Job)
+        return Job is null
             ? Primary.Value
             : $"{Primary.Value}{IdCharSeparator}{Job}";
     }
