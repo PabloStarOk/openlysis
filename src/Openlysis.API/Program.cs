@@ -1,7 +1,7 @@
 using Openlysis.API;
 using Openlysis.Application;
 using Openlysis.Infrastructure;
-using Openlysis.MultiAnalyzer.Application;
+using Openlysis.MultiAnalyzer.Adapters;
 
 var builder = WebApplication.CreateSlimBuilder();
 
