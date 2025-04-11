@@ -20,7 +20,7 @@ namespace Openlysis.Analyzers.Filescan.Adapters;
 /// <summary>
 /// Represents a file scanner analyzer that implements the <see cref="IServiceAnalyzer{TAnalysis,TAnalysisId}"/> interface.
 /// </summary>
-public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>
+public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ComposedServiceAnalysisId>
 {
     /// <inheritdoc/>
     public string ServiceName => ServiceConstants.ServiceName;
@@ -46,7 +46,7 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysi
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<ServiceAnalysisId>> AnalyzeAsync(FileAnalysisRequest request, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<ComposedServiceAnalysisId>> AnalyzeAsync(FileAnalysisRequest request, CancellationToken cancellationToken = default)
     {
         var options = ScanOptions.True;
         var scanRequest = new ScanRequest(
@@ -70,13 +70,13 @@ public class FileAnalyzer : IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysi
             return result.Errors;
         }
 
-        return ServiceAnalysisId.Create(result.Value.FlowId);
+        return ComposedServiceAnalysisId.Create(result.Value.FlowId);
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<ServiceFileAnalysis>> GetAnalysisAsync(ServiceAnalysisId analysisId, CancellationToken cancellationToken = default)
+    public async Task<ErrorOr<ServiceFileAnalysis>> GetAnalysisAsync(ComposedServiceAnalysisId analysisId, CancellationToken cancellationToken = default)
     {
-        var getScanRequest = new GetScanRequest(analysisId.Value);
+        var getScanRequest = new GetScanRequest(analysisId.Primary.Value);
 
         var httpClient = _httpClientFactory.CreateClient(ServiceName);
         ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(

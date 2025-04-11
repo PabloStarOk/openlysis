@@ -73,7 +73,7 @@ public class ServiceFileAnalysisJsonConverter : JsonConverter<ServiceFileAnalysi
         string reportsKey = options.PropertyNamingPolicy?.ConvertName(ReportsKey) ?? nameof(ServiceFileAnalysis.Reports);
 
         writer.WriteStartObject();
-        writer.WriteString(idKey, value.Id.Value);
+        writer.WriteString(idKey, value.Id.ToString());
         writer.WriteString(serviceNameKey, value.ServiceName);
         writer.WriteString(statusKey, value.Status.ToString());
 

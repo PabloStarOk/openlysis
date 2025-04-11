@@ -1,4 +1,4 @@
-using Openlysis.Domain.Common.Abstractions;
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 
@@ -7,19 +7,9 @@ namespace Openlysis.Domain.Files.Entities;
 /// <summary>
 /// Represents a file analysis of a service.
 /// </summary>
-public class ServiceFileAnalysis : Entity<ServiceAnalysisId>
+public class ServiceFileAnalysis : ServiceAnalysis
 {
     private readonly List<Report> _reports = [];
-
-    /// <summary>
-    /// Gets the name of the service.
-    /// </summary>
-    public string ServiceName { get; }
-
-    /// <summary>
-    /// Gets the status of the analysis.
-    /// </summary>
-    public AnalysisStatus Status { get; private set; }
 
     /// <summary>
     /// Gets the reports associated with the analysis as a read-only dictionary.
@@ -34,14 +24,12 @@ public class ServiceFileAnalysis : Entity<ServiceAnalysisId>
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
     private ServiceFileAnalysis(
-        ServiceAnalysisId id,
+        ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisStatus status,
         List<Report> reports)
-        : base(id)
+        : base(id, serviceName, status)
     {
-        ServiceName = serviceName;
-        Status = status;
         _reports = reports;
     }
 
@@ -60,16 +48,18 @@ public class ServiceFileAnalysis : Entity<ServiceAnalysisId>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The initial status of the analysis.</param>
-    /// <param name="reports">The dictionary of reports associated with the analysis.</param>
+    /// <param name="reports">The list of reports associated with the analysis.</param>
+    /// <param name="jobId">An optional job identifier associated with the analysis.</param>
     /// <returns>A new instance of <see cref="ServiceFileAnalysis"/>.</returns>
     public static ServiceFileAnalysis Create(
         string id,
         string serviceName,
         AnalysisStatus status,
-        List<Report> reports)
+        List<Report> reports,
+        string? jobId = "")
     {
         return new ServiceFileAnalysis(
-            ServiceAnalysisId.Create(id),
+            ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             status,
             reports);
@@ -88,20 +78,10 @@ public class ServiceFileAnalysis : Entity<ServiceAnalysisId>
         AnalysisStatus status)
     {
         return new ServiceFileAnalysis(
-            ServiceAnalysisId.Create(id),
+            ComposedServiceAnalysisId.Create(id),
             serviceName,
             status,
             []);
-    }
-
-    /// <summary>
-    /// Updates the status of the analysis.
-    /// </summary>
-    /// <param name="status">The new status to set.</param>
-    public void UpdateStatus(AnalysisStatus status)
-    {
-        ArgumentNullException.ThrowIfNull(status);
-        Status = status;
     }
 
     /// <summary>

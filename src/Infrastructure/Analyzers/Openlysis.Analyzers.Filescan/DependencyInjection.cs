@@ -84,6 +84,6 @@ public static class DependencyInjection
         services.AddSingleton<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
 
         // Add file analyzer.
-        services.AddSingleton<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>, FileAnalyzer>();
+        services.AddSingleton<IServiceAnalyzer<ServiceFileAnalysis, ComposedServiceAnalysisId>, FileAnalyzer>();
     }
 }

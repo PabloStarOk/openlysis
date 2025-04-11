@@ -128,8 +128,8 @@ public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnaly
                 .IsRequired()
                 .ValueGeneratedNever()
                 .HasConversion(
-                    id => id.Value,
-                    dbValue => ServiceAnalysisId.Create(dbValue));
+                    id => id.ToString(),
+                    dbValue => ComposedServiceAnalysisId.Create(dbValue));
 
             analysesBuilder.Property(s => s.ServiceName)
                 .HasColumnName("ServiceName")

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
-using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Constants;
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 
@@ -13,18 +13,8 @@ namespace Openlysis.Domain.URLs.Entities;
 /// <remarks>
 /// This class inherits from the Entity class with a <see cref="ServiceAnalysisId"/> type parameter.
 /// </remarks>
-public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
+public sealed class UrlServiceAnalysis : ServiceAnalysis
 {
-    /// <summary>
-    /// Gets the name of the service.
-    /// </summary>
-    public string ServiceName { get; }
-
-    /// <summary>
-    /// Gets the current status of the analysis.
-    /// </summary>
-    public AnalysisStatus Status { get; private set; }
-
     /// <summary>
     /// Gets the verdict of the analysis.
     /// </summary>
@@ -48,19 +38,20 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The current status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
+    /// <param name="threatZone">The threat zone associated with the analysis.</param>
     /// <param name="threatScore">The threat score of the analysis. Optional.</param>
     private UrlServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisStatus status,
         Verdict verdict,
+        ThreatZone threatZone,
         float? threatScore)
-        : base(id)
+        : base(id, serviceName, status)
     {
-        ServiceName = serviceName;
-        UpdateVerdict(verdict);
+        Verdict = verdict;
+        ThreatZone = threatZone;
         ThreatScore = threatScore;
-        Status = status;
     }
 
     // For EF core.
@@ -91,31 +82,16 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
         float? threatScore = null)
     {
         var composedId = ComposedServiceAnalysisId.Create(id, jobId);
-        if (threatScore > 1.0f)
-        {
-            threatScore /= 100.0f;
-        }
-
-        if (threatScore is not null)
-        {
-            threatScore = Math.Clamp((float)threatScore, 0.0f, 1.0f);
-        }
+        ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
+        float? normalizedThreatScore = NormalizeThreatScore(threatScore);
 
         return new UrlServiceAnalysis(
             composedId,
             serviceName,
             status,
             verdict,
-            threatScore);
-    }
-
-    /// <summary>
-    /// Updates the status of the analysis.
-    /// </summary>
-    /// <param name="newStatus">The new status to set.</param>
-    public void UpdateStatus(AnalysisStatus newStatus)
-    {
-        Status = newStatus;
+            threatZone,
+            normalizedThreatScore);
     }
 
     /// <summary>
@@ -154,5 +130,27 @@ public sealed class UrlServiceAnalysis : Entity<ComposedServiceAnalysisId>
         {
             ThreatScore = threatScore;
         }
+    }
+
+    /// <summary>
+    /// Normalizes the given threat score to ensure it falls within the range of 0.0 to 1.0.
+    /// </summary>
+    /// <param name="threatScore">The threat score to normalize. Can be null.</param>
+    /// <returns>
+    /// A normalized threat score between 0.0 and 1.0, or null if the input is null.
+    /// If the input is greater than 1.0, it is divided by 100.0 before clamping.
+    /// </returns>
+    private static float? NormalizeThreatScore(float? threatScore)
+    {
+        switch (threatScore)
+        {
+            case null:
+                return null;
+            case > 1.0f:
+                threatScore /= 100.0f;
+                break;
+        }
+
+        return Math.Clamp((float)threatScore, 0.0f, 1.0f);
     }
 }

@@ -38,9 +38,9 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private readonly ILogger<AnalyzeFileConsumer> _logger;
     private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>> _analyzers;
+    private readonly IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ComposedServiceAnalysisId>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
-    private readonly Dictionary<ServiceAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
+    private readonly Dictionary<ComposedServiceAnalysisId, ServiceFileAnalysis> _serviceFileAnalyses = [];
     private readonly Func<ServiceFileAnalysis, bool> _analysisFinished = s =>
         s.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
 
@@ -60,7 +60,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         IEndpointUriProvider endpointUriProvider,
         IOptionsMonitor<AnalyzeConsumerOptions> options,
         IFileStorageProvider fileStorageProvider,
-        IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ServiceAnalysisId>> analyzers)
+        IEnumerable<IServiceAnalyzer<ServiceFileAnalysis, ComposedServiceAnalysisId>> analyzers)
     {
         _logger = logger;
         _endpointUriProvider = endpointUriProvider;
