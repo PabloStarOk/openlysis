@@ -12,7 +12,7 @@ public class AuthenticationDbContextFactory : IDesignTimeDbContextFactory<Authen
     public AuthenticationDbContext CreateDbContext(string[] args)
     {
         var builder = new DbContextOptionsBuilder<AuthenticationDbContext>();
-        builder.UseSqlServer();
+        builder.UseNpgsql();
         return new AuthenticationDbContext(builder.Options);
     }
 }

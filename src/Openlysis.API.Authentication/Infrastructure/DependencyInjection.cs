@@ -20,11 +20,11 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        string? connectionString = configuration.GetConnectionString("DefaultConnection");
+        string? connectionString = configuration.GetConnectionString("AuthConnection");
         ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
         // Add auth database.
         services.AddDbContext<AuthenticationDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseNpgsql(connectionString));
     }
 }
