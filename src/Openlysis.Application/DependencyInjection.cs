@@ -17,12 +17,6 @@ public static class DependencyInjection
     /// <param name="services">Collection of services.</param>
     public static void AddApplication(this IServiceCollection services)
     {
-        services.AddMediatR(
-            config =>
-            {
-                config.Lifetime = ServiceLifetime.Scoped;
-                config.RegisterServicesFromAssemblies(typeof(DependencyInjection).Assembly);
-            });
         services.AddSingleton(TimeProvider.System);
 
         // Add file multi analysis service.
