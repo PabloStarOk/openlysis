@@ -5,11 +5,9 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using MediatR;
-
 using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.API.Endpoints.URLs.GetAnalysisById;
-using Openlysis.Application.URLs.Commands;
+using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.Users.ValueObjects;
 
@@ -29,19 +27,19 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
 
     private static readonly string DefaultScheme = Uri.UriSchemeHttps;
     private readonly ILogger<AnalyzeUrlEndpoint> _logger;
-    private readonly IMediator _mediator;
+    private readonly IUrlMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeUrlEndpoint"/> class.
     /// </summary>
-    /// <param name="logger">The logger instance used for logging.</param>
-    /// <param name="mediator">The mediator instance used to send commands.</param>
+    /// <param name="logger">The logger instance for logging information and errors.</param>
+    /// <param name="multiAnalysisService">The service responsible for analyzing URLs.</param>
     public AnalyzeUrlEndpoint(
         ILogger<AnalyzeUrlEndpoint> logger,
-        IMediator mediator)
+        IUrlMultiAnalysisService multiAnalysisService)
     {
         _logger = logger;
-        _mediator = mediator;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <inheritdoc/>
@@ -94,12 +92,9 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
             return;
         }
 
-        var command = new AnalyzeUrlCommand(
-            url,
-            userId,
-            req.IsPrivate);
+        ErrorOr<UrlMultiAnalysis> result = await _multiAnalysisService
+            .AnalyzeAsync(userId, req.IsPrivate, url, ct);
 
-        ErrorOr<UrlMultiAnalysis> result = await _mediator.Send(command, ct);
         if (result.IsError)
         {
             IResult internalError = Results.Problem(

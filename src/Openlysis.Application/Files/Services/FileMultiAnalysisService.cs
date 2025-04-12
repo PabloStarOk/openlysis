@@ -13,7 +13,7 @@ using Openlysis.Domain.Users.ValueObjects;
 namespace Openlysis.Application.Files.Services;
 
 /// <summary>
-/// Service for managing and analyzing multiple files.
+/// Service for analyzing a file with multiple analyzers
 /// Implements the <see cref="IFileMultiAnalysisService"/> interface.
 /// </summary>
 internal class FileMultiAnalysisService : IFileMultiAnalysisService

@@ -2,11 +2,9 @@ using System.Security.Claims;
 
 using FastEndpoints;
 
-using MediatR;
-
 using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.API.Endpoints.URLs.Common;
-using Openlysis.Application.URLs.Queries;
+using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.Users.ValueObjects;
 
@@ -23,16 +21,16 @@ public class GetAnalysesByHashEndpoint
 {
     private const string Name = "GetUrlAnalysisByHash";
 
-    private readonly IMediator _mediator;
+    private readonly IUrlMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAnalysesByHashEndpoint"/> class.
     /// </summary>
-    /// <param name="mediator">The mediator instance used for sending queries.</param>
+    /// <param name="multiAnalysisService">The service responsible for analyzing URLs.</param>
     public GetAnalysesByHashEndpoint(
-        IMediator mediator)
+        IUrlMultiAnalysisService multiAnalysisService)
     {
-        _mediator = mediator;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <inheritdoc/>
@@ -76,13 +74,13 @@ public class GetAnalysesByHashEndpoint
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
         UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
 
-        var query = new UrlMultiAnalysesByHashQuery(
-            req.Hash,
-            userId,
-            req.Amount,
-            req.StartedDateOrder);
-
-        IReadOnlyList<UrlMultiAnalysis> analyses = await _mediator.Send(query, ct);
+        IReadOnlyList<UrlMultiAnalysis> analyses = await _multiAnalysisService
+            .GetAnalysesByHashAsync(
+                userId,
+                req.Hash,
+                req.Amount,
+                req.StartedDateOrder,
+                ct);
 
         if (analyses.Count is 0)
         {

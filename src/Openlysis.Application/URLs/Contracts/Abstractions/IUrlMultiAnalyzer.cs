@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.ValueObjects;
 
-namespace Openlysis.Application.Common.Abstractions.Services;
+namespace Openlysis.Application.URLs.Contracts.Abstractions;
 
 /// <summary>
 /// Defines a service that uses various analysis services to analyze a URL.

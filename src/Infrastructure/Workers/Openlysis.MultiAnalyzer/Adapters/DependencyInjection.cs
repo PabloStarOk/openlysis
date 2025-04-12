@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Files.Contracts;
 using Openlysis.Application.Files.Contracts.Abstractions;
+using Openlysis.Application.URLs.Contracts.Abstractions;
 using Openlysis.MultiAnalyzer.Adapters.Broker.Files;
 using Openlysis.MultiAnalyzer.Adapters.Broker.URLs;
 using Openlysis.MultiAnalyzer.Adapters.Files;
