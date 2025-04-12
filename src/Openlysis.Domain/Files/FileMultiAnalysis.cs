@@ -94,21 +94,22 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     }
 
     /// <inheritdoc/>
-    protected override void HandleServiceAnalysisUpdate(int index, FileServiceAnalysis analysis)
+    protected override void HandleServiceAnalysisUpdate(
+        FileServiceAnalysis existingAnalysis,
+        FileServiceAnalysis updatedAnalysis)
     {
-        FileServiceAnalysis serviceAnalysis = InternalServiceAnalyses[index];
-        foreach (Report report in analysis.Reports)
+        foreach (Report report in updatedAnalysis.Reports)
         {
-            if (serviceAnalysis.Reports.Contains(report))
+            if (existingAnalysis.Reports.Contains(report))
             {
-                serviceAnalysis.UpdateReport(report);
+                existingAnalysis.UpdateReport(report);
                 continue;
             }
 
-            serviceAnalysis.AddReport(report);
+            existingAnalysis.AddReport(report);
         }
 
-        serviceAnalysis.UpdateStatus(analysis.Status);
+        existingAnalysis.UpdateStatus(updatedAnalysis.Status);
     }
 
     /// <inheritdoc/>

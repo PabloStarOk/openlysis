@@ -91,11 +91,13 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     }
 
     /// <inheritdoc/>
-    protected override void HandleServiceAnalysisUpdate(int index, UrlServiceAnalysis analysis)
+    protected override void HandleServiceAnalysisUpdate(
+        UrlServiceAnalysis existingAnalysis,
+        UrlServiceAnalysis updatedAnalysis)
     {
-        InternalServiceAnalyses[index].UpdateVerdict(analysis.Verdict);
-        InternalServiceAnalyses[index].UpdateThreatScore(analysis.ThreatScore);
-        InternalServiceAnalyses[index].UpdateStatus(analysis.Status);
+        existingAnalysis.UpdateVerdict(updatedAnalysis.Verdict);
+        existingAnalysis.UpdateThreatScore(updatedAnalysis.ThreatScore);
+        existingAnalysis.UpdateStatus(updatedAnalysis.Status);
     }
 
     /// <inheritdoc/>
@@ -107,13 +109,13 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// <inheritdoc/>
     protected override void HandleAverageVerdictUpdate()
     {
-        if (InternalServiceAnalyses.Count == 0)
+        if (ServiceAnalyses.Count == 0)
         {
             AverageVerdict = Verdict.Unknown;
             return;
         }
 
-        var verdictCounts = InternalServiceAnalyses
+        var verdictCounts = ServiceAnalyses
             .GroupBy(s => s.Verdict)
             .ToDictionary(g => g.Key, g => g.Count());
 
@@ -128,12 +130,12 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// </summary>
     private void UpdateAverageThreatScore()
     {
-        if (!InternalServiceAnalyses.Any(s => s.ThreatScore is not null))
+        if (!ServiceAnalyses.Any(s => s.ThreatScore is not null))
         {
             return;
         }
 
-        AverageThreatScore = InternalServiceAnalyses
+        AverageThreatScore = ServiceAnalyses
             .Where(s => s.ThreatScore is not null)
             .Select(s => s.ThreatScore)
             .Average();

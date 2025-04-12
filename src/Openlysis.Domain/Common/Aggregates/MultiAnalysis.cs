@@ -18,11 +18,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     : AggregateRoot<GlobalId>
     where TServiceAnalysis : ServiceAnalysis
 {
-    /// <summary>
-    /// A collection of service analyses associated with the multi-analysis.
-    /// This list is used internally to manage the service analyses.
-    /// </summary>
-    protected readonly List<TServiceAnalysis> InternalServiceAnalyses = [];
+    private readonly List<TServiceAnalysis> _serviceAnalyses = [];
 
     /// <summary>
     /// Gets the identifier of the user associated with the analysis.
@@ -62,7 +58,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// <summary>
     /// Gets the list of service analyses associated with the analysis.
     /// </summary>
-    public IReadOnlyList<TServiceAnalysis> ServiceAnalyses => InternalServiceAnalyses;
+    public IReadOnlyList<TServiceAnalysis> ServiceAnalyses => _serviceAnalyses;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MultiAnalysis{TServiceAnalysis}"/> class.
@@ -119,12 +115,12 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     public void AddServiceAnalysis(TServiceAnalysis analysis)
     {
         ArgumentNullException.ThrowIfNull(analysis);
-        if (InternalServiceAnalyses.Contains(analysis))
+        if (_serviceAnalyses.Contains(analysis))
         {
             throw new InvalidOperationException("Service analysis already contains the given UrlServiceAnalysis.");
         }
 
-        InternalServiceAnalyses.Add(analysis);
+        _serviceAnalyses.Add(analysis);
         UpdateInformation();
     }
 
@@ -137,28 +133,32 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// </exception>
     public void UpdateServiceAnalysis(TServiceAnalysis analysis)
     {
-        if (!InternalServiceAnalyses.Contains(analysis))
+        if (!_serviceAnalyses.Contains(analysis))
         {
             throw new InvalidOperationException("Service analysis does not exist in the collection.");
         }
 
-        int analysisIndex = InternalServiceAnalyses.IndexOf(analysis);
-        if (InternalServiceAnalyses[analysisIndex] is not { Status: AnalysisStatus.Queued or AnalysisStatus.InProgress })
+        TServiceAnalysis existingAnalysis = _serviceAnalyses.Single(a => a == analysis);
+        if (existingAnalysis is not
+            {
+                Status: AnalysisStatus.Queued or AnalysisStatus.InProgress
+            })
         {
             return;
         }
 
-        // TODO: Check if it can update without having to use index.
-        HandleServiceAnalysisUpdate(analysisIndex, analysis);
+        HandleServiceAnalysisUpdate(existingAnalysis, analysis);
         UpdateInformation();
     }
 
     /// <summary>
     /// Invoked when an existing service analysis in the collection is updated.
     /// </summary>
-    /// <param name="index">The index of the service analysis being updated.</param>
-    /// <param name="analysis">The updated service analysis.</param>
-    protected abstract void HandleServiceAnalysisUpdate(int index, TServiceAnalysis analysis);
+    /// <param name="existingAnalysis">The current service analysis instance that exists in the collection.</param>
+    /// <param name="updatedAnalysis">The updated service analysis instance that will replace the existing one.</param>
+    protected abstract void HandleServiceAnalysisUpdate(
+        TServiceAnalysis existingAnalysis,
+        TServiceAnalysis updatedAnalysis);
 
     /// <summary>
     /// Invoked when the information of the multi-analysis is updated.
@@ -191,12 +191,12 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// </remarks>
     private void UpdateStatus()
     {
-        if (InternalServiceAnalyses.Count < 1)
+        if (_serviceAnalyses.Count < 1)
         {
             return;
         }
 
-        IEnumerable<TServiceAnalysis> analyses = InternalServiceAnalyses;
+        IEnumerable<TServiceAnalysis> analyses = _serviceAnalyses;
 
         // If all timeout, set as timeout
         if (analyses.All(a => a.Status is AnalysisStatus.Timeout))
