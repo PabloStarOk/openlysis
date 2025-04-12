@@ -4,7 +4,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Application.Phones.Contracts;
-using Openlysis.Application.Phones.Requests;
+using Openlysis.Application.Phones.Contracts.Abstractions;
+using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Evaluators.Shared.Contracts.Configuration;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;

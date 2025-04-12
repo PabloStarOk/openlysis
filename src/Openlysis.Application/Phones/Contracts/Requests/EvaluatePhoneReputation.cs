@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Openlysis.Application.Phones.Requests;
+namespace Openlysis.Application.Phones.Contracts.Requests;
 
 /// <summary>
 /// Represents a request to evaluate the reputation of a phone number.

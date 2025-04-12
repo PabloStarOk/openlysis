@@ -3,7 +3,7 @@ using ErrorOr;
 using FastEndpoints;
 
 using Openlysis.API.Authentication.API.Extensions;
-using Openlysis.Application.Phones.Requests;
+using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Application.Phones.Services;
 using Openlysis.Domain.Phones;
 

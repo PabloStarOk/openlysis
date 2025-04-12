@@ -3,7 +3,8 @@ using ErrorOr;
 using Microsoft.Extensions.Logging;
 
 using Openlysis.Application.Phones.Contracts;
-using Openlysis.Application.Phones.Requests;
+using Openlysis.Application.Phones.Contracts.Abstractions;
+using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.Phones.Entities;
 

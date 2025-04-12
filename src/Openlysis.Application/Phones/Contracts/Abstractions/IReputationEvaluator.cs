@@ -1,8 +1,8 @@
 using ErrorOr;
 
-using Openlysis.Application.Phones.Requests;
+using Openlysis.Application.Phones.Contracts.Requests;
 
-namespace Openlysis.Application.Phones.Contracts;
+namespace Openlysis.Application.Phones.Contracts.Abstractions;
 
 /// <summary>
 /// Interface for evaluating the reputation of data of type <typeparamref name="TRequest"/>

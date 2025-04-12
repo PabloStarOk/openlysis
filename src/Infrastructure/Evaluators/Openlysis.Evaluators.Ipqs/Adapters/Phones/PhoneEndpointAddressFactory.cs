@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-using Openlysis.Application.Phones.Requests;
+using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;

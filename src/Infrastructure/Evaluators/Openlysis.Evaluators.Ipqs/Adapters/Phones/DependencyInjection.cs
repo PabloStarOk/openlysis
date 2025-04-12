@@ -5,7 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Application.Phones.Contracts;
-using Openlysis.Application.Phones.Requests;
+using Openlysis.Application.Phones.Contracts.Abstractions;
+using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Domain.Phones.Entities;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Phones;

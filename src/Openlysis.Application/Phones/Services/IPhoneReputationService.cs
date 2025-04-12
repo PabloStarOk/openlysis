@@ -1,6 +1,6 @@
 using ErrorOr;
 
-using Openlysis.Application.Phones.Requests;
+using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Domain.Phones;
 
 namespace Openlysis.Application.Phones.Services;
