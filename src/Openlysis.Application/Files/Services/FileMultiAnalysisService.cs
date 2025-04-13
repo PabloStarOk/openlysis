@@ -89,36 +89,45 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<FileMultiAnalysis>> GetAnalysisByIdAsync(
+        UserId userId,
         GlobalId id,
         CancellationToken cancellationToken = default)
     {
-        var fileAnalysis = await _repository.GetAsync(id, cancellationToken);
+        var multiAnalysis = await _repository.GetAsync(id, cancellationToken);
 
-        if (fileAnalysis is null)
+        if (multiAnalysis is null)
         {
             return Error.NotFound();
         }
 
-        return fileAnalysis;
+        if (multiAnalysis.IsPrivate
+            && multiAnalysis.UserId != userId)
+        {
+            return Error.NotFound();
+        }
+
+        return multiAnalysis;
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByHashAsync(
+        UserId userId,
         string hash,
         int amount,
         OrderType order,
         CancellationToken cancellationToken = default)
     {
-        IReadOnlyList<FileMultiAnalysis> fileAnalyses = await _repository.GetManyAsync(
+        var multiAnalyses = await _repository.GetManyAsync(
             amount,
-            f => f.DataHashSet.Sha256 == hash
-                || f.DataHashSet.Md5 == hash
-                || f.DataHashSet.Sha1 == hash
-                || f.DataHashSet.Sha512 == hash,
+            f => (f.DataHashSet.Sha256 == hash
+                    || f.DataHashSet.Md5 == hash
+                    || f.DataHashSet.Sha1 == hash
+                    || f.DataHashSet.Sha512 == hash)
+                && (!f.IsPrivate || (f.IsPrivate && f.UserId == userId)),
             OrderBy,
             cancellationToken);
 
-        return fileAnalyses
+        return multiAnalyses
             .ToList()
             .AsReadOnly();
 

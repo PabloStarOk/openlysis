@@ -35,6 +35,7 @@ public interface IFileMultiAnalysisService
     /// <summary>
     /// Retrieves a file analysis by its unique identifier.
     /// </summary>
+    /// <param name="userId">The unique identifier of the user requesting the analysis.</param>
     /// <param name="id">The unique identifier of the file analysis.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
@@ -42,12 +43,14 @@ public interface IFileMultiAnalysisService
     /// The task result contains an <see cref="ErrorOr{T}"/> object with the file analysis.
     /// </returns>
     public Task<ErrorOr<FileMultiAnalysis>> GetAnalysisByIdAsync(
+        UserId userId,
         GlobalId id,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of file analyses based on the provided hash.
     /// </summary>
+    /// <param name="userId">The unique identifier of the user requesting the analyses.</param>
     /// <param name="hash">The hash value used to filter the analyses.</param>
     /// <param name="amount">The maximum number of analyses to retrieve.</param>
     /// <param name="order">The order in which the analyses should be returned.</param>
@@ -57,6 +60,7 @@ public interface IFileMultiAnalysisService
     /// The task result contains an <see cref="ErrorOr{T}"/> object with a read-only list of file analyses.
     /// </returns>
     public Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByHashAsync(
+        UserId userId,
         string hash,
         int amount,
         OrderType order,
