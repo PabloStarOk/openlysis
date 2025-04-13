@@ -79,19 +79,19 @@ public class ReportJsonConverter : JsonConverter<Report>
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? nameof(Report.Id);
         string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(Report.Verdict);
         string threatZoneKey = options.PropertyNamingPolicy?.ConvertName(ThreatZoneKey) ?? nameof(Report.ThreatZone);
-        string threatLevelKey = options.PropertyNamingPolicy?.ConvertName(ThreatLevelKey) ?? nameof(Report.ThreatLevel);
+        string threatLevelKey = options.PropertyNamingPolicy?.ConvertName(ThreatLevelKey) ?? nameof(Report.ThreatScore);
 
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.Value);
         writer.WriteString(verdictKey, value.Verdict.ToString());
         writer.WriteString(threatZoneKey, value.ThreatZone.ToString());
-        if (value.ThreatLevel is null)
+        if (value.ThreatScore is null)
         {
             writer.WriteNull(threatLevelKey);
         }
         else
         {
-            writer.WriteNumber(threatLevelKey, (decimal)value.ThreatLevel);
+            writer.WriteNumber(threatLevelKey, (decimal)value.ThreatScore);
         }
 
         writer.WriteEndObject();

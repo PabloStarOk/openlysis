@@ -45,7 +45,7 @@ public record FileMultiAnalysisDto(
                             r.Id.Value,
                             r.Verdict.ToString(),
                             r.ThreatZone.ToString(),
-                            r.ThreatLevel));
+                            r.ThreatScore));
 
                 // Return a new ServiceFileAnalysisDto object
                 return new ServiceFileAnalysisDto(

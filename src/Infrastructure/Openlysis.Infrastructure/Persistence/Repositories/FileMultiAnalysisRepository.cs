@@ -1,10 +1,12 @@
 using System.Linq.Expressions;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.Entities;
 
 namespace Openlysis.Infrastructure.Persistence.Repositories;
 
@@ -38,7 +40,9 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
             _dbContext.Attach(fileMultiAnalysis.DataHashSet).State = EntityState.Unchanged;
         }
 
-        await _dbContext.AddAsync(fileMultiAnalysis, cancellationToken);
+        EntityEntry<FileMultiAnalysis> multiAnalysisEntry = await _dbContext.AddAsync(fileMultiAnalysis, cancellationToken);
+        await SyncServiceAnalysesAsync(multiAnalysisEntry, cancellationToken);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -77,16 +81,20 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     /// <inheritdoc/>
     public async Task UpdateAsync(FileMultiAnalysis model, CancellationToken cancellationToken = default)
     {
-        bool analysisExists = await _dbContext.FileMultiAnalyses
+        var multiAnalysis = await _dbContext.FileMultiAnalyses
             .AsSplitQuery()
-            .AnyAsync(f => f.Id == model.Id, cancellationToken);
+            .Include(u => u.ServiceAnalyses)
+            .FirstOrDefaultAsync(m => m == model, cancellationToken);
 
-        if (!analysisExists)
+        if (multiAnalysis is null)
         {
-            return;
+            throw new InvalidOperationException("UrlMultiAnalysis not found.");
         }
 
-        _dbContext.FileMultiAnalyses.Update(model);
+        EntityEntry<FileMultiAnalysis> multiAnalysisEntry = _dbContext.Entry(multiAnalysis);
+        multiAnalysisEntry.CurrentValues.SetValues(model);
+        await SyncServiceAnalysesAsync(multiAnalysisEntry, cancellationToken);
+
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -94,5 +102,68 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     public async Task<bool> ExistsAsync(GlobalId id, CancellationToken cancellationToken = default)
     {
         return await _dbContext.FileMultiAnalyses.AnyAsync(f => f.Id == id, cancellationToken);
+    }
+
+    /// <summary>
+    /// Synchronizes the service analyses of a given <see cref="FileMultiAnalysis"/> entity with the database.
+    /// </summary>
+    /// <param name="multiAnalysisEntry">The entity entry of the <see cref="FileMultiAnalysis"/> to synchronize.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    private async Task SyncServiceAnalysesAsync(
+        EntityEntry<FileMultiAnalysis> multiAnalysisEntry,
+        CancellationToken cancellationToken = default)
+    {
+        var existingAnalyses = _dbContext.FileServiceAnalyses
+            .AsSplitQuery()
+            .Where(f => multiAnalysisEntry.Entity.ServiceAnalyses.Contains(f));
+
+        foreach (var incomingAnalysis in multiAnalysisEntry.Entity.ServiceAnalyses)
+        {
+            var existingAnalysis = await existingAnalyses
+                .AsNoTracking()
+                .SingleOrDefaultAsync(e => e == incomingAnalysis, cancellationToken);
+
+            if (existingAnalysis is null)
+            {
+                continue;
+            }
+
+            EntityEntry<FileServiceAnalysis> incomingEntry = _dbContext.Entry(incomingAnalysis);
+            incomingEntry.State =
+                incomingAnalysis.Reports.SequenceEqual(existingAnalysis.Reports)
+                && incomingAnalysis.Status == existingAnalysis.Status
+                    ? EntityState.Unchanged
+                    : EntityState.Modified;
+
+            SyncReportsAsync(incomingEntry, existingAnalysis.Reports.ToArray());
+        }
+    }
+
+    /// <summary>
+    /// Synchronizes the reports of a given <see cref="FileServiceAnalysis"/> entity with the database.
+    /// </summary>
+    /// <param name="serviceAnalysisEntry">The entity entry of the <see cref="FileServiceAnalysis"/> to synchronize.</param>
+    /// <param name="existingReports">The array of existing reports in the database to compare against.</param>
+    private void SyncReportsAsync(
+        EntityEntry<FileServiceAnalysis> serviceAnalysisEntry,
+        Report[] existingReports)
+    {
+        foreach (Report incomingReport in serviceAnalysisEntry.Entity.Reports)
+        {
+            var existingReport = existingReports.SingleOrDefault(
+                r => r == incomingReport);
+
+            if (existingReport is null)
+            {
+                continue;
+            }
+
+            _dbContext.Entry(incomingReport).State =
+                incomingReport.Verdict == existingReport.Verdict
+                && incomingReport.ThreatZone == existingReport.ThreatZone
+                && incomingReport.ThreatScore.Equals(existingReport.ThreatScore)
+                ? EntityState.Unchanged
+                : EntityState.Modified;
+        }
     }
 }

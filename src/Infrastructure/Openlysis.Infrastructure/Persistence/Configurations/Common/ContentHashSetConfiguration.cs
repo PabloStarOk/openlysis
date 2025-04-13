@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Openlysis.Domain.Common.Entities;
 
-namespace Openlysis.Infrastructure.Persistence.Configurations;
+namespace Openlysis.Infrastructure.Persistence.Configurations.Common;
 
 /// <summary>
 /// Configuration class for the ContentHashSet entity.
@@ -11,36 +11,36 @@ namespace Openlysis.Infrastructure.Persistence.Configurations;
 /// </summary>
 public class ContentHashSetConfiguration : IEntityTypeConfiguration<ContentHashSet>
 {
-    private const string VarcharType = "VARCHAR";
+    private const string CharType = "char";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<ContentHashSet> builder)
     {
-        builder.ToTable("ContentHashSets");
+        builder.ToTable("content_hash_sets");
         builder.HasKey(h => h.Sha256);
 
         builder.Property(h => h.Sha256)
-            .HasColumnName("Sha256")
-            .HasColumnType(VarcharType)
+            .HasColumnName("sha256")
+            .HasColumnType(CharType)
             .HasMaxLength(64)
             .IsRequired()
             .ValueGeneratedNever();
 
         builder.Property(h => h.Md5)
-            .HasColumnName("Md5")
-            .HasColumnType(VarcharType)
+            .HasColumnName("md5")
+            .HasColumnType(CharType)
             .HasMaxLength(32)
             .IsRequired();
 
         builder.Property(h => h.Sha1)
-            .HasColumnName("Sha1")
-            .HasColumnType(VarcharType)
+            .HasColumnName("sha1")
+            .HasColumnType(CharType)
             .HasMaxLength(40)
             .IsRequired();
 
         builder.Property(h => h.Sha512)
-            .HasColumnName("Sha512")
-            .HasColumnType(VarcharType)
+            .HasColumnName("sha512")
+            .HasColumnType(CharType)
             .HasMaxLength(128)
             .IsRequired();
     }

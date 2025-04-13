@@ -22,7 +22,7 @@ public class Report : Entity<ReportId>
     /// <summary>
     /// Gets the threat level of the scan.
     /// </summary>
-    public float? ThreatLevel { get; }
+    public float? ThreatScore { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Report"/> class.
@@ -30,24 +30,23 @@ public class Report : Entity<ReportId>
     /// <param name="id">The unique identifier for the report.</param>
     /// <param name="verdict">The verdict of the scan.</param>
     /// <param name="threatZone">The threat zone of the scan.</param>
-    /// <param name="threatLevel">The threat level of the scan. Optional.</param>
+    /// <param name="threatScore">The threat level of the scan. Optional.</param>
     protected Report(
         ReportId id,
         Verdict verdict,
         ThreatZone threatZone,
-        float? threatLevel = null)
+        float? threatScore = null)
         : base(id)
     {
         Verdict = verdict;
         ThreatZone = threatZone;
-        ThreatLevel = threatLevel;
-        ThreatLevel = threatLevel;
+        ThreatScore = threatScore;
     }
 
     // For EF core.
 #pragma warning disable CS8618
 #pragma warning disable S1144
-    protected Report()
+    private Report()
     {
     }
 #pragma warning restore S1144
@@ -59,18 +58,41 @@ public class Report : Entity<ReportId>
     /// <param name="id">The unique identifier for the report.</param>
     /// <param name="verdict">The verdict of the scan.</param>
     /// <param name="threatZone">The threat zone of the scan.</param>
-    /// <param name="threatLevel">The threat level of the scan. Optional.</param>
+    /// <param name="threatScore">The threat score of the scan.</param>
     /// <returns>A new instance of the <see cref="Report"/> class.</returns>
     public static Report Create(
         string id,
         Verdict verdict,
         ThreatZone threatZone,
-        float? threatLevel)
+        float? threatScore)
     {
+        float? normalizedThreatScore = NormalizeThreatScore(threatScore);
         return new Report(
             ReportId.Create(id),
             verdict,
             threatZone,
-            threatLevel);
+            normalizedThreatScore);
+    }
+
+    /// <summary>
+    /// Normalizes the given threat score to ensure it falls within the range of 0.0 to 1.0.
+    /// </summary>
+    /// <param name="threatScore">The threat score to normalize. Can be null.</param>
+    /// <returns>
+    /// A normalized threat score between 0.0 and 1.0, or null if the input is null.
+    /// If the input is greater than 1.0, it is divided by 100.0 before clamping.
+    /// </returns>
+    private static float? NormalizeThreatScore(float? threatScore)
+    {
+        switch (threatScore)
+        {
+            case null:
+                return null;
+            case > 1.0f:
+                threatScore /= 100.0f;
+                break;
+        }
+
+        return Math.Clamp((float)threatScore, 0.0f, 1.0f);
     }
 }

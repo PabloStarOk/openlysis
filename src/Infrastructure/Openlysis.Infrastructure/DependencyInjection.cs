@@ -37,7 +37,7 @@ public static class DependencyInjection
 
         // Add analyses database.
         services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseNpgsql(connectionString));
 
         // Add repositories.
         services.AddScoped<IRepository<FileMultiAnalysis, GlobalId>, FileMultiAnalysisRepository>();

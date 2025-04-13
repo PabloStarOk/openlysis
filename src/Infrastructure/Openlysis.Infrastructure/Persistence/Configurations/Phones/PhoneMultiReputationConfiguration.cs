@@ -12,7 +12,7 @@ namespace Openlysis.Infrastructure.Persistence.Configurations.Phones;
 /// </summary>
 public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneMultiReputation>
 {
-    private const string TinyintType = "TINYINT";
+    private const string SmallintType = "smallint";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<PhoneMultiReputation> builder)
@@ -28,14 +28,13 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
     private static void ConfigureMultiReputation(
         EntityTypeBuilder<PhoneMultiReputation> builder)
     {
-        builder.ToTable("PhoneMultiReputations");
+        builder.ToTable("phone_multi_reputations");
 
         builder.HasKey(p => p.Id);
 
         builder.Property(u => u.Id)
-            .HasColumnName("PhoneMultiReputationId")
-            .HasColumnType("CHAR")
-            .HasMaxLength(36)
+            .HasColumnName("phone_multi_reputation_id")
+            .HasColumnType("uuid")
             .IsRequired()
             .ValueGeneratedNever()
             .HasConversion(
@@ -43,18 +42,18 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
                 dbValue => GlobalId.Parse(dbValue));
 
         builder.Property(p => p.AssessmentDate)
-            .HasColumnName("AssessmentDate")
-            .HasColumnType("DATETIME2")
+            .HasColumnName("assessment_date")
+            .HasColumnType("timestamp with time zone")
             .IsRequired();
 
         builder.Property(p => p.AverageVerdict)
-            .HasColumnName("AverageVerdict")
-            .HasColumnType(TinyintType)
+            .HasColumnName("average_verdict")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Property(p => p.AverageThreatZone)
-            .HasColumnName("AverageThreatZone")
-            .HasColumnType(TinyintType)
+            .HasColumnName("average_threat_zone")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Navigation(p => p.ServicesReputations)
@@ -68,14 +67,13 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
     private static void ConfigureServicesReputations(
         OwnedNavigationBuilder<PhoneMultiReputation, PhoneServiceReputation> builder)
     {
-        builder.ToTable("PhoneServicesReputations");
+        builder.ToTable("phone_services_reputations");
 
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Id)
-            .HasColumnName("PhoneServiceReputationId")
-            .HasColumnType("CHAR")
-            .HasMaxLength(36)
+            .HasColumnName("phone_service_reputation_id")
+            .HasColumnType("uuid")
             .IsRequired()
             .ValueGeneratedNever()
             .HasConversion(
@@ -83,48 +81,48 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
                 dbValue => GlobalId.Parse(dbValue));
 
         builder.Property(p => p.ServiceName)
-            .HasColumnName("ServiceName")
-            .HasColumnType("VARCHAR")
+            .HasColumnName("service_name")
+            .HasColumnType("varchar")
             .HasMaxLength(30)
             .IsRequired();
 
         builder.Property(p => p.Verdict)
-            .HasColumnName("Verdict")
-            .HasColumnType(TinyintType)
+            .HasColumnName("verdict")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Property(p => p.ThreatZone)
-            .HasColumnName("ThreatZone")
-            .HasColumnType(TinyintType)
+            .HasColumnName("threat_zone")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.OwnsOne(p => p.PhoneInfo, phoneBuilder =>
         {
             phoneBuilder.Property(p => p.LocalFormat)
-                .HasColumnName("PhoneLocalFormat")
-                .HasColumnType("VARCHAR")
+                .HasColumnName("phone_local_format")
+                .HasColumnType("varchar")
                 .HasMaxLength(30)
                 .IsRequired();
 
             phoneBuilder.Property(p => p.CountryCode)
-                .HasColumnName("PhoneCountryCode")
-                .HasColumnType("CHAR")
+                .HasColumnName("phone_country_code")
+                .HasColumnType("char")
                 .HasMaxLength(2)
                 .IsRequired();
 
             phoneBuilder.Property(p => p.DialingCode)
-                .HasColumnName("PhoneDialingCode")
-                .HasColumnType(TinyintType)
+                .HasColumnName("phone_dialing_code")
+                .HasColumnType(SmallintType)
                 .IsRequired();
 
             phoneBuilder.Property(p => p.LineType)
-                .HasColumnName("PhoneLineType")
-                .HasColumnType("VARCHAR")
+                .HasColumnName("phone_line_type")
+                .HasColumnType("varchar")
                 .HasMaxLength(20)
                 .IsRequired();
         });
 
         builder.WithOwner()
-            .HasForeignKey("PhoneMultiReputationId");
+            .HasForeignKey("phone_multi_reputation_id");
     }
 }

@@ -1,0 +1,127 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.Entities;
+using Openlysis.Domain.Users.ValueObjects;
+
+namespace Openlysis.Infrastructure.Persistence.Configurations.Files;
+
+/// <summary>
+/// Configuration for the <see cref="FileMultiAnalysis"/> entity in the database.
+/// </summary>
+public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnalysis>
+{
+    private const string SmallintType = "smallint";
+
+    /// <inheritdoc/>
+    public void Configure(EntityTypeBuilder<FileMultiAnalysis> builder)
+    {
+        ConfigureFileMultiAnalysesTable(builder);
+    }
+
+    /// <summary>
+    /// Configures the FileMultiAnalyses table.
+    /// </summary>
+    /// <param name="builder">The builder to be used to configure the entity.</param>
+    private static void ConfigureFileMultiAnalysesTable(EntityTypeBuilder<FileMultiAnalysis> builder)
+    {
+        builder.ToTable("file_multi_analyses");
+
+        builder.HasKey(f => f.Id);
+
+        builder.Property(f => f.Id)
+            .HasColumnName("file_multi_analysis_id")
+            .HasColumnType("uuid")
+            .IsRequired()
+            .ValueGeneratedNever()
+            .HasConversion(
+                id => id.Value,
+                dbValue => GlobalId.Parse(dbValue));
+
+        builder.Property(u => u.IsPrivate)
+            .HasColumnName("is_private")
+            .HasColumnType("boolean")
+            .IsRequired();
+
+        builder.Property(f => f.StartedDate)
+            .HasColumnName("started_date")
+            .HasColumnType("timestamp with time zone")
+            .IsRequired();
+
+        builder.Property(f => f.Status)
+            .HasColumnName("status")
+            .HasColumnType(SmallintType)
+            .IsRequired();
+
+        builder.Property(f => f.AverageVerdict)
+            .HasColumnName("average_verdict")
+            .HasColumnType(SmallintType)
+            .IsRequired();
+
+        builder.Property(f => f.AverageThreatZone)
+            .HasColumnName("average_threat_zone")
+            .HasColumnType(SmallintType)
+            .IsRequired();
+
+        builder.Property(f => f.AverageThreatScore)
+            .HasColumnName("average_threat_score")
+            .HasColumnType("real");
+
+        builder.OwnsOne(
+            f => f.FileMetadata, metadataBuilder =>
+            {
+                metadataBuilder.Property(m => m.Name)
+                    .HasColumnName("file_name")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+                metadataBuilder.Property(m => m.Size)
+                    .HasColumnName("size")
+                    .HasColumnType("bigint")
+                    .IsRequired();
+
+                metadataBuilder.Property(m => m.ContentType)
+                    .HasColumnName("content_type")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(20)
+                    .IsRequired();
+            });
+
+        builder.Property(u => u.UserId)
+            .HasColumnName("user_id")
+            .HasColumnType("varchar")
+            .HasMaxLength(450)
+            .IsRequired()
+            .HasConversion(
+                id => id.Value,
+                dbValue => UserId.Create(dbValue));
+
+        builder.HasOne(f => f.DataHashSet)
+            .WithMany()
+            .HasForeignKey("sha256")
+            .IsRequired();
+
+        builder.HasMany(u => u.ServiceAnalyses)
+            .WithMany()
+            .UsingEntity(
+                "file_analyses",
+                r => r.HasOne(typeof(FileServiceAnalysis)).WithMany().HasForeignKey("service_analysis_id"),
+                l => l.HasOne(typeof(FileMultiAnalysis)).WithMany().HasForeignKey("multi_analysis_id"),
+                joinEntity =>
+                {
+                    joinEntity.HasKey("multi_analysis_id", "service_analysis_id");
+                });
+
+        builder.Navigation(f => f.DataHashSet)
+            .AutoInclude();
+
+        builder.Navigation(f => f.ServiceAnalyses)
+            .AutoInclude();
+
+        builder.Ignore(f => f.AllReports);
+        builder.Ignore(f => f.ReportsAmount);
+    }
+}

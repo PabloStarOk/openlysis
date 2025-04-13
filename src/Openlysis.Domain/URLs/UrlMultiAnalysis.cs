@@ -18,11 +18,6 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     public Uri Url { get; }
 
     /// <summary>
-    /// Gets the overall threat score of the <see cref="UrlServiceAnalysis"/>.
-    /// </summary>
-    public float? AverageThreatScore { get; private set; }
-
-    /// <summary>
     /// Initializes a new instance of the <see cref="UrlMultiAnalysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the multi-analysis.</param>
@@ -33,7 +28,6 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// <param name="averageVerdict">The average verdict of the analysis.</param>
     /// <param name="averageThreatZone">The average threat zone of the analysis.</param>
     /// <param name="urlHashSet">The hash set of the URL content.</param>
-    /// <param name="averageThreatScore">The average threat score of the analysis.</param>
     /// <param name="url">The URL being analyzed.</param>
     private UrlMultiAnalysis(
         GlobalId id,
@@ -44,12 +38,18 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
         Verdict averageVerdict,
         ThreatZone averageThreatZone,
         ContentHashSet urlHashSet,
-        Uri url,
-        float? averageThreatScore)
-        : base(id, userId, isPrivate, startedDate, status, averageVerdict, averageThreatZone, urlHashSet)
+        Uri url)
+        : base(
+            id,
+            userId,
+            isPrivate,
+            startedDate,
+            status,
+            averageVerdict,
+            averageThreatZone,
+            urlHashSet)
     {
         Url = url;
-        AverageThreatScore = averageThreatScore;
     }
 
     // For EF core.
@@ -86,8 +86,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
             Verdict.Unknown,
             ThreatZone.Unknown,
             urlHashSet,
-            url,
-            null);
+            url);
     }
 
     /// <inheritdoc/>
@@ -98,12 +97,6 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
         existingAnalysis.UpdateVerdict(updatedAnalysis.Verdict);
         existingAnalysis.UpdateThreatScore(updatedAnalysis.ThreatScore);
         existingAnalysis.UpdateStatus(updatedAnalysis.Status);
-    }
-
-    /// <inheritdoc/>
-    protected override void OnUpdateInformation()
-    {
-        UpdateAverageThreatScore();
     }
 
     /// <inheritdoc/>
@@ -125,12 +118,10 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
             .First().Key;
     }
 
-    /// <summary>
-    /// Updates the average threat score based on all service analyses.
-    /// </summary>
-    private void UpdateAverageThreatScore()
+    /// <inheritdoc/>
+    protected override void HandleAverageThreatScoreUpdate()
     {
-        if (!ServiceAnalyses.Any(s => s.ThreatScore is not null))
+        if (ServiceAnalyses.All(s => s.ThreatScore is null))
         {
             return;
         }

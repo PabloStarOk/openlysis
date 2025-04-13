@@ -14,8 +14,7 @@ namespace Openlysis.Infrastructure.Persistence.Configurations.URLs;
 /// </summary>
 public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAnalysis>
 {
-    private const string NvarcharType = "NVARCHAR";
-    private const string TinyIntType = "TINYINT";
+    private const string SmallintType = "smallint";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<UrlMultiAnalysis> builder)
@@ -29,14 +28,13 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
     /// <param name="builder">The builder used to configure the UrlMultiAnalysis entity.</param>
     private static void ConfigureMultiAnalysis(EntityTypeBuilder<UrlMultiAnalysis> builder)
     {
-        builder.ToTable("UrlMultiAnalyses");
+        builder.ToTable("url_multi_analyses");
 
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Id)
-            .HasColumnName("UrlMultiAnalysisId")
-            .HasColumnType("VARCHAR")
-            .HasMaxLength(36)
+            .HasColumnName("url_multi_analysis_id")
+            .HasColumnType("uuid")
             .IsRequired()
             .ValueGeneratedNever()
             .HasConversion(
@@ -44,38 +42,38 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
                 dbValue => GlobalId.Parse(dbValue));
 
         builder.Property(u => u.IsPrivate)
-            .HasColumnName("IsPrivate")
-            .HasColumnType("BIT")
+            .HasColumnName("is_private")
+            .HasColumnType("boolean")
             .IsRequired();
 
         builder.Property(u => u.StartedDate)
-            .HasColumnName("StartedDate")
-            .HasColumnType("DATETIME2")
+            .HasColumnName("started_date")
+            .HasColumnType("timestamp with time zone")
             .IsRequired();
 
         builder.Property(u => u.Status)
-            .HasColumnName("Status")
-            .HasColumnType(TinyIntType)
+            .HasColumnName("status")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Property(u => u.AverageVerdict)
-            .HasColumnName("AverageVerdict")
-            .HasColumnType(TinyIntType)
+            .HasColumnName("average_verdict")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Property(u => u.AverageThreatZone)
-            .HasColumnName("AverageThreatZone")
-            .HasColumnType(TinyIntType)
+            .HasColumnName("average_threat_zone")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Property(u => u.AverageThreatScore)
-            .HasColumnName("AverageThreatScore")
-            .HasColumnType("FLOAT")
+            .HasColumnName("average_threat_score")
+            .HasColumnType("real")
             .HasMaxLength(25);
 
         builder.Property(u => u.Url)
-            .HasColumnName("Url")
-            .HasColumnType(NvarcharType)
+            .HasColumnName("url")
+            .HasColumnType("varchar")
             .HasMaxLength(2083)
             .IsRequired()
             .HasConversion(
@@ -84,33 +82,32 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
 
         builder.HasOne(u => u.DataHashSet)
             .WithMany()
-            .HasForeignKey("Sha256")
+            .HasForeignKey("sha256")
             .IsRequired();
 
         builder.Navigation(u => u.DataHashSet)
             .AutoInclude();
 
         builder.Property(u => u.UserId)
-            .HasColumnName("UserId")
-            .HasColumnType(NvarcharType)
+            .HasColumnName("user_id")
+            .HasColumnType("varchar")
             .HasMaxLength(450)
             .IsRequired()
             .HasConversion(
                 id => id.Value,
                 dbValue => UserId.Create(dbValue));
 
-        builder.HasIndex(u => u.UserId)
-            .IsClustered();
+        builder.HasIndex(u => u.UserId);
 
         builder.HasMany(u => u.ServiceAnalyses)
             .WithMany()
             .UsingEntity(
-                "UrlAnalyses",
-                r => r.HasOne(typeof(UrlServiceAnalysis)).WithMany().HasForeignKey("ServiceAnalysisId"),
-                l => l.HasOne(typeof(UrlMultiAnalysis)).WithMany().HasForeignKey("MultiAnalysisId"),
+                "url_analyses",
+                r => r.HasOne(typeof(UrlServiceAnalysis)).WithMany().HasForeignKey("service_analysis_id"),
+                l => l.HasOne(typeof(UrlMultiAnalysis)).WithMany().HasForeignKey("multi_analysis_id"),
                 joinEntity =>
                 {
-                    joinEntity.HasKey("MultiAnalysisId", "ServiceAnalysisId");
+                    joinEntity.HasKey("multi_analysis_id", "service_analysis_id");
                 });
     }
 }

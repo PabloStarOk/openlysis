@@ -72,7 +72,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
         var multiAnalysis = FileMultiAnalysis.Create(
             userId,
             isPrivate,
-            _timeProvider.GetUtcNow().DateTime,
+            _timeProvider.GetUtcNow().UtcDateTime,
             hashSet,
             fileMetadata);
 

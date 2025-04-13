@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 
-namespace Openlysis.Infrastructure.Persistence.Configurations;
+namespace Openlysis.Infrastructure.Persistence.Configurations.URLs;
 
 /// <summary>
 /// Configuration class for the <see cref="UrlServiceAnalysis"/> entity.
@@ -12,19 +12,18 @@ namespace Openlysis.Infrastructure.Persistence.Configurations;
 /// </summary>
 public class UrlServiceAnalysisConfiguration : IEntityTypeConfiguration<UrlServiceAnalysis>
 {
-    private const string NvarcharType = "NVARCHAR";
-    private const string TinyIntType = "TINYINT";
+    private const string SmallintType = "smallint";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<UrlServiceAnalysis> builder)
     {
-        builder.ToTable("UrlServiceAnalyses");
+        builder.ToTable("url_service_analyses");
 
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Id)
-            .HasColumnName("UrlServiceAnalysisId")
-            .HasColumnType(NvarcharType)
+            .HasColumnName("url_service_analysis_id")
+            .HasColumnType("varchar")
             .HasMaxLength(100)
             .IsRequired()
             .ValueGeneratedNever()
@@ -33,29 +32,28 @@ public class UrlServiceAnalysisConfiguration : IEntityTypeConfiguration<UrlServi
                 id => ComposedServiceAnalysisId.Parse(id));
 
         builder.Property(u => u.ServiceName)
-            .HasColumnName("ServiceName")
-            .HasColumnType(NvarcharType)
+            .HasColumnName("service_name")
+            .HasColumnType("varchar")
             .HasMaxLength(30)
             .IsRequired();
 
         builder.Property(u => u.Status)
-            .HasColumnName("Status")
-            .HasColumnType(TinyIntType)
+            .HasColumnName("status")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Property(u => u.Verdict)
-            .HasColumnName("Verdict")
-            .HasColumnType(TinyIntType)
+            .HasColumnName("verdict")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Property(u => u.ThreatZone)
-            .HasColumnName("ThreatZone")
-            .HasColumnType(TinyIntType)
+            .HasColumnName("threat_zone")
+            .HasColumnType(SmallintType)
             .IsRequired();
 
         builder.Property(u => u.ThreatScore)
-            .HasColumnName("ThreatScore")
-            .HasColumnType("FLOAT")
-            .HasMaxLength(25);
+            .HasColumnName("threat_score")
+            .HasColumnType("real");
     }
 }

@@ -51,7 +51,15 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
         ThreatZone averageThreatZone,
         ContentHashSet dataHashSet,
         FileMetadata fileMetadata)
-        : base(id, userId, isPrivate, startedDate, status, averageVerdict, averageThreatZone, dataHashSet)
+        : base(
+            id,
+            userId,
+            isPrivate,
+            startedDate,
+            status,
+            averageVerdict,
+            averageThreatZone,
+            dataHashSet)
     {
         FileMetadata = fileMetadata;
     }
@@ -128,5 +136,19 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
             .OrderByDescending(pair => pair.Value)
             .ThenByDescending(pair => pair.Key)
             .First().Key;
+    }
+
+    /// <inheritdoc/>
+    protected override void HandleAverageThreatScoreUpdate()
+    {
+        if (AllReports.All(r => r.ThreatScore is null))
+        {
+            return;
+        }
+
+        AverageThreatScore = AllReports
+            .Where(r => r.ThreatScore is not null)
+            .Select(r => r.ThreatScore)
+            .Average();
     }
 }

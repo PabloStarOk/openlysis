@@ -2,10 +2,11 @@ using Microsoft.EntityFrameworkCore;
 
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;
-using Openlysis.Infrastructure.Persistence.Configurations;
+using Openlysis.Infrastructure.Persistence.Configurations.Common;
 using Openlysis.Infrastructure.Persistence.Configurations.Files;
 using Openlysis.Infrastructure.Persistence.Configurations.Phones;
 using Openlysis.Infrastructure.Persistence.Configurations.URLs;
@@ -26,6 +27,11 @@ public class ApplicationDbContext : DbContext
     /// Gets the file analyses set of the database.
     /// </summary>
     public DbSet<FileMultiAnalysis> FileMultiAnalyses { get; init; } = null!;
+
+    /// <summary>
+    /// Gets the file service analyses set of the database.
+    /// </summary>
+    public DbSet<FileServiceAnalysis> FileServiceAnalyses { get; init; } = null!;
 
     /// <summary>
     /// Gets the URL analyses set of the database.
@@ -55,7 +61,8 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ContentHashSetConfiguration());
-        modelBuilder.ApplyConfiguration(new FileAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new FileServiceAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new FileMultiAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new UrlServiceAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new UrlMultiAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new PhoneMultiReputationConfiguration());

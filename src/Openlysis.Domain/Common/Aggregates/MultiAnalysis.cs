@@ -51,6 +51,11 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     public ThreatZone AverageThreatZone { get; private set; } = ThreatZone.Unknown;
 
     /// <summary>
+    /// Gets or sets the average threat score of the analysis.
+    /// </summary>
+    public float? AverageThreatScore { get; protected set; }
+
+    /// <summary>
     /// Gets the set of data hashes associated with the analysis.
     /// </summary>
     public ContentHashSet DataHashSet { get; }
@@ -161,17 +166,14 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         TServiceAnalysis updatedAnalysis);
 
     /// <summary>
-    /// Invoked when the information of the multi-analysis is updated.
-    /// This method can be overridden in derived classes to implement custom update logic.
-    /// </summary>
-    protected virtual void OnUpdateInformation()
-    {
-    }
-
-    /// <summary>
     /// Updates the average verdict of the analysis based on the associated service analyses.
     /// </summary>
     protected abstract void HandleAverageVerdictUpdate();
+
+    /// <summary>
+    /// Updates the average threat score of the analysis based on the associated service analyses.
+    /// </summary>
+    protected abstract void HandleAverageThreatScoreUpdate();
 
     /// <summary>
     /// Updates the average threat zone of the analysis based on the current average verdict.
@@ -235,14 +237,13 @@ public abstract class MultiAnalysis<TServiceAnalysis>
 
     /// <summary>
     /// Updates the information of the multi-analysis, including the average verdict,
-    /// average threat zone, and overall status. This method also invokes any additional
-    /// update logic defined in <see cref="OnUpdateInformation"/>.
+    /// average threat zone, and overall status.
     /// </summary>
     private void UpdateInformation()
     {
         HandleAverageVerdictUpdate();
         UpdateAverageThreatZone();
-        OnUpdateInformation();
+        HandleAverageThreatScoreUpdate();
         UpdateStatus();
     }
 }
