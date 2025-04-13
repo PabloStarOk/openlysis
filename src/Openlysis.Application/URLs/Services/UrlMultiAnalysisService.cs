@@ -85,7 +85,8 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             return Error.NotFound();
         }
 
-        if (multiAnalysis.UserId != userId)
+        if (multiAnalysis.IsPrivate &&
+            multiAnalysis.UserId != userId)
         {
             return Error.NotFound();
         }
