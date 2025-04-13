@@ -59,7 +59,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
                 s.RequestParam(r => r.File, "File to be analyzed.");
                 s.RequestParam(r => r.FileDescription, "Description of the file (Optional).");
                 s.RequestParam(r => r.FilePassword, "Password of the file if it is protected (Not recommended to upload confidential files) (Optional).");
-                s.RequestParam(r => r.IsPrivateFile, "If allow the file to be downloaded by other users (Not recommended to upload confidential files) (Optional).");
+                s.RequestParam(r => r.IsPrivate, "If the file analysis is private. True is the default. (Optional)");
                 s.RequestParam(r => r.Reanalyze, "If the file must analyzed again, instead of returning the last analysis. False is the default. (Optional).");
             });
     }
@@ -92,7 +92,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
             stream);
         var result = await _multiAnalysisService.AnalyzeAsync(
             userId,
-            request.IsPrivateFile,
+            request.IsPrivate,
             request.Reanalyze,
             fileData,
             ct);
