@@ -1,4 +1,5 @@
 using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.ValueObjects;
 
@@ -8,23 +9,27 @@ namespace Openlysis.API.Endpoints.Files.Common.Responses;
 /// Represents the response for a file multi analysis.
 /// </summary>
 /// <param name="Id">The unique identifier of the file multi analysis.</param>
+/// <param name="IsPrivate">Indicates if the analysis is private.</param>
 /// <param name="StartedDate">The date and time when the analysis started.</param>
+/// <param name="Status">The current status of the file multi analysis.</param>
 /// <param name="AverageVerdict">The average verdict of the file multi analysis.</param>
 /// <param name="AverageThreatZone">The average threat zone of the file multi analysis.</param>
-/// <param name="Status">The status of the file multi analysis.</param>
-/// <param name="FileMetadata">Metadata of the file.</param>
-/// <param name="HashSet">The set of content hashes associated with the file.</param>
+/// <param name="AverageThreatScore">The average threat score of the file multi analysis, if available.</param>
+/// <param name="FileMetadata">Metadata of the file being analyzed.</param>
+/// <param name="FileHashSet">A set of content hashes associated with the file.</param>
 /// <param name="ServiceAnalyses">The array of service analyses generated from the analysis.</param>
-/// <param name="ReportsAmount">The number of reports generated.</param>
+/// <param name="ReportsAmount">The total number of reports generated from the analysis.</param>
 public record FileMultiAnalysisDto(
     string Id,
+    bool IsPrivate,
     DateTime StartedDate,
-    string AverageVerdict,
-    string AverageThreatZone,
-    string Status,
+    AnalysisStatus Status,
+    Verdict AverageVerdict,
+    ThreatZone AverageThreatZone,
+    float? AverageThreatScore,
     FileMetadata FileMetadata,
-    ContentHashSet HashSet,
-    IEnumerable<ServiceFileAnalysisDto> ServiceAnalyses,
+    ContentHashSet FileHashSet,
+    FileServiceAnalysisDto[] ServiceAnalyses,
     int ReportsAmount)
 {
     /// <summary>
@@ -34,36 +39,21 @@ public record FileMultiAnalysisDto(
     /// <returns>A <see cref="FileMultiAnalysisDto"/> object.</returns>
     public static FileMultiAnalysisDto Parse(FileMultiAnalysis source)
     {
-        // Parse the service analyses from the source object
-        var serviceAnalyses = source.ServiceAnalyses.Select(
-            s =>
-            {
-                // Parse the reports from the service analysis
-                IEnumerable<ReportDto> reportDtos = s.Reports
-                    .Select(
-                        r => new ReportDto(
-                            r.Id.Value,
-                            r.Verdict.ToString(),
-                            r.ThreatZone.ToString(),
-                            r.ThreatScore));
+        FileServiceAnalysisDto[] servicesAnalyses = source.ServiceAnalyses
+            .Select(FileServiceAnalysisDto.Parse)
+            .ToArray();
 
-                // Return a new ServiceFileAnalysisDto object
-                return new ServiceFileAnalysisDto(
-                    s.ServiceName,
-                    s.Status.ToString(),
-                    reportDtos);
-            });
-
-        // Return a new FileMultiAnalysisDto object
         return new FileMultiAnalysisDto(
             source.Id.Value.ToString(),
+            source.IsPrivate,
             source.StartedDate,
-            source.AverageVerdict.ToString(),
-            source.AverageThreatZone.ToString(),
-            source.Status.ToString(),
+            source.Status,
+            source.AverageVerdict,
+            source.AverageThreatZone,
+            source.AverageThreatScore,
             source.FileMetadata,
             source.DataHashSet,
-            serviceAnalyses,
+            servicesAnalyses,
             source.ReportsAmount);
     }
 }
