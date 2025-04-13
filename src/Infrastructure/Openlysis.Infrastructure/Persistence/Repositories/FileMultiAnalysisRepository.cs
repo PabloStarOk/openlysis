@@ -129,9 +129,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
             }
 
             EntityEntry<FileServiceAnalysis> incomingEntry = _dbContext.Entry(incomingAnalysis);
-            incomingEntry.State =
-                incomingAnalysis.Reports.SequenceEqual(existingAnalysis.Reports)
-                && incomingAnalysis.Status == existingAnalysis.Status
+            incomingEntry.State = incomingAnalysis.HasSameStateTo(existingAnalysis)
                     ? EntityState.Unchanged
                     : EntityState.Modified;
 
@@ -159,9 +157,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
             }
 
             _dbContext.Entry(incomingReport).State =
-                incomingReport.Verdict == existingReport.Verdict
-                && incomingReport.ThreatZone == existingReport.ThreatZone
-                && incomingReport.ThreatScore.Equals(existingReport.ThreatScore)
+                incomingReport.HasSameStateTo(existingReport)
                 ? EntityState.Unchanged
                 : EntityState.Modified;
         }

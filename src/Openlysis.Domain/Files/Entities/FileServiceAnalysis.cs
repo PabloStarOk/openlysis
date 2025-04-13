@@ -118,4 +118,17 @@ public class FileServiceAnalysis : ServiceAnalysis
         int reportIndex = _reports.IndexOf(report);
         _reports[reportIndex] = report;
     }
+
+    /// <summary>
+    /// Determines whether the current analysis has the same state as the specified analysis.
+    /// </summary>
+    /// <param name="other">The other <see cref="FileServiceAnalysis"/> to compare with.</param>
+    /// <returns>
+    /// <c>true</c> if the current analysis has the same state as the specified analysis; otherwise, <c>false</c>.
+    /// </returns>
+    public bool HasSameStateTo(FileServiceAnalysis other)
+    {
+        return Reports.SequenceEqual(other.Reports)
+            && Status == other.Status;
+    }
 }

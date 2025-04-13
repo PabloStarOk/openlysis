@@ -75,6 +75,21 @@ public class Report : Entity<ReportId>
     }
 
     /// <summary>
+    /// Compares the current report with another report to determine if they have the same state.
+    /// </summary>
+    /// <param name="other">The other report to compare with.</param>
+    /// <returns>
+    /// True if the current report and the other report have the same verdict, threat zone,
+    /// and threat score; otherwise, false.
+    /// </returns>
+    public bool HasSameStateTo(Report other)
+    {
+        return Verdict == other.Verdict
+            && ThreatZone == other.ThreatZone
+            && ThreatScore.Equals(other.ThreatScore);
+    }
+
+    /// <summary>
     /// Normalizes the given threat score to ensure it falls within the range of 0.0 to 1.0.
     /// </summary>
     /// <param name="threatScore">The threat score to normalize. Can be null.</param>

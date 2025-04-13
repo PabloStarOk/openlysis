@@ -133,9 +133,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
             }
 
             _dbContext.Entry(incomingAnalysis).State =
-                incomingAnalysis.Verdict == existingAnalysis.Verdict
-                && incomingAnalysis.ThreatScore.Equals(existingAnalysis.ThreatScore)
-                && incomingAnalysis.Status == existingAnalysis.Status
+                incomingAnalysis.HasSameStateTo(existingAnalysis)
                 ? EntityState.Unchanged
                 : EntityState.Modified;
         }

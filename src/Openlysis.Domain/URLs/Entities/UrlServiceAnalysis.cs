@@ -133,6 +133,22 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
     }
 
     /// <summary>
+    /// Compares the current instance with another <see cref="UrlServiceAnalysis"/> instance
+    /// to determine if they have the same state.
+    /// </summary>
+    /// <param name="other">The other <see cref="UrlServiceAnalysis"/> instance to compare with.</param>
+    /// <returns>
+    /// <c>true</c> if the current instance and the other instance have the same verdict, 
+    /// threat score, and status; otherwise, <c>false</c>.
+    /// </returns>
+    public bool HasSameStateTo(UrlServiceAnalysis other)
+    {
+        return Verdict == other.Verdict
+            && ThreatScore.Equals(other.ThreatScore)
+            && Status == other.Status;
+    }
+
+    /// <summary>
     /// Normalizes the given threat score to ensure it falls within the range of 0.0 to 1.0.
     /// </summary>
     /// <param name="threatScore">The threat score to normalize. Can be null.</param>
