@@ -1,5 +1,5 @@
-using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Constants;
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Phones.ValueObjects;
@@ -9,23 +9,8 @@ namespace Openlysis.Domain.Phones.Entities;
 /// <summary>
 /// Represents the reputation of a phone given by a service.
 /// </summary>
-public class PhoneServiceReputation : Entity<GlobalId>
+public class PhoneServiceReputation : ServiceReputation
 {
-    /// <summary>
-    /// Gets the name of the service.
-    /// </summary>
-    public string ServiceName { get; }
-
-    /// <summary>
-    /// Gets the verdict of the service.
-    /// </summary>
-    public Verdict Verdict { get; }
-
-    /// <summary>
-    /// Gets the threat zone associated with the verdict.
-    /// </summary>
-    public ThreatZone ThreatZone { get; }
-
     /// <summary>
     /// Gets the phone information associated with the service.
     /// </summary>
@@ -45,11 +30,8 @@ public class PhoneServiceReputation : Entity<GlobalId>
         Verdict verdict,
         ThreatZone threatZone,
         PhoneInfo phoneInfo)
-        : base(id)
+        : base(id, serviceName, verdict, threatZone)
     {
-        ServiceName = serviceName;
-        Verdict = verdict;
-        ThreatZone = threatZone;
         PhoneInfo = phoneInfo;
     }
 

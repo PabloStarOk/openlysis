@@ -1,5 +1,4 @@
-using Openlysis.Domain.Common.Abstractions;
-using Openlysis.Domain.Common.Constants;
+using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Phones.Entities;
@@ -9,47 +8,15 @@ namespace Openlysis.Domain.Phones;
 /// <summary>
 /// Represents multiple reputations for a phone from different services.
 /// </summary>
-public class PhoneMultiReputation : AggregateRoot<GlobalId>
+public class PhoneMultiReputation : MultiReputation<PhoneServiceReputation>
 {
-    private readonly List<PhoneServiceReputation> _servicesReputations = [];
-
-    /// <summary>
-    /// Gets the date of the assessment.
-    /// </summary>
-    public DateTime AssessmentDate { get; }
-
-    /// <summary>
-    /// Gets the average verdict of the multi-reputation.
-    /// </summary>
-    public Verdict AverageVerdict { get; private set; }
-
-    /// <summary>
-    /// Gets the average threat zone of the multi-reputation.
-    /// </summary>
-    public ThreatZone AverageThreatZone { get; private set; }
-
-    /// <summary>
-    /// Gets a list of reputations of different services.
-    /// </summary>
-    public IReadOnlyList<PhoneServiceReputation> ServicesReputations => _servicesReputations;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PhoneMultiReputation"/> class.
-    /// </summary>
-    /// <param name="id">The unique identifier for the multi-reputation.</param>
-    /// <param name="assessmentDate">The date of the assessment.</param>
-    /// <param name="averageVerdict">The average verdict of the reputation.</param>
-    /// <param name="averageThreatZone">The average threat zone of the reputation.</param>
     private PhoneMultiReputation(
         GlobalId id,
-        DateTime assessmentDate,
+        DateTime reputationEvaluationDate,
         Verdict averageVerdict,
         ThreatZone averageThreatZone)
-        : base(id)
+        : base(id, reputationEvaluationDate, averageVerdict, averageThreatZone)
     {
-        AssessmentDate = assessmentDate;
-        AverageVerdict = averageVerdict;
-        AverageThreatZone = averageThreatZone;
     }
 
     // For EF core.
@@ -75,55 +42,5 @@ public class PhoneMultiReputation : AggregateRoot<GlobalId>
             assessmentDate,
             Verdict.Unknown,
             ThreatZone.Unknown);
-    }
-
-    /// <summary>
-    /// Adds a new reputation given by a service to the collection.
-    /// </summary>
-    /// <param name="serviceReputation">The reputation to add.</param>
-    /// <exception cref="ArgumentException">
-    /// Thrown when the reputation entity already exists in the collection.
-    /// </exception>
-    public void AddServiceReputation(PhoneServiceReputation serviceReputation)
-    {
-        if (_servicesReputations.Contains(serviceReputation))
-        {
-            throw new ArgumentException(
-                "Given PhoneServiceReputation already exists in the collection.",
-                nameof(serviceReputation));
-        }
-
-        _servicesReputations.Add(serviceReputation);
-        UpdateVerdict();
-        UpdateThreatZone();
-    }
-
-    /// <summary>
-    /// Updates the average verdict based on the service reputations.
-    /// </summary>
-    private void UpdateVerdict()
-    {
-        if (_servicesReputations.Count is 0)
-        {
-            AverageVerdict = Verdict.Unknown;
-            return;
-        }
-
-        var verdictCounts = _servicesReputations
-            .GroupBy(s => s.Verdict)
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        AverageVerdict = verdictCounts
-            .OrderByDescending(pair => pair.Value)
-            .ThenByDescending(pair => pair.Key)
-            .First().Key;
-    }
-
-    /// <summary>
-    /// Updates the average threat zone based on the average verdict.
-    /// </summary>
-    private void UpdateThreatZone()
-    {
-        AverageThreatZone = ThreatZoneMapping.Map[AverageVerdict];
     }
 }

@@ -24,7 +24,7 @@ public record PhoneMultiReputationDto(
     public static PhoneMultiReputationDto Parse(PhoneMultiReputation reputation)
     {
         return new PhoneMultiReputationDto(
-            reputation.AssessmentDate,
+            reputation.ReputationEvaluationDate,
             reputation.AverageVerdict,
             reputation.AverageThreatZone,
             reputation.ServicesReputations

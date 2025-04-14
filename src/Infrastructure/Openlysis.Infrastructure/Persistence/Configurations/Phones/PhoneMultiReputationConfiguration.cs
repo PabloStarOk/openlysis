@@ -41,7 +41,7 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
                 id => id.Value,
                 dbValue => GlobalId.Parse(dbValue));
 
-        builder.Property(p => p.AssessmentDate)
+        builder.Property(p => p.ReputationEvaluationDate)
             .HasColumnName("assessment_date")
             .HasColumnType("timestamp with time zone")
             .IsRequired();
