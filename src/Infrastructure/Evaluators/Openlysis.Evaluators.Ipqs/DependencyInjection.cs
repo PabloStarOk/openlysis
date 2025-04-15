@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.Evaluators.Ipqs.Adapters.EmailAddresses;
 using Openlysis.Evaluators.Ipqs.Adapters.Phones;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
 using Openlysis.Evaluators.Shared.Infrastructure.Client;
-using Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
@@ -54,13 +54,13 @@ public static class DependencyInjection
             .Bind(evaluatorOptionsSection)
             .ValidateDataAnnotations();
 
-        // Add service logger.
-        services.AddScoped<ReputationEvaluatorLogger<PhoneReputationEvaluator>>();
-
         // Add http client.
         services.ConfigureHttpClient(evaluatorOptions);
 
         // Add phone number evaluator.
         services.AddPhoneReputationEvaluator(configuration);
+
+        // Email address evaluator.
+        services.AddEmailAddressReputationEvaluator(configuration);
     }
 }

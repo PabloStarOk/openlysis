@@ -4,15 +4,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Application.Phones.Contracts;
-using Openlysis.Application.Phones.Contracts.Abstractions;
+using Openlysis.Application.Common.Abstractions.Contracts;
 using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Domain.Phones.Entities;
+using Openlysis.Evaluators.Ipqs.Adapters.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Phones;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
-using Openlysis.Evaluators.Ipqs.Core.Models.Requests;
+using Openlysis.Evaluators.Ipqs.Core.Models.Responses;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;
+using Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
 
 namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
@@ -55,10 +57,15 @@ internal static class DependencyInjection
                 PropertyNameCaseInsensitive = true,
             });
 
+        // Add service logger.
+        services.AddScoped<
+            IServiceLogger<PhoneReputationEvaluator>,
+            ReputationEvaluatorLogger<PhoneReputationEvaluator>>();
+
         // Add endpoint address factory.
         services.AddKeyedScoped<
             IEndpointAddressFactory<EvaluatePhoneReputation>,
-            PhoneEndpointAddressFactory>(KeyedServices.PhoneKey);
+            EndpointAddressFactory>(KeyedServices.PhoneKey);
 
         // Add verdict calculator
         services.AddScoped<

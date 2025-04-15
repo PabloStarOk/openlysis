@@ -9,7 +9,7 @@ using Openlysis.Domain.Phones.Entities;
 using Openlysis.Domain.Phones.ValueObjects;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
-using Openlysis.Evaluators.Ipqs.Core.Models.Requests;
+using Openlysis.Evaluators.Ipqs.Core.Models.Responses;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
