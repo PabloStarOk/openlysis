@@ -1,4 +1,4 @@
-namespace Openlysis.Application.Phones.Contracts.Requests;
+namespace Openlysis.Application.Common.Requests;
 
 /// <summary>
 /// Represents a request to evaluate the reputation of data.

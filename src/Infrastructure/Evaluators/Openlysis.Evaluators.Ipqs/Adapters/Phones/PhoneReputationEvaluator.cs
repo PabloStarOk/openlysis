@@ -6,8 +6,8 @@ using Openlysis.Domain.Phones.Entities;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;
-using Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
 namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
@@ -28,7 +28,7 @@ public class PhoneReputationEvaluator
     /// <param name="endpointAddressFactory">The endpoint address factory for creating endpoint addresses.</param>
     /// <param name="responseParser">The response parser for parsing service responses.</param>
     public PhoneReputationEvaluator(
-        ReputationEvaluatorLogger<PhoneReputationEvaluator> logger,
+        IServiceLogger<PhoneReputationEvaluator> logger,
         IOptionsMonitor<IpqsEvaluatorOptions> options,
         IHttpClientFactory httpClientFactory,
         [FromKeyedServices(KeyedServices.GlobalKey)] IRateQuotaService<ReputationEndpointType> rateQuotaService,

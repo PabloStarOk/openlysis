@@ -14,4 +14,9 @@ public static class KeyedServices
     /// The key used to retrieve keyed services for IPQS phone services.
     /// </summary>
     public const string PhoneKey = "IpqsPhoneServicesKey";
+
+    /// <summary>
+    /// The key used to retrieve keyed services for IPQS email address services.
+    /// </summary>
+    public const string EmailAddressKey = "IpqsEmailAddressServicesKey";
 }

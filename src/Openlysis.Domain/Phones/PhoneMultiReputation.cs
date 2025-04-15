@@ -29,17 +29,17 @@ public class PhoneMultiReputation : MultiReputation<PhoneServiceReputation>
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of <see cref="PhoneMultiReputation"/> with the specified assessment date.
+    /// Creates a new instance of <see cref="PhoneMultiReputation"/>.
     /// </summary>
-    /// <param name="assessmentDate">The date when the reputation was validated.</param>
+    /// <param name="reputationEvaluationDate">The date when the reputation was evaluated.</param>
     /// <returns>A new instance of <see cref="PhoneMultiReputation"/>.</returns>
     public static PhoneMultiReputation Create(
-        DateTime assessmentDate)
+        DateTime reputationEvaluationDate)
     {
         GlobalId globalId = GlobalId.CreateUnique();
         return new PhoneMultiReputation(
             globalId,
-            assessmentDate,
+            reputationEvaluationDate,
             Verdict.Unknown,
             ThreatZone.Unknown);
     }

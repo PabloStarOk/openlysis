@@ -84,3 +84,12 @@ All endpoints require an API key in a header.
 - Full endpoint path: `https://[domain]/api/v1/phone-numbers/{phone-number}`
 - Endpoint path: `/phone-numbers/{phone-numbers}`
 - API Key required: Yes
+
+## Email Address
+
+### Sends an email address to get its reputation
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/email-addresses/{email-address}`
+- Endpoint path: `/email-addresses/{email-address}`
+- API Key required: Yes

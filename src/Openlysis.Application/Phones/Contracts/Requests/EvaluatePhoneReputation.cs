@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+using Openlysis.Application.Common.Requests;
+
 namespace Openlysis.Application.Phones.Contracts.Requests;
 
 /// <summary>
