@@ -36,6 +36,26 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, EmailAddress
     public override void Configure()
     {
         Get("email-addresses/{email-address}");
+        Description(
+            builder =>
+            {
+                builder.WithName("GetEmailAddressReputation");
+                builder.WithDisplayName("GetEmailAddressReputation");
+                builder.Accepts<GetReputationRequest>();
+                builder.Produces<EmailAddressMultiReputationDto>();
+                builder.ProducesValidationProblem();
+                builder.ProducesProblem(statusCode: StatusCodes.Status503ServiceUnavailable);
+                builder.ProducesProblem(statusCode: StatusCodes.Status500InternalServerError);
+            },
+            clearDefaults: true);
+        Summary(
+            endpointSummary =>
+            {
+                endpointSummary.Summary = "Gets reputation of an email address";
+                endpointSummary.Description = "Gets reputation of an email address.";
+                endpointSummary.ExampleRequest = new GetReputationRequest("jhon.doe@example.com");
+                endpointSummary.RequestParam(r => r.EmailAddress, "An email address.");
+            });
         DontThrowIfValidationFails();
     }
 
