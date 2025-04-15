@@ -12,19 +12,27 @@ namespace Openlysis.Domain.EmailAddresses;
 public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceReputation>
 {
     /// <summary>
+    /// Gets the email address associated with the reputation.
+    /// </summary>
+    public string EmailAddress { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="EmailAddressMultiReputation"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the reputation.</param>
     /// <param name="evaluationReputationDate">The date when the reputation was evaluated.</param>
     /// <param name="averageVerdict">The average verdict of the reputation.</param>
     /// <param name="averageThreatZone">The average threat zone of the reputation.</param>
+    /// <param name="emailAddress">The email address associated with the reputation.</param>
     private EmailAddressMultiReputation(
         GlobalId id,
         DateTime evaluationReputationDate,
         Verdict averageVerdict,
-        ThreatZone averageThreatZone)
+        ThreatZone averageThreatZone,
+        string emailAddress)
         : base(id, evaluationReputationDate, averageVerdict, averageThreatZone)
     {
+        EmailAddress = emailAddress;
     }
 
     // For EF core.
@@ -40,15 +48,18 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceRe
     /// Creates a new instance of <see cref="EmailAddressMultiReputation"/>.
     /// </summary>
     /// <param name="reputationEvaluationDate">The date when the reputation was evaluated.</param>
+    /// <param name="emailAddress">The email address associated with the reputation.</param>
     /// <returns>A new instance of <see cref="EmailAddressMultiReputation"/>.</returns>
     public static EmailAddressMultiReputation Create(
-        DateTime reputationEvaluationDate)
+        DateTime reputationEvaluationDate,
+        string emailAddress)
     {
         GlobalId globalId = GlobalId.CreateUnique();
         return new EmailAddressMultiReputation(
             globalId,
             reputationEvaluationDate,
             Verdict.Unknown,
-            ThreatZone.Unknown);
+            ThreatZone.Unknown,
+            emailAddress);
     }
 }

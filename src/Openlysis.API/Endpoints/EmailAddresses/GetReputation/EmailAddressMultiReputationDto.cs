@@ -17,6 +17,7 @@ public record EmailAddressMultiReputationDto(
     DateTime ReputationEvaluationDate,
     Verdict AverageVerdict,
     ThreatZone AverageThreatZone,
+    string EmailAddress,
     EmailAddressServiceReputationDto[] ServiceReputations)
 {
     /// <summary>
@@ -36,6 +37,7 @@ public record EmailAddressMultiReputationDto(
             source.ReputationEvaluationDate,
             source.AverageVerdict,
             source.AverageThreatZone,
+            source.EmailAddress,
             serviceReputations);
     }
 }

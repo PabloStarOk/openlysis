@@ -58,6 +58,12 @@ public class EmailAddressMultiReputationConfiguration : IEntityTypeConfiguration
             .HasColumnType(SmallintType)
             .IsRequired();
 
+        builder.Property(p => p.EmailAddress)
+            .HasColumnName("email_address")
+            .HasColumnType("varchar")
+            .HasMaxLength(254)
+            .IsRequired();
+
         builder.Navigation(p => p.ServicesReputations)
             .AutoInclude();
     }
