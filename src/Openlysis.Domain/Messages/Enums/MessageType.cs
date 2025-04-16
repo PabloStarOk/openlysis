@@ -1,4 +1,4 @@
-namespace Openlysis.Domain.Common.Enums;
+namespace Openlysis.Domain.Messages.Enums;
 
 /// <summary>
 /// Represents the type of the analyzed message.

@@ -1,7 +1,7 @@
 using Openlysis.Domain.Common.Entities;
-using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Messages.Enums;
 
-namespace Openlysis.Domain.Common.ValueObjects;
+namespace Openlysis.Domain.Messages.ValueObjects;
 
 /// <summary>
 /// Represents information about a generic message.
@@ -13,5 +13,6 @@ namespace Openlysis.Domain.Common.ValueObjects;
 public record MessageInformation(
     MessageType Type,
     string Sender,
+    string? Subject,
     string Content,
     ContentHashSet MessageHashSet);

@@ -1,8 +1,8 @@
 using Openlysis.Domain.Common.Abstractions;
-using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Domain.Messages.Enums;
 
-namespace Openlysis.Domain.Common.Entities;
+namespace Openlysis.Domain.Messages.Entities;
 
 /// <summary>
 /// Represents the result of an analysis or reputation for a piece of data like email address, phone number, URL or file.

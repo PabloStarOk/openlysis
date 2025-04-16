@@ -1,9 +1,11 @@
 using Openlysis.Domain.Common.Abstractions;
-using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Domain.Files.ValueObjects;
+using Openlysis.Domain.Messages.Entities;
+using Openlysis.Domain.Messages.ValueObjects;
 
-namespace Openlysis.Domain.Common.Aggregates;
+namespace Openlysis.Domain.Messages;
 
 /// <summary>
 /// Represents the analysis of a message, including its type, content, sender, and detected data.
@@ -19,12 +21,17 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <summary>
     /// Gets the data of the message, including its type, sender, content, and hash set.
     /// </summary>
-    public virtual MessageInformation Message { get; }
+    public MessageInformation Message { get; }
 
     /// <summary>
     /// Gets the current state of the analysis, including its status, verdict and threat zone.
     /// </summary>
     public AnalysisState State { get; private set; }
+
+    /// <summary>
+    /// Gets the results of the analyses for the attached files in the message.
+    /// </summary>
+    public IReadOnlyList<DataAssessmentResult<FileMetadata>> AttachedFilesResults { get; }
 
     /// <summary>
     /// Gets the detected URL results from the analysis.
@@ -48,14 +55,16 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="message">The data of the message, including its type, sender, content, and hash set.</param>
     /// <param name="state">The current state of the analysis, including its status, verdict, and threat zone.</param>
-    /// <param name="detectedUrlsResults">An array of detected URL results from the analysis.</param>
-    /// <param name="detectedEmailAddressesResults">An array of detected email address results from the analysis.</param>
-    /// <param name="detectedPhoneNumbersResults">An array of detected phone number results from the analysis.</param>
+    /// <param name="attachedFilesResults">An array of multi-analysis results for the attached files in the message.</param>
+    /// <param name="detectedUrlsResults">An array of multi-analysis results for the detected phone numbers in the message.</param>
+    /// <param name="detectedEmailAddressesResults">An array of reputation results for the detected email addresses in the message.</param>
+    /// <param name="detectedPhoneNumbersResults">An array of reputation results for the detected phone numbers in the message.</param>
     protected MessageAnalysis(
         GlobalId id,
         DateTime startedDate,
         MessageInformation message,
         AnalysisState state,
+        DataAssessmentResult<FileMetadata>[] attachedFilesResults,
         DataAssessmentResult<Uri>[] detectedUrlsResults,
         DataAssessmentResult<string>[] detectedEmailAddressesResults,
         DataAssessmentResult<string>[] detectedPhoneNumbersResults)
@@ -67,6 +76,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         DetectedUrlsResults = detectedUrlsResults;
         DetectedEmailAddressesResults = detectedEmailAddressesResults;
         DetectedPhoneNumbersResults = detectedPhoneNumbersResults;
+        AttachedFilesResults = attachedFilesResults;
     }
 
     // For EF Core.
@@ -90,19 +100,21 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="message">The data of the message, including its type, sender, content, and hash set.</param>
     /// <param name="verdict">The verdict to assign to the analysis, indicating the severity or outcome.</param>
-    /// <param name="detectedUrlsResults">An array of detected URL results from the analysis.</param>
-    /// <param name="detectedEmailAddressesResults">An array of detected email address results from the analysis.</param>
-    /// <param name="detectedPhoneNumbersResults">An array of detected phone number results from the analysis.</param>
+    /// <param name="attachedFilesResults">An array of multi-analysis results for the attached files in the message.</param>
+    /// <param name="detectedUrlsResults">An array of multi-analysis results for the detected phone numbers in the message.</param>
+    /// <param name="detectedEmailAddressesResults">An array of reputation results for the detected email addresses in the message.</param>
+    /// <param name="detectedPhoneNumbersResults">An array of reputation results for the detected phone numbers in the message.</param>
     /// <returns>A new instance of the <see cref="MessageAnalysis"/> class.</returns>
     /// <remarks>
     /// This factory method generates a new instance of the <see cref="MessageAnalysis"/> class,
     /// initializing it with the provided parameters. It assigns a unique identifier to the
-    /// analysis, an initial verdict and sets the default status, and threat zone values.
+    /// analysis, an initial verdict, and sets the default status and threat zone values.
     /// </remarks>
     public static MessageAnalysis Create(
         DateTime startedDate,
         MessageInformation message,
         Verdict verdict,
+        DataAssessmentResult<FileMetadata>[] attachedFilesResults,
         DataAssessmentResult<Uri>[] detectedUrlsResults,
         DataAssessmentResult<string>[] detectedEmailAddressesResults,
         DataAssessmentResult<string>[] detectedPhoneNumbersResults)
@@ -114,56 +126,26 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
             startedDate,
             message,
             analysisState.WithVerdict(verdict),
+            attachedFilesResults,
             detectedUrlsResults,
             detectedEmailAddressesResults,
             detectedPhoneNumbersResults);
     }
 
     /// <summary>
-    /// Updates the analysis with a new verdict and status for a specific detected result.
+    /// Updates the analysis with a new verdict and overall status.
     /// </summary>
-    /// <param name="resultId">The unique identifier of the result to update.</param>
     /// <param name="verdict">The new verdict to assign to the analysis.</param>
     /// <param name="status">The new status to assign to the analysis.</param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="resultId"/>, <paramref name="verdict"/>, or <paramref name="status"/> is null.
-    /// </exception>
-    /// <exception cref="ArgumentException">
-    /// Thrown if the <paramref name="resultId"/> does not exist in the analysis.
-    /// </exception>
     public void Update(
-        GlobalId resultId,
         Verdict verdict,
         AnalysisStatus status)
     {
-        ArgumentNullException.ThrowIfNull(resultId);
         ArgumentNullException.ThrowIfNull(verdict);
         ArgumentNullException.ThrowIfNull(status);
 
-        GlobalId[] resultIds = GetAllGlobalIds();
-
-        if (!resultIds.Contains(resultId))
-        {
-            throw new ArgumentException("MessageAnalysis does not contain an analysis with the given id.", nameof(resultId));
-        }
-
         UpdateVerdict(verdict);
         State = State.WithStatus(status);
-    }
-
-    /// <summary>
-    /// Retrieves all unique identifiers (GlobalIds) from the detected results,
-    /// including URLs, email addresses, and phone numbers.
-    /// </summary>
-    /// <returns>An array of <see cref="GlobalId"/> representing all detected results.</returns>
-    protected virtual GlobalId[] GetAllGlobalIds()
-    {
-        return
-        [
-            ..DetectedUrlsResults.Select(d => d.ResultId),
-            ..DetectedEmailAddressesResults.Select(d => d.ResultId),
-            ..DetectedPhoneNumbersResults.Select(d => d.ResultId)
-        ];
     }
 
     /// <summary>
