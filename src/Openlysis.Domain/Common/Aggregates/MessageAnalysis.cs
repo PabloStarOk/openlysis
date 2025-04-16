@@ -89,23 +89,31 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// </summary>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="message">The data of the message, including its type, sender, content, and hash set.</param>
+    /// <param name="verdict">The verdict to assign to the analysis, indicating the severity or outcome.</param>
     /// <param name="detectedUrlsResults">An array of detected URL results from the analysis.</param>
     /// <param name="detectedEmailAddressesResults">An array of detected email address results from the analysis.</param>
     /// <param name="detectedPhoneNumbersResults">An array of detected phone number results from the analysis.</param>
     /// <returns>A new instance of the <see cref="MessageAnalysis"/> class.</returns>
+    /// <remarks>
+    /// This factory method generates a new instance of the <see cref="MessageAnalysis"/> class,
+    /// initializing it with the provided parameters. It assigns a unique identifier to the
+    /// analysis, an initial verdict and sets the default status, and threat zone values.
+    /// </remarks>
     public static MessageAnalysis Create(
         DateTime startedDate,
         MessageInformation message,
+        Verdict verdict,
         DataAssessmentResult<Uri>[] detectedUrlsResults,
         DataAssessmentResult<string>[] detectedEmailAddressesResults,
         DataAssessmentResult<string>[] detectedPhoneNumbersResults)
     {
         GlobalId id = GlobalId.CreateUnique();
+        var analysisState = AnalysisState.Initial();
         return new MessageAnalysis(
             id,
             startedDate,
             message,
-            AnalysisState.Initial(),
+            analysisState.WithVerdict(verdict),
             detectedUrlsResults,
             detectedEmailAddressesResults,
             detectedPhoneNumbersResults);

@@ -1,5 +1,6 @@
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Emails.ValueObjects;
 using Openlysis.Domain.Files.ValueObjects;
@@ -74,6 +75,7 @@ public sealed class EmailAnalysis : MessageAnalysis
     /// </summary>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="message">The email data associated with the analysis.</param>
+    /// <param name="verdict">The verdict assigned to the email analysis.</param>
     /// <param name="detectedUrlsResults">The results of the analysis for detected URLs in the email.</param>
     /// <param name="detectedEmailAddressesResults">The results of the analysis for detected email addresses in the email.</param>
     /// <param name="detectedPhoneNumbersResults">The results of the analysis for detected phone numbers in the email.</param>
@@ -82,22 +84,24 @@ public sealed class EmailAnalysis : MessageAnalysis
     /// <remarks>
     /// This factory method generates a new instance of the <see cref="EmailAnalysis"/> class,
     /// initializing it with the provided parameters. It assigns a unique identifier to the
-    /// analysis and sets the default status, verdict, and threat zone values.
+    /// analysis, an initial verdict and sets the default status, and threat zone values.
     /// </remarks>
     public static EmailAnalysis Create(
         DateTime startedDate,
         EmailInformation message,
+        Verdict verdict,
         DataAssessmentResult<Uri>[] detectedUrlsResults,
         DataAssessmentResult<string>[] detectedEmailAddressesResults,
         DataAssessmentResult<string>[] detectedPhoneNumbersResults,
         DataAssessmentResult<FileMetadata>[] attachedFilesResults)
     {
         GlobalId id = GlobalId.CreateUnique();
+        var analysisState = AnalysisState.Initial();
         return new EmailAnalysis(
             id,
             startedDate,
             message,
-            AnalysisState.Initial(),
+            analysisState.WithVerdict(verdict),
             detectedUrlsResults,
             detectedEmailAddressesResults,
             detectedPhoneNumbersResults,
