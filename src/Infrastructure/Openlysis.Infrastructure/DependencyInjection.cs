@@ -9,6 +9,7 @@ using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
+using Openlysis.Domain.Messages;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Evaluators.Ipqs;
@@ -45,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<IRepository<UrlMultiAnalysis, GlobalId>, UrlMultiAnalysisRepository>();
         services.AddScoped<IRepository<PhoneMultiReputation, GlobalId>, PhoneMultiReputationRepository>();
         services.AddScoped<IRepository<EmailAddressMultiReputation, GlobalId>, EmailAddressMultiReputationRepository>();
+        services.AddScoped<IRepository<MessageAnalysis, GlobalId>, MessageAnalysisRepository>();
 
         // Add hash service.
         services.AddTransient<MD5>(_ => MD5.Create());
