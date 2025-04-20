@@ -37,6 +37,7 @@ public interface IMessageAnalysisService
     /// <summary>
     /// Retrieves a message analysis by its unique identifier asynchronously.
     /// </summary>
+    /// <param name="userId">The unique identifier of the user requesting the analysis.</param>
     /// <param name="id">The unique global identifier of the message analysis.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
@@ -44,12 +45,14 @@ public interface IMessageAnalysisService
     /// with the result of the message analysis or an error.
     /// </returns>
     public Task<ErrorOr<MessageAnalysis>> GetAnalysisByIdAsync(
+        UserId userId,
         GlobalId id,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a list of message analyses by their hash asynchronously.
     /// </summary>
+    /// <param name="userId">The unique identifier of the user requesting the analyses.</param>
     /// <param name="hash">The hash value used to identify the message analyses.</param>
     /// <param name="amount">The maximum number of analyses to retrieve.</param>
     /// <param name="order">The order in which the analyses should be retrieved.</param>
@@ -58,6 +61,7 @@ public interface IMessageAnalysisService
     /// A task that represents the asynchronous operation, containing a read-only list of <see cref="MessageAnalysis"/>.
     /// </returns>
     public Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByHashAsync(
+        UserId userId,
         string hash,
         int amount,
         OrderType order,

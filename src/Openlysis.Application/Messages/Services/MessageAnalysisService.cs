@@ -114,12 +114,18 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<MessageAnalysis>> GetAnalysisByIdAsync(
+        UserId userId,
         GlobalId id,
         CancellationToken cancellationToken = default)
     {
         MessageAnalysis? messageAnalysis = await _repository.GetAsync(id, cancellationToken);
-
         if (messageAnalysis is null)
+        {
+            return Error.NotFound();
+        }
+
+        if (messageAnalysis.IsPrivate &&
+            messageAnalysis.UserId != userId)
         {
             return Error.NotFound();
         }
@@ -129,6 +135,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByHashAsync(
+        UserId userId,
         string hash,
         int amount,
         OrderType order,
@@ -139,7 +146,8 @@ internal class MessageAnalysisService : IMessageAnalysisService
             u => (u.Message.MessageHashSet.Sha256 == hash
                     || u.Message.MessageHashSet.Md5 == hash
                     || u.Message.MessageHashSet.Sha1 == hash
-                    || u.Message.MessageHashSet.Sha512 == hash),
+                    || u.Message.MessageHashSet.Sha512 == hash)
+                && (!u.IsPrivate || (u.IsPrivate && u.UserId == userId)),
             OrderBy,
             cancellationToken);
 
