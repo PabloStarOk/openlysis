@@ -64,6 +64,21 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<UrlMultiAnalysis>> GetManyByIdsAsync(
+        GlobalId[] ids,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+
+        return await _dbContext.UrlMultiAnalyses
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Include(u => u.ServiceAnalyses)
+            .Where(u => ids.Contains(u.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task AddAsync(UrlMultiAnalysis model, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(model);

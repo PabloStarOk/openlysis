@@ -63,6 +63,20 @@ public class EmailAddressMultiReputationRepository
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<EmailAddressMultiReputation>> GetManyByIdsAsync(
+        GlobalId[] ids,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+
+        return await _dbContext.EmailAddressMultiReputations
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(e => ids.Contains(e.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task AddAsync(
         EmailAddressMultiReputation model,
         CancellationToken cancellationToken = default)

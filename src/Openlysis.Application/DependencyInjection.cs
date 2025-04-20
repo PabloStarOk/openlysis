@@ -33,7 +33,8 @@ public static class DependencyInjection
         // Add email address reputation service.
         services.AddScoped<IEmailAddressReputationService, EmailAddressReputationService>();
 
-        // Add message analysis service.
+        // Add message analysis services.
         services.AddScoped<IMessageAnalysisService, MessageAnalysisService>();
+        services.AddScoped<IMessageAnalysisResultsProvider, MessageAnalysisResultsProvider>();
     }
 }

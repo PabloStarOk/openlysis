@@ -61,6 +61,20 @@ public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, 
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<PhoneMultiReputation>> GetManyByIdsAsync(
+        GlobalId[] ids,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+
+        return await _dbContext.PhoneMultiReputations
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(p => ids.Contains(p.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task AddAsync(PhoneMultiReputation model, CancellationToken cancellationToken = default)
     {
         await _dbContext.PhoneMultiReputations.AddAsync(model, cancellationToken);

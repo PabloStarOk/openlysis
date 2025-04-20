@@ -62,6 +62,20 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<MessageAnalysis>> GetManyByIdsAsync(
+        GlobalId[] ids,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+
+        return await _dbContext.MessageAnalyses
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(m => ids.Contains(m.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task AddAsync(
         MessageAnalysis model,
         CancellationToken cancellationToken = default)

@@ -3,6 +3,7 @@ using System.Security.Claims;
 using FastEndpoints;
 
 using Openlysis.API.Authentication.API.Extensions;
+using Openlysis.API.Endpoints.Sms.GetAnalysisById;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Application.Messages.Services;
 using Openlysis.Domain.Messages;
@@ -70,9 +71,7 @@ public class AnalyzeSmsEndpoint : Endpoint<AnalyzeSmsRequest, AnalyzeSmsResponse
             return;
         }
 
-        string userId = HttpContext.User.Claims
-            .Single(c => c.Type == ClaimTypes.NameIdentifier)
-            .Value;
+        string userId = User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier).Value;
 
         var message = new Message(MessageType.Sms, req.Sender, null, req.Content);
         MessageAnalysis messageAnalysis = await _messageAnalysisService.AnalyzeAsync(
@@ -86,8 +85,14 @@ public class AnalyzeSmsEndpoint : Endpoint<AnalyzeSmsRequest, AnalyzeSmsResponse
 
         Response = AnalyzeSmsResponse.Parse(messageAnalysis);
 
-        // TODO: Replace with name of GetByIdEndpoint.
-        IResult acceptedResult = Results.Accepted(uri: null, value: Response);
+        var routeValues = new RouteValueDictionary
+            {
+                { "id", Response.Id },
+            };
+        IResult acceptedResult = Results.AcceptedAtRoute (
+            GetAnalysisByIdEndpoint.Name,
+            routeValues,
+            Response);
         await SendResultAsync(acceptedResult);
     }
 }
