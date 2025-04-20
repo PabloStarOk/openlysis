@@ -34,12 +34,29 @@ public class AnalyzeSmsEndpoint : Endpoint<AnalyzeSmsRequest, AnalyzeSmsResponse
     /// <inheritdoc/>
     public override void Configure()
     {
-        Post("sms");
+        Post(string.Empty);
+        Group<SmsAnalysesGroup>();
+        Version(1);
         Description(
             builder =>
             {
+                builder.WithName("AnalyzeSms");
+                builder.WithDisplayName("AnalyzeSms");
                 builder.Accepts<AnalyzeSmsRequest>("multipart/form-data");
                 builder.Produces<AnalyzeSmsResponse>(statusCode: 202);
+                builder.ProducesValidationProblem();
+            },
+            clearDefaults: true);
+        Summary(
+            s =>
+            {
+                s.Summary = "Analyze an SMS message.";
+                s.Description = "Sends an SMS message to be analyzed.";
+                s.RequestParam(r => r.Sender, "Sender of the SMS message.");
+                s.RequestParam(r => r.Content, "Content of the SMS message.");
+                s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who sends the SMS message. Default is true");
+                s.RequestParam(r => r.ReanalyzeData, "If the data that is detected in the SMS message, should be analyzed again even if there are existing analysis results. Default is false.");
+                s.RequestParam(r => r.CountryCode, "A code of the country where detected phone numbers can be associated to, it must be in ISO 3166-1 alpha-2 format (e.g. 'US').");
             });
         DontThrowIfValidationFails();
     }

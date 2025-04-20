@@ -5,7 +5,7 @@ namespace Openlysis.API.Endpoints.Sms;
 /// <summary>
 /// Represents a group of endpoints related to SMS analyses.
 /// </summary>
-public class SmsAnalysesGroup : Group
+public sealed class SmsAnalysesGroup : Group
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="SmsAnalysesGroup"/> class
@@ -18,9 +18,9 @@ public class SmsAnalysesGroup : Group
             ep.Description(
                 b =>
                 {
-                    b.WithGroupName("SMS");
-                    b.WithDisplayName("SMS");
-                    b.WithTags("SMS");
+                    b.WithGroupName("Sms");
+                    b.WithDisplayName("Sms");
+                    b.WithTags("Sms");
                 });
         });
     }
