@@ -27,7 +27,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
     private readonly IRepository<MessageAnalysis, GlobalId> _repository;
     private readonly IMessageDataExtractor _dataExtractor;
     private readonly IMessageAnalyzer _messageAnalyzer;
-    private readonly IMessageBuilder _messageBuilder;
+    private readonly IMessageAnalysisBuilder _messageAnalysisBuilder;
     private readonly IMessageAnalysisUpdater _messageAnalysisUpdater;
 
     /// <summary>
@@ -36,19 +36,19 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// <param name="repository">The repository for managing <see cref="MessageAnalysis"/> entities.</param>
     /// <param name="dataExtractor">The service responsible for extracting data (e.g., URLs, email addresses, phone numbers) from messages.</param>
     /// <param name="messageAnalyzer">The service responsible for analyzing messages and their associated data.</param>
-    /// <param name="messageBuilder">The service responsible for building message analysis objects.</param>
+    /// <param name="messageAnalysisBuilder">The service responsible for building message analysis objects.</param>
     /// <param name="messageAnalysisUpdater">The service responsible for updating message analysis data.</param>
     public MessageAnalysisService(
         IRepository<MessageAnalysis, GlobalId> repository,
         IMessageDataExtractor dataExtractor,
         IMessageAnalyzer messageAnalyzer,
-        IMessageBuilder messageBuilder,
+        IMessageAnalysisBuilder messageAnalysisBuilder,
         IMessageAnalysisUpdater messageAnalysisUpdater)
     {
         _repository = repository;
         _dataExtractor = dataExtractor;
         _messageAnalyzer = messageAnalyzer;
-        _messageBuilder = messageBuilder;
+        _messageAnalysisBuilder = messageAnalysisBuilder;
         _messageAnalysisUpdater = messageAnalysisUpdater;
     }
 
@@ -95,7 +95,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
         IEnumerable<PhoneMultiReputation> phoneNumbersReputations =
             await _messageAnalyzer.GetPhoneNumbersReputationsAsync(phoneNumbers, cancellationToken);
 
-        MessageAnalysis messageAnalysis = await _messageBuilder.BuildAsync(
+        MessageAnalysis messageAnalysis = await _messageAnalysisBuilder.BuildAsync(
             message,
             fileMultiAnalyses,
             urlMultiAnalyses,

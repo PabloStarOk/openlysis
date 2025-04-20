@@ -90,7 +90,7 @@ public static class DependencyInjection
         services.AddTransient<IMessageDataExtractor, MessageDataExtractor>();
         services.AddTransient<IMessageAnalyzer, MessageAnalyzer>();
         services.AddSingleton(new RecyclableMemoryStreamManager());
-        services.AddTransient<IMessageBuilder, MessageBuilder>();
+        services.AddTransient<IMessageAnalysisBuilder, MessageAnalysisBuilder>();
 
         // Add message analysis coordinator
         services.AddSingleton<IMessageAnalysisUpdater, MessageAnalysisUpdater>();

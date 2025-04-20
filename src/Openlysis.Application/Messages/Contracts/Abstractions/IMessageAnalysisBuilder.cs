@@ -10,7 +10,7 @@ namespace Openlysis.Application.Messages.Contracts.Abstractions;
 /// <summary>
 /// Defines a builder of <see cref="MessageAnalysis"/>.
 /// </summary>
-public interface IMessageBuilder
+public interface IMessageAnalysisBuilder
 {
     /// <summary>
     /// Builds a new <see cref="MessageAnalysis"/> instance based on the provided message and its associated analyses.

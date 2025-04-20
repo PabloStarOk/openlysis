@@ -22,14 +22,14 @@ namespace Openlysis.Infrastructure.Services;
 /// <summary>
 /// Builder for <see cref="MessageAnalysis"/>.
 /// </summary>
-internal sealed class MessageBuilder : IMessageBuilder
+internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
 {
     private readonly RecyclableMemoryStreamManager _memoryStreamManager;
     private readonly IHashService _hashService;
     private readonly TimeProvider _timeProvider;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MessageBuilder"/> class.
+    /// Initializes a new instance of the <see cref="MessageAnalysisBuilder"/> class.
     /// </summary>
     /// <param name="memoryStreamManager">
     /// The manager for recyclable memory streams, used for efficient memory usage.
@@ -40,7 +40,7 @@ internal sealed class MessageBuilder : IMessageBuilder
     /// <param name="timeProvider">
     /// The provider for retrieving the current UTC time.
     /// </param>
-    public MessageBuilder(
+    public MessageAnalysisBuilder(
         RecyclableMemoryStreamManager memoryStreamManager,
         IHashService hashService,
         TimeProvider timeProvider)
