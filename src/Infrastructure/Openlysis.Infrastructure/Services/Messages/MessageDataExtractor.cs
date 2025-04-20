@@ -3,7 +3,7 @@ using System.Net.Mail;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Domain.Messages.Enums;
 
-namespace Openlysis.Infrastructure.Services;
+namespace Openlysis.Infrastructure.Services.Messages;
 
 /// <summary>
 /// An extractor of data for messages.

@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.Common.Entities;
 
-namespace Openlysis.Infrastructure.Services;
+namespace Openlysis.Infrastructure.Services.Hashing;
 
 /// <summary>
 /// Service to hash the data of a file.

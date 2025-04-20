@@ -15,7 +15,7 @@ using Openlysis.Domain.Messages.Entities;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 
-namespace Openlysis.Infrastructure.Services;
+namespace Openlysis.Infrastructure.Services.Messages;
 
 /// <summary>
 /// Updates verdict and status of <see cref="MessageAnalysis"/> objects according to

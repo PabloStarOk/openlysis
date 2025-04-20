@@ -18,7 +18,8 @@ using Openlysis.Evaluators.Ipqs;
 using Openlysis.Infrastructure.Configuration;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
-using Openlysis.Infrastructure.Services;
+using Openlysis.Infrastructure.Services.Hashing;
+using Openlysis.Infrastructure.Services.Messages;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
 using PhoneNumbers;

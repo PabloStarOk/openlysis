@@ -8,7 +8,7 @@ using Openlysis.Infrastructure.Persistence;
 
 using DataType = Openlysis.Domain.Messages.Enums.DataType;
 
-namespace Openlysis.Infrastructure.Services;
+namespace Openlysis.Infrastructure.Services.Messages;
 
 /// <summary>
 /// A service that detects email addresses in a given input string.

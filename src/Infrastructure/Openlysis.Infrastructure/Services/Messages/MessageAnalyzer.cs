@@ -18,7 +18,7 @@ using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.Users.ValueObjects;
 
-namespace Openlysis.Infrastructure.Services;
+namespace Openlysis.Infrastructure.Services.Messages;
 
 /// <summary>
 /// Provides methods for analyzing data related to messages.

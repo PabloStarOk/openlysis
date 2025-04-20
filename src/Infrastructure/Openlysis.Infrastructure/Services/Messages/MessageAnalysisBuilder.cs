@@ -17,7 +17,7 @@ using Openlysis.Domain.Messages.ValueObjects;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 
-namespace Openlysis.Infrastructure.Services;
+namespace Openlysis.Infrastructure.Services.Messages;
 
 /// <summary>
 /// Builder for <see cref="MessageAnalysis"/>.
