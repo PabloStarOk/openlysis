@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IO;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
@@ -84,6 +85,12 @@ public static class DependencyInjection
         services.AddTransient<DataDetector, UrlDetector>();
         services.AddTransient<DataDetector, EmailAddressDetector>();
         services.AddTransient<DataDetector, PhoneNumberDetector>();
+
+        // Add analysis service helpers.
+        services.AddTransient<IMessageDataExtractor, MessageDataExtractor>();
+        services.AddTransient<IMessageAnalyzer, MessageAnalyzer>();
+        services.AddSingleton(new RecyclableMemoryStreamManager());
+        services.AddTransient<IMessageBuilder, MessageBuilder>();
 
         // Add message analysis coordinator
         services.AddSingleton<IMessageAnalysisUpdater, MessageAnalysisUpdater>();
