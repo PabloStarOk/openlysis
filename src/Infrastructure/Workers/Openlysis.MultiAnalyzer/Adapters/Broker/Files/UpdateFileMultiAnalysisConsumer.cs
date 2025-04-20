@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MassTransit;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
 
@@ -24,15 +25,25 @@ public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis
     public const string EndpointName = "update-file-multi-analysis";
 
     private readonly IRepository<FileMultiAnalysis, GlobalId> _multiAnalysisRepository;
+    private readonly IMessageAnalysisUpdater _messageAnalysisUpdater;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFileMultiAnalysisConsumer"/> class.
     /// </summary>
-    /// <param name="multiAnalysisRepository">An <see cref="IRepository{TModel,TModelId}"/> to save <see cref="FileMultiAnalysis"/> entities.</param>
+    /// <param name="multiAnalysisRepository">
+    /// An instance of <see cref="IRepository{TModel,TModelId}"/> used to manage
+    /// <see cref="FileMultiAnalysis"/> entities in the persistence layer.
+    /// </param>
+    /// <param name="messageAnalysisUpdater">
+    /// An instance of <see cref="IMessageAnalysisUpdater"/> used to notify updates
+    /// about child analysis states.
+    /// </param>
     public UpdateFileMultiAnalysisConsumer(
-        IRepository<FileMultiAnalysis, GlobalId> multiAnalysisRepository)
+        IRepository<FileMultiAnalysis, GlobalId> multiAnalysisRepository,
+        IMessageAnalysisUpdater messageAnalysisUpdater)
     {
         _multiAnalysisRepository = multiAnalysisRepository;
+        _messageAnalysisUpdater = messageAnalysisUpdater;
     }
 
     /// <inheritdoc/>
@@ -53,6 +64,12 @@ public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis
             fileMultiAnalysis.AddServiceAnalysis(serviceAnalysis);
         }
 
-        await _multiAnalysisRepository.UpdateAsync(fileMultiAnalysis);
+        await _multiAnalysisRepository.UpdateAsync(
+            fileMultiAnalysis,
+            context.CancellationToken);
+
+        await _messageAnalysisUpdater.NotifyChildAnalysisStateAsync(
+            fileMultiAnalysis.Id,
+            context.CancellationToken);
     }
 }

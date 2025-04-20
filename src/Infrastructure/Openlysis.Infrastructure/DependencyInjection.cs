@@ -84,5 +84,8 @@ public static class DependencyInjection
         services.AddTransient<DataDetector, UrlDetector>();
         services.AddTransient<DataDetector, EmailAddressDetector>();
         services.AddTransient<DataDetector, PhoneNumberDetector>();
+
+        // Add message analysis coordinator
+        services.AddSingleton<IMessageAnalysisUpdater, MessageAnalysisUpdater>();
     }
 }
