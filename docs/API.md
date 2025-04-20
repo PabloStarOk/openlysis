@@ -93,3 +93,12 @@ All endpoints require an API key in a header.
 - Full endpoint path: `https://[domain]/api/v1/email-addresses/{email-address}`
 - Endpoint path: `/email-addresses/{email-address}`
 - API Key required: Yes
+
+## SMS
+
+### Sends an SMS message to be analyzed
+
+- HTTP method: `POST`
+- Full endpoint path: `https://[domain]/api/v1/sms`
+- Endpoint path: `/sms`
+- API Key required: Yes

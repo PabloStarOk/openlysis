@@ -53,7 +53,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
     }
 
     /// <inheritdoc/>
-    public async Task AnalyzeAsync(
+    public async Task<MessageAnalysis> AnalyzeAsync(
         UserId userId,
         bool isPrivate,
         Message message,
@@ -108,6 +108,8 @@ internal class MessageAnalysisService : IMessageAnalysisService
         await _messageAnalysisUpdater.AddPendingAsync(
             messageAnalysis,
             cancellationToken);
+
+        return messageAnalysis;
     }
 
     /// <inheritdoc/>

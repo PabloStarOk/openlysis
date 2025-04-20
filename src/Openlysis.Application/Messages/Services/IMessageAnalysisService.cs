@@ -18,14 +18,14 @@ public interface IMessageAnalysisService
     /// Analyzes a message asynchronously.
     /// </summary>
     /// <param name="userId">The unique identifier of the user performing the analysis.</param>
-    /// <param name="isPrivate">Indicates whether the message analysis is only available for the user who sends the request.</param>
-    /// <param name="message">The message to be analyzed.</param>
-    /// <param name="files">An optional array of files associated with the message.</param>
-    /// <param name="reanalyzeData">Indicates whether to reanalyze the data even if it has been analyzed before.</param>
-    /// <param name="requestCountryCode">The country code of the request origin, if available.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task AnalyzeAsync(
+    /// <param name="isPrivate">Indicates whether the message analysis is private to the requesting user.</param>
+    /// <param name="message">The message to analyze.</param>
+    /// <param name="files">An optional array of files associated with the message for analysis.</param>
+    /// <param name="reanalyzeData">Specifies whether to reanalyze the data even if it has been previously analyzed.</param>
+    /// <param name="requestCountryCode">The country code of the request origin, if provided.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests during the operation.</param>
+    /// <returns>A task representing the asynchronous operation, containing the result of the message analysis.</returns>
+    public Task<MessageAnalysis> AnalyzeAsync(
         UserId userId,
         bool isPrivate,
         Message message,
