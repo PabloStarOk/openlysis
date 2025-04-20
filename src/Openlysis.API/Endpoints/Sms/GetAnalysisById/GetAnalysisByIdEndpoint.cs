@@ -54,6 +54,25 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
     {
         Get("analyses/{id}");
         Group<SmsAnalysesGroup>();
+        Version(1);
+        Description(
+            builder =>
+            {
+                builder.WithName(Name);
+                builder.WithDisplayName(Name);
+                builder.Accepts<GetAnalysisByIdRequest>();
+                builder.Produces<MessageAnalysisDto>();
+                builder.ProducesProblem(StatusCodes.Status404NotFound);
+                builder.ProducesProblem(StatusCodes.Status500InternalServerError);
+            },
+            clearDefaults: true);
+        Summary(
+            s =>
+            {
+                s.Summary = "Gets a SMS analysis by Id.";
+                s.Description = "Retrieves an SMS analysis by its ID.";
+                s.RequestParam(r => r.Id, "ID of the SMS analysis to retrieve.");
+            });
     }
 
     /// <inheritdoc/>
