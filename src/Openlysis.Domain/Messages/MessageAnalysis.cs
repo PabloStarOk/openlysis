@@ -4,6 +4,7 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Messages.Entities;
 using Openlysis.Domain.Messages.ValueObjects;
+using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Domain.Messages;
 
@@ -13,6 +14,16 @@ namespace Openlysis.Domain.Messages;
 /// </summary>
 public class MessageAnalysis : AggregateRoot<GlobalId>
 {
+    /// <summary>
+    /// Gets the unique identifier of the user associated with the message analysis.
+    /// </summary>
+    public UserId UserId { get; }
+
+    /// <summary>
+    /// Gets a value indicating whether the message is private.
+    /// </summary>
+    public bool IsPrivate { get; }
+
     /// <summary>
     /// Gets the date and time when the analysis started.
     /// </summary>
@@ -52,15 +63,19 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// Initializes a new instance of the <see cref="MessageAnalysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the message analysis.</param>
+    /// <param name="userId">The unique identifier of the user associated with the message analysis.</param>
+    /// <param name="isPrivate">A value indicating whether the message is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="message">The data of the message, including its type, sender, content, and hash set.</param>
     /// <param name="state">The current state of the analysis, including its status, verdict, and threat zone.</param>
     /// <param name="attachedFilesResults">An array of multi-analysis results for the attached files in the message.</param>
-    /// <param name="detectedUrlsResults">An array of multi-analysis results for the detected phone numbers in the message.</param>
+    /// <param name="detectedUrlsResults">An array of multi-analysis results for the detected URLs in the message.</param>
     /// <param name="detectedEmailAddressesResults">An array of reputation results for the detected email addresses in the message.</param>
     /// <param name="detectedPhoneNumbersResults">An array of reputation results for the detected phone numbers in the message.</param>
     protected MessageAnalysis(
         GlobalId id,
+        UserId userId,
+        bool isPrivate,
         DateTime startedDate,
         MessageInformation message,
         AnalysisState state,
@@ -70,6 +85,8 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         DataAssessmentResult<string>[] detectedPhoneNumbersResults)
         : base(id)
     {
+        UserId = userId;
+        IsPrivate = isPrivate;
         StartedDate = startedDate;
         Message = message;
         State = state;
@@ -98,10 +115,12 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// Creates a new instance of the <see cref="MessageAnalysis"/> class.
     /// </summary>
     /// <param name="startedDate">The date and time when the analysis started.</param>
+    /// <param name="userId">The unique identifier of the user associated with the message analysis.</param>
+    /// <param name="isPrivate">A value indicating whether the message is private.</param>
     /// <param name="message">The data of the message, including its type, sender, content, and hash set.</param>
     /// <param name="verdict">The verdict to assign to the analysis, indicating the severity or outcome.</param>
     /// <param name="attachedFilesResults">An array of multi-analysis results for the attached files in the message.</param>
-    /// <param name="detectedUrlsResults">An array of multi-analysis results for the detected phone numbers in the message.</param>
+    /// <param name="detectedUrlsResults">An array of multi-analysis results for the detected URLs in the message.</param>
     /// <param name="detectedEmailAddressesResults">An array of reputation results for the detected email addresses in the message.</param>
     /// <param name="detectedPhoneNumbersResults">An array of reputation results for the detected phone numbers in the message.</param>
     /// <returns>A new instance of the <see cref="MessageAnalysis"/> class.</returns>
@@ -112,6 +131,8 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// </remarks>
     public static MessageAnalysis Create(
         DateTime startedDate,
+        UserId userId,
+        bool isPrivate,
         MessageInformation message,
         Verdict verdict,
         DataAssessmentResult<FileMetadata>[] attachedFilesResults,
@@ -123,6 +144,8 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         var analysisState = AnalysisState.Initial();
         return new MessageAnalysis(
             id,
+            userId,
+            isPrivate,
             startedDate,
             message,
             analysisState.WithVerdict(verdict),

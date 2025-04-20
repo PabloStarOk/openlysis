@@ -16,6 +16,7 @@ using Openlysis.Domain.Messages.Enums;
 using Openlysis.Domain.Messages.ValueObjects;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
+using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Infrastructure.Services.Messages;
 
@@ -52,6 +53,8 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
 
     /// <inheritdoc/>
     public async Task<MessageAnalysis> BuildAsync(
+        UserId userId,
+        bool isPrivate,
         Message message,
         IEnumerable<FileMultiAnalysis> fileMultiAnalyses,
         IEnumerable<UrlMultiAnalysis> urlMultiAnalyses,
@@ -72,10 +75,10 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
             CreatePhonesResults(phoneNumbersReputations);
 
         var messageInfo = await CreateMessageInformationAsync(message, cancellationToken);
-
-        // TODO: Add UserId and IsPrivate properties to domain model.
         return MessageAnalysis.Create(
             _timeProvider.GetUtcNow().UtcDateTime,
+            userId,
+            isPrivate,
             messageInfo,
             Verdict.Unknown,
             attachedFileResults,

@@ -96,6 +96,8 @@ internal class MessageAnalysisService : IMessageAnalysisService
             await _messageAnalyzer.GetPhoneNumbersReputationsAsync(phoneNumbers, cancellationToken);
 
         MessageAnalysis messageAnalysis = await _messageAnalysisBuilder.BuildAsync(
+            userId,
+            isPrivate,
             message,
             fileMultiAnalyses,
             urlMultiAnalyses,

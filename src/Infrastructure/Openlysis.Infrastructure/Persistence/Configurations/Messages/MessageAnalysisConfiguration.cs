@@ -5,6 +5,7 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Entities;
+using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations.Messages;
 
@@ -59,6 +60,11 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
             .HasConversion(
                 id => id.Value,
                 dbValue => GlobalId.Parse(dbValue));
+
+        builder.Property(m => m.IsPrivate)
+            .HasColumnName("is_private")
+            .HasColumnType("boolean")
+            .IsRequired();
 
         builder.Property(m => m.StartedDate)
             .HasColumnName("started_date")
@@ -120,6 +126,15 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
                .HasColumnType(SmallintType)
                .IsRequired();
         });
+
+        builder.Property(u => u.UserId)
+            .HasColumnName("user_id")
+            .HasColumnType("varchar")
+            .HasMaxLength(450)
+            .IsRequired()
+            .HasConversion(
+                id => id.Value,
+                dbValue => UserId.Create(dbValue));
 
         builder.Navigation(m => m.Message)
             .AutoInclude();
