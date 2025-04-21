@@ -3,6 +3,7 @@ using System.Security.Claims;
 using FastEndpoints;
 
 using Openlysis.API.Authentication.API.Extensions;
+using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.URLs;
