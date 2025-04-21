@@ -116,3 +116,12 @@ All endpoints require an API key in a header.
 - Full endpoint path: `https://[domain]/api/v1/sms/{hash}/analyses`
 - Endpoint path: `/sms/{hash}/analyses`
 - API Key required: Yes
+
+## Emails
+
+### Gets an Email analysis by Id
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/email/analyses/{id}`
+- Endpoint path: `/email/analyses/{id}`
+- API Key required: Yes
