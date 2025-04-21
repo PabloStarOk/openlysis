@@ -109,3 +109,10 @@ All endpoints require an API key in a header.
 - Full endpoint path: `https://[domain]/api/v1/sms/analyses/{id}`
 - Endpoint path: `/sms/analyses/{id}`
 - API Key required: Yes
+
+### Get SMS analyses by hash
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/sms/{hash}/analyses`
+- Endpoint path: `/sms/{hash}/analyses`
+- API Key required: Yes
