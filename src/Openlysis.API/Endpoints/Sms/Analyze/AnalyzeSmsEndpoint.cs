@@ -3,6 +3,7 @@ using System.Security.Claims;
 using FastEndpoints;
 
 using Openlysis.API.Authentication.API.Extensions;
+using Openlysis.API.Endpoints.Common.Responses.Messages;
 using Openlysis.API.Endpoints.Sms.GetAnalysisById;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Application.Messages.Services;
@@ -19,7 +20,7 @@ namespace Openlysis.API.Endpoints.Sms.Analyze;
 /// This endpoint handles requests to analyze SMS messages by processing the input
 /// and returning the ID or hash of a <see cref="MessageAnalysis"/>.
 /// </remarks>
-public class AnalyzeSmsEndpoint : Endpoint<AnalyzeSmsRequest, AnalyzeSmsResponse>
+public class AnalyzeSmsEndpoint : Endpoint<AnalyzeSmsRequest, AnalyzeMessageResponse>
 {
     private readonly IMessageAnalysisService _messageAnalysisService;
 
@@ -44,7 +45,7 @@ public class AnalyzeSmsEndpoint : Endpoint<AnalyzeSmsRequest, AnalyzeSmsResponse
                 builder.WithName("AnalyzeSms");
                 builder.WithDisplayName("AnalyzeSms");
                 builder.Accepts<AnalyzeSmsRequest>("multipart/form-data");
-                builder.Produces<AnalyzeSmsResponse>(statusCode: 202);
+                builder.Produces<AnalyzeMessageResponse>(statusCode: 202);
                 builder.ProducesValidationProblem();
             },
             clearDefaults: true);
@@ -83,7 +84,7 @@ public class AnalyzeSmsEndpoint : Endpoint<AnalyzeSmsRequest, AnalyzeSmsResponse
             requestCountryCode: req.NormalizedCountryCode,
             cancellationToken: ct);
 
-        Response = AnalyzeSmsResponse.Parse(messageAnalysis);
+        Response = AnalyzeMessageResponse.Parse(messageAnalysis);
 
         var routeValues = new RouteValueDictionary
             {
