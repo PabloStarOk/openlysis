@@ -46,12 +46,9 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
         ArgumentNullException.ThrowIfNull(messageAnalysis);
 
         var entry = UpdatableEntry.Create(messageAnalysis);
-        if (!_messageAnalysisEntries.TryAdd(messageAnalysis.Id, entry))
-        {
-            throw new InvalidOperationException($"Given {typeof(MessageAnalysis)} already exists in the collection.");
-        }
-
+        RegisterUpdatableEntry(entry);
         await UpdateWithMultiReputationsAsync(messageAnalysis, cancellationToken);
+        CompleteIfNotUpdatable(entry);
         await StoreInRepositoryAsync(messageAnalysis, cancellationToken);
     }
 
@@ -85,6 +82,12 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
         public MessageAnalysis MessageAnalysis { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the associated <see cref="MessageAnalysis"/> object
+        /// can be updated based on the presence of updatable child analyses.
+        /// </summary>
+        public bool IsUpdatable { get; }
+
+        /// <summary>
         /// Gets a read-only list of cached analysis states, representing the terminal states
         /// of child analyses associated with this entry.
         /// </summary>
@@ -108,6 +111,7 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
             MessageAnalysis = messageAnalysis;
             _cachedTerminalAnalysisIds = new List<GlobalId>(updatableAnalysesCount);
             _cachedTerminalAnalysisStates = new List<AnalysisState>(updatableAnalysesCount);
+            IsUpdatable = HasUpdatableChildAnalyses();
         }
 
         /// <summary>
@@ -169,6 +173,40 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
                 _cachedTerminalAnalysisStates.Add(analysisState);
             }
         }
+
+        /// <summary>
+        /// Determines whether the associated <see cref="MessageAnalysis"/> object has any child analyses
+        /// that can be updated, based on the presence of attached file results or detected URL results.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if there are updatable child analyses; otherwise, <c>false</c>.
+        /// </returns>
+        private bool HasUpdatableChildAnalyses()
+        {
+            return MessageAnalysis is
+            {
+                AttachedFilesResults.Count: > 0,
+                DetectedUrlsResults.Count: > 0
+            };
+        }
+    }
+
+    /// <summary>
+    /// Completes the associated <see cref="MessageAnalysis"/> if it is not updatable.
+    /// Updates the status to <see cref="AnalysisStatus.Completed"/> while retaining the current verdict.
+    /// </summary>
+    /// <param name="entry">The <see cref="UpdatableEntry"/> to evaluate and potentially complete.</param>
+    private static void CompleteIfNotUpdatable(UpdatableEntry entry)
+    {
+        if (entry.IsUpdatable)
+        {
+            return;
+        }
+
+        Verdict currentVerdict = entry.MessageAnalysis.State.Verdict;
+        entry.MessageAnalysis.Update(
+            currentVerdict,
+            AnalysisStatus.Completed);
     }
 
     /// <summary>
@@ -231,6 +269,30 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
         AnalysisStatus status = CalculateStatus(statuses.ToArray());
 
         analysis.Update(verdict, status);
+    }
+
+    /// <summary>
+    /// Adds an updatable entry to the collection of message analysis entries.
+    /// </summary>
+    /// <param name="entry">The <see cref="UpdatableEntry"/> to add.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the given <see cref="MessageAnalysis"/> already exists in the collection.
+    /// </exception>
+    private void RegisterUpdatableEntry(UpdatableEntry entry)
+    {
+        if (!entry.IsUpdatable)
+        {
+            return;
+        }
+
+        bool wasAdded = _messageAnalysisEntries.TryAdd(
+            entry.MessageAnalysis.Id,
+            entry);
+
+        if (!wasAdded)
+        {
+            throw new InvalidOperationException($"Given {typeof(MessageAnalysis)} already exists in the collection.");
+        }
     }
 
     /// <summary>
@@ -309,16 +371,16 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
         MessageAnalysis analysis,
         CancellationToken cancellationToken = default)
     {
+        List<Verdict> verdicts = [];
+
         if (analysis is
             {
                 DetectedEmailAddressesResults.Count: 0,
-                DetectedPhoneNumbersResults.Count: 0
+                DetectedPhoneNumbersResults.Count: 0,
             })
         {
-            return;
+            verdicts.Add(Verdict.Undetected);
         }
-
-        List<Verdict> verdicts = [];
 
         if (analysis.DetectedEmailAddressesResults.Count > 0)
         {
