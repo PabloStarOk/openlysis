@@ -54,7 +54,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
             {
                 s.Summary = "Analyze a message.";
                 s.Description = "Sends a message to be analyzed.";
-                s.RequestParam(r => r.MessageType, "Type of the message. Accepted values are 'SMS' or 'email'.");
+                s.RequestParam(r => r.MessageType, "Type of the message. Accepted values are 'SMS' or 'email'."); // TODO: Documentation is not displayed.
                 s.RequestParam(r => r.Sender, "Sender of the message.");
                 s.RequestParam(r => r.Content, "Content of the message.");
                 s.RequestParam(r => r.Subject, "Subject of the message, can be null or empty.");
