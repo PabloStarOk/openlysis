@@ -72,8 +72,9 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
         IEnumerable<Uri> urls =
             ExtractData(subject, content, _dataExtractor.ExtractUrls);
-        List<MailAddress> emailAddresses =
-            ExtractData(subject, content, _dataExtractor.ExtractEmailAddresses).ToList();
+        HashSet<MailAddress> emailAddresses =
+            ExtractData(subject, content, _dataExtractor.ExtractEmailAddresses)
+                .ToHashSet();
         IEnumerable<string> phoneNumbers =
             ExtractData(subject, content, _dataExtractor.ExtractPhoneNumbers);
         if (TryCreateSenderEmail(message, out MailAddress? senderEmail))
