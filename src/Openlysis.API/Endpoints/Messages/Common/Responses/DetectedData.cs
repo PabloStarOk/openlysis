@@ -1,6 +1,6 @@
 using Openlysis.Domain.Messages;
 
-namespace Openlysis.API.Endpoints.Common.Responses.Messages;
+namespace Openlysis.API.Endpoints.Messages.Common.Responses;
 
 /// <summary>
 /// Data extracted from a message's subject and content, including URLs, email addresses, and phone numbers.
@@ -9,7 +9,7 @@ namespace Openlysis.API.Endpoints.Common.Responses.Messages;
 /// <param name="EmailAddresses">A collection of detected email addresses.</param>
 /// <param name="PhoneNumbers">A collection of detected phone numbers.</param>
 public record DetectedData(
-    IEnumerable<Uri> Urls, // TODO: Check if it looks correct.
+    IEnumerable<Uri> Urls,
     IEnumerable<string> EmailAddresses,
     IEnumerable<string> PhoneNumbers)
 {

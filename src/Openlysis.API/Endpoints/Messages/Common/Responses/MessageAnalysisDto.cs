@@ -2,7 +2,7 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.ValueObjects;
 
-namespace Openlysis.API.Endpoints.Common.Responses.Messages;
+namespace Openlysis.API.Endpoints.Messages.Common.Responses;
 
 /// <summary>
 /// Data transfer object (DTO) for <see cref="MessageAnalysis"/>.

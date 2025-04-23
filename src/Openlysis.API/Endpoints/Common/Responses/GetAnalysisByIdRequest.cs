@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Openlysis.API.Endpoints.Common.Requests;
+namespace Openlysis.API.Endpoints.Common.Responses;
 
 /// <summary>
 /// Request to retrieve an analysis by ID.

@@ -1,9 +1,9 @@
 using Openlysis.Domain.Messages;
 
-namespace Openlysis.API.Endpoints.Common.Responses.Messages;
+namespace Openlysis.API.Endpoints.Messages.Analyze;
 
 /// <summary>
-/// Response after starting to analyze an SMS or email message.
+/// Response after starting to analyze a message.
 /// </summary>
 /// <param name="Id">The unique identifier for the analysis.</param>
 /// <param name="Sha256">The SHA-256 hash of the message.</param>

@@ -94,48 +94,25 @@ All endpoints require an API key in a header.
 - Endpoint path: `/email-addresses/{email-address}`
 - API Key required: Yes
 
-## SMS
+## Messages
 
-### Sends an SMS message to be analyzed
-
-- HTTP method: `POST`
-- Full endpoint path: `https://[domain]/api/v1/sms`
-- Endpoint path: `/sms`
-- API Key required: Yes
-
-### Gets an SMS analysis by ID
-
-- HTTP method: `GET`
-- Full endpoint path: `https://[domain]/api/v1/sms/analyses/{id}`
-- Endpoint path: `/sms/analyses/{id}`
-- API Key required: Yes
-
-### Get SMS analyses by hash
-
-- HTTP method: `GET`
-- Full endpoint path: `https://[domain]/api/v1/sms/{hash}/analyses`
-- Endpoint path: `/sms/{hash}/analyses`
-- API Key required: Yes
-
-## Emails
-
-### Sends an email message to be analyzed
+### Sends a message to be analyzed
 
 - HTTP method: `POST`
-- Full endpoint path: `https://[domain]/api/v1/emails`
-- Endpoint path: `/emails`
+- Full endpoint path: `https://[domain]/api/v1/messages`
+- Endpoint path: `/messages`
 - API Key required: Yes
 
-### Gets an email analysis by ID
+### Gets a message analysis by ID
 
 - HTTP method: `GET`
-- Full endpoint path: `https://[domain]/api/v1/emails/analyses/{id}`
-- Endpoint path: `/emails/analyses/{id}`
+- Full endpoint path: `https://[domain]/api/v1/messages/analyses/{id}`
+- Endpoint path: `/messages/analyses/{id}`
 - API Key required: Yes
 
-### Get email analyses by hash
+### Gets message analyses by hash
 
 - HTTP method: `GET`
-- Full endpoint path: `https://[domain]/api/v1/emails/{hash}/analyses`
-- Endpoint path: `/emails/{hash}/analyses`
+- Full endpoint path: `https://[domain]/api/v1/messages/{hash}/analyses`
+- Endpoint path: `/messages/{hash}/analyses`
 - API Key required: Yes

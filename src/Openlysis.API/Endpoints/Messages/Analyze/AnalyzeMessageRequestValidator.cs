@@ -2,26 +2,30 @@ using FastEndpoints;
 
 using FluentValidation;
 
-namespace Openlysis.API.Endpoints.Emails.Analyze;
+namespace Openlysis.API.Endpoints.Messages.Analyze;
 
 /// <summary>
-/// Validator for the <see cref="Sms.Analyze.AnalyzeSmsRequest"/> class.
+/// Validator for the <see cref="AnalyzeMessageRequest"/> class.
 /// Ensures that the required fields in the request are properly validated.
 /// </summary>
-public sealed class AnalyzeEmailRequestValidator : Validator<AnalyzeEmailRequest>
+public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageRequest>
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="AnalyzeEmailRequestValidator"/> class.
+    /// Initializes a new instance of the <see cref="AnalyzeMessageRequestValidator"/> class.
     /// </summary>
-    public AnalyzeEmailRequestValidator()
+    public AnalyzeMessageRequestValidator()
     {
+        RuleFor(x => x.MessageType)
+            .NotNull()
+            .WithMessage("Type of the message must be provided.");
+
         RuleFor(x => x.Sender)
             .NotEmpty()
-            .WithMessage("Sender of the email must be provided.");
+            .WithMessage("Sender of the message must be provided.");
 
         RuleFor(x => x.Content)
             .NotEmpty()
-            .WithMessage("Content of the email must be provided.");
+            .WithMessage("Content of the message must be provided.");
 
         RuleFor(x => x.CountryCode)
             .Length(2)
@@ -84,7 +88,7 @@ public sealed class AnalyzeEmailRequestValidator : Validator<AnalyzeEmailRequest
     /// True if each password corresponds to a valid attached file name or if either collection is null; otherwise, false.
     /// </returns>
     private static bool MatchAttachedFilesPasswords(
-        AnalyzeEmailRequest request,
+        AnalyzeMessageRequest request,
         Dictionary<string, string>? passwords)
     {
         if (request.AttachedFiles is null

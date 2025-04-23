@@ -4,10 +4,10 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using Openlysis.API.Endpoints.Common.Requests;
-using Openlysis.API.Endpoints.Common.Responses.Messages;
+using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 using Openlysis.API.Endpoints.Files.Common.Responses;
+using Openlysis.API.Endpoints.Messages.Common.Responses;
 using Openlysis.API.Endpoints.Phones.GetReputation;
 using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.Messages.Services;
@@ -15,7 +15,7 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Users.ValueObjects;
 
-namespace Openlysis.API.Endpoints.Emails.GetAnalysisById;
+namespace Openlysis.API.Endpoints.Messages.GetAnalysisById;
 
 /// <summary>
 /// Endpoint for retrieving a <see cref="MessageAnalysis"/> by its unique identifier.
@@ -29,7 +29,7 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
     /// <summary>
     /// The name of the endpoint for retrieving message analysis by ID.
     /// </summary>
-    public const string Name = "GetEmailAnalysisById";
+    public const string Name = "GetMessageAnalysisById";
 
     private readonly ILogger<GetAnalysisByIdEndpoint> _logger;
     private readonly IMessageAnalysisService _messageAnalysisService;
@@ -55,7 +55,7 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
     public override void Configure()
     {
         Get("analyses/{id}");
-        Group<EmailAnalysesGroup>();
+        Group<MessageAnalysesGroup>();
         Version(1);
         Description(
             builder =>
@@ -71,9 +71,9 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
         Summary(
             s =>
             {
-                s.Summary = "Gets an email analysis by Id.";
-                s.Description = "Retrieves an email analysis by its ID.";
-                s.RequestParam(r => r.Id, "ID of the email analysis to retrieve.");
+                s.Summary = "Gets a message analysis by Id.";
+                s.Description = "Retrieves a message analysis by its ID.";
+                s.RequestParam(r => r.Id, "ID of the message analysis to retrieve.");
             });
     }
 
@@ -110,7 +110,6 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
             return;
         }
 
-        // TODO: Refactor duplicated logic with other sms analysis endpoints.
         var messageAnalysis = result.Value;
         var fileMultiAnalyses = await _resultsProvider.GetFileMultiAnalysesAsync(
             messageAnalysis,

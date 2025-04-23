@@ -4,16 +4,16 @@ using FastEndpoints;
 
 using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.API.Endpoints.Common.Requests;
-using Openlysis.API.Endpoints.Common.Responses.Messages;
 using Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 using Openlysis.API.Endpoints.Files.Common.Responses;
+using Openlysis.API.Endpoints.Messages.Common.Responses;
 using Openlysis.API.Endpoints.Phones.GetReputation;
 using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.Messages.Services;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Users.ValueObjects;
 
-namespace Openlysis.API.Endpoints.Emails.GetAnalysesByHash;
+namespace Openlysis.API.Endpoints.Messages.GetAnalysesByHash;
 
 /// <summary>
 /// Endpoint for retrieving message analyses by a specific hash.
@@ -25,6 +25,8 @@ namespace Openlysis.API.Endpoints.Emails.GetAnalysesByHash;
 public class GetAnalysesByHashEndpoint
     : Endpoint<GetAnalysesByHashRequest, IEnumerable<MessageAnalysisDto>>
 {
+    private const string Name = "GetMessageAnalysesByHash";
+
     private readonly IMessageAnalysisService _messageAnalysisService;
     private readonly IMessageAnalysisResultsProvider _resultsProvider;
 
@@ -49,13 +51,13 @@ public class GetAnalysesByHashEndpoint
     public override void Configure()
     {
         Get("{hash}/analyses");
-        Group<EmailAnalysesGroup>();
+        Group<MessageAnalysesGroup>();
         Version(1);
         Description(
             builder =>
             {
-                builder.WithName("GetEmailAnalysesByHash");
-                builder.WithDisplayName("GetEmailAnalysesByHash");
+                builder.WithName(Name);
+                builder.WithDisplayName(Name);
                 builder.Accepts<GetAnalysesByHashRequest>();
                 builder.Produces<IEnumerable<MessageAnalysisDto>>();
                 builder.ProducesValidationProblem();
@@ -65,9 +67,9 @@ public class GetAnalysesByHashEndpoint
         Summary(
             s =>
             {
-                s.Summary = "Get several analyses for an email message by Hash";
+                s.Summary = "Get several analyses for a message by Hash";
                 s.Description = "Gets a collection of analyses by providing a MD5, SHA-1, SHA-256 or SHA-512 hash of an email message.";
-                s.RequestParam(r => r.Hash, "A SHA-256, MD5, SHA-1 or SHA-512 hash of the email message.");
+                s.RequestParam(r => r.Hash, "A SHA-256, MD5, SHA-1 or SHA-512 hash of the message.");
                 s.RequestParam(r => r.Amount, "(Pagination) Amount of analyses to retrieve.");
                 s.RequestParam(r => r.StartedDateOrder, "Order of the collection by started date.");
             });

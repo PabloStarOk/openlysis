@@ -5,6 +5,7 @@ using ErrorOr;
 using FastEndpoints;
 
 using Openlysis.API.Endpoints.Common.Requests;
+using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.Common.ValueObjects;

@@ -3,7 +3,7 @@ using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.API.Endpoints.Phones.GetReputation;
 using Openlysis.API.Endpoints.URLs.Common;
 
-namespace Openlysis.API.Endpoints.Common.Responses.Messages;
+namespace Openlysis.API.Endpoints.Messages.Common.Responses;
 
 /// <summary>
 /// Analysis and reputation results of the detected data in a message.
