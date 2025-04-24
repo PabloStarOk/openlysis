@@ -11,8 +11,8 @@ namespace Openlysis.API.Endpoints.URLs.Common;
 /// <param name="IsPrivate">Indicates if the analysis is private.</param>
 /// <param name="StartedDate">The date when the analysis started.</param>
 /// <param name="Status">The current status of the analysis.</param>
-/// <param name="AverageVerdict">The average verdict of the analysis.</param>
-/// <param name="AverageThreatZone">The average threat zone of the analysis.</param>
+/// <param name="FinalVerdict">The final verdict of the analysis.</param>
+/// <param name="FinalThreatZone">The final threat zone of the analysis.</param>
 /// <param name="AverageThreatScore">The average threat score of the analysis.</param>
 /// <param name="Url">The URL being analyzed.</param>
 /// <param name="UrlHashSet">The set of content hashes for the URL.</param>
@@ -22,8 +22,8 @@ public record UrlMultiAnalysisDto(
     bool IsPrivate,
     DateTime StartedDate,
     AnalysisStatus Status,
-    Verdict AverageVerdict,
-    ThreatZone AverageThreatZone,
+    Verdict FinalVerdict,
+    ThreatZone FinalThreatZone,
     float? AverageThreatScore,
     Uri Url,
     ContentHashSet UrlHashSet,
@@ -45,8 +45,8 @@ public record UrlMultiAnalysisDto(
             source.IsPrivate,
             source.StartedDate,
             source.Status,
-            source.AverageVerdict,
-            source.AverageThreatZone,
+            source.FinalVerdict,
+            source.FinalThreatZone,
             source.AverageThreatScore,
             source.Url,
             source.DataHashSet,

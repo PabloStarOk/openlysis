@@ -56,13 +56,13 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Property(u => u.AverageVerdict)
-            .HasColumnName("average_verdict")
+        builder.Property(u => u.FinalVerdict)
+            .HasColumnName("final_verdict")
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Property(u => u.AverageThreatZone)
-            .HasColumnName("average_threat_zone")
+        builder.Property(u => u.FinalThreatZone)
+            .HasColumnName("final_threat_zone")
             .HasColumnType(SmallintType)
             .IsRequired();
 

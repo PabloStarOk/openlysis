@@ -55,13 +55,13 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Property(f => f.AverageVerdict)
-            .HasColumnName("average_verdict")
+        builder.Property(f => f.FinalVerdict)
+            .HasColumnName("final_verdict")
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Property(f => f.AverageThreatZone)
-            .HasColumnName("average_threat_zone")
+        builder.Property(f => f.FinalThreatZone)
+            .HasColumnName("final_threat_zone")
             .HasColumnType(SmallintType)
             .IsRequired();
 

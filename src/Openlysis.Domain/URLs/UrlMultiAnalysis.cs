@@ -25,8 +25,8 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// <param name="isPrivate">A value indicating whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="status">The current status of the analysis.</param>
-    /// <param name="averageVerdict">The average verdict of the analysis.</param>
-    /// <param name="averageThreatZone">The average threat zone of the analysis.</param>
+    /// <param name="finalVerdict">The final verdict of the analysis.</param>
+    /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
     /// <param name="urlHashSet">The hash set of the URL content.</param>
     /// <param name="url">The URL being analyzed.</param>
     private UrlMultiAnalysis(
@@ -35,8 +35,8 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
         bool isPrivate,
         DateTime startedDate,
         AnalysisStatus status,
-        Verdict averageVerdict,
-        ThreatZone averageThreatZone,
+        Verdict finalVerdict,
+        ThreatZone finalThreatZone,
         ContentHashSet urlHashSet,
         Uri url)
         : base(
@@ -45,8 +45,8 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
             isPrivate,
             startedDate,
             status,
-            averageVerdict,
-            averageThreatZone,
+            finalVerdict,
+            finalThreatZone,
             urlHashSet)
     {
         Url = url;
@@ -100,22 +100,11 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     }
 
     /// <inheritdoc/>
-    protected override void HandleAverageVerdictUpdate()
+    protected override Verdict[] GetServiceAnalysesVerdicts()
     {
-        if (ServiceAnalyses.Count == 0)
-        {
-            AverageVerdict = Verdict.Unknown;
-            return;
-        }
-
-        var verdictCounts = ServiceAnalyses
-            .GroupBy(s => s.Verdict)
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        AverageVerdict = verdictCounts
-            .OrderByDescending(pair => pair.Value)
-            .ThenByDescending(pair => pair.Key)
-            .First().Key;
+        return ServiceAnalyses
+            .Select(r => r.Verdict)
+            .ToArray();
     }
 
     /// <inheritdoc/>

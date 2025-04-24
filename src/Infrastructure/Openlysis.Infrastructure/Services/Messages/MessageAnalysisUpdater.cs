@@ -166,7 +166,7 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
 
                 var analysisState = AnalysisState
                     .Initial()
-                    .WithVerdict(multiAnalysis.AverageVerdict)
+                    .WithVerdict(multiAnalysis.FinalVerdict)
                     .WithStatus(multiAnalysis.Status);
 
                 _cachedTerminalAnalysisIds.Add(multiAnalysis.Id);
@@ -442,7 +442,7 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
 
             entry.CacheTerminalChildAnalyses(fileMultiAnalyses);
 
-            verdicts.AddRange(fileMultiAnalyses.Select(f => f.AverageVerdict));
+            verdicts.AddRange(fileMultiAnalyses.Select(f => f.FinalVerdict));
             statuses.AddRange(fileMultiAnalyses.Select(f => f.Status));
         }
 
@@ -458,7 +458,7 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
 
             entry.CacheTerminalChildAnalyses(urlMultiAnalyses);
 
-            verdicts.AddRange(urlMultiAnalyses.Select(f => f.AverageVerdict));
+            verdicts.AddRange(urlMultiAnalyses.Select(f => f.FinalVerdict));
             statuses.AddRange(urlMultiAnalyses.Select(f => f.Status));
         }
 
