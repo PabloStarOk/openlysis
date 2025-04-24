@@ -393,7 +393,7 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
                     resultIds,
                     cancellationToken);
 
-            verdicts.AddRange(emailMultiReputations.Select(e => e.AverageVerdict));
+            verdicts.AddRange(emailMultiReputations.Select(e => e.FinalVerdict));
         }
 
         if (analysis.DetectedPhoneNumbersResults.Count > 0)
@@ -407,7 +407,7 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
                     resultIds,
                     cancellationToken);
 
-            verdicts.AddRange(phoneMultiReputations.Select(e => e.AverageVerdict));
+            verdicts.AddRange(phoneMultiReputations.Select(e => e.FinalVerdict));
         }
 
         UpdateMessageAnalysis(analysis, verdicts, [AnalysisStatus.Queued]);

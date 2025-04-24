@@ -5,18 +5,18 @@ namespace Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 
 /// <summary>
 /// Represents the reputation details of an email address, including its evaluation date,
-/// average verdict, average threat zone, and service-specific reputations.
+/// final verdict, final threat zone, and service-specific reputations.
 /// </summary>
 /// <param name="Id">The unique identifier of the email address.</param>
 /// <param name="ReputationEvaluationDate">The date when the reputation was evaluated.</param>
-/// <param name="AverageVerdict">The average verdict of the email address reputation.</param>
-/// <param name="AverageThreatZone">The average threat zone of the email address reputation.</param>
+/// <param name="FinalVerdict">The final verdict of the email address reputation.</param>
+/// <param name="FinalThreatZone">The final threat zone of the email address reputation.</param>
 /// <param name="ServiceReputations">An array of service-specific reputation details.</param>
 public record EmailAddressMultiReputationDto(
     string Id,
     DateTime ReputationEvaluationDate,
-    Verdict AverageVerdict,
-    ThreatZone AverageThreatZone,
+    Verdict FinalVerdict,
+    ThreatZone FinalThreatZone,
     string EmailAddress,
     EmailAddressServiceReputationDto[] ServiceReputations)
 {
@@ -35,8 +35,8 @@ public record EmailAddressMultiReputationDto(
         return new EmailAddressMultiReputationDto(
             source.Id.Value.ToString(),
             source.ReputationEvaluationDate,
-            source.AverageVerdict,
-            source.AverageThreatZone,
+            source.FinalVerdict,
+            source.FinalThreatZone,
             source.EmailAddress,
             serviceReputations);
     }
