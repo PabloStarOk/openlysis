@@ -8,6 +8,7 @@ using Openlysis.Application.Common.Enums;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.Messages.Contracts.Requests;
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
@@ -62,6 +63,15 @@ internal class MessageAnalysisService : IMessageAnalysisService
         string? requestCountryCode,
         CancellationToken cancellationToken = default)
     {
+        MessageAnalysis? lastExistingAnalysis =
+            await FetchLastAnalysisAsync(message, cancellationToken);
+
+        if (lastExistingAnalysis is not null
+            && !reanalyzeData)
+        {
+            return lastExistingAnalysis;
+        }
+
         string? subject = message.Subject;
         string content = message.Content;
 
@@ -211,5 +221,30 @@ internal class MessageAnalysisService : IMessageAnalysisService
         senderEmail = null;
         return message.Type is MessageType.Email
             && MailAddress.TryCreate(message.Sender, out senderEmail);
+    }
+
+    /// <summary>
+    /// Fetches the most recent analysis for the given message, if it exists.
+    /// </summary>
+    /// <param name="message">The message for which to fetch the last analysis.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains the most recent
+    /// <see cref="MessageAnalysis"/> if found; otherwise, <c>null</c>.
+    /// </returns>
+    private async Task<MessageAnalysis?> FetchLastAnalysisAsync(
+        Message message,
+        CancellationToken cancellationToken)
+    {
+        ContentHashSet messageHashSet = await _messageAnalysisBuilder
+            .GenerateHashAsync(message, cancellationToken);
+
+        IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(
+            amount: 1,
+            filter: m => m.Message.MessageHashSet == messageHashSet,
+            orderBy: q => q.OrderByDescending(m => m.StartedDate),
+            cancellationToken);
+
+        return existingAnalyses.FirstOrDefault();
     }
 }

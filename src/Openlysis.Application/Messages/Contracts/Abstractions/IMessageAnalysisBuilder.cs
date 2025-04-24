@@ -1,4 +1,5 @@
 using Openlysis.Application.Messages.Contracts.Requests;
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Messages;
@@ -33,5 +34,19 @@ public interface IMessageAnalysisBuilder
         IEnumerable<UrlMultiAnalysis> urlMultiAnalyses,
         IEnumerable<EmailAddressMultiReputation> emailAddressesReputations,
         IEnumerable<PhoneMultiReputation> phoneNumbersReputations,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Generates a hash set of content based on the provided message.
+    /// This hash set is used to uniquely identify the message content
+    /// by combining its sender, subject, and content into a single hash.
+    /// </summary>
+    /// <param name="message">The message for which the content hash set will be generated.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation, containing the resulting <see cref="ContentHashSet"/>.
+    /// </returns>
+    public Task<ContentHashSet> GenerateHashAsync(
+        Message message,
         CancellationToken cancellationToken = default);
 }

@@ -87,6 +87,23 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
             phoneResults);
     }
 
+    /// <inheritdoc/>
+    public async Task<ContentHashSet> GenerateHashAsync(
+        Message message,
+        CancellationToken cancellationToken = default)
+    {
+        string mergedMessage = string.Join(
+            string.Empty,
+            message.Sender,
+            message.Subject,
+            message.Content);
+        byte[] messageBytes = Encoding.UTF8.GetBytes(mergedMessage);
+        await using var memoryStream = _memoryStreamManager.GetStream(
+            nameof(GenerateHashAsync),
+            messageBytes);
+        return await _hashService.HashDataAsync(memoryStream, cancellationToken);
+    }
+
     /// <summary>
     /// Creates an array of data assessment results for attached files
     /// based on the provided file multi-analyses.
@@ -170,28 +187,6 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
                 p.ServicesReputations[0].PhoneInfo.LocalFormat,
                 p.Id))
             .ToArray();
-    }
-
-    /// <summary>
-    /// Generates a hash set for the given message by combining its sender, subject, and content.
-    /// </summary>
-    /// <param name="message">The message to hash, containing sender, subject, and content.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation, containing the generated <see cref="ContentHashSet"/>.</returns>
-    private async Task<ContentHashSet> GenerateHashAsync(
-        Message message,
-        CancellationToken cancellationToken)
-    {
-        string mergedMessage = string.Join(
-            string.Empty,
-            message.Sender,
-            message.Subject,
-            message.Content);
-        byte[] messageBytes = Encoding.UTF8.GetBytes(mergedMessage);
-        await using var memoryStream = _memoryStreamManager.GetStream(
-            nameof(GenerateHashAsync),
-            messageBytes);
-        return await _hashService.HashDataAsync(memoryStream, cancellationToken);
     }
 
     /// <summary>
