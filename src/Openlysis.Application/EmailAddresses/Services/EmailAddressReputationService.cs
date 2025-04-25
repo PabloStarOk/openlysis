@@ -3,7 +3,9 @@ using ErrorOr;
 using Microsoft.Extensions.Logging;
 
 using Openlysis.Application.Common.Abstractions.Contracts;
+using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.EmailAddresses.Contracts.Requests;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.EmailAddresses.Entities;
 
@@ -18,6 +20,7 @@ namespace Openlysis.Application.EmailAddresses.Services;
 internal class EmailAddressReputationService : IEmailAddressReputationService
 {
     private readonly ILogger<EmailAddressReputationService> _logger;
+    private readonly IRepository<EmailAddressMultiReputation, GlobalId> _repository;
     private readonly TimeProvider _timeProvider;
     private readonly IEnumerable<IReputationEvaluator<EvaluateEmailAddressReputation, EmailAddressServiceReputation>> _reputationEvaluators;
 
@@ -25,16 +28,21 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
     /// Initializes a new instance of the <see cref="EmailAddressReputationService"/> class.
     /// </summary>
     /// <param name="logger">The logger instance for logging information and errors.</param>
+    /// <param name="repository">
+    /// The repository for storing <see cref="EmailAddressMultiReputation"/> objects.
+    /// </param>
     /// <param name="timeProvider">The time provider for retrieving the current UTC time.</param>
     /// <param name="reputationEvaluators">
     /// A collection of reputation evaluators used to evaluate email address reputations.
     /// </param>
     public EmailAddressReputationService(
         ILogger<EmailAddressReputationService> logger,
+        IRepository<EmailAddressMultiReputation, GlobalId> repository,
         TimeProvider timeProvider,
         IEnumerable<IReputationEvaluator<EvaluateEmailAddressReputation, EmailAddressServiceReputation>> reputationEvaluators)
     {
         _logger = logger;
+        _repository = repository;
         _timeProvider = timeProvider;
         _reputationEvaluators = reputationEvaluators;
     }
@@ -45,6 +53,7 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
     /// <inheritdoc/>
     public async Task<ErrorOr<EmailAddressMultiReputation>> GetAsync(
         EvaluateEmailAddressReputation evaluateEmailAddressReputation,
+        bool storeInDatabase,
         CancellationToken cancellationToken = default)
     {
         if (!IsAvailable)
@@ -77,18 +86,23 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
             multiReputation.AddServiceReputation(result.Value);
         });
 
-        if (multiReputation.ServicesReputations.Count > 0)
-        {
-            return multiReputation;
-        }
-
         if (errors.Count > 0)
         {
             return errors;
         }
 
-        string errorMessage = $"{typeof(EmailAddressMultiReputation)} object doesn't contain {typeof(EmailAddressServiceReputation)} objects and none error was returned by evaluator services.";
-        _logger.LogError(errorMessage);
-        return Error.Unexpected(description: errorMessage);
+        if (multiReputation.ServicesReputations.Count is 0)
+        {
+            string errorMessage = $"{typeof(EmailAddressMultiReputation)} object doesn't contain {typeof(EmailAddressServiceReputation)} objects and none error was returned by evaluator services.";
+            _logger.LogError(errorMessage);
+            return Error.Unexpected(description: errorMessage);
+        }
+
+        if (storeInDatabase)
+        {
+            await _repository.AddAsync(multiReputation, cancellationToken);
+        }
+
+        return multiReputation;
     }
 }

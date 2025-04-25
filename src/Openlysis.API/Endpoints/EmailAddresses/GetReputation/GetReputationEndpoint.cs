@@ -78,8 +78,11 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, EmailAddress
 
         var evaluateRequest = new EvaluateEmailAddressReputation(
             req.NormalizedEmailAddress);
-        ErrorOr<EmailAddressMultiReputation> evaluateResult = await _reputationService
-            .GetAsync(evaluateRequest, ct);
+        ErrorOr<EmailAddressMultiReputation> evaluateResult =
+            await _reputationService.GetAsync(
+                evaluateRequest,
+                storeInDatabase: false,
+                ct);
 
         if (evaluateResult.IsError)
         {

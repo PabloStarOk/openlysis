@@ -142,6 +142,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
             var request = new EvaluateEmailAddressReputation(email.Address);
             ErrorOr<EmailAddressMultiReputation> result = await _emailAddressReputationService.GetAsync(
                 request,
+                storeInDatabase: true,
                 ct);
 
             if (result.IsError)
@@ -175,6 +176,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                 var request = new EvaluatePhoneReputation(phone);
                 ErrorOr<PhoneMultiReputation> result = await _phoneReputationService.AssessAsync(
                     request,
+                    storeInDatabase: true,
                     ct);
 
                 if (result.IsError)

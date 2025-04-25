@@ -19,6 +19,7 @@ public interface IEmailAddressReputationService
     /// Retrieves the reputation details for a given email address.
     /// </summary>
     /// <param name="evaluateEmailAddressReputation">The request containing the email address and related parameters to evaluate.</param>
+    /// <param name="storeInDatabase">A boolean indicating whether to store the multi reputation in the database.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains
@@ -26,5 +27,6 @@ public interface IEmailAddressReputationService
     /// </returns>
     public Task<ErrorOr<EmailAddressMultiReputation>> GetAsync(
         EvaluateEmailAddressReputation evaluateEmailAddressReputation,
+        bool storeInDatabase,
         CancellationToken cancellationToken = default);
 }
