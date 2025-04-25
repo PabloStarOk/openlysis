@@ -53,7 +53,7 @@ public class EmailAddressMultiReputationConfiguration : IEntityTypeConfiguration
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Property(p => p.FinalVerdict)
+        builder.Property(p => p.FinalThreatZone)
             .HasColumnName("final_threat_zone")
             .HasColumnType(SmallintType)
             .IsRequired();
