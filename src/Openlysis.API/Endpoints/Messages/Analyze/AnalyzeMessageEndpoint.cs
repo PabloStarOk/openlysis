@@ -80,7 +80,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
         Claim userIdClaim = User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier);
         UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
         MessageType messageType = (MessageType)req.MessageType;
-        var message = new Message(messageType, req.Sender, null, req.Content);
+        var message = new Message(messageType, req.Sender, req.Subject, req.Content);
         FileData[] files = CreateFileDataArray(req);
         MessageAnalysis messageAnalysis = await _messageAnalysisService.AnalyzeAsync(
             userId: userId,
