@@ -9,6 +9,7 @@ using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.API.Endpoints.Messages.Common.Responses;
 using Openlysis.API.Endpoints.Phones.GetReputation;
 using Openlysis.API.Endpoints.URLs.Common;
+using Openlysis.Application.Common.Enums;
 using Openlysis.Application.Messages.Services;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Users.ValueObjects;
@@ -135,6 +136,12 @@ public class GetAnalysesByHashEndpoint
             return;
         }
 
-        Response = messageAnalysisDtos;
+        // TODO: Refactor duplicated logic with app layer services.
+        Response = req.StartedDateOrder switch
+        {
+            OrderType.Dsc => messageAnalysisDtos.OrderByDescending(u => u.StartedDate),
+            OrderType.Asc => messageAnalysisDtos.OrderBy(u => u.StartedDate),
+            _ => throw new InvalidOperationException("StartedDateOrder has an invalid enum value.")
+        };
     }
 }

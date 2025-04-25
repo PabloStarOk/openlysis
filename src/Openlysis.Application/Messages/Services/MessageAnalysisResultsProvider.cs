@@ -55,6 +55,11 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
             .Select(a => a.ResultId)
             .ToArray();
 
+        if (ids.Length is 0)
+        {
+            return [];
+        }
+
         return await _fileMultiAnalysisRepository.GetManyByIdsAsync(ids, cancellationToken);
     }
 
@@ -66,6 +71,11 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
         GlobalId[] ids = messageAnalysis.DetectedUrlsResults
             .Select(a => a.ResultId)
             .ToArray();
+
+        if (ids.Length is 0)
+        {
+            return [];
+        }
 
         return await _urlMultiAnalysisRepository.GetManyByIdsAsync(ids, cancellationToken);
     }
@@ -79,6 +89,11 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
             .Select(a => a.ResultId)
             .ToArray();
 
+        if (ids.Length is 0)
+        {
+            return [];
+        }
+
         return await _emailReputationsRepository.GetManyByIdsAsync(ids, cancellationToken);
     }
 
@@ -90,6 +105,11 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
         GlobalId[] ids = messageAnalysis.DetectedPhoneNumbersResults
             .Select(a => a.ResultId)
             .ToArray();
+
+        if (ids.Length is 0)
+        {
+            return [];
+        }
 
         return await _phoneReputationsRepository.GetManyByIdsAsync(ids, cancellationToken);
     }
