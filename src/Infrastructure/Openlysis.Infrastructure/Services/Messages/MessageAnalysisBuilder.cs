@@ -29,6 +29,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     private readonly RecyclableMemoryStreamManager _memoryStreamManager;
     private readonly IHashService _hashService;
     private readonly TimeProvider _timeProvider;
+    private BuildState _buildState = new ();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageAnalysisBuilder"/> class.
@@ -53,44 +54,118 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     }
 
     /// <inheritdoc/>
-    public async Task<MessageAnalysis> BuildAsync(
-        UserId userId,
-        bool isPrivate,
+    public IMessageAnalysisBuilder WithUserContext(
+        UserId userId, bool isPrivate)
+    {
+        _buildState = _buildState with
+        {
+            UserId = userId,
+            IsPrivate = isPrivate
+        };
+
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public IMessageAnalysisBuilder WithMessageInformation(
         Message message,
-        Stream[] filesData,
-        IEnumerable<FileMultiAnalysis> fileMultiAnalyses,
-        IEnumerable<UrlMultiAnalysis> urlMultiAnalyses,
-        IEnumerable<EmailAddressMultiReputation> emailAddressesReputations,
-        IEnumerable<PhoneMultiReputation> phoneNumbersReputations,
-        CancellationToken cancellationToken = default)
+        Stream[] filesData)
+    {
+        _buildState = _buildState with
+        {
+            Message = message,
+            FilesData = filesData
+        };
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public IMessageAnalysisBuilder WithFileMultiAnalyses(
+        IEnumerable<FileMultiAnalysis> multiAnalyses)
     {
         DataAssessmentResult<FileMetadata>[] attachedFileResults =
-            CreateAttachedFilesResults(fileMultiAnalyses);
+            CreateAttachedFilesResults(multiAnalyses);
 
+        _buildState = _buildState with
+        {
+            FileResults = attachedFileResults,
+        };
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public IMessageAnalysisBuilder WithUrlMultiAnalyses(
+        IEnumerable<UrlMultiAnalysis> multiAnalyses)
+    {
         DataAssessmentResult<Uri>[] urlResults =
-            CreateUrlsResults(urlMultiAnalyses);
+            CreateUrlsResults(multiAnalyses);
 
+        _buildState = _buildState with
+        {
+            UrlResults = urlResults,
+        };
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public IMessageAnalysisBuilder WithEmailAddressMultiReputations(
+        IEnumerable<EmailAddressMultiReputation> multiReputations)
+    {
         DataAssessmentResult<string>[] emailResults =
-            CreateEmailsResults(emailAddressesReputations);
+            CreateEmailsResults(multiReputations);
 
+        _buildState = _buildState with
+        {
+            EmailResults = emailResults,
+        };
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public IMessageAnalysisBuilder WithPhoneNumberMultiReputations(
+        IEnumerable<PhoneMultiReputation> multiReputations)
+    {
         DataAssessmentResult<string>[] phoneResults =
-            CreatePhonesResults(phoneNumbersReputations);
+            CreatePhonesResults(multiReputations);
+
+        _buildState = _buildState with
+        {
+            PhoneResults = phoneResults,
+        };
+        return this;
+    }
+
+    /// <inheritdoc/>
+    public async Task<MessageAnalysis> BuildAsync(
+        CancellationToken cancellationToken = default)
+    {
+        if (_buildState.UserId is null
+            || _buildState.IsPrivate is null
+            || _buildState.Message is null
+            || _buildState.FilesData is null
+            || _buildState.FileResults is null
+            || _buildState.UrlResults is null
+            || _buildState.EmailResults is null
+            || _buildState.PhoneResults is null)
+        {
+            throw new InvalidOperationException("Cannot build message analysis. One or more required properties in the build state are null.");
+        }
 
         var messageInfo = await CreateMessageInformationAsync(
-            message,
-            filesData,
+            _buildState.Message,
+            _buildState.FilesData,
             cancellationToken);
 
         return MessageAnalysis.Create(
             _timeProvider.GetUtcNow().UtcDateTime,
-            userId,
-            isPrivate,
+            _buildState.UserId,
+            (bool)_buildState.IsPrivate,
             messageInfo,
             Verdict.Unknown,
-            attachedFileResults,
-            urlResults,
-            emailResults,
-            phoneResults);
+            _buildState.FileResults,
+            _buildState.UrlResults,
+            _buildState.EmailResults,
+            _buildState.PhoneResults);
     }
 
     /// <inheritdoc/>
@@ -118,6 +193,27 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
 
         return await HashStringAsync(compositeHash, cancellationToken);
     }
+
+    /// <summary>
+    /// Represents the state of the builder during the construction of a `MessageAnalysis`.
+    /// </summary>
+    /// <param name="UserId">The ID of the user associated with the message analysis.</param>
+    /// <param name="IsPrivate">Indicates whether the message is private.</param>
+    /// <param name="Message">The message being analyzed.</param>
+    /// <param name="FilesData">The data streams of the files attached to the message.</param>
+    /// <param name="FileResults">The assessment results for the attached files.</param>
+    /// <param name="UrlResults">The assessment results for the URLs in the message.</param>
+    /// <param name="EmailResults">The assessment results for the email addresses in the message.</param>
+    /// <param name="PhoneResults">The assessment results for the phone numbers in the message.</param>
+    private sealed record BuildState(
+        UserId? UserId = null,
+        bool? IsPrivate = null,
+        Message? Message = null,
+        Stream[]? FilesData = null,
+        DataAssessmentResult<FileMetadata>[]? FileResults = null,
+        DataAssessmentResult<Uri>[]? UrlResults = null,
+        DataAssessmentResult<string>[]? EmailResults = null,
+        DataAssessmentResult<string>[]? PhoneResults = null);
 
     /// <summary>
     /// Creates an array of data assessment results for attached files

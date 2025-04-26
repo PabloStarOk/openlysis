@@ -109,16 +109,14 @@ internal class MessageAnalysisService : IMessageAnalysisService
         IEnumerable<PhoneMultiReputation> phoneNumbersReputations =
             await _messageAnalyzer.GetPhoneNumbersReputationsAsync(phoneNumbers, cancellationToken);
 
-        MessageAnalysis messageAnalysis = await _messageAnalysisBuilder.BuildAsync(
-            userId,
-            isPrivate,
-            message,
-            filesData,
-            fileMultiAnalyses,
-            urlMultiAnalyses,
-            emailAddressesReputations,
-            phoneNumbersReputations,
-            cancellationToken);
+        MessageAnalysis messageAnalysis = await _messageAnalysisBuilder
+            .WithUserContext(userId, isPrivate)
+            .WithMessageInformation(message, filesData)
+            .WithFileMultiAnalyses(fileMultiAnalyses)
+            .WithUrlMultiAnalyses(urlMultiAnalyses)
+            .WithEmailAddressMultiReputations(emailAddressesReputations)
+            .WithPhoneNumberMultiReputations(phoneNumbersReputations)
+            .BuildAsync(cancellationToken);
 
         await _messageAnalysisUpdater.AddPendingAsync(
             messageAnalysis,
