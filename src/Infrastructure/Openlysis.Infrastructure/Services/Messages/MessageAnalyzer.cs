@@ -65,14 +65,14 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         ArgumentNullException.ThrowIfNull(files);
 
         List<FileMultiAnalysis> fileMultiAnalyses = [];
-        await Parallel.ForEachAsync(files, cancellationToken, async (file, ct) =>
+        foreach (var file in files)
         {
             ErrorOr<FileMultiAnalysis> result = await _fileAnalysisService.AnalyzeAsync(
                 userId,
                 isPrivate,
                 reanalyzeData,
                 file,
-                ct);
+                cancellationToken);
 
             if (result.IsError)
             {
@@ -86,11 +86,11 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                     file.ContentType,
                     file.Stream.Length,
                     result.Errors);
-                return;
+                continue;
             }
 
             fileMultiAnalyses.Add(result.Value);
-        });
+        }
 
         return fileMultiAnalyses;
     }
@@ -103,13 +103,13 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         CancellationToken cancellationToken = default)
     {
         List<UrlMultiAnalysis> urlMultiAnalyses = [];
-        await Parallel.ForEachAsync(urls, cancellationToken, async (url, ct) =>
+        foreach (var url in urls)
         {
             ErrorOr<UrlMultiAnalysis> result = await _urlAnalysisService.AnalyzeAsync(
                 userId,
                 isPrivate,
                 url,
-                ct);
+                cancellationToken);
 
             if (result.IsError)
             {
@@ -119,11 +119,11 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                     + "\n\tErrors: {Errors}.",
                     url,
                     result.Errors);
-                return;
+                continue;
             }
 
             urlMultiAnalyses.Add(result.Value);
-        });
+        }
 
         return urlMultiAnalyses;
     }
@@ -134,16 +134,13 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         CancellationToken cancellationToken = default)
     {
         List<EmailAddressMultiReputation> multiReputations = [];
-        await Parallel.ForEachAsync(
-            emailAddresses,
-            cancellationToken,
-            async (email, ct) =>
+        foreach (var email in emailAddresses)
         {
             var request = new EvaluateEmailAddressReputation(email.Address);
             ErrorOr<EmailAddressMultiReputation> result = await _emailAddressReputationService.GetAsync(
                 request,
                 storeInDatabase: true,
-                ct);
+                cancellationToken);
 
             if (result.IsError)
             {
@@ -153,11 +150,11 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                     + "\n\tErrors: {Errors}.",
                     email,
                     result.Errors);
-                return;
+                continue;
             }
 
             multiReputations.Add(result.Value);
-        });
+        }
 
         return multiReputations;
     }
@@ -168,30 +165,27 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         CancellationToken cancellationToken = default)
     {
         List<PhoneMultiReputation> multiReputations = [];
-        await Parallel.ForEachAsync(
-            phoneNumbers,
-            cancellationToken,
-            async (phone, ct) =>
-            {
-                var request = new EvaluatePhoneReputation(phone);
-                ErrorOr<PhoneMultiReputation> result = await _phoneReputationService.AssessAsync(
-                    request,
-                    storeInDatabase: true,
-                    ct);
+        foreach (var phone in phoneNumbers)
+        {
+            var request = new EvaluatePhoneReputation(phone);
+            ErrorOr<PhoneMultiReputation> result = await _phoneReputationService.AssessAsync(
+                request,
+                storeInDatabase: true,
+                cancellationToken);
 
-                if (result.IsError)
-                {
-                    _logger.LogError(
+            if (result.IsError)
+            {
+                _logger.LogError(
                     "Phone number could not be analyzed due to one or more errors."
                     + "\n\tPhone Number: {PhoneNumber}."
                     + "\n\tErrors: {Errors}.",
                     phone,
                     result.Errors);
-                    return;
-                }
+                continue;
+            }
 
-                multiReputations.Add(result.Value);
-            });
+            multiReputations.Add(result.Value);
+        }
 
         return multiReputations;
     }
