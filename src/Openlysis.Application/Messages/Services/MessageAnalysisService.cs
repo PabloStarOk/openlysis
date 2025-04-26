@@ -63,8 +63,11 @@ internal class MessageAnalysisService : IMessageAnalysisService
         string? requestCountryCode,
         CancellationToken cancellationToken = default)
     {
-        MessageAnalysis? lastExistingAnalysis =
-            await FetchLastAnalysisAsync(message, cancellationToken);
+        Stream[] filesData = GetFileDataStreams(files);
+        MessageAnalysis? lastExistingAnalysis = await FetchLastAnalysisAsync(
+                message,
+                filesData,
+                cancellationToken);
 
         if (lastExistingAnalysis is not null
             && !reanalyzeData)
@@ -110,6 +113,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
             userId,
             isPrivate,
             message,
+            filesData,
             fileMultiAnalyses,
             urlMultiAnalyses,
             emailAddressesReputations,
@@ -224,9 +228,25 @@ internal class MessageAnalysisService : IMessageAnalysisService
     }
 
     /// <summary>
+    /// Converts an array of `FileData` objects into an array of their associated `Stream` objects.
+    /// </summary>
+    /// <param name="files">An optional array of `FileData` objects containing file streams.</param>
+    /// <returns>
+    /// An array of `Stream` objects extracted from the provided `FileData` objects.
+    /// Returns an empty array if `files` is null.
+    /// </returns>
+    private static Stream[] GetFileDataStreams(FileData[]? files)
+    {
+        return files is null
+            ? []
+            : files.Select(f => f.Stream).ToArray();
+    }
+
+    /// <summary>
     /// Fetches the most recent analysis for the given message, if it exists.
     /// </summary>
     /// <param name="message">The message for which to fetch the last analysis.</param>
+    /// <param name="filesData">An array of streams representing the file data associated with the message.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains the most recent
@@ -234,10 +254,14 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// </returns>
     private async Task<MessageAnalysis?> FetchLastAnalysisAsync(
         Message message,
+        Stream[] filesData,
         CancellationToken cancellationToken)
     {
         ContentHashSet messageHashSet = await _messageAnalysisBuilder
-            .GenerateHashAsync(message, cancellationToken);
+            .GenerateHashAsync(
+                message,
+                filesData,
+                cancellationToken);
 
         IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(
             amount: 1,

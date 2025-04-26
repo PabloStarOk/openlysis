@@ -56,6 +56,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         UserId userId,
         bool isPrivate,
         Message message,
+        Stream[] filesData,
         IEnumerable<FileMultiAnalysis> fileMultiAnalyses,
         IEnumerable<UrlMultiAnalysis> urlMultiAnalyses,
         IEnumerable<EmailAddressMultiReputation> emailAddressesReputations,
@@ -74,7 +75,11 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         DataAssessmentResult<string>[] phoneResults =
             CreatePhonesResults(phoneNumbersReputations);
 
-        var messageInfo = await CreateMessageInformationAsync(message, cancellationToken);
+        var messageInfo = await CreateMessageInformationAsync(
+            message,
+            filesData,
+            cancellationToken);
+
         return MessageAnalysis.Create(
             _timeProvider.GetUtcNow().UtcDateTime,
             userId,
@@ -90,18 +95,27 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <inheritdoc/>
     public async Task<ContentHashSet> GenerateHashAsync(
         Message message,
+        Stream[] filesData,
         CancellationToken cancellationToken = default)
     {
-        string mergedMessage = string.Join(
-            string.Empty,
-            message.Sender,
-            message.Subject,
-            message.Content);
-        byte[] messageBytes = Encoding.UTF8.GetBytes(mergedMessage);
-        await using var memoryStream = _memoryStreamManager.GetStream(
-            nameof(GenerateHashAsync),
-            messageBytes);
-        return await _hashService.HashDataAsync(memoryStream, cancellationToken);
+        ContentHashSet messageHashValues = await HashMessageAsync(
+            message,
+            cancellationToken);
+
+        if (filesData.Length is 0)
+        {
+            return messageHashValues;
+        }
+
+        ContentHashSet[] filesHashValues = await HashFilesAsync(
+            filesData,
+            cancellationToken);
+
+        string compositeHash = CreateCompositeHash(
+            messageHashValues,
+            filesHashValues);
+
+        return await HashStringAsync(compositeHash, cancellationToken);
     }
 
     /// <summary>
@@ -190,19 +204,112 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     }
 
     /// <summary>
-    /// Creates a <see cref="MessageInformation"/> object for the given message.
+    /// Creates a composite hash by combining the SHA-256 hash of the message
+    /// with the SHA-256 hashes of the associated files.
+    /// </summary>
+    /// <param name="messageHashValues">
+    /// The hash values of the message content.
+    /// </param>
+    /// <param name="filesHashValues">
+    /// The hash values of the associated files.
+    /// </param>
+    /// <returns>
+    /// A string representing the composite hash.
+    /// </returns>
+    private static string CreateCompositeHash(
+        ContentHashSet messageHashValues,
+        params ContentHashSet[] filesHashValues)
+    {
+        var filesSha256Values = filesHashValues.Select(f => f.Sha256);
+        string concatenatedValues = string
+            .Concat(filesSha256Values.OrderDescending());
+        return string.Concat(messageHashValues.Sha256, concatenatedValues);
+    }
+
+    /// <summary>
+    /// Computes the SHA-256 hash of the given message.
+    /// </summary>
+    /// <param name="message">The message containing metadata to be hashed.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation, containing the SHA-256 hash string of the message.
+    /// </returns>
+    private async Task<ContentHashSet> HashMessageAsync(
+        Message message,
+        CancellationToken cancellationToken = default)
+    {
+        string messageMetadata = string.Join(
+            separator: string.Empty,
+            message.Sender,
+            message.Subject,
+            message.Content);
+
+        return await HashStringAsync(
+            messageMetadata,
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Computes the SHA-256 hash values for the provided file data streams.
+    /// </summary>
+    /// <param name="filesData">An array of streams representing the file data to be hashed.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation, containing an array of <see cref="ContentHashSet"/> 
+    /// with the computed hash values for each file.
+    /// </returns>
+    private async Task<ContentHashSet[]> HashFilesAsync(
+        Stream[] filesData,
+        CancellationToken cancellationToken = default)
+    {
+        List<ContentHashSet> filesHashValues = [];
+        foreach (var data in filesData)
+        {
+            ContentHashSet hashValues = await _hashService.HashDataAsync(data, cancellationToken);
+            filesHashValues.Add(hashValues);
+        }
+
+        return filesHashValues.ToArray();
+    }
+
+    /// <summary>
+    /// Computes a hash from the given string using the SHA-256 algorithm.
+    /// </summary>
+    /// <param name="input">The input string to be hashed.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation, containing the computed <see cref="ContentHashSet"/>.
+    /// </returns>
+    private async Task<ContentHashSet> HashStringAsync(
+        string input,
+        CancellationToken cancellationToken = default)
+    {
+        byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+        await using var memoryStream = _memoryStreamManager.GetStream(
+            nameof(HashStringAsync),
+            inputBytes);
+
+        return await _hashService.HashDataAsync(memoryStream, cancellationToken);
+    }
+
+    /// <summary>
+    /// Creates a <see cref="MessageInformation"/> object for the given message and associated file data.
     /// </summary>
     /// <param name="message">The message containing details such as type, sender, subject, and content.</param>
+    /// <param name="filesData">An array of streams representing the file data associated with the message.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation, containing the created <see cref="MessageInformation"/>.
     /// </returns>
     private async Task<MessageInformation> CreateMessageInformationAsync(
         Message message,
+        Stream[] filesData,
         CancellationToken cancellationToken)
     {
-        ContentHashSet messageHashSet
-            = await GenerateHashAsync(message, cancellationToken);
+        ContentHashSet messageHashSet = await GenerateHashAsync(
+            message,
+            filesData,
+            cancellationToken);
 
         return new MessageInformation(
             message.Type,

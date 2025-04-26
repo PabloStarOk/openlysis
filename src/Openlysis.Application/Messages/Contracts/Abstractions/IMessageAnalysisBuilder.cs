@@ -20,6 +20,7 @@ public interface IMessageAnalysisBuilder
     /// <param name="userId">The unique identifier of the user associated with the message analysis.</param>
     /// <param name="isPrivate">Indicates whether the message is private.</param>
     /// <param name="message">The message to analyze.</param>
+    /// <param name="filesData">An array of streams representing the file data associated with the message.</param>
     /// <param name="fileMultiAnalyses">A collection of file analyses associated with the message.</param>
     /// <param name="urlMultiAnalyses">A collection of URL analyses associated with the message.</param>
     /// <param name="emailAddressesReputations">A collection of email address reputations associated with the message.</param>
@@ -30,6 +31,7 @@ public interface IMessageAnalysisBuilder
         UserId userId,
         bool isPrivate,
         Message message,
+        Stream[] filesData,
         IEnumerable<FileMultiAnalysis> fileMultiAnalyses,
         IEnumerable<UrlMultiAnalysis> urlMultiAnalyses,
         IEnumerable<EmailAddressMultiReputation> emailAddressesReputations,
@@ -42,11 +44,13 @@ public interface IMessageAnalysisBuilder
     /// by combining its sender, subject, and content into a single hash.
     /// </summary>
     /// <param name="message">The message for which the content hash set will be generated.</param>
+    /// <param name="filesData">An array of streams representing the file data to be included in the hash generation.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation, containing the resulting <see cref="ContentHashSet"/>.
     /// </returns>
     public Task<ContentHashSet> GenerateHashAsync(
         Message message,
+        Stream[] filesData,
         CancellationToken cancellationToken = default);
 }
