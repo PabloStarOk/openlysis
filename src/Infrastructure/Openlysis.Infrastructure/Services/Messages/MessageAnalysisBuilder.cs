@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 
 using Microsoft.IO;
@@ -255,19 +256,25 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <param name="filesData">An array of streams representing the file data to be hashed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
-    /// A task that represents the asynchronous operation, containing an array of <see cref="ContentHashSet"/> 
+    /// A task that represents the asynchronous operation, containing an array of <see cref="ContentHashSet"/>
     /// with the computed hash values for each file.
     /// </returns>
     private async Task<ContentHashSet[]> HashFilesAsync(
         Stream[] filesData,
         CancellationToken cancellationToken = default)
     {
-        List<ContentHashSet> filesHashValues = [];
-        foreach (var data in filesData)
-        {
-            ContentHashSet hashValues = await _hashService.HashDataAsync(data, cancellationToken);
-            filesHashValues.Add(hashValues);
-        }
+        ConcurrentBag<ContentHashSet> filesHashValues = [];
+        await Parallel.ForEachAsync(
+            filesData,
+            cancellationToken,
+            async (data, ct) =>
+            {
+                ContentHashSet hashValues = await _hashService.HashDataAsync(
+                    data,
+                    ct);
+
+                filesHashValues.Add(hashValues);
+            });
 
         return filesHashValues.ToArray();
     }
