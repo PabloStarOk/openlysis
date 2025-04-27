@@ -80,7 +80,10 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, PhoneMultiRe
 
         var assessPhoneNumber = new EvaluatePhoneReputation(req.NormalizedPhoneNumber);
         ErrorOr<PhoneMultiReputation> assessResult =
-            await _reputationService.AssessAsync(assessPhoneNumber, ct);
+            await _reputationService.AssessAsync(
+                assessPhoneNumber,
+                storeInDatabase: false,
+                ct);
 
         if (assessResult.IsError)
         {

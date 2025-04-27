@@ -2,6 +2,7 @@ using System.Security.Claims;
 
 using FastEndpoints;
 
+using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.Application.Files.Services;
 using Openlysis.Domain.Files;
@@ -12,7 +13,7 @@ namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 /// <summary>
 /// Endpoint for retrieving file analysis by hash.
 /// </summary>
-public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHash, IEnumerable<FileMultiAnalysisDto>>
+public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHashRequest, IEnumerable<FileMultiAnalysisDto>>
 {
     private readonly IFileMultiAnalysisService _multiAnalysisService;
 
@@ -63,7 +64,7 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHash, IEnumerable
     /// <param name="request">A <see cref="GetAnalysesByHash"/>.</param>
     /// <param name="ct">A <see cref="CancellationToken"/> to cancel the operation.</param>
     /// <returns>An <see cref="IEnumerable{FileMultiAnalysis}"/>.</returns>
-    public override async Task HandleAsync(GetAnalysesByHash request, CancellationToken ct)
+    public override async Task HandleAsync(GetAnalysesByHashRequest request, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(request.Hash))
         {

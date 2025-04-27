@@ -46,13 +46,13 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
             .HasColumnType("timestamp with time zone")
             .IsRequired();
 
-        builder.Property(p => p.AverageVerdict)
-            .HasColumnName("average_verdict")
+        builder.Property(p => p.FinalVerdict)
+            .HasColumnName("final_verdict")
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Property(p => p.AverageThreatZone)
-            .HasColumnName("average_threat_zone")
+        builder.Property(p => p.FinalThreatZone)
+            .HasColumnName("final_threat_zone")
             .HasColumnType(SmallintType)
             .IsRequired();
 

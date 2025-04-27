@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Application.EmailAddresses.Services;
 using Openlysis.Application.Files.Services;
+using Openlysis.Application.Messages.Services;
 using Openlysis.Application.Phones.Services;
 using Openlysis.Application.URLs.Services;
 
@@ -31,5 +32,9 @@ public static class DependencyInjection
 
         // Add email address reputation service.
         services.AddScoped<IEmailAddressReputationService, EmailAddressReputationService>();
+
+        // Add message analysis services.
+        services.AddScoped<IMessageAnalysisService, MessageAnalysisService>();
+        services.AddScoped<IMessageAnalysisResultsProvider, MessageAnalysisResultsProvider>();
     }
 }

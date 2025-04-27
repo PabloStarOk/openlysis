@@ -24,14 +24,14 @@ public abstract class MultiReputation<TServiceReputation>
     public DateTime ReputationEvaluationDate { get; }
 
     /// <summary>
-    /// Gets the average verdict of the multi-reputation.
+    /// Gets the final verdict of the multi-reputation.
     /// </summary>
-    public Verdict AverageVerdict { get; private set; }
+    public Verdict FinalVerdict { get; private set; }
 
     /// <summary>
-    /// Gets the average threat zone of the multi-reputation.
+    /// Gets the final threat zone of the multi-reputation.
     /// </summary>
-    public ThreatZone AverageThreatZone { get; private set; }
+    public ThreatZone FinalThreatZone { get; private set; }
 
     /// <summary>
     /// Gets a list of reputations of different services.
@@ -43,18 +43,18 @@ public abstract class MultiReputation<TServiceReputation>
     /// </summary>
     /// <param name="id">The unique identifier for the aggregate.</param>
     /// <param name="reputationEvaluationDate">The date when the reputation evaluation was performed.</param>
-    /// <param name="averageVerdict">The initial average verdict of the multi-reputation.</param>
-    /// <param name="averageThreatZone">The initial average threat zone of the multi-reputation.</param>
+    /// <param name="finalVerdict">The initial final verdict of the multi-reputation.</param>
+    /// <param name="finalThreatZone">The initial final threat zone of the multi-reputation.</param>
     protected MultiReputation(
         GlobalId id,
         DateTime reputationEvaluationDate,
-        Verdict averageVerdict,
-        ThreatZone averageThreatZone)
+        Verdict finalVerdict,
+        ThreatZone finalThreatZone)
         : base(id)
     {
         ReputationEvaluationDate = reputationEvaluationDate;
-        AverageVerdict = averageVerdict;
-        AverageThreatZone = averageThreatZone;
+        FinalVerdict = finalVerdict;
+        FinalThreatZone = finalThreatZone;
     }
 
     // For EF core.
@@ -94,31 +94,43 @@ public abstract class MultiReputation<TServiceReputation>
     }
 
     /// <summary>
-    /// Updates the average verdict based on the service reputations.
+    /// Updates the final verdict based on the service reputations.
     /// </summary>
     private void UpdateVerdict()
     {
-        if (_servicesReputations.Count is 0)
+        Verdict[] servicesVerdicts = ServicesReputations
+            .Select(s => s.Verdict)
+            .ToArray();
+
+        if (servicesVerdicts.Length is 0)
         {
-            AverageVerdict = Verdict.Unknown;
+            FinalVerdict = Verdict.Unknown;
             return;
         }
 
-        var verdictCounts = _servicesReputations
-            .GroupBy(s => s.Verdict)
-            .ToDictionary(g => g.Key, g => g.Count());
+        if (servicesVerdicts.Contains(Verdict.Malicious))
+        {
+            FinalVerdict = Verdict.Malicious;
+            return;
+        }
 
-        AverageVerdict = verdictCounts
-            .OrderByDescending(pair => pair.Value)
-            .ThenByDescending(pair => pair.Key)
-            .First().Key;
+        if (servicesVerdicts.Contains(Verdict.Suspicious))
+        {
+            FinalVerdict = Verdict.Suspicious;
+            return;
+        }
+
+        if (servicesVerdicts.Contains(Verdict.Undetected))
+        {
+            FinalVerdict = Verdict.Undetected;
+        }
     }
 
     /// <summary>
-    /// Updates the average threat zone based on the average verdict.
+    /// Updates the final threat zone based on the final verdict.
     /// </summary>
     private void UpdateThreatZone()
     {
-        AverageThreatZone = ThreatZoneMapping.Map[AverageVerdict];
+        FinalThreatZone = ThreatZoneMapping.Map[FinalVerdict];
     }
 }

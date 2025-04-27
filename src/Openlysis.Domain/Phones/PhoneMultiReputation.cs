@@ -10,12 +10,19 @@ namespace Openlysis.Domain.Phones;
 /// </summary>
 public class PhoneMultiReputation : MultiReputation<PhoneServiceReputation>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PhoneMultiReputation"/> class.
+    /// </summary>
+    /// <param name="id">The unique identifier for the reputation.</param>
+    /// <param name="reputationEvaluationDate">The date when the reputation was evaluated.</param>
+    /// <param name="finalVerdict">The final verdict of the reputation.</param>
+    /// <param name="finalThreatZone">The final threat zone of the reputation.</param>
     private PhoneMultiReputation(
         GlobalId id,
         DateTime reputationEvaluationDate,
-        Verdict averageVerdict,
-        ThreatZone averageThreatZone)
-        : base(id, reputationEvaluationDate, averageVerdict, averageThreatZone)
+        Verdict finalVerdict,
+        ThreatZone finalThreatZone)
+        : base(id, reputationEvaluationDate, finalVerdict, finalThreatZone)
     {
     }
 

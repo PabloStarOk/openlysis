@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 
-using Openlysis.Domain.URLs;
-
-namespace Openlysis.API.Endpoints.URLs.GetAnalysisById;
+namespace Openlysis.API.Endpoints.Common.Responses;
 
 /// <summary>
-/// Request to retrieve a <see cref="UrlMultiAnalysis"/> by ID.
+/// Request to retrieve an analysis by ID.
 /// </summary>
 /// <param name="Id">The ID of the analysis.</param>
 public record GetAnalysisByIdRequest(

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MassTransit;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;
@@ -25,15 +26,25 @@ public class UpdateUrlMultiAnalysisConsumer : IConsumer<UpdateUrlMultiAnalysis>
     public const string EndpointName = "update-url-multi-analysis";
 
     private readonly IRepository<UrlMultiAnalysis, GlobalId> _repository;
+    private readonly IMessageAnalysisUpdater _messageAnalysisUpdater;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateUrlMultiAnalysisConsumer"/> class.
     /// </summary>
-    /// <param name="repository">The repository for URL multi-analysis.</param>
+    /// <param name="repository">
+    /// The repository for managing <see cref="UrlMultiAnalysis"/> entities,
+    /// providing methods for retrieving and updating multi-analysis data.
+    /// </param>
+    /// <param name="messageAnalysisUpdater">
+    /// An instance of <see cref="IMessageAnalysisUpdater"/> used to notify updates
+    /// about child analysis states.
+    /// </param>
     public UpdateUrlMultiAnalysisConsumer(
-        IRepository<UrlMultiAnalysis, GlobalId> repository)
+        IRepository<UrlMultiAnalysis, GlobalId> repository,
+        IMessageAnalysisUpdater messageAnalysisUpdater)
     {
         _repository = repository;
+        _messageAnalysisUpdater = messageAnalysisUpdater;
     }
 
     /// <inheritdoc/>
@@ -57,5 +68,9 @@ public class UpdateUrlMultiAnalysisConsumer : IConsumer<UpdateUrlMultiAnalysis>
         }
 
         await _repository.UpdateAsync(multiAnalysis, context.CancellationToken);
+
+        await _messageAnalysisUpdater.NotifyChildAnalysisStateAsync(
+            multiAnalysis.Id,
+            context.CancellationToken);
     }
 }

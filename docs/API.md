@@ -93,3 +93,26 @@ All endpoints require an API key in a header.
 - Full endpoint path: `https://[domain]/api/v1/email-addresses/{email-address}`
 - Endpoint path: `/email-addresses/{email-address}`
 - API Key required: Yes
+
+## Messages
+
+### Sends a message to be analyzed
+
+- HTTP method: `POST`
+- Full endpoint path: `https://[domain]/api/v1/messages`
+- Endpoint path: `/messages`
+- API Key required: Yes
+
+### Gets a message analysis by ID
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/messages/analyses/{id}`
+- Endpoint path: `/messages/analyses/{id}`
+- API Key required: Yes
+
+### Gets message analyses by hash
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/messages/{hash}/analyses`
+- Endpoint path: `/messages/{hash}/analyses`
+- API Key required: Yes

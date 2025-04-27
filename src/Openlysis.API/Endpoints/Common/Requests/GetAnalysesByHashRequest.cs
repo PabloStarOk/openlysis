@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using Openlysis.Application.Common.Enums;
 
-namespace Openlysis.API.Endpoints.URLs.GetAnalysesByHash;
+namespace Openlysis.API.Endpoints.Common.Requests;
 
 /// <summary>
 /// Request model for getting analyses by hash.

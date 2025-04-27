@@ -41,14 +41,14 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     public AnalysisStatus Status { get; private set; } = AnalysisStatus.Queued;
 
     /// <summary>
-    /// Gets or sets the average verdict of the analysis.
+    /// Gets the final verdict of the analysis.
     /// </summary>
-    public Verdict AverageVerdict { get; protected set; } = Verdict.Unknown;
+    public Verdict FinalVerdict { get; private set; } = Verdict.Unknown;
 
     /// <summary>
-    /// Gets the average threat zone of the analysis.
+    /// Gets the final threat zone of the analysis.
     /// </summary>
-    public ThreatZone AverageThreatZone { get; private set; } = ThreatZone.Unknown;
+    public ThreatZone FinalThreatZone { get; private set; } = ThreatZone.Unknown;
 
     /// <summary>
     /// Gets or sets the average threat score of the analysis.
@@ -73,8 +73,8 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="status">The current status of the analysis.</param>
-    /// <param name="averageVerdict">The average verdict of the analysis.</param>
-    /// <param name="averageThreatZone">The average threat zone of the analysis.</param>
+    /// <param name="finalVerdict">The final verdict of the analysis.</param>
+    /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
     /// <param name="dataHashSet">The set of data hashes associated with the analysis.</param>
     protected MultiAnalysis(
         GlobalId id,
@@ -82,8 +82,8 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         bool isPrivate,
         DateTime startedDate,
         AnalysisStatus status,
-        Verdict averageVerdict,
-        ThreatZone averageThreatZone,
+        Verdict finalVerdict,
+        ThreatZone finalThreatZone,
         ContentHashSet dataHashSet)
         : base(id)
     {
@@ -91,8 +91,8 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         IsPrivate = isPrivate;
         StartedDate = startedDate;
         Status = status;
-        AverageVerdict = averageVerdict;
-        AverageThreatZone = averageThreatZone;
+        FinalVerdict = finalVerdict;
+        FinalThreatZone = finalThreatZone;
         DataHashSet = dataHashSet;
     }
 
@@ -166,9 +166,10 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         TServiceAnalysis updatedAnalysis);
 
     /// <summary>
-    /// Updates the average verdict of the analysis based on the associated service analyses.
+    /// Retrieves the verdicts from the associated service analyses.
     /// </summary>
-    protected abstract void HandleAverageVerdictUpdate();
+    /// <returns>An array of verdicts from the service analyses.</returns>
+    protected abstract Verdict[] GetServiceAnalysesVerdicts();
 
     /// <summary>
     /// Updates the average threat score of the analysis based on the associated service analyses.
@@ -176,11 +177,42 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     protected abstract void HandleAverageThreatScoreUpdate();
 
     /// <summary>
-    /// Updates the average threat zone of the analysis based on the current average verdict.
+    /// Updates the final verdict of the multi-analysis based on the associated service analyses.
     /// </summary>
-    private void UpdateAverageThreatZone()
+    private void UpdateFinalVerdict()
     {
-        AverageThreatZone = ThreatZoneMapping.Map[AverageVerdict];
+        Verdict[] servicesVerdicts = GetServiceAnalysesVerdicts();
+
+        if (servicesVerdicts.Length is 0)
+        {
+            FinalVerdict = Verdict.Unknown;
+            return;
+        }
+
+        if (servicesVerdicts.Contains(Verdict.Malicious))
+        {
+            FinalVerdict = Verdict.Malicious;
+            return;
+        }
+
+        if (servicesVerdicts.Contains(Verdict.Suspicious))
+        {
+            FinalVerdict = Verdict.Suspicious;
+            return;
+        }
+
+        if (servicesVerdicts.Contains(Verdict.Undetected))
+        {
+            FinalVerdict = Verdict.Undetected;
+        }
+    }
+
+    /// <summary>
+    /// Updates the final threat zone of the analysis based on the current final verdict.
+    /// </summary>
+    private void UpdateFinalThreatZone()
+    {
+        FinalThreatZone = ThreatZoneMapping.Map[FinalVerdict];
     }
 
     /// <summary>
@@ -236,13 +268,13 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     }
 
     /// <summary>
-    /// Updates the information of the multi-analysis, including the average verdict,
-    /// average threat zone, and overall status.
+    /// Updates the information of the multi-analysis, including the final verdict,
+    /// final threat zone, and overall status.
     /// </summary>
     private void UpdateInformation()
     {
-        HandleAverageVerdictUpdate();
-        UpdateAverageThreatZone();
+        UpdateFinalVerdict();
+        UpdateFinalThreatZone();
         HandleAverageThreatScoreUpdate();
         UpdateStatus();
     }

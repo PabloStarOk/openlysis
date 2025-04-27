@@ -79,6 +79,20 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<FileMultiAnalysis>> GetManyByIdsAsync(
+        GlobalId[] ids,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(ids);
+
+        return await _dbContext.FileMultiAnalyses
+            .AsNoTracking()
+            .AsSplitQuery()
+            .Where(f => ids.Contains(f.Id))
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc/>
     public async Task UpdateAsync(FileMultiAnalysis model, CancellationToken cancellationToken = default)
     {
         var multiAnalysis = await _dbContext.FileMultiAnalyses

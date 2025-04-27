@@ -33,6 +33,18 @@ public interface IRepository<TModel, in TModelId>
         Func<IQueryable<TModel>, IOrderedQueryable<TModel>>? orderBy = null,
         CancellationToken cancellationToken = default);
 
+    // TODO: Refactor GetManyByIdsAsync method, there's duplicated logic in implementations.
+
+    /// <summary>
+    /// Retrieves multiple models by their identifiers.
+    /// </summary>
+    /// <param name="ids">The identifiers of the models to retrieve.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous operation, with a result of the models if found.</returns>
+    public Task<IReadOnlyList<TModel>> GetManyByIdsAsync(
+        TModelId[] ids,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Adds a new model to the repository.
     /// </summary>

@@ -2,7 +2,7 @@ using FastEndpoints;
 
 using FluentValidation;
 
-namespace Openlysis.API.Endpoints.URLs.GetAnalysesByHash;
+namespace Openlysis.API.Endpoints.Common.Requests;
 
 /// <summary>
 /// Validator for GetAnalysesByHashRequest.

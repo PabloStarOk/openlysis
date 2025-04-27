@@ -12,8 +12,8 @@ namespace Openlysis.API.Endpoints.Files.Common.Responses;
 /// <param name="IsPrivate">Indicates if the analysis is private.</param>
 /// <param name="StartedDate">The date and time when the analysis started.</param>
 /// <param name="Status">The current status of the file multi analysis.</param>
-/// <param name="AverageVerdict">The average verdict of the file multi analysis.</param>
-/// <param name="AverageThreatZone">The average threat zone of the file multi analysis.</param>
+/// <param name="FinalVerdict">The final verdict of the file multi analysis.</param>
+/// <param name="FinalThreatZone">The final threat zone of the file multi analysis.</param>
 /// <param name="AverageThreatScore">The average threat score of the file multi analysis, if available.</param>
 /// <param name="FileMetadata">Metadata of the file being analyzed.</param>
 /// <param name="FileHashSet">A set of content hashes associated with the file.</param>
@@ -24,8 +24,8 @@ public record FileMultiAnalysisDto(
     bool IsPrivate,
     DateTime StartedDate,
     AnalysisStatus Status,
-    Verdict AverageVerdict,
-    ThreatZone AverageThreatZone,
+    Verdict FinalVerdict,
+    ThreatZone FinalThreatZone,
     float? AverageThreatScore,
     FileMetadata FileMetadata,
     ContentHashSet FileHashSet,
@@ -48,8 +48,8 @@ public record FileMultiAnalysisDto(
             source.IsPrivate,
             source.StartedDate,
             source.Status,
-            source.AverageVerdict,
-            source.AverageThreatZone,
+            source.FinalVerdict,
+            source.FinalThreatZone,
             source.AverageThreatScore,
             source.FileMetadata,
             source.DataHashSet,

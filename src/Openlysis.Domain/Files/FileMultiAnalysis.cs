@@ -37,8 +37,8 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="status">The current status of the analysis.</param>
-    /// <param name="averageVerdict">The summary verdict of the analysis.</param>
-    /// <param name="averageThreatZone">The summary threat zone of the analysis.</param>
+    /// <param name="finalVerdict">The final verdict of the analysis.</param>
+    /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
     /// <param name="dataHashSet">The set of content hashes associated with the analysis.</param>
     /// <param name="fileMetadata">The metadata of the file being analyzed.</param>
     private FileMultiAnalysis(
@@ -47,8 +47,8 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
         bool isPrivate,
         DateTime startedDate,
         AnalysisStatus status,
-        Verdict averageVerdict,
-        ThreatZone averageThreatZone,
+        Verdict finalVerdict,
+        ThreatZone finalThreatZone,
         ContentHashSet dataHashSet,
         FileMetadata fileMetadata)
         : base(
@@ -57,8 +57,8 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
             isPrivate,
             startedDate,
             status,
-            averageVerdict,
-            averageThreatZone,
+            finalVerdict,
+            finalThreatZone,
             dataHashSet)
     {
         FileMetadata = fileMetadata;
@@ -121,21 +121,11 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     }
 
     /// <inheritdoc/>
-    protected override void HandleAverageVerdictUpdate()
+    protected override Verdict[] GetServiceAnalysesVerdicts()
     {
-        if (!AllReports.Any())
-        {
-            AverageVerdict = Verdict.Unknown;
-            return;
-        }
-
-        var verdictCounts = AllReports.GroupBy(r => r.Verdict)
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        AverageVerdict = verdictCounts
-            .OrderByDescending(pair => pair.Value)
-            .ThenByDescending(pair => pair.Key)
-            .First().Key;
+        return AllReports
+            .Select(r => r.Verdict)
+            .ToArray();
     }
 
     /// <inheritdoc/>

@@ -21,16 +21,16 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceRe
     /// </summary>
     /// <param name="id">The unique identifier for the reputation.</param>
     /// <param name="evaluationReputationDate">The date when the reputation was evaluated.</param>
-    /// <param name="averageVerdict">The average verdict of the reputation.</param>
-    /// <param name="averageThreatZone">The average threat zone of the reputation.</param>
+    /// <param name="finalVerdict">The final verdict of the reputation.</param>
+    /// <param name="finalThreatZone">The final threat zone of the reputation.</param>
     /// <param name="emailAddress">The email address associated with the reputation.</param>
     private EmailAddressMultiReputation(
         GlobalId id,
         DateTime evaluationReputationDate,
-        Verdict averageVerdict,
-        ThreatZone averageThreatZone,
+        Verdict finalVerdict,
+        ThreatZone finalThreatZone,
         string emailAddress)
-        : base(id, evaluationReputationDate, averageVerdict, averageThreatZone)
+        : base(id, evaluationReputationDate, finalVerdict, finalThreatZone)
     {
         EmailAddress = emailAddress;
     }

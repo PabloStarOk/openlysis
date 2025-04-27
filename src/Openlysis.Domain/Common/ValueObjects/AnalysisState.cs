@@ -1,0 +1,75 @@
+using Openlysis.Domain.Common.Constants;
+using Openlysis.Domain.Common.Enums;
+
+namespace Openlysis.Domain.Common.ValueObjects;
+
+/// <summary>
+/// Represents the state of an analysis, including its status, verdict, and associated threat zone.
+/// </summary>
+public sealed record AnalysisState
+{
+    /// <summary>
+    /// Gets the current status of the analysis.
+    /// </summary>
+    public AnalysisStatus Status { get; private set; } = AnalysisStatus.Queued;
+
+    /// <summary>
+    /// Gets the verdict of the analysis.
+    /// </summary>
+    public Verdict Verdict { get; private set; } = Verdict.Unknown;
+
+    /// <summary>
+    /// Gets the threat zone associated with the analysis.
+    /// </summary>
+    public ThreatZone ThreatZone { get; private set; } = ThreatZone.Unknown;
+
+    // Private constructor for immutability
+    private AnalysisState(
+        AnalysisStatus status,
+        Verdict verdict,
+        ThreatZone threatZone)
+    {
+        Status = status;
+        Verdict = verdict;
+        ThreatZone = threatZone;
+    }
+
+    /// <summary>
+    /// Creates and returns the initial state of an analysis.
+    /// </summary>
+    /// <returns>An <see cref="AnalysisState"/> instance with default values.</returns>
+    public static AnalysisState Initial()
+    {
+        return new AnalysisState(
+            AnalysisStatus.Queued,
+            Verdict.Unknown,
+            ThreatZone.Unknown);
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="AnalysisState"/> with an updated verdict.
+    /// </summary>
+    /// <param name="newVerdict">The new verdict to set for the analysis.</param>
+    /// <returns>A new <see cref="AnalysisState"/> instance with the updated verdict and corresponding threat zone.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the analysis is already completed.</exception>
+    public AnalysisState WithVerdict(Verdict newVerdict)
+    {
+        if (Status == AnalysisStatus.Completed)
+        {
+            throw new InvalidOperationException("Cannot update a completed analysis.");
+        }
+
+        var newThreatZone = ThreatZoneMapping.Map[newVerdict];
+        return new AnalysisState(Status, newVerdict, newThreatZone);
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="AnalysisState"/> with an updated status.
+    /// </summary>
+    /// <param name="newStatus">The new status to set for the analysis.</param>
+    /// <returns>A new <see cref="AnalysisState"/> instance with the updated status.</returns>
+    public AnalysisState WithStatus(AnalysisStatus newStatus)
+    {
+        return new AnalysisState(newStatus, Verdict, ThreatZone);
+    }
+}

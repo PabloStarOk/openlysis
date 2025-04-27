@@ -4,12 +4,14 @@ using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.Entities;
+using Openlysis.Domain.Messages;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Persistence.Configurations.Common;
 using Openlysis.Infrastructure.Persistence.Configurations.EmailAddresses;
 using Openlysis.Infrastructure.Persistence.Configurations.Files;
+using Openlysis.Infrastructure.Persistence.Configurations.Messages;
 using Openlysis.Infrastructure.Persistence.Configurations.Phones;
 using Openlysis.Infrastructure.Persistence.Configurations.URLs;
 
@@ -56,6 +58,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<EmailAddressMultiReputation> EmailAddressMultiReputations { get; init; } = null!;
 
     /// <summary>
+    /// Gets a database set of <see cref="MessageAnalysis"/>.
+    /// </summary>
+    public DbSet<MessageAnalysis> MessageAnalyses { get; init; } = null!;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ApplicationDbContext"/> class.
     /// </summary>
     /// <param name="options">Options of the database context.</param>
@@ -74,5 +81,6 @@ public class ApplicationDbContext : DbContext
         modelBuilder.ApplyConfiguration(new UrlMultiAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new PhoneMultiReputationConfiguration());
         modelBuilder.ApplyConfiguration(new EmailAddressMultiReputationConfiguration());
+        modelBuilder.ApplyConfiguration(new MessageAnalysisConfiguration());
     }
 }
