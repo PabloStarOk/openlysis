@@ -76,17 +76,11 @@ public interface IMessageAnalysisBuilder
 
     /// <summary>
     /// Generates a hash set of content based on the provided message.
-    /// This hash set is used to uniquely identify the message content
-    /// by combining its sender, subject, and content into a single hash.
     /// </summary>
-    /// <param name="message">The message for which the content hash set will be generated.</param>
-    /// <param name="filesData">An array of streams representing the file data to be included in the hash generation.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation, containing the resulting <see cref="ContentHashSet"/>.
     /// </returns>
-    public Task<ContentHashSet> GenerateHashAsync(
-        Message message,
-        Stream[] filesData,
+    public ValueTask<ContentHashSet> GenerateHashAsync(
         CancellationToken cancellationToken = default);
 }

@@ -153,7 +153,6 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
 
         var messageInfo = await CreateMessageInformationAsync(
             _buildState.Message,
-            _buildState.FilesData,
             cancellationToken);
 
         return MessageAnalysis.Create(
@@ -169,29 +168,50 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     }
 
     /// <inheritdoc/>
-    public async Task<ContentHashSet> GenerateHashAsync(
-        Message message,
-        Stream[] filesData,
+    public async ValueTask<ContentHashSet> GenerateHashAsync(
         CancellationToken cancellationToken = default)
     {
+        if (_buildState.Message is null
+            || _buildState.FilesData is null)
+        {
+            throw new InvalidOperationException("Message information and associated files must be set before generating the hash of the message.");
+        }
+
+        if (_buildState.HashValues is not null)
+        {
+            return _buildState.HashValues;
+        }
+
         ContentHashSet messageHashValues = await HashMessageAsync(
-            message,
+            _buildState.Message,
             cancellationToken);
 
-        if (filesData.Length is 0)
+        if (_buildState.FilesData.Length is 0)
         {
+            _buildState = _buildState with
+            {
+                HashValues = messageHashValues
+            };
             return messageHashValues;
         }
 
         ContentHashSet[] filesHashValues = await HashFilesAsync(
-            filesData,
+            _buildState.FilesData,
             cancellationToken);
 
         string compositeHash = CreateCompositeHash(
             messageHashValues,
             filesHashValues);
 
-        return await HashStringAsync(compositeHash, cancellationToken);
+        ContentHashSet compositeHashValues = await HashStringAsync(
+            compositeHash,
+            cancellationToken);
+
+        _buildState = _buildState with
+        {
+            HashValues = compositeHashValues
+        };
+        return _buildState.HashValues;
     }
 
     /// <summary>
@@ -201,15 +221,21 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <param name="IsPrivate">Indicates whether the message is private.</param>
     /// <param name="Message">The message being analyzed.</param>
     /// <param name="FilesData">The data streams of the files attached to the message.</param>
+    /// <param name="HashValues">The hash values of the message and associated files.</param>
     /// <param name="FileResults">The assessment results for the attached files.</param>
     /// <param name="UrlResults">The assessment results for the URLs in the message.</param>
     /// <param name="EmailResults">The assessment results for the email addresses in the message.</param>
     /// <param name="PhoneResults">The assessment results for the phone numbers in the message.</param>
+    /// <remarks>
+    /// This record is used to store the intermediate state of the builder, including user context,
+    /// message details, and analysis results for files, URLs, email addresses, and phone numbers.
+    /// </remarks>
     private sealed record BuildState(
         UserId? UserId = null,
         bool? IsPrivate = null,
         Message? Message = null,
         Stream[]? FilesData = null,
+        ContentHashSet? HashValues = null,
         DataAssessmentResult<FileMetadata>[]? FileResults = null,
         DataAssessmentResult<Uri>[]? UrlResults = null,
         DataAssessmentResult<string>[]? EmailResults = null,
@@ -396,23 +422,18 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     }
 
     /// <summary>
-    /// Creates a <see cref="MessageInformation"/> object for the given message and associated file data.
+    /// Creates a <see cref="MessageInformation"/> object for the given message.
     /// </summary>
     /// <param name="message">The message containing details such as type, sender, subject, and content.</param>
-    /// <param name="filesData">An array of streams representing the file data associated with the message.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation, containing the created <see cref="MessageInformation"/>.
     /// </returns>
     private async Task<MessageInformation> CreateMessageInformationAsync(
         Message message,
-        Stream[] filesData,
         CancellationToken cancellationToken)
     {
-        ContentHashSet messageHashSet = await GenerateHashAsync(
-            message,
-            filesData,
-            cancellationToken);
+        ContentHashSet messageHashSet = await GenerateHashAsync(cancellationToken);
 
         return new MessageInformation(
             message.Type,

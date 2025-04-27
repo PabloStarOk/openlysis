@@ -256,10 +256,8 @@ internal class MessageAnalysisService : IMessageAnalysisService
         CancellationToken cancellationToken)
     {
         ContentHashSet messageHashSet = await _messageAnalysisBuilder
-            .GenerateHashAsync(
-                message,
-                filesData,
-                cancellationToken);
+            .WithMessageInformation(message, filesData)
+            .GenerateHashAsync(cancellationToken);
 
         IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(
             amount: 1,
