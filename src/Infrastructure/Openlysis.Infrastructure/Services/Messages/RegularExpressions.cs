@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Openlysis.Infrastructure.Persistence;
+namespace Openlysis.Infrastructure.Services.Messages;
 
 /// <summary>
 /// A static partial class containing predefined regular expressions and utility methods for working with them.
