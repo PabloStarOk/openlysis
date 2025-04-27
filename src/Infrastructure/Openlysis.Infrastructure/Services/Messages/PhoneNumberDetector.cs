@@ -22,12 +22,6 @@ internal class PhoneNumberDetector : DataDetector
     private const string DefaultRegionCode = "CO";
     private const string UnknownRegionCode = "ZZ";
 
-    private static readonly HashSet<string> RegionCodes =
-        PhoneNumberUtil.GetInstance()
-        .GetSupportedRegions()
-        .Order()
-        .ToHashSet();
-
     private static readonly HashSet<int> CountryCodes =
         PhoneNumberUtil.GetInstance()
             .GetSupportedCallingCodes()
@@ -63,16 +57,6 @@ internal class PhoneNumberDetector : DataDetector
         RegularExpressions.GetAllExcluding(GetDetectionPattern());
 
     /// <inheritdoc/>
-    protected override string[] HandleDetectionCore(string input)
-    {
-        return
-            [
-                ..base.HandleDetectionCore(input), // Detect using regex.
-                ..DetectWithLibrary(input),
-            ];
-    }
-
-    /// <inheritdoc/>
     protected override string NormalizeDetection(string detection)
     {
         PhoneNumber phoneNumber;
@@ -104,31 +88,6 @@ internal class PhoneNumberDetector : DataDetector
         {
             return false;
         }
-    }
-
-    /// <summary>
-    /// Detects phone numbers in the given input string using the libphonenumber library.
-    /// </summary>
-    /// <param name="input">The input string to search for phone numbers.</param>
-    /// <returns>
-    /// An array of detected phone numbers as strings, combining results from the library
-    /// and regex-based detection.
-    /// </returns>
-    private IEnumerable<string> DetectWithLibrary(string input)
-    {
-        HashSet<PhoneNumberMatch> phoneNumbers = [];
-        foreach (string regionCode in RegionCodes)
-        {
-            var foundNumbers = _phoneNumberUtil.FindNumbers(
-                input,
-                regionCode,
-                PhoneNumberUtil.Leniency.VALID,
-                1);
-            phoneNumbers.UnionWith(foundNumbers);
-        }
-
-        return phoneNumbers
-            .Select(p => p.Number.NationalNumber.ToString());
     }
 
     /// <summary>
