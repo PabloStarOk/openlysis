@@ -19,6 +19,11 @@ namespace Openlysis.Application.Messages.Contracts.Abstractions;
 public interface IMessageAnalyzer
 {
     /// <summary>
+    /// Gets a value indicating whether the analyzer is available for use.
+    /// </summary>
+    public bool IsAvailable { get; }
+
+    /// <summary>
     /// Analyzes the provided files.
     /// </summary>
     /// <param name="userId">The ID of the user requesting the analysis.</param>

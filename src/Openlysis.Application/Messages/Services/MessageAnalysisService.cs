@@ -25,6 +25,9 @@ namespace Openlysis.Application.Messages.Services;
 /// </summary>
 internal class MessageAnalysisService : IMessageAnalysisService
 {
+    /// <inheritdoc/>
+    public bool AnalyzeIsAvailable => _messageAnalyzer.IsAvailable;
+
     private readonly IRepository<MessageAnalysis, GlobalId> _repository;
     private readonly IMessageDataExtractor _dataExtractor;
     private readonly IMessageAnalyzer _messageAnalyzer;
@@ -54,7 +57,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
     }
 
     /// <inheritdoc/>
-    public async Task<MessageAnalysis> AnalyzeAsync(
+    public async Task<ErrorOr<MessageAnalysis>> AnalyzeAsync(
         UserId userId,
         bool isPrivate,
         Message message,
@@ -63,6 +66,11 @@ internal class MessageAnalysisService : IMessageAnalysisService
         string? requestCountryCode,
         CancellationToken cancellationToken = default)
     {
+        if (!AnalyzeIsAvailable)
+        {
+            return Error.Failure("Service is not available");
+        }
+
         Stream[] filesData = GetFileDataStreams(files);
         MessageAnalysis? lastExistingAnalysis = await FetchLastAnalysisAsync(
                 message,

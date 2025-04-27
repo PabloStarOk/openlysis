@@ -26,6 +26,12 @@ namespace Openlysis.Infrastructure.Services.Messages;
 /// </summary>
 internal sealed class MessageAnalyzer : IMessageAnalyzer
 {
+    // TODO: Add IsAvailable to file and url analysis services.
+
+    /// <inheritdoc/>
+    public bool IsAvailable => _phoneReputationService.IsAvailable
+        && _emailAddressReputationService.IsAvailable;
+
     private readonly ILogger<MessageAnalyzer> _logger;
     private readonly IFileMultiAnalysisService _fileAnalysisService;
     private readonly IUrlMultiAnalysisService _urlAnalysisService;

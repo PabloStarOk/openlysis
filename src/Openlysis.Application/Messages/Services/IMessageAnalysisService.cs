@@ -15,6 +15,11 @@ namespace Openlysis.Application.Messages.Services;
 public interface IMessageAnalysisService
 {
     /// <summary>
+    /// Gets a value indicating whether the analysis service is available.
+    /// </summary>
+    public bool AnalyzeIsAvailable { get; }
+
+    /// <summary>
     /// Analyzes a message asynchronously.
     /// </summary>
     /// <param name="userId">The unique identifier of the user performing the analysis.</param>
@@ -25,7 +30,7 @@ public interface IMessageAnalysisService
     /// <param name="requestCountryCode">The country code of the request origin, if provided.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests during the operation.</param>
     /// <returns>A task representing the asynchronous operation, containing the result of the message analysis.</returns>
-    public Task<MessageAnalysis> AnalyzeAsync(
+    public Task<ErrorOr<MessageAnalysis>> AnalyzeAsync(
         UserId userId,
         bool isPrivate,
         Message message,

@@ -1,5 +1,7 @@
 using System.Security.Claims;
 
+using ErrorOr;
+
 using FastEndpoints;
 
 using Openlysis.API.Authentication.API.Extensions;
@@ -77,12 +79,21 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
             return;
         }
 
+        if (!_messageAnalysisService.AnalyzeIsAvailable)
+        {
+            IResult result = Results.Problem(
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                detail: "Service to analyze a message is unavailable, try again later.");
+            await SendResultAsync(result);
+        }
+
         Claim userIdClaim = User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier);
         UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
         MessageType messageType = (MessageType)req.MessageType;
         var message = new Message(messageType, req.Sender, req.Subject, req.Content);
         FileData[] files = CreateFileDataArray(req);
-        MessageAnalysis messageAnalysis = await _messageAnalysisService.AnalyzeAsync(
+        ErrorOr<MessageAnalysis> analyzeResult = await _messageAnalysisService
+            .AnalyzeAsync(
             userId: userId,
             isPrivate: req.IsPrivate,
             message: message,
@@ -91,6 +102,20 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
             requestCountryCode: req.NormalizedCountryCode,
             cancellationToken: ct);
 
+        if (analyzeResult.IsError)
+        {
+            IResult internalError = Results.Problem(
+                statusCode: StatusCodes.Status500InternalServerError,
+                detail: "Internal error while analyzing message, try again later.");
+
+            Logger.LogError(
+                "An error occurred while analyzing message.\nErrors:\n\t{Errors}",
+                analyzeResult.Errors);
+            await SendResultAsync(internalError);
+            return;
+        }
+
+        MessageAnalysis messageAnalysis = analyzeResult.Value;
         Response = AnalyzeMessageResponse.Parse(messageAnalysis);
 
         var routeValues = new RouteValueDictionary
