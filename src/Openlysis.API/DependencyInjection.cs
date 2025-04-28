@@ -34,27 +34,40 @@ public static class DependencyInjection
         IConfiguration configuration,
         IWebHostEnvironment environment)
     {
-        var fileUploadOptions = configuration
-            .GetRequiredSection("FileUploadOptions")
+        // Get options
+        var serverOptions = configuration
+            .GetRequiredSection(ServerOptions.SectionName)
+            .Get<ServerOptions>();
+
+        var fileUploadOptionsSection = configuration
+            .GetRequiredSection(FileUploadOptions.SectionName);
+        var fileUploadOptions = fileUploadOptionsSection
             .Get<FileUploadOptions>();
+
+        ArgumentNullException.ThrowIfNull(serverOptions);
+        ArgumentNullException.ThrowIfNull(fileUploadOptionsSection);
         ArgumentNullException.ThrowIfNull(fileUploadOptions);
+
+        // Add options
+        services.Configure<FileUploadOptions>(fileUploadOptionsSection);
 
         // Server options
         services.Configure<KestrelServerOptions>(
             options =>
             {
-                options.Limits.MaxRequestBodySize = fileUploadOptions.MaxRequestBodySize;
+                options.Limits.MaxRequestBodySize = serverOptions.MaxRequestBodySize;
             });
-
-        // Add authentication and authorization
-        services.AddApiAuthentication(configuration, environment);
 
         // Request options
         services.Configure<FormOptions>(
             options =>
             {
+                options.MultipartBodyLengthLimit = fileUploadOptions.MaxFileSize;
                 options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
             });
+
+        // Add authentication and authorization
+        services.AddApiAuthentication(configuration, environment);
 
         services.AddProblemDetails(
             opt =>

@@ -6,12 +6,17 @@ namespace Openlysis.API.Configuration.Options;
 public record FileUploadOptions
 {
     /// <summary>
-    /// Gets the maximum size of the request body in bytes.
+    /// The configuration section name for file upload options.
     /// </summary>
-    public int MaxRequestBodySize { get; init; }
+    public const string SectionName = "FileUpload";
+
+    /// <summary>
+    /// Gets the maximum file size allowed for upload in bytes.
+    /// </summary>
+    required public int MaxFileSize { get; init; }
 
     /// <summary>
     /// Gets the memory buffer threshold in bytes.
     /// </summary>
-    public int MemoryBufferThreshold { get; init; }
+    required public int MemoryBufferThreshold { get; init; }
 }
