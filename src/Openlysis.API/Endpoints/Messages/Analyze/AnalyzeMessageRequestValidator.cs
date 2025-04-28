@@ -2,6 +2,10 @@ using FastEndpoints;
 
 using FluentValidation;
 
+using Microsoft.Extensions.Options;
+
+using Openlysis.API.Configuration.Options;
+
 namespace Openlysis.API.Endpoints.Messages.Analyze;
 
 /// <summary>
@@ -13,7 +17,12 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeMessageRequestValidator"/> class.
     /// </summary>
-    public AnalyzeMessageRequestValidator()
+    /// <param name="fileUploadOptions">
+    /// An instance of <see cref="IOptionsMonitor{TOptions}"/> for monitoring changes to
+    /// <see cref="FileUploadOptions"/> configuration.
+    /// </param>
+    public AnalyzeMessageRequestValidator(
+        IOptionsMonitor<FileUploadOptions> fileUploadOptions)
     {
         RuleFor(x => x.MessageType)
             .NotNull()
@@ -33,7 +42,9 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
 
         RuleFor(x => x.AttachedFiles)
             .Must(NotAttachedFilesZeroWithLength)
-            .WithMessage("All files must have length at least higher than zero.");
+            .WithMessage("All files must have length at least higher than zero.")
+            .Must(a => AttachedFilesNotExceedLimit(a, fileUploadOptions))
+            .WithMessage($"The number of attached files must not exceed the limit of {fileUploadOptions.CurrentValue.MaxFileUploadsLimit}.");
 
         RuleFor(x => x.AttachedFilesPasswords)
             .Must(NotEmptyPasswords)
@@ -60,6 +71,26 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
 
         return attachedFiles.Count is 0
             || attachedFiles.All(file => file.Length > 0);
+    }
+
+    /// <summary>
+    /// Validates that the number of attached files does not exceed the maximum limit specified
+    /// in the file upload options.
+    /// </summary>
+    /// <param name="attachedFiles">The collection of attached files to validate.</param>
+    /// <param name="fileUploadOptions">
+    /// An instance of <see cref="IOptionsMonitor{TOptions}"/> for monitoring changes to
+    /// <see cref="FileUploadOptions"/> configuration.
+    /// </param>
+    /// <returns>
+    /// True if the number of attached files is less than or equal to the maximum limit; otherwise, false.
+    /// </returns>
+    private static bool AttachedFilesNotExceedLimit(
+        IFormFileCollection? attachedFiles,
+        IOptionsMonitor<FileUploadOptions> fileUploadOptions)
+    {
+        return attachedFiles?.Count
+            <= fileUploadOptions.CurrentValue.MaxFileUploadsLimit;
     }
 
     /// <summary>

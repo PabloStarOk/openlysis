@@ -19,4 +19,9 @@ public record FileUploadOptions
     /// Gets the memory buffer threshold in bytes.
     /// </summary>
     required public int MemoryBufferThreshold { get; init; }
+
+    /// <summary>
+    /// Gets the maximum number of files allowed in a single request.
+    /// </summary>
+    required public int MaxFileUploadsLimit { get; init; }
 }
