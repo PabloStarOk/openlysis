@@ -104,6 +104,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
                 await SendResultAsync(Results.Problem(
                     statusCode: StatusCodes.Status500InternalServerError,
                     detail: "An internal error occured, try again later."));
+                return;
             }
 
             var extensions = new Dictionary<string, object?>
@@ -116,6 +117,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
                 statusCode: StatusCodes.Status400BadRequest,
                 detail: "One or more errors occurred.",
                 extensions: extensions));
+            return;
         }
 
         Response = new AnalyzeFileResponse(
