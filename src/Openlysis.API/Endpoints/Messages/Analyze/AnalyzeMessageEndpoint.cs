@@ -72,8 +72,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
     /// <inheritdoc/>
     public override async Task HandleAsync(AnalyzeMessageRequest req, CancellationToken ct)
     {
-        if (ValidationFailed
-            || req.MessageType is null)
+        if (ValidationFailed)
         {
             await SendResultAsync(ValidationFailures.AsValidationProblem());
             return;
@@ -89,7 +88,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
 
         Claim userIdClaim = User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier);
         UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
-        MessageType messageType = (MessageType)req.MessageType;
+        MessageType messageType = (MessageType)req.MessageType!;
         var message = new Message(messageType, req.Sender, req.Subject, req.Content);
         FileData[] files = CreateFileDataArray(req);
         ErrorOr<MessageAnalysis> analyzeResult = await _messageAnalysisService
