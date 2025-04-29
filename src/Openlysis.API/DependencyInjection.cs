@@ -132,6 +132,6 @@ public static class DependencyInjection
                 opt.RemoveEmptyRequestSchema = true;
             });
 
-        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddExceptionHandlers();
     }
 }
