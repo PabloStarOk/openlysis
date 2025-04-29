@@ -254,13 +254,10 @@ public abstract class MultiAnalysis<TServiceAnalysis>
             return;
         }
 
-        // Queued or in progress according to most frequent or higher status.
+        // The most frequent and lower status.
         var statusCount = analyses.GroupBy(a => a.Status)
             .ToDictionary(g => g.Key, g => g.Count())
-            .Where(g => g.Key
-                is not AnalysisStatus.Completed
-                and not AnalysisStatus.Timeout
-                and not AnalysisStatus.Failed);
+            .Where(g => g.Key is not AnalysisStatus.Completed);
 
         Status = statusCount.OrderByDescending(s => s.Value)
             .ThenBy(s => s.Key)
