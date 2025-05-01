@@ -1,0 +1,125 @@
+name: ${COMPOSE_NAME}
+
+services:
+  database:
+    build:
+      context: ./db
+      dockerfile: "Dockerfile"
+    container_name: ${DATABASE_CONTAINER_NAME}
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 20s
+      start_period: 5s
+      retries: 5
+    environment:
+      PGUSER: ${PGUSER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      API_USER_DB_PASSWORD: ${API_USER_DB_PASSWORD}
+      API_DB_NAME: ${API_DB_NAME}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - openlysis-db-volume:/var/lib/postgresql/data
+    networks:
+      - api-network
+
+  broker:
+    image: rabbitmq:4-management-alpine
+    container_name: ${BROKER_CONTAINER_NAME}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 20s
+      start_period: 5s
+      retries: 5
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - ${RABBITMQ_NODE_PORT}:5672
+      - ${RABBITMQ_MANAGEMENT_PORT}:15672
+    networks:
+      - api-network
+
+  api-migrator:
+    build:
+      context: ../
+      dockerfile: "docker/migrations/Dockerfile"
+      no_cache: true
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      API_DB_SERVER: ${DATABASE_CONTAINER_NAME}
+      API_DB_PORT: ${POSTGRES_PORT}
+      API_DB_NAME: ${API_DB_NAME}
+      API_DB_USER: ${API_DB_USER}
+      API_DB_PASSWORD: ${API_USER_DB_PASSWORD}
+      PGPASSWORD: ${API_USER_DB_PASSWORD}
+      MIGRATIONS_CONNECTION_STRING: ${API_CONNECTION_STRING}
+      MIGRATIONS_SQL_SCRIPT_PATH: ${MIGRATIONS_SQL_SCRIPT_PATH}
+    volumes:
+      - api-migrator-volume:/app/markers
+    networks:
+      - api-network
+    configs:
+      - source: api-config
+        target: ${MIGRATOR_CONFIG_TARGET_FILEPATH}
+
+  analyzer-worker:
+    build: 
+      context: ../
+      dockerfile: "src/Infrastructure/Workers/Openlysis.MultiAnalyzer/Dockerfile"
+      no_cache: true
+    container_name: ${WORKER_CONTAINER_NAME}
+    environment:
+      DOTNET_ENVIRONMENT: ${APP_ENVIRONMENT}
+    depends_on:
+      broker:
+        condition: service_healthy
+    networks:
+      - api-network
+    configs:
+      - source: analyzer-worker-config
+        target: ${WORKER_CONFIG_TARGET_FILEPATH}
+
+  api:
+    build:
+      context: ../
+      dockerfile: "src/Openlysis.API/Dockerfile"
+      no_cache: true
+    container_name: ${API_CONTAINER_NAME}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT}
+    ports:
+      - ${API_PORT}:8080
+      - ${API_PORT_2}:8081
+    networks:
+      - api-network
+    depends_on:
+      database:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      api-migrator:
+        condition: service_completed_successfully
+    configs:
+      - source: api-config
+        target: ${API_CONFIG_TARGET_FILEPATH}
+
+volumes:
+  openlysis-db-volume:
+    name: openlysis-db-volume
+  api-migrator-volume:
+    name: openlysis-api-migrator-volume
+
+networks:
+  api-network:
+    driver: bridge
+
+configs:
+  analyzer-worker-config:
+    file: ${WORKER_CONFIG_SOURCE_FILEPATH}
+  api-config:
+    file: ${API_CONFIG_SOURCE_FILEPATH}

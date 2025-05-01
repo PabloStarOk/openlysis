@@ -1,0 +1,4 @@
+SET
+    ROLE api_role;
+
+CREATE DATABASE :API_DB_NAME;
