@@ -1,6 +1,13 @@
 # Openlysis
 
-Openlysis will be a service which will use self-hosted and external services to provide an unified REST API to analyze files and URLs, this project intends to be structured along with other projects for the presentation layer such as a mobile app, desktop app and a website, but the main purpose is to automate the scanning of files that were recently downloaded from the Web and incoming SMS to quickly identify smishing.
+An API built with ASP.NET which wraps various analysis services like VirusTotal, HybridAnalysis, Filescan.io, urlquery, among others to analyze data like files, URLs or to get reputation of phone numbers or email addresses.
+This API provides a standardized response which abstracts the JSON models returned by the analysis services.
+
+> [!IMPORTANT]
+> The main goal is to provide a mechanism to detect Phishing messages and most of their variants by detecting, extracting and analyzing the data mentioned above along with attached files.   
+
+> [!NOTE]
+> This API can be extended with other external services or even with self-hosted ones like ClamAV and CAPESandbox.
 
 ## License
 
