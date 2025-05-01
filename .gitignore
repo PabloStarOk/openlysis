@@ -1017,3 +1017,6 @@ launchSettings.json
 appsettings.json
 appsettings.Development.json
 appsettings.Production.json
+
+# Env files
+.env
