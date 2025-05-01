@@ -59,7 +59,6 @@ public static class DependencyInjection
                     }
 
                     options.SignIn.RequireConfirmedEmail = true;
-                    options.SignIn.RequireConfirmedAccount = true;
                     options.Password.RequiredLength = 8;
                 })
             .AddSignInManager<SignInManager<User>>()

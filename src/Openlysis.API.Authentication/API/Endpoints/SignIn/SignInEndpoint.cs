@@ -100,10 +100,17 @@ public class SignInEndpoint : Endpoint<SignInRequest, ApiKeyResponse>
             }
         }
 
+        if (signInResult.IsNotAllowed)
+        {
+            IResult notAllowedResult = await GetNotAllowedProblemAsync(
+                user);
+            await SendResultAsync(notAllowedResult);
+            return;
+        }
+
         if (!signInResult.Succeeded)
         {
-            IResult result = Results.Problem(signInResult.ToString(), statusCode: StatusCodes.Status401Unauthorized);
-            await SendResultAsync(result);
+            await SendUnauthorizedAsync(ct);
             return;
         }
 
@@ -129,5 +136,47 @@ public class SignInEndpoint : Endpoint<SignInRequest, ApiKeyResponse>
 
         Response = new ApiKeyResponse(apiKey);
         await SendOkAsync(Response, ct);
+    }
+
+    /// <summary>
+    /// Generates a problem result indicating that the user is not allowed to sign in.
+    /// </summary>
+    /// <param name="user">The user attempting to sign in.</param>
+    /// <returns>
+    /// An <see cref="IResult"/> containing details about the missing requirements
+    /// (e.g., unconfirmed email or phone number) preventing the user from signing in.
+    /// </returns>
+    private async Task<IResult> GetNotAllowedProblemAsync(User user)
+    {
+        bool mustConfirmEmail = false;
+        if (_signInManager.Options.SignIn.RequireConfirmedEmail)
+        {
+            bool isConfirmed = await _signInManager.UserManager
+                .IsEmailConfirmedAsync(user);
+            mustConfirmEmail = !isConfirmed;
+        }
+
+        bool mustConfirmPhoneNumber = false;
+        if (_signInManager.Options.SignIn.RequireConfirmedPhoneNumber)
+        {
+            bool isConfirmed = await _signInManager.UserManager
+                .IsPhoneNumberConfirmedAsync(user);
+            mustConfirmPhoneNumber = !isConfirmed;
+        }
+
+        List<string> missingRequiredData = new (2);
+        if (mustConfirmEmail)
+        {
+            missingRequiredData.Add("email");
+        }
+
+        if (mustConfirmPhoneNumber)
+        {
+            missingRequiredData.Add("phone number");
+        }
+
+        return Results.Problem(
+            statusCode: StatusCodes.Status401Unauthorized,
+            detail: $"Confirm your {string.Join(" and ", missingRequiredData)} to sign in.");
     }
 }
