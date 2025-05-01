@@ -22,14 +22,13 @@ public static class AppConfiguration
     {
         app.UseExceptionHandler();
 
-        app.UseAuthentication().UseAuthorization();
-
         if (app.Environment.IsDevelopment())
         {
             app.UseOpenApi();
             app.UseSwaggerUi(c => c.DocExpansion = "list");
         }
 
+        app.UseAuthentication().UseAuthorization();
         app.UseFastEndpoints(
             c =>
             {
