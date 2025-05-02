@@ -1,3 +1,5 @@
+using System;
+
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,9 +18,13 @@ using Openlysis.MultiAnalyzer.Consumers.URLs;
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices((context, services) =>
 {
-    // Add options
+    // Get options
     var consumerSettingsSection = context.Configuration
         .GetRequiredSection(AnalyzeConsumerOptions.SectionName);
+
+    ArgumentNullException.ThrowIfNull(consumerSettingsSection);
+
+    // Add options
     services.Configure<AnalyzeConsumerOptions>(consumerSettingsSection);
 
     services.AddInfrastructure(context.Configuration);
