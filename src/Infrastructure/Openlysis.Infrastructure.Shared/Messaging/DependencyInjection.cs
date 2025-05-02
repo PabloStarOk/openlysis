@@ -32,24 +32,7 @@ public static class DependencyInjection
             .GetRequiredSection(BrokerSettings.SectionName);
         services.Configure<BrokerSettings>(brokerSettingsSection);
 
-        // Local storage provider
-        string tempSubDirPath = Path.Combine(Path.GetTempPath(), "openlysis");
-        var dirInfo = new DirectoryInfo(tempSubDirPath);
-        if (!dirInfo.Exists)
-        {
-            dirInfo.Create();
-        }
-
-        if (OperatingSystem.IsLinux())
-        {
-            dirInfo.UnixFileMode =
-                UnixFileMode.UserExecute
-                | UnixFileMode.UserWrite
-                | UnixFileMode.UserRead;
-        }
-
-        services.AddSingleton(dirInfo);
-        services.AddScoped<IFileStorageProvider, LocalFileStorageProvider>();
+        services.AddLocalFileStorageProvider();
 
         // Endpoint uri provider
         services.AddSingleton<IEndpointUriProvider, EndpointUriProvider>();
