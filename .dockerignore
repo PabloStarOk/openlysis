@@ -271,7 +271,6 @@ coverage*[.json, .xml, .info]
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-**/*.json
 docs
 todo
 LICENSE

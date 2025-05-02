@@ -1,26 +1,48 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Copy .csproj files.
+WORKDIR /app/src
+COPY ["src/Openlysis.API/Openlysis.API.csproj", "Openlysis.API/"]
+COPY ["src/Openlysis.API.Authentication/Openlysis.API.Authentication.csproj", "Openlysis.API.Authentication/"]
+COPY ["src/Openlysis.Domain/Openlysis.Domain.csproj", "Openlysis.Domain/"]
+COPY ["src/Openlysis.Application/Openlysis.Application.csproj", "Openlysis.Application/"]
+COPY ["src/Infrastructure/Openlysis.Infrastructure.Shared/Openlysis.Infrastructure.Shared.csproj", "Infrastructure/Openlysis.Infrastructure.Shared/"]
+COPY ["src/Infrastructure/Openlysis.Infrastructure/Openlysis.Infrastructure.csproj", "Infrastructure/Openlysis.Infrastructure/"]
+COPY ["src/Infrastructure/Evaluators/Openlysis.Evaluators.Shared/Openlysis.Evaluators.Shared.csproj", "Infrastructure/Evaluators/Openlysis.Evaluators.Shared/"]
+COPY ["src/Infrastructure/Evaluators/Openlysis.Evaluators.Ipqs/Openlysis.Evaluators.Ipqs.csproj", "Infrastructure/Evaluators/Openlysis.Evaluators.Ipqs/"]
+RUN dotnet restore "Openlysis.API/Openlysis.API.csproj"
+# Copy project files.
+COPY ["src/Openlysis.API/", "Openlysis.API/"]
+COPY ["src/Openlysis.API.Authentication/", "Openlysis.API.Authentication/"]
+COPY ["src/Openlysis.Domain/", "Openlysis.Domain/"]
+COPY ["src/Openlysis.Application/", "Openlysis.Application/"]
+COPY ["src/Infrastructure/Openlysis.Infrastructure.Shared/", "Infrastructure/Openlysis.Infrastructure.Shared/"]
+COPY ["src/Infrastructure/Openlysis.Infrastructure/", "Infrastructure/Openlysis.Infrastructure/"]
+COPY ["src/Infrastructure/Evaluators/", "Infrastructure/Evaluators/"]
 
-# PostgreSQL CLI
-RUN apt-get update \
-    && apt-get install -y postgresql-client \
-    && rm -rf /var/lib/apt/lists/* 
-
-# Dotnet tools
-RUN dotnet tool install --global dotnet-ef \
-    && ln -s /root/.dotnet/tools/dotnet-ef /usr/local/bin/dotnet-ef 
-
-WORKDIR /app
-
-# Copy scripts
-COPY ["docker/migrations/scripts/", "scripts/"]
-RUN chmod +x scripts/init.sh
-
-# Copy project files
-COPY ["src/", "src/"]
 WORKDIR /app/src/Openlysis.API
-
-RUN dotnet restore
 RUN dotnet add package Microsoft.EntityFrameworkCore.Design
 RUN dotnet build --no-restore
 
-ENTRYPOINT ["/app/scripts/init.sh"]
+WORKDIR /app/src
+RUN dotnet tool install --global dotnet-ef \
+    && ln -s /root/.dotnet/tools/dotnet-ef /usr/local/bin/dotnet-ef
+RUN dotnet ef migrations script \
+    --project Openlysis.API.Authentication \
+    -s Openlysis.API \
+    -i \
+    -o /app/migration.sql \
+    --no-build
+
+FROM alpine:3.21
+WORKDIR /init
+# Copy scripts
+COPY ["docker/migrations/scripts/", "scripts/"]
+RUN chmod +x scripts/init.sh
+COPY --from=build ["/app/migration.sql", "scripts/"]
+# Install PostgreSQL CLI
+RUN apk update \
+    && apk upgrade \
+    && apk add postgresql-client \
+    && rm -rf /var/cache/apk/*
+
+ENTRYPOINT ["/init/scripts/init.sh"]
