@@ -3,8 +3,8 @@ name: ${COMPOSE_NAME}
 services:
   database:
     build:
-      context: ./db
-      dockerfile: "Dockerfile"
+      context: ../
+      dockerfile: "docker/db/Dockerfile"
     container_name: ${DATABASE_CONTAINER_NAME}
     healthcheck:
       test: ["CMD", "pg_isready"]
@@ -15,6 +15,7 @@ services:
     environment:
       PGUSER: ${PGUSER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      API_DB_USER_NAME: ${API_DB_USER_NAME}
       API_USER_DB_PASSWORD: ${API_USER_DB_PASSWORD}
       API_DB_NAME: ${API_DB_NAME}
     ports:
@@ -41,32 +42,6 @@ services:
       - ${RABBITMQ_MANAGEMENT_PORT}:15672
     networks:
       - api-network
-
-  api-migrator:
-    build:
-      context: ../
-      dockerfile: "docker/migrations/Dockerfile"
-      no_cache: true
-    depends_on:
-      database:
-        condition: service_healthy
-    environment:
-      API_DB_SERVER: ${DATABASE_CONTAINER_NAME}
-      API_DB_PORT: ${POSTGRES_PORT}
-      API_DB_NAME: ${API_DB_NAME}
-      API_DB_USER: ${API_DB_USER}
-      API_DB_PASSWORD: ${API_USER_DB_PASSWORD}
-      PGPASSWORD: ${API_USER_DB_PASSWORD}
-      MIGRATIONS_CONNECTION_STRING: ${API_CONNECTION_STRING}
-      MIGRATIONS_SQL_SCRIPT_PATH: ${MIGRATIONS_SQL_SCRIPT_PATH}
-      MIGRATIONS_SQL_SCRIPT_PATH_2: ${MIGRATIONS_SQL_SCRIPT_PATH_2}
-    volumes:
-      - api-migrator-volume:/app/markers
-    networks:
-      - api-network
-    configs:
-      - source: api-config
-        target: ${MIGRATOR_CONFIG_TARGET_FILEPATH}
 
   analyzer-worker:
     build: 
@@ -103,8 +78,6 @@ services:
         condition: service_healthy
       broker:
         condition: service_healthy
-      api-migrator:
-        condition: service_completed_successfully
     configs:
       - source: api-config
         target: ${API_CONFIG_TARGET_FILEPATH}
@@ -112,8 +85,6 @@ services:
 volumes:
   openlysis-db-volume:
     name: openlysis-db-volume
-  api-migrator-volume:
-    name: openlysis-api-migrator-volume
 
 networks:
   api-network:
