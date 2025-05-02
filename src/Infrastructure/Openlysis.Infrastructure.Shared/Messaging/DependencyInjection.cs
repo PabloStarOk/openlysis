@@ -38,7 +38,7 @@ public static class DependencyInjection
         services.Configure<BrokerSettings>(brokerSettingsSection);
 
         // Add local file storage provider
-        services.AddLocalFileStorageProvider();
+        services.AddLocalFileStorageProvider(configuration);
 
         // Endpoint uri provider
         services.AddSingleton<IEndpointUriProvider, EndpointUriProvider>();
