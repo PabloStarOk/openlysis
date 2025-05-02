@@ -6,23 +6,26 @@ using Openlysis.Domain.Phones;
 namespace Openlysis.Application.Phones.Services;
 
 /// <summary>
-/// Interface for assessing the reputation of a phone number.
+/// Defines the contract for a service that evaluates the reputation of phone numbers.
 /// </summary>
 public interface IPhoneReputationService
 {
     /// <summary>
-    /// Gets a value indicating whether the service is available for assessing phone reputations.
+    /// Gets a value indicating whether the phone reputation service is available for use.
     /// </summary>
     public bool IsAvailable { get; }
 
     /// <summary>
-    /// Asynchronously assesses the reputation of a phone number.
+    /// Retrieves the reputation of a phone number based on the provided evaluation request.
     /// </summary>
-    /// <param name="evaluatePhoneReputation">An object containing the phone number and related details to assess.</param>
-    /// <param name="storeInDatabase">A boolean indicating whether to store the multi reputation in the database.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests during the asynchronous operation.</param>
-    /// <returns>A task that represents the asynchronous operation, containing the phone number's reputation details as a <see cref="PhoneMultiReputation"/> object.</returns>
-    public Task<ErrorOr<PhoneMultiReputation>> AssessAsync(
+    /// <param name="evaluatePhoneReputation">The request containing details for evaluating the phone reputation.</param>
+    /// <param name="storeInDatabase">Indicates whether the result should be stored in the database.</param>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <returns>
+    /// A task that represents the asynchronous operation. The task result contains an
+    /// <see cref="ErrorOr{T}"/> object with the phone reputation details or an error.
+    /// </returns>
+    public Task<ErrorOr<PhoneMultiReputation>> GetAsync(
         EvaluatePhoneReputation evaluatePhoneReputation,
         bool storeInDatabase,
         CancellationToken cancellationToken = default);

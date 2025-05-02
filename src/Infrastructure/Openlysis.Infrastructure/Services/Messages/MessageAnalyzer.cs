@@ -174,7 +174,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         foreach (var phone in phoneNumbers)
         {
             var request = new EvaluatePhoneReputation(phone);
-            ErrorOr<PhoneMultiReputation> result = await _phoneReputationService.AssessAsync(
+            ErrorOr<PhoneMultiReputation> result = await _phoneReputationService.GetAsync(
                 request,
                 storeInDatabase: true,
                 cancellationToken);
