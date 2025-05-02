@@ -8,6 +8,8 @@
 
     <ItemGroup>
       <PackageReference Include="ErrorOr" Version="2.0.1" />
+      <PackageReference Include="MassTransit" Version="8.4.0" />
+      <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.3" />
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.3" />
@@ -20,7 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Infrastructure\" />
+      <ProjectReference Include="..\..\Openlysis.Domain\Openlysis.Domain.csproj" />
     </ItemGroup>
 
 </Project>

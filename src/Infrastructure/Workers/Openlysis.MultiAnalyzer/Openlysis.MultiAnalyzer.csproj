@@ -6,9 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.6" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    <PackageReference Include="MassTransit" Version="[8.*,9.0)" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -16,14 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Openlysis.Application\Openlysis.Application.csproj" />
+    <ProjectReference Include="..\..\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj" />
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.Filescan\Openlysis.Analyzers.Filescan.csproj" />
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.HybridAnalysis\Openlysis.Analyzers.HybridAnalysis.csproj" />
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj" />
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.VirusTotal\Openlysis.Analyzers.VirusTotal.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Core\Broker\" />
   </ItemGroup>
 </Project>

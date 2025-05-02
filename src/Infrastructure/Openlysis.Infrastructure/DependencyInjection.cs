@@ -20,6 +20,7 @@ using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
 using Openlysis.Infrastructure.Services.Hashing;
 using Openlysis.Infrastructure.Services.Messages;
+using Openlysis.Infrastructure.Services.Messaging;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
 using PhoneNumbers;
@@ -72,6 +73,10 @@ public static class DependencyInjection
         services.AddTransient<SHA256>(_ => SHA256.Create());
         services.AddTransient<SHA512>(_ => SHA512.Create());
         services.AddScoped<IHashService, HashService>();
+
+        // Add message senders
+        services.AddAnalyzeMessageSenders();
+        services.AddUpdateAnalysisConsumers(configuration);
 
         // Add phone number evaluators.
         services.AddIpqsReputationEvaluators(configuration);

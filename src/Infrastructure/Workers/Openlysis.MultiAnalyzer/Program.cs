@@ -7,11 +7,11 @@ using Openlysis.Analyzers.HybridAnalysis;
 using Openlysis.Analyzers.URLQuery;
 using Openlysis.Analyzers.VirusTotal;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
-using Openlysis.MultiAnalyzer.Core;
-using Openlysis.MultiAnalyzer.Core.Broker.Files;
-using Openlysis.MultiAnalyzer.Core.Broker.URLs;
-using Openlysis.MultiAnalyzer.Core.Configuration;
-using Openlysis.MultiAnalyzer.Infrastructure;
+using Openlysis.Infrastructure.Shared.Messaging;
+using Openlysis.MultiAnalyzer;
+using Openlysis.MultiAnalyzer.Configuration;
+using Openlysis.MultiAnalyzer.Consumers.Files;
+using Openlysis.MultiAnalyzer.Consumers.URLs;
 
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices((context, services) =>

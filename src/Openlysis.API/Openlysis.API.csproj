@@ -24,7 +24,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Infrastructure\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj" />
-      <ProjectReference Include="..\Infrastructure\Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj" />
       <ProjectReference Include="..\Openlysis.API.Authentication\Openlysis.API.Authentication.csproj" />
     </ItemGroup>
 
