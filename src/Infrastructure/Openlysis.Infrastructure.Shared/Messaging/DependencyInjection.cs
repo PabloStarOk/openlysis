@@ -28,10 +28,16 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        // Get options
         var brokerSettingsSection = configuration
             .GetRequiredSection(BrokerSettings.SectionName);
+
+        ArgumentNullException.ThrowIfNull(brokerSettingsSection);
+
+        // Add options
         services.Configure<BrokerSettings>(brokerSettingsSection);
 
+        // Add local file storage provider
         services.AddLocalFileStorageProvider();
 
         // Endpoint uri provider
