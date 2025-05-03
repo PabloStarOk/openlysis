@@ -87,7 +87,6 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
             fileStream,
             _context.Message.FileName,
             _context.Message.FileContentType,
-            _context.Message.FileDescription,
             _context.Message.FilePassword,
             _context.Message.IsPrivateFile);
 

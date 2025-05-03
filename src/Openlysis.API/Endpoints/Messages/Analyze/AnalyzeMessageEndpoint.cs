@@ -169,7 +169,6 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
         return new FileData(
             fileName,
             attachedFile.ContentType,
-            string.Empty, // TODO: Should I remove file description from FileData? Maybe a bit unnecessary.
             filePassword,
             attachedFile.OpenReadStream());
     }

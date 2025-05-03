@@ -9,7 +9,6 @@ namespace Openlysis.Infrastructure.Shared.Messaging.Models;
 /// <param name="FileName">The name of the file.</param>
 /// <param name="FileContentType">The content type of the file.</param>
 /// <param name="FileId">The unique identifier of the file.</param>
-/// <param name="FileDescription">A description of the file.</param>
 /// <param name="FilePassword">The password for the file, if any.</param>
 /// <param name="IsPrivateFile">Indicates if the file is private.</param>
 public record AnalyzeFile(
@@ -17,6 +16,5 @@ public record AnalyzeFile(
     string FileName,
     string FileContentType,
     string FileId,
-    string FileDescription,
     string FilePassword,
     bool IsPrivateFile);

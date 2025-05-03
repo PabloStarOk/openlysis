@@ -79,7 +79,6 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
         await _multiAnalyzer.StartAnalysisAsync(
             multiAnalysis,
             fileData.Stream,
-            fileData.Description,
             fileData.Password,
             isPrivate,
             cancellationToken);

@@ -53,7 +53,6 @@ public class FileAnalyzer : IServiceAnalyzer<FileServiceAnalysis, ComposedServic
             request.FileName,
             request.FileContentType,
             request.FileData,
-            request.FileDescription,
             Password: request.FilePassword,
             IsPrivateFile: request.IsPrivateFile,
             Options: options);

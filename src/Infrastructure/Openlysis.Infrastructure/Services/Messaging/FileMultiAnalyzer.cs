@@ -42,7 +42,6 @@ internal class FileMultiAnalyzer : IFileMultiAnalyzer
     public async Task StartAnalysisAsync(
         FileMultiAnalysis fileMultiAnalysis,
         Stream fileData,
-        string fileDescription,
         string filePassword,
         bool isPrivateFile,
         CancellationToken cancellationToken)
@@ -55,7 +54,6 @@ internal class FileMultiAnalyzer : IFileMultiAnalyzer
             fileMultiAnalysis.FileMetadata.Name,
             fileMultiAnalysis.FileMetadata.ContentType,
             fileId,
-            fileDescription,
             filePassword,
             isPrivateFile);
 
