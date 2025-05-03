@@ -5,7 +5,7 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Infrastructure.Shared.Messaging.Abstractions;
 using Openlysis.Infrastructure.Shared.Messaging.Models;
 
-namespace Openlysis.Infrastructure.Services.Messaging;
+namespace Openlysis.Infrastructure.Services.URLs;
 
 /// <summary>
 /// Represents a service for analyzing URLs using multiple analyzers.

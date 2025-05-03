@@ -7,7 +7,9 @@ using Microsoft.IO;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
+using Openlysis.Application.Files.Contracts.Abstractions;
 using Openlysis.Application.Messages.Contracts.Abstractions;
+using Openlysis.Application.URLs.Contracts.Abstractions;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
@@ -18,9 +20,11 @@ using Openlysis.Evaluators.Ipqs;
 using Openlysis.Infrastructure.Configuration;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
+using Openlysis.Infrastructure.Services.Files;
 using Openlysis.Infrastructure.Services.Hashing;
 using Openlysis.Infrastructure.Services.Messages;
 using Openlysis.Infrastructure.Services.Messaging;
+using Openlysis.Infrastructure.Services.URLs;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 
 using PhoneNumbers;
@@ -74,8 +78,11 @@ public static class DependencyInjection
         services.AddTransient<SHA512>(_ => SHA512.Create());
         services.AddScoped<IHashService, HashService>();
 
+        // Add multi analyzers
+        services.AddScoped<IFileMultiAnalyzer, FileMultiAnalyzer>();
+        services.AddScoped<IUrlMultiAnalyzer, UrlMultiAnalyzer>();
+
         // Add message senders
-        services.AddAnalyzeMessageSenders();
         services.AddUpdateAnalysisConsumers(configuration);
 
         // Add phone number evaluators.

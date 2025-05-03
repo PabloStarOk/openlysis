@@ -3,8 +3,6 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Application.Files.Contracts.Abstractions;
-using Openlysis.Application.URLs.Contracts.Abstractions;
 using Openlysis.Infrastructure.Services.Messaging.Consumers.Files;
 using Openlysis.Infrastructure.Services.Messaging.Consumers.URLs;
 using Openlysis.Infrastructure.Shared.Messaging;
@@ -34,16 +32,5 @@ internal static class DependencyInjection
                 x.AddConsumer<UpdateUrlMultiAnalysisConsumer, UpdateUrlMultiAnalysisConsumerDefinition>();
                 x.AddRabbitMqBroker(services);
             });
-    }
-
-    /// <summary>
-    /// Registers the services required for sending analysis messages.
-    /// </summary>
-    /// <param name="services">The service collection to which the dependencies will be added.</param>
-    internal static void AddAnalyzeMessageSenders(
-        this IServiceCollection services)
-    {
-        services.AddScoped<IFileMultiAnalyzer, FileMultiAnalyzer>();
-        services.AddScoped<IUrlMultiAnalyzer, UrlMultiAnalyzer>();
     }
 }

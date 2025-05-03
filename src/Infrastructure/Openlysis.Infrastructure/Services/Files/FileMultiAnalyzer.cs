@@ -5,7 +5,7 @@ using Openlysis.Domain.Files;
 using Openlysis.Infrastructure.Shared.Messaging.Abstractions;
 using Openlysis.Infrastructure.Shared.Messaging.Models;
 
-namespace Openlysis.Infrastructure.Services.Messaging;
+namespace Openlysis.Infrastructure.Services.Files;
 
 /// <summary>
 /// Service to analyze a file using multi services.
