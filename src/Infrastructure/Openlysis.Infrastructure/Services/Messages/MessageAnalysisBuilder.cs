@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Net.Mail;
 using System.Text;
 
 using Microsoft.IO;
@@ -111,7 +112,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     public IMessageAnalysisBuilder WithEmailAddressMultiReputations(
         IEnumerable<EmailAddressMultiReputation> multiReputations)
     {
-        DataAssessmentResult<string>[] emailResults =
+        DataAssessmentResult<MailAddress>[] emailResults =
             CreateEmailsResults(multiReputations);
 
         _buildState = _buildState with
@@ -238,7 +239,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         ContentHashSet? HashValues = null,
         DataAssessmentResult<FileMetadata>[]? FileResults = null,
         DataAssessmentResult<Uri>[]? UrlResults = null,
-        DataAssessmentResult<string>[]? EmailResults = null,
+        DataAssessmentResult<MailAddress>[]? EmailResults = null,
         DataAssessmentResult<string>[]? PhoneResults = null);
 
     /// <summary>
@@ -294,11 +295,11 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <returns>
     /// An array of <see cref="DataAssessmentResult{String}"/> representing the assessment results for the email addresses.
     /// </returns>
-    private static DataAssessmentResult<string>[] CreateEmailsResults(
+    private static DataAssessmentResult<MailAddress>[] CreateEmailsResults(
         IEnumerable<EmailAddressMultiReputation> multiReputations)
     {
         return multiReputations
-            .Select(e => DataAssessmentResult<string>.Create(
+            .Select(e => DataAssessmentResult<MailAddress>.Create(
                 DataType.EmailAddress,
                 e.EmailAddress,
                 e.Id))

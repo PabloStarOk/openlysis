@@ -23,7 +23,7 @@ public record DetectedData(
         IEnumerable<Uri> urls = source.DetectedUrlsResults
             .Select(d => d.Value);
         IEnumerable<string> emailAddresses = source.DetectedEmailAddressesResults
-            .Select(d => d.Value);
+            .Select(d => d.Value.Address);
         IEnumerable<string> phoneNumbers = source.DetectedPhoneNumbersResults
             .Select(d => d.Value);
 

@@ -1,3 +1,5 @@
+using System.Net.Mail;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -23,20 +25,10 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
     public void Configure(EntityTypeBuilder<MessageAnalysis> builder)
     {
         ConfigureMessageAnalysis(builder);
-        builder.OwnsMany(f => f.AttachedFilesResults, ConfigureAttachedFileResults);
-        builder.OwnsMany(f => f.DetectedUrlsResults, ConfigureDetectedUrlResults);
-        builder.OwnsMany(f => f.DetectedEmailAddressesResults, bld => ConfigureDetectedStringResults(
-            bld,
-            tableName: "detected_email_address_results",
-            idColumnName: "detected_email_address_results_id",
-            valueColumnName: "email_address",
-            resultIdColumnName: "email_address_multi_reputation_id"));
-        builder.OwnsMany(f => f.DetectedPhoneNumbersResults, bld => ConfigureDetectedStringResults(
-            bld,
-            tableName: "detected_phone_number_results",
-            idColumnName: "detected_phone_number_results_id",
-            valueColumnName: "phone_number",
-            resultIdColumnName: "phone_multi_reputation_id"));
+        builder.OwnsMany(d => d.AttachedFilesResults, ConfigureFileAttachedResults);
+        builder.OwnsMany(d => d.DetectedUrlsResults, ConfigureDetectedUrlResults);
+        builder.OwnsMany(d => d.DetectedEmailAddressesResults, ConfigureDetectedEmailAddressesResults);
+        builder.OwnsMany(d => d.DetectedPhoneNumbersResults, ConfigureDetectedPhoneNumberResults);
     }
 
     /// <summary>
@@ -144,136 +136,25 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
     }
 
     /// <summary>
-    /// Configures the schema for the `AttachedFileResults` owned collection of the `MessageAnalysis` entity.
+    /// Configures the schema for a detected data result of type <typeparamref name="TDataType"/>.
     /// </summary>
+    /// <typeparam name="TDataType">The type of the data being assessed.</typeparam>
     /// <param name="builder">
-    /// The <see cref="OwnedNavigationBuilder{TEntity, TDependentEntity}"/> used to configure the owned collection.
+    /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned navigation property.
     /// </param>
-    private static void ConfigureAttachedFileResults(
-        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<FileMetadata>> builder)
-    {
-        builder.ToTable("attached_file_results");
-
-        builder.HasKey(a => a.Id);
-
-        builder.Property(a => a.Id)
-            .HasColumnName("attached_file_result_id")
-            .HasColumnType("uuid")
-            .IsRequired()
-            .ValueGeneratedNever()
-            .HasConversion(
-                id => id.Value,
-                dbValue => GlobalId.Parse(dbValue));
-
-        builder.Property(a => a.Type)
-            .HasColumnName("data_type")
-            .HasColumnType(SmallintType)
-            .IsRequired();
-
-        builder.OwnsOne(a => a.Value, metadataBuilder =>
-        {
-            metadataBuilder.Property(m => m.Name)
-                .HasColumnName("file_name")
-                .HasColumnType(VarcharType)
-                .HasMaxLength(100)
-                .IsRequired();
-
-            metadataBuilder.Property(m => m.Size)
-                .HasColumnName("size")
-                .HasColumnType("bigint")
-                .IsRequired();
-
-            metadataBuilder.Property(m => m.ContentType)
-                .HasColumnName("content_type")
-                .HasColumnType(VarcharType)
-                .HasMaxLength(20)
-                .IsRequired();
-        });
-
-        builder.Property(a => a.ResultId)
-            .HasColumnName("file_multi_analysis_id")
-            .HasColumnType("uuid")
-            .IsRequired()
-            .HasConversion(
-                id => id.Value,
-                dbValue => GlobalId.Parse(dbValue));
-
-        builder.WithOwner()
-            .HasForeignKey(MessageAnalysisIdColumnName);
-    }
-
-    /// <summary>
-    /// Configures the schema for the `DetectedUrlResults` owned collection of the `MessageAnalysis` entity.
-    /// </summary>
-    /// <param name="builder">
-    /// The <see cref="OwnedNavigationBuilder{TEntity, TDependentEntity}"/> used to configure the owned collection.
+    /// <param name="tableName">The name of the database table for the detected data result.</param>
+    /// <param name="idColumnName">The name of the column representing the unique identifier of the detected data result.</param>
+    /// <param name="resultIdColumnName">The name of the column representing the result identifier of the detected data result.</param>
+    /// <param name="configureValueColumnName">
+    /// An action to configure the value column of the detected data result.
     /// </param>
-    private static void ConfigureDetectedUrlResults(
-        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<Uri>> builder)
-    {
-        builder.ToTable("detected_url_results");
-
-        builder.HasKey(a => a.Id);
-
-        builder.Property(a => a.Id)
-            .HasColumnName("detected_url_results_id")
-            .HasColumnType("uuid")
-            .IsRequired()
-            .ValueGeneratedNever()
-            .HasConversion(
-                id => id.Value,
-                dbValue => GlobalId.Parse(dbValue));
-
-        builder.Property(a => a.Type)
-            .HasColumnName("data_type")
-            .HasColumnType(SmallintType)
-            .IsRequired();
-
-        builder.Property(u => u.Value)
-            .HasColumnName("url")
-            .HasColumnType(VarcharType)
-            .HasMaxLength(2083)
-            .IsRequired()
-            .HasConversion(
-                u => u.AbsoluteUri,
-                dbValue => new Uri(dbValue));
-
-        builder.Property(a => a.ResultId)
-            .HasColumnName("url_multi_analysis_id")
-            .HasColumnType("uuid")
-            .IsRequired()
-            .HasConversion(
-                id => id.Value,
-                dbValue => GlobalId.Parse(dbValue));
-
-        builder.WithOwner()
-            .HasForeignKey(MessageAnalysisIdColumnName);
-    }
-
-    /// <summary>
-    /// Configures the schema for a collection of detected string results owned by the `MessageAnalysis` entity.
-    /// </summary>
-    /// <param name="builder">
-    /// The <see cref="OwnedNavigationBuilder{TEntity, TDependentEntity}"/> used to configure the owned collection.
-    /// </param>
-    /// <param name="tableName">
-    /// The name of the database table for the detected string results.
-    /// </param>
-    /// <param name="idColumnName">
-    /// The name of the column representing the unique identifier for each detected string result.
-    /// </param>
-    /// <param name="valueColumnName">
-    /// The name of the column representing the detected string value.
-    /// </param>
-    /// <param name="resultIdColumnName">
-    /// The name of the column representing the result identifier for the detected string.
-    /// </param>
-    private static void ConfigureDetectedStringResults(
-        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<string>> builder,
+    private static void ConfigureDetectedDataResult<TDataType>(
+        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<TDataType>> builder,
         string tableName,
         string idColumnName,
-        string valueColumnName,
-        string resultIdColumnName)
+        string resultIdColumnName,
+        Action<OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<TDataType>>> configureValueColumnName)
+        where TDataType : notnull
     {
         builder.ToTable(tableName);
 
@@ -293,11 +174,7 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Property(u => u.Value)
-            .HasColumnName(valueColumnName)
-            .HasColumnType(VarcharType)
-            .HasMaxLength(15)
-            .IsRequired();
+        configureValueColumnName(builder);
 
         builder.Property(a => a.ResultId)
             .HasColumnName(resultIdColumnName)
@@ -309,5 +186,111 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
 
         builder.WithOwner()
             .HasForeignKey(MessageAnalysisIdColumnName);
+    }
+
+    /// <summary>
+    /// Configures the schema for the attached file results of the <see cref="MessageAnalysis"/> entity.
+    /// </summary>
+    /// <param name="builder">
+    /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned navigation property.
+    /// </param>
+    private static void ConfigureFileAttachedResults(
+        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<FileMetadata>> builder)
+    {
+        ConfigureDetectedDataResult(
+            builder,
+            tableName: "attached_file_results",
+            idColumnName: "attached_file_result_id",
+            resultIdColumnName: "file_multi_analysis_id",
+            valueBuilder =>
+                valueBuilder.OwnsOne(
+                    a => a.Value, metadataBuilder =>
+                    {
+                        metadataBuilder.Property(m => m.Name)
+                            .HasColumnName("file_name")
+                            .HasColumnType(VarcharType)
+                            .HasMaxLength(100)
+                            .IsRequired();
+
+                        metadataBuilder.Property(m => m.Size)
+                            .HasColumnName("size")
+                            .HasColumnType("bigint")
+                            .IsRequired();
+
+                        metadataBuilder.Property(m => m.ContentType)
+                            .HasColumnName("content_type")
+                            .HasColumnType(VarcharType)
+                            .HasMaxLength(20)
+                            .IsRequired();
+                    }));
+    }
+
+    /// <summary>
+    /// Configures the schema for the detected URL results of the <see cref="MessageAnalysis"/> entity.
+    /// </summary>
+    /// <param name="builder">
+    /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned navigation property.
+    /// </param>
+    private static void ConfigureDetectedUrlResults(
+        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<Uri>> builder)
+    {
+        ConfigureDetectedDataResult(
+            builder,
+            tableName: "detected_url_results",
+            idColumnName: "detected_url_results_id",
+            resultIdColumnName: "url_multi_analysis_id",
+            valueBuilder => valueBuilder.Property(u => u.Value)
+                .HasColumnName("url")
+                .HasColumnType(VarcharType)
+                .HasMaxLength(2083)
+                .IsRequired()
+                .HasConversion(
+                    u => u.AbsoluteUri,
+                    dbValue => new Uri(dbValue)));
+    }
+
+    /// <summary>
+    /// Configures the schema for the detected email address results of the <see cref="MessageAnalysis"/> entity.
+    /// </summary>
+    /// <param name="builder">
+    /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned navigation property.
+    /// </param>
+    private static void ConfigureDetectedEmailAddressesResults(
+        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<MailAddress>> builder)
+    {
+        ConfigureDetectedDataResult(
+            builder,
+            tableName: "detected_email_address_results",
+            idColumnName: "detected_email_address_results_id",
+            resultIdColumnName: "email_address_multi_reputation_id",
+            configureValueColumnName: valueBuilder => valueBuilder.Property(u => u.Value)
+                .HasColumnName("email_address")
+                .HasColumnType(VarcharType)
+                .HasMaxLength(254)
+                .IsRequired()
+                .HasConversion(
+                    emailAddress => emailAddress.Address,
+                    dbValue => new MailAddress(dbValue)));
+    }
+
+    /// <summary>
+    /// Configures the schema for the detected phone number results of the <see cref="MessageAnalysis"/> entity.
+    /// </summary>
+    /// <param name="builder">
+    /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned navigation property.
+    /// </param>
+    private static void ConfigureDetectedPhoneNumberResults(
+        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<string>> builder)
+    {
+        ConfigureDetectedDataResult(
+            builder,
+            tableName: "detected_phone_number_results",
+            idColumnName: "detected_phone_number_results_id",
+            resultIdColumnName: "phone_multi_reputation_id",
+            valueBuilder => valueBuilder.Property(u => u.Value)
+                .HasColumnName("phone_number")
+                .HasColumnType(VarcharType)
+                .HasMaxLength(15)
+                .IsRequired());
     }
 }

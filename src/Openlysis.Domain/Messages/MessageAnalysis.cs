@@ -1,3 +1,5 @@
+using System.Net.Mail;
+
 using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
@@ -52,7 +54,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <summary>
     /// Gets the detected email address results from the analysis.
     /// </summary>
-    public IReadOnlyList<DataAssessmentResult<string>> DetectedEmailAddressesResults { get; }
+    public IReadOnlyList<DataAssessmentResult<MailAddress>> DetectedEmailAddressesResults { get; }
 
     /// <summary>
     /// Gets the detected phone number results from the analysis.
@@ -81,7 +83,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         AnalysisState state,
         DataAssessmentResult<FileMetadata>[] attachedFilesResults,
         DataAssessmentResult<Uri>[] detectedUrlsResults,
-        DataAssessmentResult<string>[] detectedEmailAddressesResults,
+        DataAssessmentResult<MailAddress>[] detectedEmailAddressesResults,
         DataAssessmentResult<string>[] detectedPhoneNumbersResults)
         : base(id)
     {
@@ -137,7 +139,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         Verdict verdict,
         DataAssessmentResult<FileMetadata>[] attachedFilesResults,
         DataAssessmentResult<Uri>[] detectedUrlsResults,
-        DataAssessmentResult<string>[] detectedEmailAddressesResults,
+        DataAssessmentResult<MailAddress>[] detectedEmailAddressesResults,
         DataAssessmentResult<string>[] detectedPhoneNumbersResults)
     {
         GlobalId id = GlobalId.CreateUnique();

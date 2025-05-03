@@ -1,3 +1,5 @@
+using System.Net.Mail;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -62,7 +64,10 @@ public class EmailAddressMultiReputationConfiguration : IEntityTypeConfiguration
             .HasColumnName("email_address")
             .HasColumnType("varchar")
             .HasMaxLength(254)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion(
+                emailAddress => emailAddress.Address,
+                dbValue => new MailAddress(dbValue));
 
         builder.Navigation(p => p.ServicesReputations)
             .AutoInclude();

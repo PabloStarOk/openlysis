@@ -1,3 +1,5 @@
+using System.Net.Mail;
+
 using ErrorOr;
 
 using Microsoft.Extensions.Logging;
@@ -62,9 +64,10 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
         }
 
         List<Error> errors = [];
+        var emailAddress = new MailAddress(evaluateEmailAddressReputation.Value);
         var multiReputation = EmailAddressMultiReputation.Create(
             _timeProvider.GetUtcNow().UtcDateTime,
-            evaluateEmailAddressReputation.Value);
+            emailAddress);
 
         // TODO: When service is unavailable, wait a timeout along with an event from the service.
         await Parallel.ForEachAsync(_reputationEvaluators, cancellationToken, async (evaluator, ct) =>

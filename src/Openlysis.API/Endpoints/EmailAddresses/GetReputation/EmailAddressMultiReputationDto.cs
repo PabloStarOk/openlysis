@@ -37,7 +37,7 @@ public record EmailAddressMultiReputationDto(
             source.ReputationEvaluationDate,
             source.FinalVerdict,
             source.FinalThreatZone,
-            source.EmailAddress,
+            source.EmailAddress.Address,
             serviceReputations);
     }
 }

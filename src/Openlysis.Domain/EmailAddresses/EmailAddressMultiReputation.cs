@@ -1,3 +1,5 @@
+using System.Net.Mail;
+
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
@@ -14,7 +16,7 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceRe
     /// <summary>
     /// Gets the email address associated with the reputation.
     /// </summary>
-    public string EmailAddress { get; }
+    public MailAddress EmailAddress { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EmailAddressMultiReputation"/> class.
@@ -29,7 +31,7 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceRe
         DateTime evaluationReputationDate,
         Verdict finalVerdict,
         ThreatZone finalThreatZone,
-        string emailAddress)
+        MailAddress emailAddress)
         : base(id, evaluationReputationDate, finalVerdict, finalThreatZone)
     {
         EmailAddress = emailAddress;
@@ -52,7 +54,7 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceRe
     /// <returns>A new instance of <see cref="EmailAddressMultiReputation"/>.</returns>
     public static EmailAddressMultiReputation Create(
         DateTime reputationEvaluationDate,
-        string emailAddress)
+        MailAddress emailAddress)
     {
         GlobalId globalId = GlobalId.CreateUnique();
         return new EmailAddressMultiReputation(
