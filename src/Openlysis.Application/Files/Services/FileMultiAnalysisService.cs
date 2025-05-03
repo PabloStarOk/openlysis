@@ -76,6 +76,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
             hashSet,
             fileMetadata);
 
+        await _repository.AddAsync(multiAnalysis, cancellationToken);
         await _multiAnalyzer.StartAnalysisAsync(
             multiAnalysis,
             fileData.Stream,
