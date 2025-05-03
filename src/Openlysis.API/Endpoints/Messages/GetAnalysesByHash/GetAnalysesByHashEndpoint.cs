@@ -9,7 +9,6 @@ using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.API.Endpoints.Messages.Common.Responses;
 using Openlysis.API.Endpoints.Phones.GetReputation;
 using Openlysis.API.Endpoints.URLs.Common;
-using Openlysis.Application.Common.Enums;
 using Openlysis.Application.Messages.Services;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Users.ValueObjects;
@@ -97,8 +96,16 @@ public class GetAnalysesByHashEndpoint
                 req.StartedDateOrder,
                 ct);
 
+        if (messageAnalyses.Count is 0)
+        {
+            IResult notFoundResult = Results.Problem(
+                statusCode: StatusCodes.Status404NotFound,
+                detail: "There are no analyses for the given hash.");
+            await SendResultAsync(notFoundResult);
+        }
+
         List<MessageAnalysisDto> messageAnalysisDtos = [];
-        await Parallel.ForEachAsync(messageAnalyses, ct, async (analysis, token) =>
+        foreach (var analysis in messageAnalyses)
         {
             // TODO: Refactor duplicated logic with GetAnalysisByIdEndpoint.
             var fileMultiAnalyses = await _resultsProvider.GetFileMultiAnalysesAsync(
@@ -106,13 +113,13 @@ public class GetAnalysesByHashEndpoint
                 ct);
             var urlMultiAnalyses = await _resultsProvider.GetUrlMultiAnalysesAsync(
                 analysis,
-                token);
+                ct);
             var emailMultiReputations = await _resultsProvider.GetEmailAddressesReputationsAsync(
                 analysis,
-                token);
+                ct);
             var phoneMultiReputations = await _resultsProvider.GetPhoneNumbersReputationsAsync(
                 analysis,
-                token);
+                ct);
 
             var results = new MessageAnalysisResults(
                 fileMultiAnalyses.Select(FileMultiAnalysisDto.Parse),
@@ -125,23 +132,8 @@ public class GetAnalysesByHashEndpoint
                 results);
 
             messageAnalysisDtos.Add(dto);
-        });
-
-        if (messageAnalyses.Count is 0)
-        {
-            IResult notFoundResult = Results.Problem(
-                statusCode: StatusCodes.Status404NotFound,
-                detail: "There are no analyses for the given hash.");
-            await SendResultAsync(notFoundResult);
-            return;
         }
 
-        // TODO: Refactor duplicated logic with app layer services.
-        Response = req.StartedDateOrder switch
-        {
-            OrderType.Dsc => messageAnalysisDtos.OrderByDescending(u => u.StartedDate),
-            OrderType.Asc => messageAnalysisDtos.OrderBy(u => u.StartedDate),
-            _ => throw new InvalidOperationException("StartedDateOrder has an invalid enum value.")
-        };
+        Response = messageAnalysisDtos;
     }
 }
