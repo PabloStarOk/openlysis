@@ -20,4 +20,8 @@
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj" />
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.VirusTotal\Openlysis.Analyzers.VirusTotal.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Communication\" />
+  </ItemGroup>
 </Project>

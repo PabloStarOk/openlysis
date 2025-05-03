@@ -17,13 +17,13 @@ using Openlysis.Domain.Messages;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 using Openlysis.Evaluators.Ipqs;
+using Openlysis.Infrastructure.Communication;
 using Openlysis.Infrastructure.Configuration;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
 using Openlysis.Infrastructure.Services.Files;
 using Openlysis.Infrastructure.Services.Hashing;
 using Openlysis.Infrastructure.Services.Messages;
-using Openlysis.Infrastructure.Services.Messaging;
 using Openlysis.Infrastructure.Services.URLs;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 

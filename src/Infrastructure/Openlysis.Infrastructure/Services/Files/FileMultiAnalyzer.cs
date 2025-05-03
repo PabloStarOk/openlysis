@@ -2,8 +2,8 @@ using MassTransit;
 
 using Openlysis.Application.Files.Contracts.Abstractions;
 using Openlysis.Domain.Files;
-using Openlysis.Infrastructure.Shared.Messaging.Abstractions;
-using Openlysis.Infrastructure.Shared.Messaging.Models;
+using Openlysis.Infrastructure.Shared.Communication.Abstractions;
+using Openlysis.Infrastructure.Shared.Communication.Models;
 
 namespace Openlysis.Infrastructure.Services.Files;
 
