@@ -50,6 +50,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     public async Task<FileMultiAnalysis?> GetAsync(GlobalId fileMultiAnalysisId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.FileMultiAnalyses
+            .AsNoTracking()
             .AsSplitQuery()
             .FirstOrDefaultAsync(f => f.Id == fileMultiAnalysisId, cancellationToken);
     }
@@ -61,7 +62,9 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
         Func<IQueryable<FileMultiAnalysis>, IOrderedQueryable<FileMultiAnalysis>>? orderBy = null,
         CancellationToken cancellationToken = default)
     {
-        IQueryable<FileMultiAnalysis> query = _dbContext.FileMultiAnalyses.AsSplitQuery();
+        IQueryable<FileMultiAnalysis> query = _dbContext.FileMultiAnalyses
+            .AsNoTracking()
+            .AsSplitQuery();
 
         if (filter is not null)
         {
@@ -115,7 +118,9 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     /// <inheritdoc/>
     public async Task<bool> ExistsAsync(GlobalId id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.FileMultiAnalyses.AnyAsync(f => f.Id == id, cancellationToken);
+        return await _dbContext.FileMultiAnalyses
+            .AsNoTracking()
+            .AnyAsync(f => f.Id == id, cancellationToken);
     }
 
     /// <summary>

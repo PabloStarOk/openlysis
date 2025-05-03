@@ -32,6 +32,7 @@ public class EmailAddressMultiReputationRepository
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.EmailAddressMultiReputations
+            .AsNoTracking()
             .AsSplitQuery()
             .SingleOrDefaultAsync(p => p.Id == id, cancellationToken);
     }
@@ -45,6 +46,7 @@ public class EmailAddressMultiReputationRepository
     {
         IQueryable<EmailAddressMultiReputation> query = _dbContext
             .EmailAddressMultiReputations
+            .AsNoTracking()
             .AsSplitQuery();
 
         if (filter is not null)
@@ -107,6 +109,7 @@ public class EmailAddressMultiReputationRepository
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.EmailAddressMultiReputations
+            .AsNoTracking()
             .AnyAsync(p => p.Id == id, cancellationToken);
     }
 }

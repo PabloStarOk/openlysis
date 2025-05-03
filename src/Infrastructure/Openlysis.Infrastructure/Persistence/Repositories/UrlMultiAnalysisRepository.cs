@@ -33,6 +33,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
         ArgumentNullException.ThrowIfNull(id);
 
         return await _dbContext.UrlMultiAnalyses
+            .AsNoTracking()
             .AsSplitQuery()
             .Include(u => u.ServiceAnalyses)
             .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
@@ -46,6 +47,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
         CancellationToken cancellationToken = default)
     {
         IQueryable<UrlMultiAnalysis> query = _dbContext.UrlMultiAnalyses
+            .AsNoTracking()
             .Include(u => u.ServiceAnalyses);
 
         if (filter is not null)
@@ -121,7 +123,9 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
     /// <inheritdoc/>
     public async Task<bool> ExistsAsync(GlobalId id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.UrlMultiAnalyses.AnyAsync(u => u.Id == id, cancellationToken);
+        return await _dbContext.UrlMultiAnalyses
+            .AsNoTracking()
+            .AnyAsync(u => u.Id == id, cancellationToken);
     }
 
     /// <summary>

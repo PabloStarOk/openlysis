@@ -31,6 +31,7 @@ public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, 
         CancellationToken cancellationToken = default)
     {
         return await _dbContext.PhoneMultiReputations
+            .AsNoTracking()
             .AsSplitQuery()
             .SingleOrDefaultAsync(p => p.Id == globalId, cancellationToken);
     }
@@ -43,6 +44,7 @@ public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, 
         CancellationToken cancellationToken = default)
     {
         IQueryable<PhoneMultiReputation> query = _dbContext.PhoneMultiReputations
+            .AsNoTracking()
             .AsSplitQuery();
 
         if (filter is not null)
@@ -98,6 +100,7 @@ public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, 
     public async Task<bool> ExistsAsync(GlobalId globalId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.PhoneMultiReputations
+            .AsNoTracking()
             .AnyAsync(p => p.Id == globalId, cancellationToken);
     }
 }

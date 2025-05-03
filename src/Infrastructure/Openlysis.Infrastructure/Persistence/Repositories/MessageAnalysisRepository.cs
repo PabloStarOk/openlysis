@@ -32,6 +32,7 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
         ArgumentNullException.ThrowIfNull(id);
 
         return await _dbContext.MessageAnalyses
+            .AsNoTracking()
             .AsSplitQuery()
             .SingleOrDefaultAsync(m => m.Id == id, cancellationToken);
     }
@@ -44,6 +45,7 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
         CancellationToken cancellationToken = default)
     {
         IQueryable<MessageAnalysis> query = _dbContext.MessageAnalyses
+            .AsNoTracking()
             .AsSplitQuery();
 
         if (filter is not null)
@@ -122,6 +124,7 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
         ArgumentNullException.ThrowIfNull(id);
 
         return _dbContext.MessageAnalyses
+            .AsNoTracking()
             .AnyAsync(p => p.Id == id, cancellationToken);
     }
 }
