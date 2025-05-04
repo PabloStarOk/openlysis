@@ -16,7 +16,7 @@ internal sealed class EndpointUriProvider : IEndpointUriProvider, IDisposable
     public Uri AnalyzeFileUri { get; private set; }
 
     /// <inheritdoc/>
-    public Uri UpdateMultiAnalysisUri { get; private set; }
+    public Uri UpdateFileMultiAnalysisUri { get; private set; }
 
     /// <inheritdoc/>
     public Uri AnalyzeUrlUri { get; private set; }
@@ -63,7 +63,7 @@ internal sealed class EndpointUriProvider : IEndpointUriProvider, IDisposable
 
         // Update file multi analysis consumer.
         uriBuilder.Path = Uri.EscapeDataString(settings.UpdateFileAnalysisEndpointName);
-        UpdateMultiAnalysisUri = uriBuilder.Uri;
+        UpdateFileMultiAnalysisUri = uriBuilder.Uri;
 
         // Analyze URL consumer.
         uriBuilder.Path = Uri.EscapeDataString(settings.AnalyzeUrlEndpointName);

@@ -197,6 +197,6 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         var request = new UpdateFileMultiAnalysis(
             _multiAnalysisId,
             _serviceFileAnalyses.Values.ToArray());
-        await _context.Send(_endpointUriProvider.UpdateMultiAnalysisUri, request);
+        await _context.Send(_endpointUriProvider.UpdateFileMultiAnalysisUri, request);
     }
 }

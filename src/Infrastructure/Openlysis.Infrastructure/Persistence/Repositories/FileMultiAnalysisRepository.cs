@@ -50,7 +50,6 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     public async Task<FileMultiAnalysis?> GetAsync(GlobalId fileMultiAnalysisId, CancellationToken cancellationToken = default)
     {
         return await _dbContext.FileMultiAnalyses
-            .AsNoTracking()
             .AsSplitQuery()
             .FirstOrDefaultAsync(f => f.Id == fileMultiAnalysisId, cancellationToken);
     }

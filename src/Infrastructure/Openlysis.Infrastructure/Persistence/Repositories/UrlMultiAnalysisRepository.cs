@@ -33,7 +33,6 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
         ArgumentNullException.ThrowIfNull(id);
 
         return await _dbContext.UrlMultiAnalyses
-            .AsNoTracking()
             .AsSplitQuery()
             .Include(u => u.ServiceAnalyses)
             .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);

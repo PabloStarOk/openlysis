@@ -11,9 +11,9 @@ public interface IEndpointUriProvider
     public Uri AnalyzeFileUri { get; }
 
     /// <summary>
-    /// Gets the URI for updating a multi-analysis.
+    /// Gets the URI for updating a file multi-analysis.
     /// </summary>
-    public Uri UpdateMultiAnalysisUri { get; }
+    public Uri UpdateFileMultiAnalysisUri { get; }
 
     /// <summary>
     /// Gets the URI for analyzing a URL.
