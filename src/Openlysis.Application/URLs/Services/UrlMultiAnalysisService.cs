@@ -2,6 +2,8 @@ using System.Text;
 
 using ErrorOr;
 
+using Microsoft.IO;
+
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Enums;
@@ -23,6 +25,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
     private readonly IUrlMultiAnalyzer _urlMultiAnalyzer;
+    private readonly RecyclableMemoryStreamManager _memoryStreamManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlMultiAnalysisService"/> class.
@@ -31,16 +34,19 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     /// <param name="timeProvider">The service for providing the current time.</param>
     /// <param name="hashService">The service for generating and managing hashes.</param>
     /// <param name="urlMultiAnalyzer">The service for performing multi-analysis on URLs.</param>
+    /// <param name="memoryStreamManager">The manager for recyclable <see cref="MemoryStream"/> used for storing URL string bytes.</param>
     public UrlMultiAnalysisService(
         IRepository<UrlMultiAnalysis, GlobalId> repository,
         TimeProvider timeProvider,
         IHashService hashService,
-        IUrlMultiAnalyzer urlMultiAnalyzer)
+        IUrlMultiAnalyzer urlMultiAnalyzer,
+        RecyclableMemoryStreamManager memoryStreamManager)
     {
         _repository = repository;
         _timeProvider = timeProvider;
         _hashService = hashService;
         _urlMultiAnalyzer = urlMultiAnalyzer;
+        _memoryStreamManager = memoryStreamManager;
     }
 
     /// <inheritdoc/>
@@ -53,7 +59,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     {
         ContentHashSet urlHashSet;
         byte[] urlBytes = Encoding.UTF8.GetBytes(url.AbsoluteUri);
-        await using (var urlMemoryStream = new MemoryStream(urlBytes))
+        await using (var urlMemoryStream = _memoryStreamManager.GetStream(urlBytes))
         {
             urlHashSet = await _hashService.HashDataAsync(urlMemoryStream, cancellationToken);
         }
