@@ -55,7 +55,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
         // Check if the file has already been analyzed.
         var existingAnalyses = await _repository.GetManyAsync(
             1,
-            f => f.DataHashSet == hashSet,
+            f => f.DataHashValues == hashSet,
             q => q.OrderByDescending(f => f.StartedDate),
             cancellationToken);
 
@@ -119,10 +119,10 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
     {
         var multiAnalyses = await _repository.GetManyAsync(
             amount,
-            f => (f.DataHashSet.Sha256 == hash
-                    || f.DataHashSet.Md5 == hash
-                    || f.DataHashSet.Sha1 == hash
-                    || f.DataHashSet.Sha512 == hash)
+            f => (f.DataHashValues.Sha256 == hash
+                    || f.DataHashValues.Md5 == hash
+                    || f.DataHashValues.Sha1 == hash
+                    || f.DataHashValues.Sha512 == hash)
                 && (!f.IsPrivate || (f.IsPrivate && f.UserId == userId)),
             OrderBy,
             cancellationToken);

@@ -85,12 +85,12 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
         ArgumentNullException.ThrowIfNull(model);
 
         bool hashExists = await _dbContext.ContentHashSets
-            .AnyAsync(c => c.Sha256 == model.DataHashSet.Sha256, cancellationToken);
+            .AnyAsync(c => c.Sha256 == model.DataHashValues.Sha256, cancellationToken);
 
         if (hashExists)
         {
             _dbContext.ChangeTracker.Clear();
-            _dbContext.Attach(model.DataHashSet).State = EntityState.Unchanged;
+            _dbContext.Attach(model.DataHashValues).State = EntityState.Unchanged;
         }
 
         EntityEntry<UrlMultiAnalysis> multiAnalysisEntry = await _dbContext.AddAsync(model, cancellationToken);

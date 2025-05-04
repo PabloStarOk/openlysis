@@ -57,16 +57,16 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         bool reanalyze,
         CancellationToken cancellationToken)
     {
-        ContentHashSet urlHashSet;
+        HashValues urlHashValues;
         byte[] urlBytes = Encoding.UTF8.GetBytes(url.AbsoluteUri);
         await using (var urlMemoryStream = _memoryStreamManager.GetStream(urlBytes))
         {
-            urlHashSet = await _hashService.HashDataAsync(urlMemoryStream, cancellationToken);
+            urlHashValues = await _hashService.HashDataAsync(urlMemoryStream, cancellationToken);
         }
 
         IReadOnlyList<UrlMultiAnalysis> lastExistingAnalyses = await GetAnalysesByHashAsync(
             userId,
-            hash: urlHashSet.Sha256,
+            hash: urlHashValues.Sha256,
             amount: 1,
             order: OrderType.Dsc,
             cancellationToken);
@@ -81,7 +81,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             isPrivate,
             _timeProvider.GetUtcNow().UtcDateTime,
             url,
-            urlHashSet);
+            urlHashValues);
 
         await _urlMultiAnalyzer.StartAnalysisAsync(
             multiAnalysis.Id,
@@ -123,10 +123,10 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     {
         var analyses = await _repository.GetManyAsync(
             amount,
-            u => (u.DataHashSet.Sha256 == hash
-                    || u.DataHashSet.Md5 == hash
-                    || u.DataHashSet.Sha1 == hash
-                    || u.DataHashSet.Sha512 == hash)
+            u => (u.DataHashValues.Sha256 == hash
+                    || u.DataHashValues.Md5 == hash
+                    || u.DataHashValues.Sha1 == hash
+                    || u.DataHashValues.Sha512 == hash)
                 && (!u.IsPrivate || (u.IsPrivate && u.UserId == userId)),
             OrderBy,
             cancellationToken);

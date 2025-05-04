@@ -58,7 +58,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// <summary>
     /// Gets the set of data hashes associated with the analysis.
     /// </summary>
-    public ContentHashSet DataHashSet { get; }
+    public HashValues DataHashValues { get; }
 
     /// <summary>
     /// Gets the list of service analyses associated with the analysis.
@@ -75,7 +75,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// <param name="status">The current status of the analysis.</param>
     /// <param name="finalVerdict">The final verdict of the analysis.</param>
     /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
-    /// <param name="dataHashSet">The set of data hashes associated with the analysis.</param>
+    /// <param name="dataHashValues">The set of data hashes associated with the analysis.</param>
     protected MultiAnalysis(
         GlobalId id,
         UserId userId,
@@ -84,7 +84,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         AnalysisStatus status,
         Verdict finalVerdict,
         ThreatZone finalThreatZone,
-        ContentHashSet dataHashSet)
+        HashValues dataHashValues)
         : base(id)
     {
         UserId = userId;
@@ -93,7 +93,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         Status = status;
         FinalVerdict = finalVerdict;
         FinalThreatZone = finalThreatZone;
-        DataHashSet = dataHashSet;
+        DataHashValues = dataHashValues;
     }
 
     // For EF Core.

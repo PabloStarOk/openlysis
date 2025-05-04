@@ -25,7 +25,7 @@ public class ApplicationDbContext : DbContext
     /// <summary>
     /// Gets the content hash sets of the database.
     /// </summary>
-    public DbSet<ContentHashSet> ContentHashSets { get; init; } = null!;
+    public DbSet<HashValues> ContentHashSets { get; init; } = null!;
 
     /// <summary>
     /// Gets the file analyses set of the database.

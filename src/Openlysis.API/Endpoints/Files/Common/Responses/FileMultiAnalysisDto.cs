@@ -16,7 +16,7 @@ namespace Openlysis.API.Endpoints.Files.Common.Responses;
 /// <param name="FinalThreatZone">The final threat zone of the file multi analysis.</param>
 /// <param name="AverageThreatScore">The average threat score of the file multi analysis, if available.</param>
 /// <param name="FileMetadata">Metadata of the file being analyzed.</param>
-/// <param name="FileHashSet">A set of content hashes associated with the file.</param>
+/// <param name="FileHashValues">A set of content hashes associated with the file.</param>
 /// <param name="ServiceAnalyses">The array of service analyses generated from the analysis.</param>
 /// <param name="ReportsAmount">The total number of reports generated from the analysis.</param>
 public record FileMultiAnalysisDto(
@@ -28,7 +28,7 @@ public record FileMultiAnalysisDto(
     ThreatZone FinalThreatZone,
     float? AverageThreatScore,
     FileMetadata FileMetadata,
-    ContentHashSet FileHashSet,
+    HashValues FileHashValues,
     FileServiceAnalysisDto[] ServiceAnalyses,
     int ReportsAmount)
 {
@@ -52,7 +52,7 @@ public record FileMultiAnalysisDto(
             source.FinalThreatZone,
             source.AverageThreatScore,
             source.FileMetadata,
-            source.DataHashSet,
+            source.DataHashValues,
             servicesAnalyses,
             source.ReportsAmount);
     }

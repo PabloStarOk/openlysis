@@ -39,7 +39,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     /// <param name="status">The current status of the analysis.</param>
     /// <param name="finalVerdict">The final verdict of the analysis.</param>
     /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
-    /// <param name="dataHashSet">The set of content hashes associated with the analysis.</param>
+    /// <param name="dataHashValues">The set of content hashes associated with the analysis.</param>
     /// <param name="fileMetadata">The metadata of the file being analyzed.</param>
     private FileMultiAnalysis(
         GlobalId id,
@@ -49,7 +49,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
         AnalysisStatus status,
         Verdict finalVerdict,
         ThreatZone finalThreatZone,
-        ContentHashSet dataHashSet,
+        HashValues dataHashValues,
         FileMetadata fileMetadata)
         : base(
             id,
@@ -59,7 +59,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
             status,
             finalVerdict,
             finalThreatZone,
-            dataHashSet)
+            dataHashValues)
     {
         FileMetadata = fileMetadata;
     }
@@ -79,14 +79,14 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     /// <param name="userId">The unique identifier of the user who initiated the analysis.</param>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
-    /// <param name="dataHashSet">The set of content hashes associated with the analysis.</param>
+    /// <param name="dataHashValues">The set of content hashes associated with the analysis.</param>
     /// <param name="fileMetadata">The metadata of the file being analyzed.</param>
     /// <returns>A new instance of the <see cref="FileMultiAnalysis"/> class.</returns>
     public static FileMultiAnalysis Create(
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
-        ContentHashSet dataHashSet,
+        HashValues dataHashValues,
         FileMetadata fileMetadata)
     {
         return new FileMultiAnalysis(
@@ -97,7 +97,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
             AnalysisStatus.Queued,
             Verdict.Unknown,
             ThreatZone.Unknown,
-            dataHashSet,
+            dataHashValues,
             fileMetadata);
     }
 

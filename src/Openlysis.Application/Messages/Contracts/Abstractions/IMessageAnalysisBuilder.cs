@@ -79,8 +79,8 @@ public interface IMessageAnalysisBuilder
     /// </summary>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
-    /// A task that represents the asynchronous operation, containing the resulting <see cref="ContentHashSet"/>.
+    /// A task that represents the asynchronous operation, containing the resulting <see cref="HashValues"/>.
     /// </returns>
-    public ValueTask<ContentHashSet> GenerateHashAsync(
+    public ValueTask<HashValues> GenerateHashAsync(
         CancellationToken cancellationToken = default);
 }

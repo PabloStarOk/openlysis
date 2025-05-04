@@ -120,10 +120,10 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
 
         Response = new AnalyzeFileResponse(
             result.Value.Id.Value.ToString(),
-            result.Value.DataHashSet.Md5,
-            result.Value.DataHashSet.Sha1,
-            result.Value.DataHashSet.Sha256,
-            result.Value.DataHashSet.Sha512);
+            result.Value.DataHashValues.Md5,
+            result.Value.DataHashValues.Sha1,
+            result.Value.DataHashValues.Sha256,
+            result.Value.DataHashValues.Sha512);
 
         var routeValues = new Dictionary<string, string>
         {

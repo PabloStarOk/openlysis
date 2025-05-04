@@ -86,13 +86,13 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
 
         var hashSetExists = await _dbContext.ContentHashSets
             .AnyAsync(
-                c => c.Sha256 == model.Message.MessageHashSet.Sha256,
+                c => c.Sha256 == model.Message.MessageHashValues.Sha256,
                 cancellationToken);
 
         if (hashSetExists)
         {
             _dbContext.ChangeTracker.Clear();
-            _dbContext.Attach(model.Message.MessageHashSet).State = EntityState.Unchanged;
+            _dbContext.Attach(model.Message.MessageHashValues).State = EntityState.Unchanged;
         }
 
         await _dbContext.MessageAnalyses.AddAsync(model, cancellationToken);

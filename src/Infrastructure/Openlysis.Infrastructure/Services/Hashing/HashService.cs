@@ -11,7 +11,7 @@ namespace Openlysis.Infrastructure.Services.Hashing;
 public class HashService : IHashService
 {
     /// <inheritdoc/>
-    public async Task<ContentHashSet> HashDataAsync(Stream data, CancellationToken cancellationToken)
+    public async Task<HashValues> HashDataAsync(Stream data, CancellationToken cancellationToken)
     {
         byte[] md5HashBytes = await MD5.HashDataAsync(data, cancellationToken);
         ResetStreamPosition(data);
@@ -29,7 +29,7 @@ public class HashService : IHashService
         string sha256HashString = Convert.ToHexString(sha256HashBytes);
         string sha512HashString = Convert.ToHexString(sha512HashBytes);
 
-        return new ContentHashSet(
+        return new HashValues(
             md5HashString,
             sha1HashString,
             sha256HashString,

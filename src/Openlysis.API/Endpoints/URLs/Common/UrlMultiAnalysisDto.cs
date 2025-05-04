@@ -15,7 +15,7 @@ namespace Openlysis.API.Endpoints.URLs.Common;
 /// <param name="FinalThreatZone">The final threat zone of the analysis.</param>
 /// <param name="AverageThreatScore">The average threat score of the analysis.</param>
 /// <param name="Url">The URL being analyzed.</param>
-/// <param name="UrlHashSet">The set of content hashes for the URL.</param>
+/// <param name="UrlHashValues">The set of content hashes for the URL.</param>
 /// <param name="ServiceAnalyses">The analyses from different services.</param>
 public record UrlMultiAnalysisDto(
     string Id,
@@ -26,7 +26,7 @@ public record UrlMultiAnalysisDto(
     ThreatZone FinalThreatZone,
     float? AverageThreatScore,
     Uri Url,
-    ContentHashSet UrlHashSet,
+    HashValues UrlHashValues,
     UrlServiceAnalysisDto[] ServiceAnalyses)
 {
     /// <summary>
@@ -49,7 +49,7 @@ public record UrlMultiAnalysisDto(
             source.FinalThreatZone,
             source.AverageThreatScore,
             source.Url,
-            source.DataHashSet,
+            source.DataHashValues,
             serviceAnalyses);
     }
 }

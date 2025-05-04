@@ -27,7 +27,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// <param name="status">The current status of the analysis.</param>
     /// <param name="finalVerdict">The final verdict of the analysis.</param>
     /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
-    /// <param name="urlHashSet">The hash set of the URL content.</param>
+    /// <param name="urlHashValues">The hash set of the URL content.</param>
     /// <param name="url">The URL being analyzed.</param>
     private UrlMultiAnalysis(
         GlobalId id,
@@ -37,7 +37,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
         AnalysisStatus status,
         Verdict finalVerdict,
         ThreatZone finalThreatZone,
-        ContentHashSet urlHashSet,
+        HashValues urlHashValues,
         Uri url)
         : base(
             id,
@@ -47,7 +47,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
             status,
             finalVerdict,
             finalThreatZone,
-            urlHashSet)
+            urlHashValues)
     {
         Url = url;
     }
@@ -68,14 +68,14 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// <param name="isPrivate">A value indicating whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
     /// <param name="url">The URL being analyzed.</param>
-    /// <param name="urlHashSet">The hash set of the URL content.</param>
+    /// <param name="urlHashValues">The hash set of the URL content.</param>
     /// <returns>A new instance of the <see cref="UrlMultiAnalysis"/> class.</returns>
     public static UrlMultiAnalysis Create(
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
         Uri url,
-        ContentHashSet urlHashSet)
+        HashValues urlHashValues)
     {
         return new UrlMultiAnalysis(
             GlobalId.CreateUnique(),
@@ -85,7 +85,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
             AnalysisStatus.Queued,
             Verdict.Unknown,
             ThreatZone.Unknown,
-            urlHashSet,
+            urlHashValues,
             url);
     }
 

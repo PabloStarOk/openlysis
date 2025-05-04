@@ -99,7 +99,7 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
                 id => id.Value,
                 dbValue => UserId.Create(dbValue));
 
-        builder.HasOne(f => f.DataHashSet)
+        builder.HasOne(f => f.DataHashValues)
             .WithMany()
             .HasForeignKey("sha256")
             .IsRequired();
@@ -115,7 +115,7 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
                     joinEntity.HasKey("multi_analysis_id", "service_analysis_id");
                 });
 
-        builder.Navigation(f => f.DataHashSet)
+        builder.Navigation(f => f.DataHashValues)
             .AutoInclude();
 
         builder.Navigation(f => f.ServiceAnalyses)

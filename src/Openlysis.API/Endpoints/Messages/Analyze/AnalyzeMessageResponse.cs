@@ -26,9 +26,9 @@ public record AnalyzeMessageResponse(
     {
         return new AnalyzeMessageResponse(
             source.Id.Value.ToString(),
-            source.Message.MessageHashSet.Sha256,
-            source.Message.MessageHashSet.Sha1,
-            source.Message.MessageHashSet.Md5,
-            source.Message.MessageHashSet.Sha512);
+            source.Message.MessageHashValues.Sha256,
+            source.Message.MessageHashValues.Sha1,
+            source.Message.MessageHashValues.Md5,
+            source.Message.MessageHashValues.Sha512);
     }
 }

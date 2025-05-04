@@ -31,13 +31,13 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     {
         var hashSetExists = await _dbContext.ContentHashSets
             .AnyAsync(
-                c => c.Sha256 == fileMultiAnalysis.DataHashSet.Sha256,
+                c => c.Sha256 == fileMultiAnalysis.DataHashValues.Sha256,
                 cancellationToken);
 
         if (hashSetExists)
         {
             _dbContext.ChangeTracker.Clear();
-            _dbContext.Attach(fileMultiAnalysis.DataHashSet).State = EntityState.Unchanged;
+            _dbContext.Attach(fileMultiAnalysis.DataHashValues).State = EntityState.Unchanged;
         }
 
         EntityEntry<FileMultiAnalysis> multiAnalysisEntry = await _dbContext.AddAsync(fileMultiAnalysis, cancellationToken);

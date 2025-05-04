@@ -80,12 +80,12 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
                 u => u.AbsoluteUri,
                 dbValue => new Uri(dbValue));
 
-        builder.HasOne(u => u.DataHashSet)
+        builder.HasOne(u => u.DataHashValues)
             .WithMany()
             .HasForeignKey("sha256")
             .IsRequired();
 
-        builder.Navigation(u => u.DataHashSet)
+        builder.Navigation(u => u.DataHashValues)
             .AutoInclude();
 
         builder.Property(u => u.UserId)

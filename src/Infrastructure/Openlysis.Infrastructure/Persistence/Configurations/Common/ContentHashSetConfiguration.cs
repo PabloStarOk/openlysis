@@ -6,17 +6,16 @@ using Openlysis.Domain.Common.Entities;
 namespace Openlysis.Infrastructure.Persistence.Configurations.Common;
 
 /// <summary>
-/// Configuration class for the ContentHashSet entity.
-/// Implements the IEntityTypeConfiguration interface to configure the ContentHashSet entity.
+/// Configuration class for the <see cref="HashValues"/> entity.
 /// </summary>
-public class ContentHashSetConfiguration : IEntityTypeConfiguration<ContentHashSet>
+public class ContentHashSetConfiguration : IEntityTypeConfiguration<HashValues>
 {
     private const string CharType = "char";
 
     /// <inheritdoc/>
-    public void Configure(EntityTypeBuilder<ContentHashSet> builder)
+    public void Configure(EntityTypeBuilder<HashValues> builder)
     {
-        builder.ToTable("content_hash_sets");
+        builder.ToTable("hash_values");
         builder.HasKey(h => h.Sha256);
 
         builder.Property(h => h.Sha256)

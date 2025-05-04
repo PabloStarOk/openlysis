@@ -169,7 +169,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     }
 
     /// <inheritdoc/>
-    public async ValueTask<ContentHashSet> GenerateHashAsync(
+    public async ValueTask<HashValues> GenerateHashAsync(
         CancellationToken cancellationToken = default)
     {
         if (_buildState.Message is null
@@ -183,7 +183,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
             return _buildState.HashValues;
         }
 
-        ContentHashSet messageHashValues = await HashMessageAsync(
+        HashValues messageHashValues = await HashMessageAsync(
             _buildState.Message,
             cancellationToken);
 
@@ -196,7 +196,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
             return messageHashValues;
         }
 
-        ContentHashSet[] filesHashValues = await HashFilesAsync(
+        HashValues[] filesHashValues = await HashFilesAsync(
             _buildState.FilesData,
             cancellationToken);
 
@@ -204,7 +204,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
             messageHashValues,
             filesHashValues);
 
-        ContentHashSet compositeHashValues = await HashStringAsync(
+        HashValues compositeHashValues = await HashStringAsync(
             compositeHash,
             cancellationToken);
 
@@ -236,7 +236,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         bool? IsPrivate = null,
         Message? Message = null,
         Stream[]? FilesData = null,
-        ContentHashSet? HashValues = null,
+        HashValues? HashValues = null,
         DataAssessmentResult<FileMetadata>[]? FileResults = null,
         DataAssessmentResult<Uri>[]? UrlResults = null,
         DataAssessmentResult<MailAddress>[]? EmailResults = null,
@@ -341,8 +341,8 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// A string representing the composite hash.
     /// </returns>
     private static string CreateCompositeHash(
-        ContentHashSet messageHashValues,
-        params ContentHashSet[] filesHashValues)
+        HashValues messageHashValues,
+        params HashValues[] filesHashValues)
     {
         var filesSha256Values = filesHashValues.Select(f => f.Sha256);
         string concatenatedValues = string
@@ -358,7 +358,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <returns>
     /// A task that represents the asynchronous operation, containing the SHA-256 hash string of the message.
     /// </returns>
-    private async Task<ContentHashSet> HashMessageAsync(
+    private async Task<HashValues> HashMessageAsync(
         Message message,
         CancellationToken cancellationToken = default)
     {
@@ -379,20 +379,20 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <param name="filesData">An array of streams representing the file data to be hashed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
-    /// A task that represents the asynchronous operation, containing an array of <see cref="ContentHashSet"/>
+    /// A task that represents the asynchronous operation, containing an array of <see cref="HashValues"/>
     /// with the computed hash values for each file.
     /// </returns>
-    private async Task<ContentHashSet[]> HashFilesAsync(
+    private async Task<HashValues[]> HashFilesAsync(
         Stream[] filesData,
         CancellationToken cancellationToken = default)
     {
-        ConcurrentBag<ContentHashSet> filesHashValues = [];
+        ConcurrentBag<HashValues> filesHashValues = [];
         await Parallel.ForEachAsync(
             filesData,
             cancellationToken,
             async (data, ct) =>
             {
-                ContentHashSet hashValues = await _hashService.HashDataAsync(
+                HashValues hashValues = await _hashService.HashDataAsync(
                     data,
                     ct);
 
@@ -408,9 +408,9 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <param name="input">The input string to be hashed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
-    /// A task that represents the asynchronous operation, containing the computed <see cref="ContentHashSet"/>.
+    /// A task that represents the asynchronous operation, containing the computed <see cref="HashValues"/>.
     /// </returns>
-    private async Task<ContentHashSet> HashStringAsync(
+    private async Task<HashValues> HashStringAsync(
         string input,
         CancellationToken cancellationToken = default)
     {
@@ -434,13 +434,13 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         Message message,
         CancellationToken cancellationToken)
     {
-        ContentHashSet messageHashSet = await GenerateHashAsync(cancellationToken);
+        HashValues messageHashValues = await GenerateHashAsync(cancellationToken);
 
         return new MessageInformation(
             message.Type,
             message.Sender,
             message.Subject,
             message.Content,
-            messageHashSet);
+            messageHashValues);
     }
 }

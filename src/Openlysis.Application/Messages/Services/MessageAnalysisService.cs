@@ -164,10 +164,10 @@ internal class MessageAnalysisService : IMessageAnalysisService
     {
         var analyses = await _repository.GetManyAsync(
             amount,
-            u => (u.Message.MessageHashSet.Sha256 == hash
-                    || u.Message.MessageHashSet.Md5 == hash
-                    || u.Message.MessageHashSet.Sha1 == hash
-                    || u.Message.MessageHashSet.Sha512 == hash)
+            u => (u.Message.MessageHashValues.Sha256 == hash
+                    || u.Message.MessageHashValues.Md5 == hash
+                    || u.Message.MessageHashValues.Sha1 == hash
+                    || u.Message.MessageHashValues.Sha512 == hash)
                 && (!u.IsPrivate || (u.IsPrivate && u.UserId == userId)),
             OrderBy,
             cancellationToken);
@@ -263,13 +263,13 @@ internal class MessageAnalysisService : IMessageAnalysisService
         Stream[] filesData,
         CancellationToken cancellationToken)
     {
-        ContentHashSet messageHashSet = await _messageAnalysisBuilder
+        HashValues messageHashValues = await _messageAnalysisBuilder
             .WithMessageInformation(message, filesData)
             .GenerateHashAsync(cancellationToken);
 
         IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(
             amount: 1,
-            filter: m => m.Message.MessageHashSet == messageHashSet,
+            filter: m => m.Message.MessageHashValues == messageHashValues,
             orderBy: q => q.OrderByDescending(m => m.StartedDate),
             cancellationToken);
 
