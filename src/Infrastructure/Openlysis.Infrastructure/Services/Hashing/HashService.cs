@@ -29,7 +29,7 @@ public class HashService : IHashService
         string sha256HashString = Convert.ToHexString(sha256HashBytes);
         string sha512HashString = Convert.ToHexString(sha512HashBytes);
 
-        return new HashValues(
+        return HashValues.Create(
             md5HashString,
             sha1HashString,
             sha256HashString,
