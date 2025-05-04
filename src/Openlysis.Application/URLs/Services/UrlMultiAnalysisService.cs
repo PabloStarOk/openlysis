@@ -48,6 +48,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         UserId userId,
         bool isPrivate,
         Uri url,
+        bool reanalyze,
         CancellationToken cancellationToken)
     {
         ContentHashSet urlHashSet;
@@ -55,6 +56,18 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         await using (var urlMemoryStream = new MemoryStream(urlBytes))
         {
             urlHashSet = await _hashService.HashDataAsync(urlMemoryStream, cancellationToken);
+        }
+
+        IReadOnlyList<UrlMultiAnalysis> lastExistingAnalyses = await GetAnalysesByHashAsync(
+            userId,
+            hash: urlHashSet.Sha256,
+            amount: 1,
+            order: OrderType.Dsc,
+            cancellationToken);
+        if (lastExistingAnalyses.Count > 0
+            && !reanalyze)
+        {
+            return lastExistingAnalyses[0];
         }
 
         var multiAnalysis = UrlMultiAnalysis.Create(

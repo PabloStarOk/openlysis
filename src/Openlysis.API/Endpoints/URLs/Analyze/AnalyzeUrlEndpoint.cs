@@ -66,6 +66,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
                 s.Description = "Uploads a URL to be analyzed by multiple services.";
                 s.ExampleRequest = new AnalyzeUrlRequest("https://example-site.com");
                 s.RequestParam(r => r.Url, "URL to be analyzed.");
+                s.RequestParam(r => r.Reanalyze, "Indicates whether the URL should be reanalyzed even if an existing analysis is available. Default is false.");
                 s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who uploads the URL. Default is false");
             });
         DontThrowIfValidationFails();
@@ -93,7 +94,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
         }
 
         ErrorOr<UrlMultiAnalysis> result = await _multiAnalysisService
-            .AnalyzeAsync(userId, req.IsPrivate, url, ct);
+            .AnalyzeAsync(userId, req.IsPrivate, url, req.Reanalyze, ct);
 
         if (result.IsError)
         {

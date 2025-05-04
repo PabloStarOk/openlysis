@@ -111,7 +111,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
         }
 
         IEnumerable<UrlMultiAnalysis> urlMultiAnalyses =
-            await _messageAnalyzer.AnalyzeUrlsAsync(userId, isPrivate, urls, cancellationToken);
+            await _messageAnalyzer.AnalyzeUrlsAsync(userId, isPrivate, urls, reanalyzeData, cancellationToken);
         IEnumerable<EmailAddressMultiReputation> emailAddressesReputations =
             await _messageAnalyzer.GetEmailAddressesReputationsAsync(emailAddresses, cancellationToken);
         IEnumerable<PhoneMultiReputation> phoneNumbersReputations =

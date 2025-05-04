@@ -18,12 +18,14 @@ public interface IUrlMultiAnalysisService
     /// <param name="userId">The ID of the user requesting the analysis.</param>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="url">The URL to be analyzed.</param>
+    /// <param name="reanalyze">Indicates whether to reanalyze the URL even if it has been analyzed before.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="ErrorOr{T}"/> containing the analysis result or an error.</returns>
     public Task<ErrorOr<UrlMultiAnalysis>> AnalyzeAsync(
         UserId userId,
         bool isPrivate,
         Uri url,
+        bool reanalyze,
         CancellationToken cancellationToken);
 
     /// <summary>

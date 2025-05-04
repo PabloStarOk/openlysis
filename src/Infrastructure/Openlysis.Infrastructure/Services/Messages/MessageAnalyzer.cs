@@ -106,6 +106,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         UserId userId,
         bool isPrivate,
         IEnumerable<Uri> urls,
+        bool reanalyze,
         CancellationToken cancellationToken = default)
     {
         List<UrlMultiAnalysis> urlMultiAnalyses = [];
@@ -115,6 +116,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                 userId,
                 isPrivate,
                 url,
+                reanalyze,
                 cancellationToken);
 
             if (result.IsError)
