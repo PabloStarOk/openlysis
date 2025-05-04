@@ -28,14 +28,14 @@ public interface IMessageAnalyzer
     /// </summary>
     /// <param name="userId">The ID of the user requesting the analysis.</param>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
-    /// <param name="reanalyzeData">Specifies whether to reanalyze the data even if it was previously analyzed.</param>
+    /// <param name="reanalyze">Specifies whether to reanalyze the message even if there is an existing analysis available to retrieve.</param>
     /// <param name="files">The array of files to be analyzed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of file analysis results.</returns>
     public Task<IEnumerable<FileMultiAnalysis>> AnalyzeFilesAsync(
         UserId userId,
         bool isPrivate,
-        bool reanalyzeData,
+        bool reanalyze,
         FileData[] files,
         CancellationToken cancellationToken = default);
 

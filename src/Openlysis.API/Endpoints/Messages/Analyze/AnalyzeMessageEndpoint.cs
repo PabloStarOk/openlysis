@@ -63,7 +63,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
                 s.RequestParam(r => r.AttachedFiles, "Files attached to the message.");
                 s.RequestParam(r => r.AttachedFilesPasswords, "A dictionary where the key is the name of an attached file and the value is its corresponding password, if required. Should be sent as a JSON for proper binding.");
                 s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who sends the message. Default is true");
-                s.RequestParam(r => r.ReanalyzeData, "If the data that is detected in the message, should be analyzed again even if there are existing analysis results. Default is false.");
+                s.RequestParam(r => r.Reanalyze, "If the extracted data and the message should be reanalyzed even if there are existing analyses for theme. Default is false.");
                 s.RequestParam(r => r.CountryCode, "A code of the country where detected phone numbers can be associated to, it must be in ISO 3166-1 alpha-2 format (e.g. 'US').");
             });
         DontThrowIfValidationFails();
@@ -97,7 +97,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
             isPrivate: req.IsPrivate,
             message: message,
             files: files,
-            reanalyzeData: req.ReanalyzeData,
+            reanalyze: req.Reanalyze,
             requestCountryCode: req.NormalizedCountryCode,
             cancellationToken: ct);
 

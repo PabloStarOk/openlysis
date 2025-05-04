@@ -12,7 +12,7 @@ namespace Openlysis.API.Endpoints.Messages.Analyze;
 /// <param name="AttachedFiles">The collection of files attached to the message.</param>
 /// <param name="AttachedFilesPasswords">A dictionary containing passwords for the attached files, if any.</param>
 /// <param name="IsPrivate">Indicates whether the message analysis is private and non-accessible for other users.</param>
-/// <param name="ReanalyzeData">Specifies whether to analyze detected data in the message even if there are existing analysis results for them.</param>
+/// <param name="Reanalyze">Specifies whether to reanalyze the message even if there is an existing analysis available to retrieve.</param>
 /// <param name="CountryCode">The optional country code to improve data detection in the message.</param>
 public record AnalyzeMessageRequest(
     MessageType? MessageType,
@@ -22,7 +22,7 @@ public record AnalyzeMessageRequest(
     IFormFileCollection? AttachedFiles,
     Dictionary<string, string>? AttachedFilesPasswords,
     bool IsPrivate = true,
-    bool ReanalyzeData = false,
+    bool Reanalyze = false,
     string? CountryCode = null)
 {
     /// <summary>

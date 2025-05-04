@@ -64,7 +64,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     public async Task<IEnumerable<FileMultiAnalysis>> AnalyzeFilesAsync(
         UserId userId,
         bool isPrivate,
-        bool reanalyzeData,
+        bool reanalyze,
         FileData[] files,
         CancellationToken cancellationToken = default)
     {
@@ -76,7 +76,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
             ErrorOr<FileMultiAnalysis> result = await _fileAnalysisService.AnalyzeAsync(
                 userId,
                 isPrivate,
-                reanalyzeData,
+                reanalyze,
                 file,
                 cancellationToken);
 

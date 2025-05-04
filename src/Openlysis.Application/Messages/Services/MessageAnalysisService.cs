@@ -62,7 +62,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
         bool isPrivate,
         Message message,
         FileData[]? files,
-        bool reanalyzeData,
+        bool reanalyze,
         string? requestCountryCode,
         CancellationToken cancellationToken = default)
     {
@@ -78,7 +78,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
                 cancellationToken);
 
         if (lastExistingAnalysis is not null
-            && !reanalyzeData)
+            && !reanalyze)
         {
             return lastExistingAnalysis;
         }
@@ -107,11 +107,11 @@ internal class MessageAnalysisService : IMessageAnalysisService
         if (files is not null)
         {
             fileMultiAnalyses = await _messageAnalyzer
-                .AnalyzeFilesAsync(userId, isPrivate, reanalyzeData, files, cancellationToken);
+                .AnalyzeFilesAsync(userId, isPrivate, reanalyze, files, cancellationToken);
         }
 
         IEnumerable<UrlMultiAnalysis> urlMultiAnalyses =
-            await _messageAnalyzer.AnalyzeUrlsAsync(userId, isPrivate, urls, reanalyzeData, cancellationToken);
+            await _messageAnalyzer.AnalyzeUrlsAsync(userId, isPrivate, urls, reanalyze, cancellationToken);
         IEnumerable<EmailAddressMultiReputation> emailAddressesReputations =
             await _messageAnalyzer.GetEmailAddressesReputationsAsync(emailAddresses, cancellationToken);
         IEnumerable<PhoneMultiReputation> phoneNumbersReputations =
