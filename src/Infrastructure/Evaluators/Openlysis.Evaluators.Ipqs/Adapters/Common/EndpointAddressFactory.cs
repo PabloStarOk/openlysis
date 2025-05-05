@@ -1,7 +1,7 @@
+using System.Net.Mail;
+
 using Microsoft.Extensions.Options;
 
-using Openlysis.Application.EmailAddresses.Contracts.Requests;
-using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.EmailAddresses;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
@@ -14,8 +14,8 @@ namespace Openlysis.Evaluators.Ipqs.Adapters.Common;
 /// </summary>
 /// <seealso cref="IEndpointAddressFactory{EvaluatePhoneReputation}"/>
 internal class EndpointAddressFactory
-    : IEndpointAddressFactory<EvaluatePhoneReputation>,
-    IEndpointAddressFactory<EvaluateEmailAddressReputation>
+    : IEndpointAddressFactory<MailAddress>,
+      IEndpointAddressFactory<string>
 {
     private readonly IOptionsSnapshot<IpqsSecretOptions> _secretOptions;
     private readonly IOptionsSnapshot<IpqsEvaluatorOptions> _evaluatorOptions;
@@ -44,19 +44,19 @@ internal class EndpointAddressFactory
     }
 
     /// <inheritdoc/>
-    public Uri Create(EvaluatePhoneReputation data)
+    public Uri Create(string data)
     {
         return CreateWith(
             Addresses.PhoneNumberValidation,
-            data.Value);
+            data);
     }
 
     /// <inheritdoc/>
-    public Uri Create(EvaluateEmailAddressReputation data)
+    public Uri Create(MailAddress data)
     {
         Uri baseUri = CreateWith(
             Addresses.EmailAddressVerification,
-            data.Value);
+            data.Address);
 
         var uriBuilder = new UriBuilder(baseUri)
         {

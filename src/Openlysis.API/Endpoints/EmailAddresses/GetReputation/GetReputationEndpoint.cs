@@ -1,9 +1,10 @@
+using System.Net.Mail;
+
 using ErrorOr;
 
 using FastEndpoints;
 
 using Openlysis.API.Authentication.API.Extensions;
-using Openlysis.Application.EmailAddresses.Contracts.Requests;
 using Openlysis.Application.EmailAddresses.Services;
 using Openlysis.Domain.EmailAddresses;
 
@@ -76,11 +77,10 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, EmailAddress
             await SendResultAsync(result);
         }
 
-        var evaluateRequest = new EvaluateEmailAddressReputation(
-            req.NormalizedEmailAddress);
+        var emailAddress = new MailAddress(req.NormalizedEmailAddress);
         ErrorOr<EmailAddressMultiReputation> evaluateResult =
             await _reputationService.GetAsync(
-                evaluateRequest,
+                emailAddress,
                 storeInDatabase: false,
                 ct);
 

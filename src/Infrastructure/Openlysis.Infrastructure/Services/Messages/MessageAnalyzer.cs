@@ -4,12 +4,10 @@ using ErrorOr;
 
 using Microsoft.Extensions.Logging;
 
-using Openlysis.Application.EmailAddresses.Contracts.Requests;
 using Openlysis.Application.EmailAddresses.Services;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Files.Services;
 using Openlysis.Application.Messages.Contracts.Abstractions;
-using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Application.Phones.Services;
 using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.EmailAddresses;
@@ -144,9 +142,8 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         List<EmailAddressMultiReputation> multiReputations = [];
         foreach (var email in emailAddresses)
         {
-            var request = new EvaluateEmailAddressReputation(email.Address);
             ErrorOr<EmailAddressMultiReputation> result = await _emailAddressReputationService.GetAsync(
-                request,
+                email,
                 storeInDatabase: true,
                 cancellationToken);
 
@@ -175,9 +172,8 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         List<PhoneMultiReputation> multiReputations = [];
         foreach (var phone in phoneNumbers)
         {
-            var request = new EvaluatePhoneReputation(phone);
             ErrorOr<PhoneMultiReputation> result = await _phoneReputationService.GetAsync(
-                request,
+                phone,
                 storeInDatabase: true,
                 cancellationToken);
 

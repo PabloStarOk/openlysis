@@ -1,6 +1,7 @@
+using System.Net.Mail;
+
 using ErrorOr;
 
-using Openlysis.Application.EmailAddresses.Contracts.Requests;
 using Openlysis.Domain.EmailAddresses;
 
 namespace Openlysis.Application.EmailAddresses.Services;
@@ -18,7 +19,7 @@ public interface IEmailAddressReputationService
     /// <summary>
     /// Retrieves the reputation details for a given email address.
     /// </summary>
-    /// <param name="evaluateEmailAddressReputation">The request containing the email address and related parameters to evaluate.</param>
+    /// <param name="emailAddress">The email address for which to retrieve reputation details.</param>
     /// <param name="storeInDatabase">A boolean indicating whether to store the multi reputation in the database.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
@@ -26,7 +27,7 @@ public interface IEmailAddressReputationService
     /// an <see cref="ErrorOr{T}"/> object with the email address reputation details.
     /// </returns>
     public Task<ErrorOr<EmailAddressMultiReputation>> GetAsync(
-        EvaluateEmailAddressReputation evaluateEmailAddressReputation,
+        MailAddress emailAddress,
         bool storeInDatabase,
         CancellationToken cancellationToken = default);
 }

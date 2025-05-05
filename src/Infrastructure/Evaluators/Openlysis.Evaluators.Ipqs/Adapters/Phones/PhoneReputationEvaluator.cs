@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Domain.Phones.Entities;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
@@ -16,7 +15,7 @@ namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
 /// Evaluates the reputation of phone numbers using the IPQS service.
 /// </summary>
 public class PhoneReputationEvaluator
-    : ReputationEvaluator<EvaluatePhoneReputation, PhoneServiceReputation>
+    : ReputationEvaluator<string, PhoneServiceReputation>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="PhoneReputationEvaluator"/> class.
@@ -32,7 +31,7 @@ public class PhoneReputationEvaluator
         IOptionsMonitor<IpqsEvaluatorOptions> options,
         IHttpClientFactory httpClientFactory,
         [FromKeyedServices(KeyedServices.GlobalKey)] IRateQuotaService<ReputationEndpointType> rateQuotaService,
-        [FromKeyedServices(KeyedServices.PhoneKey)] IEndpointAddressFactory<EvaluatePhoneReputation> endpointAddressFactory,
+        [FromKeyedServices(KeyedServices.PhoneKey)] IEndpointAddressFactory<string> endpointAddressFactory,
         [FromKeyedServices(KeyedServices.PhoneKey)] IResponseParser<PhoneServiceReputation> responseParser)
         : base(logger, options, httpClientFactory, rateQuotaService, endpointAddressFactory, responseParser)
     {

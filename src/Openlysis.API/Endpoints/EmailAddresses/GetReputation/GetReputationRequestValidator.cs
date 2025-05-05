@@ -1,3 +1,5 @@
+using System.Net.Mail;
+
 using FastEndpoints;
 
 using FluentValidation;
@@ -17,6 +19,7 @@ public class GetReputationRequestValidator : Validator<GetReputationRequest>
     {
         RuleFor(x => x.NormalizedEmailAddress)
             .NotEmpty()
+            .Must(e => MailAddress.TryCreate(e, out _))
             .EmailAddress()
             .WithErrorCode("InvalidEmailAddress")
             .WithMessage("Invalid email address, make sure email address complies with RFC 5322 standard.");

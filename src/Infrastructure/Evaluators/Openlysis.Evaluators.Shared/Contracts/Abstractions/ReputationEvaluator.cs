@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Application.Common.Abstractions.Contracts;
-using Openlysis.Application.Common.Requests;
 using Openlysis.Evaluators.Shared.Contracts.Configuration;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
@@ -15,14 +14,14 @@ using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Models;
 namespace Openlysis.Evaluators.Shared.Contracts.Abstractions;
 
 /// <summary>
-/// Provides an abstract base class for evaluating the reputation of a <see cref="TRequest"/> model
+/// Provides an abstract base class for evaluating the reputation of a <see cref="TData"/> model
 /// and returning a result of type <see cref="TModel"/>.
 /// </summary>
-/// <typeparam name="TRequest">An implementation of <see cref="EvaluateReputationRequest"/>.</typeparam>
+/// <typeparam name="TData">The type of the data to be evaluated.</typeparam>
 /// <typeparam name="TModel">The type of model to be returned with the results of the evaluation.</typeparam>
-public abstract class ReputationEvaluator<TRequest, TModel>
-    : IReputationEvaluator<TRequest, TModel>, IDisposable
-    where TRequest : EvaluateReputationRequest
+public abstract class ReputationEvaluator<TData, TModel>
+    : IReputationEvaluator<TData, TModel>, IDisposable
+    where TData : notnull
     where TModel : notnull
 {
     /// <inheritdoc/>
@@ -31,11 +30,11 @@ public abstract class ReputationEvaluator<TRequest, TModel>
     /// <inheritdoc/>
     public bool IsAvailable { get; private set; } = true;
 
-    private readonly IServiceLogger<ReputationEvaluator<TRequest, TModel>> _logger;
+    private readonly IServiceLogger<ReputationEvaluator<TData, TModel>> _logger;
     private readonly IOptionsMonitor<ReputationEvaluatorOptions> _options;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IRateQuotaService<ReputationEndpointType>? _rateQuotaService;
-    private readonly IEndpointAddressFactory<TRequest> _endpointAddressFactory;
+    private readonly IEndpointAddressFactory<TData> _endpointAddressFactory;
     private readonly IResponseParser<TModel> _responseParser;
     private bool _isDisposed;
 
@@ -49,11 +48,11 @@ public abstract class ReputationEvaluator<TRequest, TModel>
     /// <param name="endpointAddressFactory">The factory to create endpoint addresses for the given data type.</param>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
     protected ReputationEvaluator(
-        IServiceLogger<ReputationEvaluator<TRequest, TModel>> logger,
+        IServiceLogger<ReputationEvaluator<TData, TModel>> logger,
         IOptionsMonitor<ReputationEvaluatorOptions> options,
         IHttpClientFactory httpClientFactory,
         IRateQuotaService<ReputationEndpointType> rateQuotaService,
-        IEndpointAddressFactory<TRequest> endpointAddressFactory,
+        IEndpointAddressFactory<TData> endpointAddressFactory,
         IResponseParser<TModel> responseParser)
     {
         _logger = logger;
@@ -76,10 +75,10 @@ public abstract class ReputationEvaluator<TRequest, TModel>
     /// <param name="endpointAddressFactory">The factory to create endpoint addresses for the given data type.</param>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
     protected ReputationEvaluator(
-        IServiceLogger<ReputationEvaluator<TRequest, TModel>> logger,
+        IServiceLogger<ReputationEvaluator<TData, TModel>> logger,
         IOptionsMonitor<ReputationEvaluatorOptions> options,
         IHttpClientFactory httpClientFactory,
-        IEndpointAddressFactory<TRequest> endpointAddressFactory,
+        IEndpointAddressFactory<TData> endpointAddressFactory,
         IResponseParser<TModel> responseParser)
     {
         _logger = logger;
@@ -91,7 +90,7 @@ public abstract class ReputationEvaluator<TRequest, TModel>
 
     /// <inheritdoc/>
     public async Task<ErrorOr<TModel>> EvaluateAsync(
-        TRequest request,
+        TData data,
         CancellationToken cancellationToken = default)
     {
         if (!IsAvailable)
@@ -99,12 +98,7 @@ public abstract class ReputationEvaluator<TRequest, TModel>
             return Error.Failure(description: $"{ServiceName} validator service is not available to validate.");
         }
 
-        if (!request.IsFormatValid())
-        {
-            throw new ArgumentException("Given request has data with invalid format.", nameof(request));
-        }
-
-        Uri endpointAddress = _endpointAddressFactory.Create(request);
+        Uri endpointAddress = _endpointAddressFactory.Create(data);
 
         try
         {

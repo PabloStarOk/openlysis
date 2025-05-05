@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using System.Text.Json;
 
 using Microsoft.Extensions.Configuration;
@@ -5,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Application.Common.Abstractions.Contracts;
-using Openlysis.Application.EmailAddresses.Contracts.Requests;
 using Openlysis.Domain.EmailAddresses.Entities;
 using Openlysis.Evaluators.Ipqs.Adapters.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
@@ -78,7 +78,7 @@ internal static class DependencyInjection
 
         // Add endpoint address factory.
         services.AddKeyedScoped<
-            IEndpointAddressFactory<EvaluateEmailAddressReputation>,
+            IEndpointAddressFactory<MailAddress>,
             EndpointAddressFactory>(KeyedServices.EmailAddressKey);
 
         // Add verdict calculator.
@@ -93,7 +93,7 @@ internal static class DependencyInjection
 
         // Add reputation evaluator.
         services.AddScoped<
-            IReputationEvaluator<EvaluateEmailAddressReputation, EmailAddressServiceReputation>,
+            IReputationEvaluator<MailAddress, EmailAddressServiceReputation>,
             EmailAddressReputationEvaluator>();
     }
 }

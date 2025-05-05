@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Application.Common.Abstractions.Contracts;
-using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Domain.Phones.Entities;
 using Openlysis.Evaluators.Ipqs.Adapters.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
@@ -64,7 +63,7 @@ internal static class DependencyInjection
 
         // Add endpoint address factory.
         services.AddKeyedScoped<
-            IEndpointAddressFactory<EvaluatePhoneReputation>,
+            IEndpointAddressFactory<string>,
             EndpointAddressFactory>(KeyedServices.PhoneKey);
 
         // Add verdict calculator
@@ -79,7 +78,7 @@ internal static class DependencyInjection
 
         // Add evaluator.
         services.AddScoped<
-            IReputationEvaluator<EvaluatePhoneReputation, PhoneServiceReputation>,
+            IReputationEvaluator<string, PhoneServiceReputation>,
             PhoneReputationEvaluator>();
     }
 }

@@ -1,7 +1,8 @@
+using System.Net.Mail;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Application.EmailAddresses.Contracts.Requests;
 using Openlysis.Domain.EmailAddresses.Entities;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
@@ -16,7 +17,7 @@ namespace Openlysis.Evaluators.Ipqs.Adapters.EmailAddresses;
 /// Evaluates the reputation of email addresses using the IPQS service.
 /// </summary>
 public class EmailAddressReputationEvaluator
-    : ReputationEvaluator<EvaluateEmailAddressReputation, EmailAddressServiceReputation>
+    : ReputationEvaluator<MailAddress, EmailAddressServiceReputation>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="EmailAddressReputationEvaluator"/> class.
@@ -32,7 +33,7 @@ public class EmailAddressReputationEvaluator
         IOptionsMonitor<IpqsEvaluatorOptions> options,
         IHttpClientFactory httpClientFactory,
         [FromKeyedServices(KeyedServices.GlobalKey)] IRateQuotaService<ReputationEndpointType> rateQuotaService,
-        [FromKeyedServices(KeyedServices.EmailAddressKey)] IEndpointAddressFactory<EvaluateEmailAddressReputation> endpointAddressFactory,
+        [FromKeyedServices(KeyedServices.EmailAddressKey)] IEndpointAddressFactory<MailAddress> endpointAddressFactory,
         [FromKeyedServices(KeyedServices.EmailAddressKey)] IResponseParser<EmailAddressServiceReputation> responseParser)
         : base(logger, options, httpClientFactory, rateQuotaService, endpointAddressFactory, responseParser)
     {

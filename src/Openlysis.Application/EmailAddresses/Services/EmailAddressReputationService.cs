@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 
 using Openlysis.Application.Common.Abstractions.Contracts;
 using Openlysis.Application.Common.Abstractions.Persistence;
-using Openlysis.Application.EmailAddresses.Contracts.Requests;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.EmailAddresses.Entities;
@@ -24,7 +23,7 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
     private readonly ILogger<EmailAddressReputationService> _logger;
     private readonly IRepository<EmailAddressMultiReputation, GlobalId> _repository;
     private readonly TimeProvider _timeProvider;
-    private readonly IEnumerable<IReputationEvaluator<EvaluateEmailAddressReputation, EmailAddressServiceReputation>> _reputationEvaluators;
+    private readonly IEnumerable<IReputationEvaluator<MailAddress, EmailAddressServiceReputation>> _reputationEvaluators;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EmailAddressReputationService"/> class.
@@ -41,7 +40,7 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
         ILogger<EmailAddressReputationService> logger,
         IRepository<EmailAddressMultiReputation, GlobalId> repository,
         TimeProvider timeProvider,
-        IEnumerable<IReputationEvaluator<EvaluateEmailAddressReputation, EmailAddressServiceReputation>> reputationEvaluators)
+        IEnumerable<IReputationEvaluator<MailAddress, EmailAddressServiceReputation>> reputationEvaluators)
     {
         _logger = logger;
         _repository = repository;
@@ -54,7 +53,7 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<EmailAddressMultiReputation>> GetAsync(
-        EvaluateEmailAddressReputation evaluateEmailAddressReputation,
+        MailAddress emailAddress,
         bool storeInDatabase,
         CancellationToken cancellationToken = default)
     {
@@ -64,7 +63,6 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
         }
 
         List<Error> errors = [];
-        var emailAddress = new MailAddress(evaluateEmailAddressReputation.Value);
         var multiReputation = EmailAddressMultiReputation.Create(
             _timeProvider.GetUtcNow().UtcDateTime,
             emailAddress);
@@ -73,7 +71,7 @@ internal class EmailAddressReputationService : IEmailAddressReputationService
         await Parallel.ForEachAsync(_reputationEvaluators, cancellationToken, async (evaluator, ct) =>
         {
             ErrorOr<EmailAddressServiceReputation> result = await evaluator
-                .EvaluateAsync(evaluateEmailAddressReputation, ct);
+                .EvaluateAsync(emailAddress, ct);
 
             if (result.IsError)
             {

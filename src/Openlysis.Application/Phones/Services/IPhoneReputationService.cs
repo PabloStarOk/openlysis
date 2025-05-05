@@ -1,6 +1,5 @@
 using ErrorOr;
 
-using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Domain.Phones;
 
 namespace Openlysis.Application.Phones.Services;
@@ -18,7 +17,7 @@ public interface IPhoneReputationService
     /// <summary>
     /// Retrieves the reputation of a phone number based on the provided evaluation request.
     /// </summary>
-    /// <param name="evaluatePhoneReputation">The request containing details for evaluating the phone reputation.</param>
+    /// <param name="phoneNumber">The phone number for which to retrieve reputation details.</param>
     /// <param name="storeInDatabase">Indicates whether the result should be stored in the database.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
@@ -26,7 +25,7 @@ public interface IPhoneReputationService
     /// <see cref="ErrorOr{T}"/> object with the phone reputation details or an error.
     /// </returns>
     public Task<ErrorOr<PhoneMultiReputation>> GetAsync(
-        EvaluatePhoneReputation evaluatePhoneReputation,
+        string phoneNumber,
         bool storeInDatabase,
         CancellationToken cancellationToken = default);
 }

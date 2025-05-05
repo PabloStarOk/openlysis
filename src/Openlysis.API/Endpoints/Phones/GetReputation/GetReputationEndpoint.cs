@@ -3,7 +3,6 @@ using ErrorOr;
 using FastEndpoints;
 
 using Openlysis.API.Authentication.API.Extensions;
-using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Application.Phones.Services;
 using Openlysis.Domain.Phones;
 
@@ -78,10 +77,9 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, PhoneMultiRe
             await SendResultAsync(result);
         }
 
-        var assessPhoneNumber = new EvaluatePhoneReputation(req.NormalizedPhoneNumber);
         ErrorOr<PhoneMultiReputation> assessResult =
             await _reputationService.GetAsync(
-                assessPhoneNumber,
+                req.NormalizedPhoneNumber,
                 storeInDatabase: false,
                 ct);
 

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 
 using Openlysis.Application.Common.Abstractions.Contracts;
 using Openlysis.Application.Common.Abstractions.Persistence;
-using Openlysis.Application.Phones.Contracts.Requests;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.Phones.Entities;
@@ -26,7 +25,7 @@ internal class PhoneReputationService : IPhoneReputationService
     private readonly ILogger<PhoneReputationService> _logger;
     private readonly IRepository<PhoneMultiReputation, GlobalId> _repository;
     private readonly TimeProvider _timeProvider;
-    private readonly IEnumerable<IReputationEvaluator<EvaluatePhoneReputation, PhoneServiceReputation>> _reputationEvaluators;
+    private readonly IEnumerable<IReputationEvaluator<string, PhoneServiceReputation>> _reputationEvaluators;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PhoneReputationService"/> class.
@@ -43,7 +42,7 @@ internal class PhoneReputationService : IPhoneReputationService
         ILogger<PhoneReputationService> logger,
         IRepository<PhoneMultiReputation, GlobalId> repository,
         TimeProvider timeProvider,
-        IEnumerable<IReputationEvaluator<EvaluatePhoneReputation, PhoneServiceReputation>> reputationEvaluators)
+        IEnumerable<IReputationEvaluator<string, PhoneServiceReputation>> reputationEvaluators)
     {
         _logger = logger;
         _repository = repository;
@@ -53,7 +52,7 @@ internal class PhoneReputationService : IPhoneReputationService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<PhoneMultiReputation>> GetAsync(
-        EvaluatePhoneReputation evaluatePhoneReputation,
+        string phoneNumber,
         bool storeInDatabase,
         CancellationToken cancellationToken = default)
     {
@@ -65,13 +64,13 @@ internal class PhoneReputationService : IPhoneReputationService
         List<Error> errors = [];
         var multiReputation = PhoneMultiReputation.Create(
             _timeProvider.GetUtcNow().UtcDateTime,
-            evaluatePhoneReputation.Value);
+            phoneNumber);
 
         // TODO: When service is unavailable, wait a timeout along with an event from the service.
         await Parallel.ForEachAsync(_reputationEvaluators, cancellationToken, async (evaluator, ct) =>
         {
             ErrorOr<PhoneServiceReputation> result = await evaluator
-                .EvaluateAsync(evaluatePhoneReputation, ct);
+                .EvaluateAsync(phoneNumber, ct);
 
             if (result.IsError)
             {
