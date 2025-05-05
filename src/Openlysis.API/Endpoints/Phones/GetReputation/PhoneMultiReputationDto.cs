@@ -9,11 +9,13 @@ namespace Openlysis.API.Endpoints.Phones.GetReputation;
 /// <param name="AssessmentDate">The date when the assessment was performed.</param>
 /// <param name="FinalVerdict">The final verdict of the phone number's reputation.</param>
 /// <param name="FinalThreatZone">The final threat zone associated with the phone number.</param>
+/// <param name="PhoneNumber">The phone number associated with the reputation.</param>
 /// <param name="ServicesReputations">An array of reputations for individual phone services.</param>
 public record PhoneMultiReputationDto(
     DateTime AssessmentDate,
     Verdict FinalVerdict,
     ThreatZone FinalThreatZone,
+    string PhoneNumber,
     PhoneServiceReputationDto[] ServicesReputations)
 {
     /// <summary>
@@ -27,6 +29,7 @@ public record PhoneMultiReputationDto(
             reputation.ReputationEvaluationDate,
             reputation.FinalVerdict,
             reputation.FinalThreatZone,
+            reputation.PhoneNumber,
             reputation.ServicesReputations
                 .Select(PhoneServiceReputationDto.Parse)
                 .ToArray());

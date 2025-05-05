@@ -64,7 +64,8 @@ internal class PhoneReputationService : IPhoneReputationService
 
         List<Error> errors = [];
         var multiReputation = PhoneMultiReputation.Create(
-            _timeProvider.GetUtcNow().UtcDateTime);
+            _timeProvider.GetUtcNow().UtcDateTime,
+            evaluatePhoneReputation.Value);
 
         // TODO: When service is unavailable, wait a timeout along with an event from the service.
         await Parallel.ForEachAsync(_reputationEvaluators, cancellationToken, async (evaluator, ct) =>

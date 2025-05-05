@@ -11,19 +11,27 @@ namespace Openlysis.Domain.Phones;
 public class PhoneMultiReputation : MultiReputation<PhoneServiceReputation>
 {
     /// <summary>
+    /// Gets the phone number associated with the reputation.
+    /// </summary>
+    public string PhoneNumber { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="PhoneMultiReputation"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the reputation.</param>
     /// <param name="reputationEvaluationDate">The date when the reputation was evaluated.</param>
     /// <param name="finalVerdict">The final verdict of the reputation.</param>
     /// <param name="finalThreatZone">The final threat zone of the reputation.</param>
+    /// <param name="phoneNumber">The phone number associated with the reputation.</param>
     private PhoneMultiReputation(
         GlobalId id,
         DateTime reputationEvaluationDate,
         Verdict finalVerdict,
-        ThreatZone finalThreatZone)
+        ThreatZone finalThreatZone,
+        string phoneNumber)
         : base(id, reputationEvaluationDate, finalVerdict, finalThreatZone)
     {
+        PhoneNumber = phoneNumber;
     }
 
     // For EF core.
@@ -39,15 +47,18 @@ public class PhoneMultiReputation : MultiReputation<PhoneServiceReputation>
     /// Creates a new instance of <see cref="PhoneMultiReputation"/>.
     /// </summary>
     /// <param name="reputationEvaluationDate">The date when the reputation was evaluated.</param>
+    /// <param name="phoneNumber">The phone number associated with the reputation.</param>
     /// <returns>A new instance of <see cref="PhoneMultiReputation"/>.</returns>
     public static PhoneMultiReputation Create(
-        DateTime reputationEvaluationDate)
+        DateTime reputationEvaluationDate,
+        string phoneNumber)
     {
         GlobalId globalId = GlobalId.CreateUnique();
         return new PhoneMultiReputation(
             globalId,
             reputationEvaluationDate,
             Verdict.Unknown,
-            ThreatZone.Unknown);
+            ThreatZone.Unknown,
+            phoneNumber);
     }
 }
