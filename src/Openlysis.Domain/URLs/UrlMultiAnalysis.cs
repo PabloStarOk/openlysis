@@ -24,9 +24,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// <param name="userId">The user ID associated with the analysis.</param>
     /// <param name="isPrivate">A value indicating whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
-    /// <param name="status">The current status of the analysis.</param>
-    /// <param name="finalVerdict">The final verdict of the analysis.</param>
-    /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
+    /// <param name="state">The initial state of the analysis, including its status, verdict, and threat zone.</param>
     /// <param name="urlHashValues">The hash set of the URL content.</param>
     /// <param name="url">The URL being analyzed.</param>
     private UrlMultiAnalysis(
@@ -34,9 +32,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
-        AnalysisStatus status,
-        Verdict finalVerdict,
-        ThreatZone finalThreatZone,
+        AnalysisState state,
         HashValues urlHashValues,
         Uri url)
         : base(
@@ -44,9 +40,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
             userId,
             isPrivate,
             startedDate,
-            status,
-            finalVerdict,
-            finalThreatZone,
+            state,
             urlHashValues)
     {
         Url = url;
@@ -82,9 +76,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
             userId,
             isPrivate,
             startedDate,
-            AnalysisStatus.Queued,
-            Verdict.Unknown,
-            ThreatZone.Unknown,
+            AnalysisState.Initial(),
             urlHashValues,
             url);
     }

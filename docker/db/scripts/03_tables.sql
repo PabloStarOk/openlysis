@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS file_multi_analyses
     is_private boolean NOT NULL,
     started_date timestamp with time zone NOT NULL,
     status smallint NOT NULL,
-    final_verdict smallint NOT NULL,
-    final_threat_zone smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
     average_threat_score real,
     file_name varchar(100) NOT NULL,
     size bigint NOT NULL,
@@ -50,8 +50,8 @@ CREATE TABLE IF NOT EXISTS url_multi_analyses
     is_private boolean NOT NULL,
     started_date timestamp with time zone NOT NULL,
     status smallint NOT NULL,
-    final_verdict smallint NOT NULL,
-    final_threat_zone smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
     average_threat_score real,
     url varchar(2083) NOT NULl,
     user_id varchar(450) NOT NULL REFERENCES "AspNetUsers"("Id"),
@@ -78,8 +78,8 @@ CREATE TABLE IF NOT EXISTS url_analyses
 CREATE TABLE IF NOT EXISTS email_address_multi_reputations (
     email_address_multi_reputation_id uuid PRIMARY KEY,
     evaluation_date timestamp with time zone NOT NULL,
-    final_verdict smallint NOT NULL,
-    final_threat_zone smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
     email_address varchar(254) NOT NULL
 );
 
@@ -97,8 +97,8 @@ CREATE TABLE IF NOT EXISTS phone_multi_reputations
 (
     phone_multi_reputation_id uuid PRIMARY KEY,
     evaluation_date timestamp with time zone NOT NULL,
-    final_verdict smallint NOT NULL,
-    final_threat_zone smallint NOT NULL
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS phone_services_reputations

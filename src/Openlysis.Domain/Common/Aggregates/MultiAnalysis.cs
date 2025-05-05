@@ -1,5 +1,4 @@
 using Openlysis.Domain.Common.Abstractions;
-using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
@@ -36,19 +35,9 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     public DateTime StartedDate { get; }
 
     /// <summary>
-    /// Gets the current status of the analysis.
+    /// Gets the current state of the analysis.
     /// </summary>
-    public AnalysisStatus Status { get; private set; } = AnalysisStatus.Queued;
-
-    /// <summary>
-    /// Gets the final verdict of the analysis.
-    /// </summary>
-    public Verdict FinalVerdict { get; private set; } = Verdict.Unknown;
-
-    /// <summary>
-    /// Gets the final threat zone of the analysis.
-    /// </summary>
-    public ThreatZone FinalThreatZone { get; private set; } = ThreatZone.Unknown;
+    public AnalysisState State { get; private set; }
 
     /// <summary>
     /// Gets or sets the average threat score of the analysis.
@@ -72,27 +61,21 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// <param name="userId">The identifier of the user associated with the analysis.</param>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
-    /// <param name="status">The current status of the analysis.</param>
-    /// <param name="finalVerdict">The final verdict of the analysis.</param>
-    /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
+    /// <param name="state">The initial state of the analysis, including its status, verdict, and threat zone.</param>
     /// <param name="dataHashValues">The set of data hashes associated with the analysis.</param>
     protected MultiAnalysis(
         GlobalId id,
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
-        AnalysisStatus status,
-        Verdict finalVerdict,
-        ThreatZone finalThreatZone,
+        AnalysisState state,
         HashValues dataHashValues)
         : base(id)
     {
         UserId = userId;
         IsPrivate = isPrivate;
         StartedDate = startedDate;
-        Status = status;
-        FinalVerdict = finalVerdict;
-        FinalThreatZone = finalThreatZone;
+        State = state;
         DataHashValues = dataHashValues;
     }
 
@@ -185,34 +168,26 @@ public abstract class MultiAnalysis<TServiceAnalysis>
 
         if (servicesVerdicts.Length is 0)
         {
-            FinalVerdict = Verdict.Unknown;
+            State = State.WithVerdict(Verdict.Unknown);
             return;
         }
 
         if (servicesVerdicts.Contains(Verdict.Malicious))
         {
-            FinalVerdict = Verdict.Malicious;
+            State = State.WithVerdict(Verdict.Malicious);
             return;
         }
 
         if (servicesVerdicts.Contains(Verdict.Suspicious))
         {
-            FinalVerdict = Verdict.Suspicious;
+            State = State.WithVerdict(Verdict.Suspicious);
             return;
         }
 
         if (servicesVerdicts.Contains(Verdict.Undetected))
         {
-            FinalVerdict = Verdict.Undetected;
+            State = State.WithVerdict(Verdict.Undetected);
         }
-    }
-
-    /// <summary>
-    /// Updates the final threat zone of the analysis based on the current final verdict.
-    /// </summary>
-    private void UpdateFinalThreatZone()
-    {
-        FinalThreatZone = ThreatZoneMapping.Map[FinalVerdict];
     }
 
     /// <summary>
@@ -235,14 +210,14 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         // If all timeout, set as timeout
         if (analyses.All(a => a.Status is AnalysisStatus.Timeout))
         {
-            Status = AnalysisStatus.Timeout;
+            State = State.WithStatus(AnalysisStatus.Timeout);
             return;
         }
 
         // If all failed, set as failed
         if (analyses.All(a => a.Status is AnalysisStatus.Failed))
         {
-            Status = AnalysisStatus.Failed;
+            State = State.WithStatus(AnalysisStatus.Failed);
             return;
         }
 
@@ -250,7 +225,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         if (analyses.All(a => a.Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
             && analyses.Any(a => a.Status is AnalysisStatus.Completed))
         {
-            Status = AnalysisStatus.Completed;
+            State = State.WithStatus(AnalysisStatus.Completed);
             return;
         }
 
@@ -259,9 +234,11 @@ public abstract class MultiAnalysis<TServiceAnalysis>
             .ToDictionary(g => g.Key, g => g.Count())
             .Where(g => g.Key is not AnalysisStatus.Completed);
 
-        Status = statusCount.OrderByDescending(s => s.Value)
+        AnalysisStatus mostFrequentLowerStatus = statusCount.OrderByDescending(s => s.Value)
             .ThenBy(s => s.Key)
             .First().Key;
+
+        State = State.WithStatus(mostFrequentLowerStatus);
     }
 
     /// <summary>
@@ -271,7 +248,6 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     private void UpdateInformation()
     {
         UpdateFinalVerdict();
-        UpdateFinalThreatZone();
         HandleAverageThreatScoreUpdate();
         UpdateStatus();
     }

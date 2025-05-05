@@ -36,9 +36,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     /// <param name="userId">The unique identifier of the user who initiated the analysis.</param>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
-    /// <param name="status">The current status of the analysis.</param>
-    /// <param name="finalVerdict">The final verdict of the analysis.</param>
-    /// <param name="finalThreatZone">The final threat zone of the analysis.</param>
+    /// <param name="state">The initial state of the analysis, including its status, verdict, and threat zone.</param>
     /// <param name="dataHashValues">The set of content hashes associated with the analysis.</param>
     /// <param name="fileMetadata">The metadata of the file being analyzed.</param>
     private FileMultiAnalysis(
@@ -46,9 +44,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
         UserId userId,
         bool isPrivate,
         DateTime startedDate,
-        AnalysisStatus status,
-        Verdict finalVerdict,
-        ThreatZone finalThreatZone,
+        AnalysisState state,
         HashValues dataHashValues,
         FileMetadata fileMetadata)
         : base(
@@ -56,9 +52,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
             userId,
             isPrivate,
             startedDate,
-            status,
-            finalVerdict,
-            finalThreatZone,
+            state,
             dataHashValues)
     {
         FileMetadata = fileMetadata;
@@ -94,9 +88,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
             userId,
             isPrivate,
             startedDate,
-            AnalysisStatus.Queued,
-            Verdict.Unknown,
-            ThreatZone.Unknown,
+            AnalysisState.Initial(),
             dataHashValues,
             fileMetadata);
     }

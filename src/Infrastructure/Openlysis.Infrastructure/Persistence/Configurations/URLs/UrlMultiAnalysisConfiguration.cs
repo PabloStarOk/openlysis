@@ -51,20 +51,23 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
             .HasColumnType("timestamp with time zone")
             .IsRequired();
 
-        builder.Property(u => u.Status)
-            .HasColumnName("status")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+        builder.OwnsOne(f => f.State, stateBuilder =>
+        {
+            stateBuilder.Property(s => s.Status)
+                .HasColumnName("status")
+                .HasColumnType(SmallintType)
+                .IsRequired();
 
-        builder.Property(u => u.FinalVerdict)
-            .HasColumnName("final_verdict")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+            stateBuilder.Property(s => s.Verdict)
+                .HasColumnName("verdict")
+                .HasColumnType(SmallintType)
+                .IsRequired();
 
-        builder.Property(u => u.FinalThreatZone)
-            .HasColumnName("final_threat_zone")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+            stateBuilder.Property(s => s.ThreatZone)
+                .HasColumnName("threat_zone")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+        });
 
         builder.Property(u => u.AverageThreatScore)
             .HasColumnName("average_threat_score")

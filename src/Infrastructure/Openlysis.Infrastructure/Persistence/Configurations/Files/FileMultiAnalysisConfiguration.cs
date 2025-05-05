@@ -50,20 +50,23 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
             .HasColumnType("timestamp with time zone")
             .IsRequired();
 
-        builder.Property(f => f.Status)
-            .HasColumnName("status")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+        builder.OwnsOne(f => f.State, stateBuilder =>
+        {
+            stateBuilder.Property(s => s.Status)
+                .HasColumnName("status")
+                .HasColumnType(SmallintType)
+                .IsRequired();
 
-        builder.Property(f => f.FinalVerdict)
-            .HasColumnName("final_verdict")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+            stateBuilder.Property(s => s.Verdict)
+                .HasColumnName("verdict")
+                .HasColumnType(SmallintType)
+                .IsRequired();
 
-        builder.Property(f => f.FinalThreatZone)
-            .HasColumnName("final_threat_zone")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+            stateBuilder.Property(s => s.ThreatZone)
+                .HasColumnName("threat_zone")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+        });
 
         builder.Property(f => f.AverageThreatScore)
             .HasColumnName("average_threat_score")

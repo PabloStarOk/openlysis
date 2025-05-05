@@ -155,7 +155,7 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
             ArgumentNullException.ThrowIfNull(multiAnalyses);
 
             var filteredMultiAnalyses = multiAnalyses
-                .Where(f => f.Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress);
+                .Where(f => f.State.Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress);
 
             foreach (var multiAnalysis in filteredMultiAnalyses)
             {
@@ -166,8 +166,8 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
 
                 var analysisState = AnalysisState
                     .Initial()
-                    .WithVerdict(multiAnalysis.FinalVerdict)
-                    .WithStatus(multiAnalysis.Status);
+                    .WithVerdict(multiAnalysis.State.Verdict)
+                    .WithStatus(multiAnalysis.State.Status);
 
                 _cachedTerminalAnalysisIds.Add(multiAnalysis.Id);
                 _cachedTerminalAnalysisStates.Add(analysisState);
@@ -442,8 +442,8 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
 
             entry.CacheTerminalChildAnalyses(fileMultiAnalyses);
 
-            verdicts.AddRange(fileMultiAnalyses.Select(f => f.FinalVerdict));
-            statuses.AddRange(fileMultiAnalyses.Select(f => f.Status));
+            verdicts.AddRange(fileMultiAnalyses.Select(f => f.State.Verdict));
+            statuses.AddRange(fileMultiAnalyses.Select(f => f.State.Status));
         }
 
         if (analysis.DetectedUrlsResults.Count > 0)
@@ -458,8 +458,8 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
 
             entry.CacheTerminalChildAnalyses(urlMultiAnalyses);
 
-            verdicts.AddRange(urlMultiAnalyses.Select(f => f.FinalVerdict));
-            statuses.AddRange(urlMultiAnalyses.Select(f => f.Status));
+            verdicts.AddRange(urlMultiAnalyses.Select(f => f.State.Verdict));
+            statuses.AddRange(urlMultiAnalyses.Select(f => f.State.Status));
         }
 
         UpdateMessageAnalysis(analysis, verdicts, statuses);
