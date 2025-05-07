@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
 using Openlysis.Analyzers.Shared.Contracts.Common.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
@@ -21,7 +22,7 @@ namespace Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 /// <typeparam name="TAnalysis">The type of the analysis result.</typeparam>
 /// <typeparam name="TRequest">The type of the request.</typeparam>
 public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
-     where TAnalysis : notnull
+     where TAnalysis : ServiceAnalysis
      where TRequest : AnalyzeRequest
 {
     /// <summary>

@@ -1,3 +1,5 @@
+using Openlysis.Analyzers.Shared.Contracts.Common.Requests;
+
 namespace Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 
 /// <summary>
@@ -8,9 +10,10 @@ namespace Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 /// <param name="FileContentType">The content type of the file.</param>
 /// <param name="FilePassword">The password for the file, if any.</param>
 /// <param name="IsPrivateFile">Indicates whether the file is private.</param>
-public record FileAnalysisRequest(
+public record AnalyzeFileRequest(
     Stream FileData,
     string FileName,
     string FileContentType,
     string FilePassword,
-    bool IsPrivateFile);
+    bool IsPrivateFile)
+    : AnalyzeRequest(string.Empty, IsPrivateFile);

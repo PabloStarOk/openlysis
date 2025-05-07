@@ -32,7 +32,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private readonly ILogger<AnalyzeFileConsumer> _logger;
     private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly IEnumerable<IServiceAnalyzer<FileServiceAnalysis, ComposedServiceAnalysisId>> _analyzers;
+    private readonly IEnumerable<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
     private readonly Dictionary<ComposedServiceAnalysisId, FileServiceAnalysis> _serviceFileAnalyses = [];
     private readonly Func<FileServiceAnalysis, bool> _analysisFinished = s =>
@@ -54,7 +54,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         IEndpointUriProvider endpointUriProvider,
         IOptionsMonitor<AnalyzeConsumerOptions> options,
         IFileStorageProvider fileStorageProvider,
-        IEnumerable<IServiceAnalyzer<FileServiceAnalysis, ComposedServiceAnalysisId>> analyzers)
+        IEnumerable<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>> analyzers)
     {
         _logger = logger;
         _endpointUriProvider = endpointUriProvider;
@@ -83,7 +83,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         await using var fileStream = await _fileStorageProvider
             .DownloadAsync(_context.Message.FileId, cancellationToken);
 
-        var request = new FileAnalysisRequest(
+        var request = new AnalyzeFileRequest(
             fileStream,
             _context.Message.FileName,
             _context.Message.FileContentType,
@@ -100,14 +100,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
                 return;
             }
 
-            var analysisResult = await analyzer.GetAnalysisAsync(analyzeResult.Value, ct);
-            if (analysisResult.IsError)
-            {
-                _logger.LogError("One or more errors occurred while getting analysis results: {Errors}", analysisResult.Errors);
-                return;
-            }
-
-            FileServiceAnalysis analysis = analysisResult.Value;
+            FileServiceAnalysis analysis = analyzeResult.Value;
             _serviceFileAnalyses.Add(analysis.Id, analysis);
         });
 

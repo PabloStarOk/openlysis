@@ -7,14 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Openlysis.Analyzers.Filescan.Adapters;
 using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Configuration;
+using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Core.Models.Enums;
 using Openlysis.Analyzers.Filescan.Infrastructure.Analysis;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
-using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
@@ -51,13 +52,15 @@ public static class DependencyInjection
 
         // Add analyzer loggers
         services.AddAnalyzerLogger<FilescanAnalyzer, FilescanAnalyzerOptions>(
-            FilescanAnalyzer.KeyedServicesKey);
+            KeyedServices.GlobalKey);
         services.AddAnalyzerLogger<UrlAnalyzer, FilescanAnalyzerOptions>(
-            FilescanAnalyzer.KeyedServicesKey);
+            KeyedServices.GlobalKey);
+        services.AddAnalyzerLogger<FileAnalyzer, FilescanAnalyzerOptions>(
+            KeyedServices.GlobalKey);
 
         // Add analyzer deserializer.
         services.AddServiceDeserializer<FilescanAnalyzerOptions>(
-            FilescanAnalyzer.KeyedServicesKey,
+            KeyedServices.GlobalKey,
             () => new JsonSerializerOptions()
             {
                 PropertyNameCaseInsensitive = true,
@@ -74,7 +77,7 @@ public static class DependencyInjection
         // Add request limit tracker
         services.AddRateQuotaService<AnalysisEndpointType>(
             configuration,
-            UrlAnalyzer.LimitTrackerServiceKey,
+            KeyedServices.GlobalKey,
             analyzerOptions.ServiceName);
 
         // Add Filescan analyzer.
@@ -84,6 +87,6 @@ public static class DependencyInjection
         services.AddSingleton<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
 
         // Add file analyzer.
-        services.AddSingleton<IServiceAnalyzer<FileServiceAnalysis, ComposedServiceAnalysisId>, FileAnalyzer>();
+        services.AddSingleton<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>, FileAnalyzer>();
     }
 }

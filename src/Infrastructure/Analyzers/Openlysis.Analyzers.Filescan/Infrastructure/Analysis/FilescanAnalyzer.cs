@@ -20,11 +20,6 @@ namespace Openlysis.Analyzers.Filescan.Infrastructure.Analysis;
 /// </summary>
 public sealed class FilescanAnalyzer : IFilescanAnalyzer
 {
-    /// <summary>
-    /// Key used for identifying Filescan services.
-    /// </summary>
-    public const string KeyedServicesKey = "FilescanServices";
-
     private readonly IServiceLogger<FilescanAnalyzer> _serviceLogger;
     private readonly IServiceDeserializer _serviceDeserializer;
 
@@ -34,8 +29,8 @@ public sealed class FilescanAnalyzer : IFilescanAnalyzer
     /// <param name="serviceLogger">The analyzer logger instance for custom logging.</param>
     /// <param name="serviceDeserializer">The analyzer deserializer instance for custom deserialization.</param>
     public FilescanAnalyzer(
-        [FromKeyedServices(KeyedServicesKey)] IServiceLogger<FilescanAnalyzer> serviceLogger,
-        [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceLogger<FilescanAnalyzer> serviceLogger,
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceDeserializer serviceDeserializer)
     {
         _serviceLogger = serviceLogger;
         _serviceDeserializer = serviceDeserializer;

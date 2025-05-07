@@ -11,7 +11,6 @@ using Openlysis.Analyzers.Filescan.Core.Models.Enums;
 using Openlysis.Analyzers.Filescan.Core.Models.Objects;
 using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
-using Openlysis.Analyzers.Filescan.Infrastructure.Analysis;
 using Openlysis.Analyzers.Filescan.Infrastructure.Factories;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
@@ -29,11 +28,6 @@ namespace Openlysis.Analyzers.Filescan.Adapters;
 /// </summary>
 public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 {
-    /// <summary>
-    /// Key of the service for tracking request limits.
-    /// </summary>
-    public const string LimitTrackerServiceKey = "FilescanLimitTracker";
-
     private readonly IFilescanAnalyzer _filescanAnalyzer;
 
     /// <summary>
@@ -46,9 +40,9 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <param name="filescanAnalyzer">The filescan analyzer for analyzing files.</param>
     public UrlAnalyzer(
         IOptionsMonitor<FilescanAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
+        [FromKeyedServices(KeyedServices.GlobalKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        [FromKeyedServices(FilescanAnalyzer.KeyedServicesKey)] IServiceLogger<UrlAnalyzer> logger,
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceLogger<UrlAnalyzer> logger,
         IFilescanAnalyzer filescanAnalyzer)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {
