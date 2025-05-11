@@ -78,8 +78,8 @@ CREATE TABLE IF NOT EXISTS url_analyses
 CREATE TABLE IF NOT EXISTS email_address_multi_reputations (
     email_address_multi_reputation_id uuid PRIMARY KEY,
     evaluation_date timestamp with time zone NOT NULL,
-    verdict smallint NOT NULL,
-    threat_zone smallint NOT NULL,
+    final_verdict smallint NOT NULL,
+    final_threat_zone smallint NOT NULL,
     email_address varchar(254) NOT NULL
 );
 
@@ -97,8 +97,8 @@ CREATE TABLE IF NOT EXISTS phone_multi_reputations
 (
     phone_multi_reputation_id uuid PRIMARY KEY,
     evaluation_date timestamp with time zone NOT NULL,
-    verdict smallint NOT NULL,
-    threat_zone smallint NOT NULL
+    final_verdict smallint NOT NULL,
+    final_threat_zone smallint NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS phone_services_reputations
