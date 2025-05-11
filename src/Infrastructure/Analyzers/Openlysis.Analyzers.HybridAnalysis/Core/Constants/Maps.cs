@@ -27,6 +27,7 @@ public static class Maps
     /// </summary>
     public static readonly ReadOnlyDictionary<HybridVerdict, Verdict> VerdictMap = new Dictionary<HybridVerdict, Verdict>(Enum.GetValues<Status>().Length)
     {
+        { HybridVerdict.NoVerdict, Verdict.Unknown },
         { HybridVerdict.NoSpecificThreat, Verdict.Undetected },
         { HybridVerdict.Suspicious, Verdict.Suspicious },
         { HybridVerdict.Malicious, Verdict.Malicious },

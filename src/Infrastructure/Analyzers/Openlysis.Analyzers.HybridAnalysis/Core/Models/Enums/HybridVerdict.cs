@@ -6,6 +6,11 @@ namespace Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 public enum HybridVerdict
 {
     /// <summary>
+    /// No verdict has been determined or no analysis was performed.
+    /// </summary>
+    NoVerdict,
+
+    /// <summary>
     /// No specific threat detected.
     /// </summary>
     NoSpecificThreat,
