@@ -20,19 +20,27 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
     public AnalysisStatus Status { get; private set; }
 
     /// <summary>
+    /// Gets the error message if the analysis failed.
+    /// </summary>
+    public string? Error { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ServiceAnalysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the service analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The current status of the analysis.</param>
+    /// <param name="error">The error message if the analysis failed.</param>
     protected ServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
-        AnalysisStatus status)
+        AnalysisStatus status,
+        string? error)
         : base(id)
     {
         ServiceName = serviceName;
         Status = status;
+        Error = error;
     }
 
     // For EF core.

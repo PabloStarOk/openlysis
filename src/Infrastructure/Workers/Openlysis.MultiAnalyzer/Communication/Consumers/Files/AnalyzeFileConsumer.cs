@@ -97,6 +97,10 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
             if (analyzeResult.IsError)
             {
                 _logger.LogError("One or more errors occurred while analyzing a file: {Errors}", analyzeResult.Errors);
+                var failedAnalysis = FileServiceAnalysis.CreateFailed(
+                    analyzer.ServiceName,
+                    error: "File could not be analyzed.");
+                _serviceFileAnalyses.Add(failedAnalysis.Id, failedAnalysis);
                 return;
             }
 

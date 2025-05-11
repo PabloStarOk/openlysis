@@ -40,14 +40,16 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="threatZone">The threat zone associated with the analysis.</param>
     /// <param name="threatScore">The threat score of the analysis. Optional.</param>
+    /// <param name="error">The error message if the analysis failed.</param>
     private UrlServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisStatus status,
         Verdict verdict,
         ThreatZone threatZone,
-        float? threatScore)
-        : base(id, serviceName, status)
+        float? threatScore,
+        string? error)
+        : base(id, serviceName, status, error)
     {
         Verdict = verdict;
         ThreatZone = threatZone;
@@ -91,7 +93,34 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
             status,
             verdict,
             threatZone,
-            normalizedThreatScore);
+            normalizedThreatScore,
+            error: null);
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="UrlServiceAnalysis"/> with Failed status.
+    /// </summary>
+    /// <param name="serviceName">The name of the service being analyzed.</param>
+    /// <param name="error">The error message indicating why the analysis failed.</param>
+    /// <returns>A new instance of <see cref="UrlServiceAnalysis"/> with Failed status, Unknown verdict, and Unknown threat zone.</returns>
+    /// <remarks>
+    /// This method is used when an analysis has failed and creates an analysis with empty IDs and appropriate failure indicators.
+    /// </remarks>
+    public static UrlServiceAnalysis CreateFailed(
+        string serviceName,
+        string error)
+    {
+        string id = string.Empty;
+        string jobId = string.Empty;
+        var composedId = ComposedServiceAnalysisId.Create(id, jobId);
+        return new UrlServiceAnalysis(
+            composedId,
+            serviceName,
+            AnalysisStatus.Failed,
+            Verdict.Unknown,
+            ThreatZone.Unknown,
+            null,
+            error: error);
     }
 
     /// <summary>
@@ -138,7 +167,7 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
     /// </summary>
     /// <param name="other">The other <see cref="UrlServiceAnalysis"/> instance to compare with.</param>
     /// <returns>
-    /// <c>true</c> if the current instance and the other instance have the same verdict, 
+    /// <c>true</c> if the current instance and the other instance have the same verdict,
     /// threat score, and status; otherwise, <c>false</c>.
     /// </returns>
     public bool HasSameStateTo(UrlServiceAnalysis other)

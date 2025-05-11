@@ -70,12 +70,20 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
         {
             if (!analyzer.CanAnalyze)
             {
+                var failedAnalysis = UrlServiceAnalysis.CreateFailed(
+                    analyzer.ServiceName,
+                    error: "Analysis service is not available.");
+                _serviceAnalyses.Add(failedAnalysis.Id, failedAnalysis);
                 return;
             }
 
             ErrorOr<UrlServiceAnalysis> result = await analyzer.AnalyzeAsync(request, ct);
             if (result.IsError)
             {
+                var failedAnalysis = UrlServiceAnalysis.CreateFailed(
+                    analyzer.ServiceName,
+                    error: "URL could not be analyzed.");
+                _serviceAnalyses.Add(failedAnalysis.Id, failedAnalysis);
                 return;
             }
 
@@ -130,7 +138,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
             }
 
             // Get status
-            ErrorOr<AnalysisStatus> getStatusResult = await analyzer.GetStatusAsync(analysis.Id, cancellationToken);
+            ErrorOr<AnalysisStatus> getStatusResult = await analyzer.GetStatusAsync(analysis.Id, ct);
             if (getStatusResult.IsError)
             {
                 analysis.UpdateStatus(AnalysisStatus.Failed);

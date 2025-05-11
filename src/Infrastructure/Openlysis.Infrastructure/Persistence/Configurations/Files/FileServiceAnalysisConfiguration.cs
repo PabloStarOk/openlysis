@@ -14,6 +14,7 @@ namespace Openlysis.Infrastructure.Persistence.Configurations.Files;
 public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileServiceAnalysis>
 {
     private const string SmallintType = "smallint";
+    private const string VarcharType = "varchar";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<FileServiceAnalysis> builder)
@@ -37,7 +38,7 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
 
         builder.Property(s => s.Id)
             .HasColumnName("file_service_analysis_id")
-            .HasColumnType("varchar")
+            .HasColumnType(VarcharType)
             .HasMaxLength(200)
             .IsRequired()
             .ValueGeneratedNever()
@@ -47,7 +48,7 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
 
         builder.Property(s => s.ServiceName)
             .HasColumnName("service_name")
-            .HasColumnType("varchar")
+            .HasColumnType(VarcharType)
             .HasMaxLength(30)
             .IsRequired();
 
@@ -55,6 +56,11 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
             .HasColumnName("status")
             .HasColumnType(SmallintType)
             .IsRequired();
+
+        builder.Property(u => u.Error)
+            .HasColumnName("error")
+            .HasColumnType(VarcharType)
+            .HasMaxLength(250);
     }
 
     /// <summary>
@@ -75,7 +81,7 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
 
         builder.Property(r => r.Id)
             .HasColumnName("report_id")
-            .HasColumnType("varchar")
+            .HasColumnType(VarcharType)
             .HasMaxLength(200)
             .IsRequired()
             .HasConversion(

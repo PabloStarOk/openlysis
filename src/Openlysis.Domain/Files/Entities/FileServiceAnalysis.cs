@@ -23,12 +23,14 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
+    /// <param name="error">The error message if the analysis failed.</param>
     private FileServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisStatus status,
-        List<Report> reports)
-        : base(id, serviceName, status)
+        List<Report> reports,
+        string? error)
+        : base(id, serviceName, status, error)
     {
         _reports = reports;
     }
@@ -62,7 +64,8 @@ public class FileServiceAnalysis : ServiceAnalysis
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             status,
-            reports);
+            reports,
+            error: null);
     }
 
     /// <summary>
@@ -83,7 +86,28 @@ public class FileServiceAnalysis : ServiceAnalysis
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             status,
-            []);
+            [],
+            error: null);
+    }
+
+    /// <summary>
+    /// Creates a new instance of <see cref="FileServiceAnalysis"/> with failed status.
+    /// </summary>
+    /// <param name="serviceName">The name of the service that failed analysis.</param>
+    /// <param name="error">The error message describing why the analysis failed.</param>
+    /// <returns>A new instance of <see cref="FileServiceAnalysis"/> with failed status and empty identifiers.</returns>
+    public static FileServiceAnalysis CreateFailed(
+        string serviceName,
+        string error)
+    {
+        string id = string.Empty;
+        string jobId = string.Empty;
+        return new FileServiceAnalysis(
+            ComposedServiceAnalysisId.Create(id, jobId),
+            serviceName,
+            AnalysisStatus.Failed,
+            [],
+            error);
     }
 
     /// <summary>
