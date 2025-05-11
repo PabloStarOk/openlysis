@@ -34,9 +34,12 @@ RUN dotnet ef migrations script \
     --no-build
 
 FROM postgres:17-alpine
+
+COPY ["docker/db/scripts/init.sh", "/docker-entrypoint-initdb.d/"]
+RUN chmod +x /docker-entrypoint-initdb.d/init.sh
+
 USER postgres
 WORKDIR /scripts
 COPY ["docker/db/scripts/*.sql", "."]
 COPY --from=build ["/app/02_migrations.sql", "."]
 WORKDIR /
-COPY ["docker/db/scripts/init.sh", "/docker-entrypoint-initdb.d/"]
