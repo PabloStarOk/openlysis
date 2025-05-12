@@ -129,15 +129,6 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 
         GetAnalysisResponse analysisResponse = result.Value;
 
-        if (analysisResponse.Reports.Count > 1)
-        {
-            _logger.LogError(
-                "Get analysis response contains more than 1 report at {ServiceName} service analyzer. \nTotal Reports Received: {TotalReportsReceived}",
-                ServiceName,
-                analysisResponse.Reports.Count);
-            return Error.Unexpected("Filescan get analysis response contains more than 1 report.");
-        }
-
         var serviceAnalysis = FileServiceAnalysis.Create(
             analysisResponse.FlowId,
             ServiceName,
@@ -148,30 +139,55 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
             return serviceAnalysis;
         }
 
-        var filescanReportId = analysisResponse.Reports.First().Key;
-        var filescanReport = analysisResponse.Reports.First().Value;
+        UpdateAnalysisFromResponse(serviceAnalysis, analysisResponse);
+        return serviceAnalysis;
+    }
 
+    /// <summary>
+    /// Updates the provided analysis object with data from the given response.
+    /// </summary>
+    /// <param name="analysis">The analysis object to update.</param>
+    /// <param name="response">The response containing data to update the analysis with.</param>
+    private void UpdateAnalysisFromResponse(
+        FileServiceAnalysis analysis,
+        GetAnalysisResponse response)
+    {
+        foreach (var reportKeyValue in response.Reports)
+        {
+            string filescanReportId = reportKeyValue.Key;
+            FilescanReport filescanReport = reportKeyValue.Value;
+
+            Verdict verdict = Maps.VerdictMap[
+                filescanReport.FinalVerdict?.Verdict ?? FilescanVerdict.Unknown];
+            ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
+
+            var report = Report.Create(
+                filescanReportId,
+                verdict,
+                threatZone,
+                filescanReport.FinalVerdict?.ThreatLevel);
+            analysis.AddReport(report);
+            DebugFilescanReport(filescanReport);
+        }
+
+        AnalysisStatus status = Maps.AnalysisStatusMap[response.Status];
+        analysis.UpdateStatus(status);
+    }
+
+    /// <summary>
+    /// Logs debug information about a given Filescan report.
+    /// </summary>
+    /// <param name="filescanReport">The Filescan report to log debug information for.</param>
+    private void DebugFilescanReport(
+        FilescanReport filescanReport)
+    {
 #if DEBUG
         _logger.LogDebug(
-            "Filescan Results:"
+            "Filescan Report:"
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreatScore: {ThreatScore}",
             filescanReport.FinalVerdict?.Verdict,
             filescanReport.FinalVerdict?.ThreatLevel);
 #endif
-
-        Verdict verdict = Maps.VerdictMap[filescanReport.FinalVerdict?.Verdict ?? FilescanVerdict.Unknown];
-        ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
-        AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];
-
-        var report = Report.Create(
-            filescanReportId,
-            verdict,
-            threatZone,
-            filescanReport.FinalVerdict?.ThreatLevel);
-        serviceAnalysis.AddReport(report);
-        serviceAnalysis.UpdateStatus(status);
-
-        return serviceAnalysis;
     }
 }
