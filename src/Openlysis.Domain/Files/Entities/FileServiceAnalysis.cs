@@ -125,6 +125,11 @@ public class FileServiceAnalysis : ServiceAnalysis
     {
         ArgumentNullException.ThrowIfNull(report);
 
+        if (!State.CanBeUpdated)
+        {
+            throw new InvalidOperationException("Cannot add a report when analysis is completed, failed or timed out.");
+        }
+
         if (_reports.Contains(report))
         {
             return;
@@ -141,6 +146,11 @@ public class FileServiceAnalysis : ServiceAnalysis
     public void UpdateReport(Report report)
     {
         ArgumentNullException.ThrowIfNull(report);
+
+        if (!State.CanBeUpdated)
+        {
+            throw new InvalidOperationException("Cannot add a report when analysis is completed, failed or timed out.");
+        }
 
         if (!_reports.Contains(report))
         {

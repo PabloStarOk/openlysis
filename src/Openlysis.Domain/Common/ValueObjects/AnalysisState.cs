@@ -24,6 +24,14 @@ public sealed record AnalysisState
     public ThreatZone ThreatZone { get; } = ThreatZone.Unknown;
 
     /// <summary>
+    /// Gets a value indicating whether the analysis state can be updated.
+    /// The state can be updated if the status is either Queued or InProgress.
+    /// </summary>
+    public bool CanBeUpdated => Status
+        is AnalysisStatus.Queued
+        or AnalysisStatus.InProgress;
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="AnalysisState"/> class with the specified status, verdict, and threat zone.
     /// </summary>
     /// <param name="status">The status of the analysis.</param>
@@ -71,9 +79,9 @@ public sealed record AnalysisState
     /// <exception cref="InvalidOperationException">Thrown if the analysis is already completed.</exception>
     public AnalysisState WithVerdict(Verdict newVerdict)
     {
-        if (Status == AnalysisStatus.Completed)
+        if (!CanBeUpdated)
         {
-            throw new InvalidOperationException("Cannot update a completed analysis.");
+            throw new InvalidOperationException("Cannot update a completed, failed or timed out analysis.");
         }
 
         var newThreatZone = ThreatZoneMapping.Map[newVerdict];
