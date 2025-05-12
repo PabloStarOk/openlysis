@@ -10,12 +10,12 @@ namespace Openlysis.Domain.Files.Entities;
 /// </summary>
 public class FileServiceAnalysis : ServiceAnalysis
 {
-    private readonly List<Report> _reports = [];
+    private readonly List<FileReport> _reports = [];
 
     /// <summary>
     /// Gets the reports associated with the analysis as a read-only dictionary.
     /// </summary>
-    public IReadOnlyList<Report> Reports => _reports.AsReadOnly();
+    public IReadOnlyList<FileReport> Reports => _reports.AsReadOnly();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileServiceAnalysis"/> class.
@@ -29,7 +29,7 @@ public class FileServiceAnalysis : ServiceAnalysis
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisState state,
-        List<Report> reports,
+        List<FileReport> reports,
         string? error)
         : base(id, serviceName, state, error)
     {
@@ -58,7 +58,7 @@ public class FileServiceAnalysis : ServiceAnalysis
         string id,
         string serviceName,
         AnalysisStatus status,
-        List<Report> reports,
+        List<FileReport> reports,
         string? jobId = null)
     {
         var state = AnalysisState
@@ -118,47 +118,47 @@ public class FileServiceAnalysis : ServiceAnalysis
     }
 
     /// <summary>
-    /// Adds a report to the analysis.
+    /// Adds a fileReport to the analysis.
     /// </summary>
-    /// <param name="report">The report to add.</param>
-    public void AddReport(Report report)
+    /// <param name="fileReport">The fileReport to add.</param>
+    public void AddReport(FileReport fileReport)
     {
-        ArgumentNullException.ThrowIfNull(report);
+        ArgumentNullException.ThrowIfNull(fileReport);
 
         if (!State.CanBeUpdated)
         {
-            throw new InvalidOperationException("Cannot add a report when analysis is completed, failed or timed out.");
+            throw new InvalidOperationException("Cannot add a fileReport when analysis is completed, failed or timed out.");
         }
 
-        if (_reports.Contains(report))
+        if (_reports.Contains(fileReport))
         {
             return;
         }
 
-        _reports.Add(report);
+        _reports.Add(fileReport);
         UpdateVerdictFromReports();
     }
 
     /// <summary>
-    /// Updates an existing report in the analysis.
+    /// Updates an existing file report in the analysis.
     /// </summary>
-    /// <param name="report">The report to update.</param>
-    public void UpdateReport(Report report)
+    /// <param name="fileReport">The file report to update.</param>
+    public void UpdateReport(FileReport fileReport)
     {
-        ArgumentNullException.ThrowIfNull(report);
+        ArgumentNullException.ThrowIfNull(fileReport);
 
         if (!State.CanBeUpdated)
         {
-            throw new InvalidOperationException("Cannot add a report when analysis is completed, failed or timed out.");
+            throw new InvalidOperationException("Cannot add a fileReport when analysis is completed, failed or timed out.");
         }
 
-        if (!_reports.Contains(report))
+        if (!_reports.Contains(fileReport))
         {
             return;
         }
 
-        int reportIndex = _reports.IndexOf(report);
-        _reports[reportIndex] = report;
+        int reportIndex = _reports.IndexOf(fileReport);
+        _reports[reportIndex] = fileReport;
         UpdateVerdictFromReports();
     }
 

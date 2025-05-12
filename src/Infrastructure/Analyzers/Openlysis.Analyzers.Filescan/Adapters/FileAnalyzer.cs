@@ -161,7 +161,7 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
                 filescanReport.FinalVerdict?.Verdict ?? FilescanVerdict.Unknown];
             ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
 
-            var report = Report.Create(
+            var report = FileReport.Create(
                 filescanReportId,
                 verdict,
                 threatZone,

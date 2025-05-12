@@ -162,9 +162,9 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     /// <param name="existingReports">The array of existing reports in the database to compare against.</param>
     private void SyncReportsAsync(
         EntityEntry<FileServiceAnalysis> serviceAnalysisEntry,
-        Report[] existingReports)
+        FileReport[] existingReports)
     {
-        foreach (Report incomingReport in serviceAnalysisEntry.Entity.Reports)
+        foreach (FileReport incomingReport in serviceAnalysisEntry.Entity.Reports)
         {
             var existingReport = existingReports.SingleOrDefault(
                 r => r == incomingReport);

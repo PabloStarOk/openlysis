@@ -10,23 +10,23 @@ namespace Openlysis.API.Endpoints.Files.Common.Responses;
 /// <param name="Verdict">The verdict of the analysis.</param>
 /// <param name="ThreatZone">The threat zone of the analysis.</param>
 /// <param name="ThreatScore">The threat score of the analysis, if available.</param>
-public record ReportDto(
+public record FileReportDto(
     string Id,
     Verdict Verdict,
     ThreatZone ThreatZone,
     float? ThreatScore)
 {
     /// <summary>
-    /// Converts a <see cref="Report"/> entity to a <see cref="ReportDto"/>.
+    /// Converts a <see cref="FileReport"/> entity to a <see cref="FileReportDto"/>.
     /// </summary>
-    /// <param name="report">The <see cref="Report"/> entity to convert.</param>
-    /// <returns>A new instance of <see cref="ReportDto"/> populated with data from the given <see cref="Report"/>.</returns>
-    public static ReportDto Parse(Report report)
+    /// <param name="fileReport">The <see cref="FileReport"/> entity to convert.</param>
+    /// <returns>A new instance of <see cref="FileReportDto"/> populated with data from the given <see cref="FileReport"/>.</returns>
+    public static FileReportDto Parse(FileReport fileReport)
     {
-        return new ReportDto(
-            report.Id.Value,
-            report.Verdict,
-            report.ThreatZone,
-            report.ThreatScore);
+        return new FileReportDto(
+            fileReport.Id.Value,
+            fileReport.Verdict,
+            fileReport.ThreatZone,
+            fileReport.ThreatScore);
     }
 }

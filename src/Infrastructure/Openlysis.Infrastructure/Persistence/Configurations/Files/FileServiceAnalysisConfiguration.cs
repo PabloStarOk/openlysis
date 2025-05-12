@@ -77,14 +77,14 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
     }
 
     /// <summary>
-    /// Configures the properties and relationships for the <see cref="Report"/> entity
+    /// Configures the properties and relationships for the <see cref="FileReport"/> entity
     /// as an owned navigation property of <see cref="FileServiceAnalysis"/>.
     /// </summary>
     /// <param name="builder">
     /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned entity.
     /// </param>
     private static void ConfigureReportEntity(
-        OwnedNavigationBuilder<FileServiceAnalysis, Report> builder)
+        OwnedNavigationBuilder<FileServiceAnalysis, FileReport> builder)
     {
         builder.ToTable("reports");
 

@@ -26,7 +26,7 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         string id = string.Empty;
         string serviceName = string.Empty;
         AnalysisStatus status = 0;
-        List<Report> reports = [];
+        List<FileReport> reports = [];
         while (reader.Read())
         {
             if (reader.TokenType is JsonTokenType.EndObject)
@@ -78,7 +78,7 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         writer.WriteString(verdictKey, value.State.Verdict.ToString());
 
         writer.WriteStartArray(reportsKey);
-        var reportJsonConverter = (JsonConverter<Report>)options.Converters.Single(c => c.Type == typeof(Report));
+        var reportJsonConverter = (JsonConverter<FileReport>)options.Converters.Single(c => c.Type == typeof(FileReport));
         foreach (var report in value.Reports)
         {
             reportJsonConverter.Write(writer, report, options);
@@ -90,18 +90,18 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
     }
 
     /// <summary>
-    /// Converts a JSON array to a list of <see cref="Report"/> objects.
+    /// Converts a JSON array to a list of <see cref="FileReport"/> objects.
     /// </summary>
     /// <param name="reader">The <see cref="Utf8JsonReader"/> to read from.</param>
     /// <param name="options">The <see cref="JsonSerializerOptions"/> to use for deserialization.</param>
-    /// <returns>A list of <see cref="Report"/> objects.</returns>
-    private static List<Report> ConvertReports(
+    /// <returns>A list of <see cref="FileReport"/> objects.</returns>
+    private static List<FileReport> ConvertReports(
         ref Utf8JsonReader reader,
         JsonSerializerOptions options)
     {
-        var reportJsonConverter = (JsonConverter<Report>)options.Converters
-            .Single(c => c.Type == typeof(Report));
-        List<Report> reports = [];
+        var reportJsonConverter = (JsonConverter<FileReport>)options.Converters
+            .Single(c => c.Type == typeof(FileReport));
+        List<FileReport> reports = [];
         while (reader.Read())
         {
             if (reader.TokenType is JsonTokenType.StartArray)
@@ -114,7 +114,7 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
                 break;
             }
 
-            Report? report = reportJsonConverter.Read(ref reader, typeof(Report), options);
+            FileReport? report = reportJsonConverter.Read(ref reader, typeof(FileReport), options);
 
             if (report is not null)
             {

@@ -21,7 +21,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     /// <summary>
     /// Gets all reports from the service file analyses.
     /// </summary>
-    public IReadOnlyList<Report> AllReports => ServiceAnalyses
+    public IReadOnlyList<FileReport> AllReports => ServiceAnalyses
         .SelectMany(s => s.Reports).ToList().AsReadOnly();
 
     /// <summary>
@@ -98,7 +98,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
         FileServiceAnalysis existingAnalysis,
         FileServiceAnalysis updatedAnalysis)
     {
-        foreach (Report report in updatedAnalysis.Reports)
+        foreach (FileReport report in updatedAnalysis.Reports)
         {
             if (existingAnalysis.Reports.Contains(report))
             {

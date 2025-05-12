@@ -7,9 +7,9 @@ using Openlysis.Domain.Files.Entities;
 namespace Openlysis.Infrastructure.Shared.Communication.Serialization.Files;
 
 /// <summary>
-/// Converts a <see cref="Report"/> object to and from JSON.
+/// Converts a <see cref="FileReport"/> object to and from JSON.
 /// </summary>
-internal class ReportJsonConverter : JsonConverter<Report>
+internal class ReportJsonConverter : JsonConverter<FileReport>
 {
     private const string IdKey = "id";
     private const string VerdictKey = "verdict";
@@ -17,7 +17,10 @@ internal class ReportJsonConverter : JsonConverter<Report>
     private const string ThreatLevelKey = "threatlevel";
 
     /// <inheritdoc/>
-    public override Report Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override FileReport Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
     {
         string id = string.Empty;
         Verdict verdict = 0;
@@ -62,7 +65,7 @@ internal class ReportJsonConverter : JsonConverter<Report>
             }
         }
 
-        return Report.Create(
+        return FileReport.Create(
             id,
             verdict,
             threatZone,
@@ -72,13 +75,13 @@ internal class ReportJsonConverter : JsonConverter<Report>
     /// <inheritdoc/>
     public override void Write(
         Utf8JsonWriter writer,
-        Report value,
+        FileReport value,
         JsonSerializerOptions options)
     {
-        string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? nameof(Report.Id);
-        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(Report.Verdict);
-        string threatZoneKey = options.PropertyNamingPolicy?.ConvertName(ThreatZoneKey) ?? nameof(Report.ThreatZone);
-        string threatLevelKey = options.PropertyNamingPolicy?.ConvertName(ThreatLevelKey) ?? nameof(Report.ThreatScore);
+        string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? nameof(FileReport.Id);
+        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(FileReport.Verdict);
+        string threatZoneKey = options.PropertyNamingPolicy?.ConvertName(ThreatZoneKey) ?? nameof(FileReport.ThreatZone);
+        string threatLevelKey = options.PropertyNamingPolicy?.ConvertName(ThreatLevelKey) ?? nameof(FileReport.ThreatScore);
 
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.Value);

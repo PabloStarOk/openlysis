@@ -5,9 +5,9 @@ using Openlysis.Domain.Files.ValueObjects;
 namespace Openlysis.Domain.Files.Entities;
 
 /// <summary>
-/// Represents a single report.
+/// Report of an analysis for a file.
 /// </summary>
-public class Report : Entity<ReportId>
+public class FileReport : Entity<ReportId>
 {
     /// <summary>
     /// Gets the verdict of the scan.
@@ -25,13 +25,13 @@ public class Report : Entity<ReportId>
     public float? ThreatScore { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Report"/> class.
+    /// Initializes a new instance of the <see cref="FileReport"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the report.</param>
     /// <param name="verdict">The verdict of the scan.</param>
     /// <param name="threatZone">The threat zone of the scan.</param>
     /// <param name="threatScore">The threat level of the scan. Optional.</param>
-    protected Report(
+    protected FileReport(
         ReportId id,
         Verdict verdict,
         ThreatZone threatZone,
@@ -46,28 +46,28 @@ public class Report : Entity<ReportId>
     // For EF core.
 #pragma warning disable CS8618
 #pragma warning disable S1144
-    private Report()
+    private FileReport()
     {
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of the <see cref="Report"/> class.
+    /// Creates a new instance of the <see cref="FileReport"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the report.</param>
     /// <param name="verdict">The verdict of the scan.</param>
     /// <param name="threatZone">The threat zone of the scan.</param>
     /// <param name="threatScore">The threat score of the scan.</param>
-    /// <returns>A new instance of the <see cref="Report"/> class.</returns>
-    public static Report Create(
+    /// <returns>A new instance of the <see cref="FileReport"/> class.</returns>
+    public static FileReport Create(
         string id,
         Verdict verdict,
         ThreatZone threatZone,
         float? threatScore)
     {
         float? normalizedThreatScore = NormalizeThreatScore(threatScore);
-        return new Report(
+        return new FileReport(
             ReportId.Create(id),
             verdict,
             threatZone,
@@ -82,7 +82,7 @@ public class Report : Entity<ReportId>
     /// True if the current report and the other report have the same verdict, threat zone,
     /// and threat score; otherwise, false.
     /// </returns>
-    public bool HasSameStateTo(Report other)
+    public bool HasSameStateTo(FileReport other)
     {
         return Verdict == other.Verdict
             && ThreatZone == other.ThreatZone

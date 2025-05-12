@@ -21,7 +21,7 @@ public record FileServiceAnalysisDto(
     AnalysisStatus Status,
     Verdict Verdict,
     ThreatZone ThreatZone,
-    ReportDto[] Reports,
+    FileReportDto[] Reports,
     string? Error)
 {
     /// <summary>
@@ -31,8 +31,8 @@ public record FileServiceAnalysisDto(
     /// <returns>A new <see cref="FileServiceAnalysisDto"/> instance containing the converted data.</returns>
     public static FileServiceAnalysisDto Parse(FileServiceAnalysis source)
     {
-        ReportDto[] reports = source.Reports
-            .Select(ReportDto.Parse)
+        FileReportDto[] reports = source.Reports
+            .Select(FileReportDto.Parse)
             .ToArray();
 
         return new FileServiceAnalysisDto(
