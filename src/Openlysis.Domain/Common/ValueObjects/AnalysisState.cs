@@ -11,17 +11,17 @@ public sealed record AnalysisState
     /// <summary>
     /// Gets the current status of the analysis.
     /// </summary>
-    public AnalysisStatus Status { get; private set; } = AnalysisStatus.Queued;
+    public AnalysisStatus Status { get; } = AnalysisStatus.Queued;
 
     /// <summary>
     /// Gets the verdict of the analysis.
     /// </summary>
-    public Verdict Verdict { get; private set; } = Verdict.Unknown;
+    public Verdict Verdict { get; } = Verdict.Unknown;
 
     /// <summary>
     /// Gets the threat zone associated with the analysis.
     /// </summary>
-    public ThreatZone ThreatZone { get; private set; } = ThreatZone.Unknown;
+    public ThreatZone ThreatZone { get; } = ThreatZone.Unknown;
 
     // Private constructor for immutability
     private AnalysisState(
