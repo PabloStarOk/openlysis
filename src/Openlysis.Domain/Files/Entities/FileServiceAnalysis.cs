@@ -132,33 +132,10 @@ public class FileServiceAnalysis : ServiceAnalysis
 
         if (_reports.Contains(fileReport))
         {
-            return;
+            throw new InvalidOperationException("Report already exists.");
         }
 
         _reports.Add(fileReport);
-        UpdateVerdictFromReports();
-    }
-
-    /// <summary>
-    /// Updates an existing file report in the analysis.
-    /// </summary>
-    /// <param name="fileReport">The file report to update.</param>
-    public void UpdateReport(FileReport fileReport)
-    {
-        ArgumentNullException.ThrowIfNull(fileReport);
-
-        if (!State.CanBeUpdated)
-        {
-            throw new InvalidOperationException("Cannot add a fileReport when analysis is completed, failed or timed out.");
-        }
-
-        if (!_reports.Contains(fileReport))
-        {
-            return;
-        }
-
-        int reportIndex = _reports.IndexOf(fileReport);
-        _reports[reportIndex] = fileReport;
         UpdateVerdictFromReports();
     }
 
