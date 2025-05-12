@@ -23,7 +23,12 @@ public sealed record AnalysisState
     /// </summary>
     public ThreatZone ThreatZone { get; } = ThreatZone.Unknown;
 
-    // Private constructor for immutability
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AnalysisState"/> class with the specified status, verdict, and threat zone.
+    /// </summary>
+    /// <param name="status">The status of the analysis.</param>
+    /// <param name="verdict">The verdict of the analysis.</param>
+    /// <param name="threatZone">The threat zone associated with the analysis.</param>
     private AnalysisState(
         AnalysisStatus status,
         Verdict verdict,
