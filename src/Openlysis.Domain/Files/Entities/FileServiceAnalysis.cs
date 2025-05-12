@@ -1,3 +1,4 @@
+using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
@@ -130,6 +131,7 @@ public class FileServiceAnalysis : ServiceAnalysis
         }
 
         _reports.Add(report);
+        UpdateVerdictFromReports();
     }
 
     /// <summary>
@@ -147,6 +149,7 @@ public class FileServiceAnalysis : ServiceAnalysis
 
         int reportIndex = _reports.IndexOf(report);
         _reports[reportIndex] = report;
+        UpdateVerdictFromReports();
     }
 
     /// <summary>
@@ -160,5 +163,17 @@ public class FileServiceAnalysis : ServiceAnalysis
     {
         return Reports.SequenceEqual(other.Reports)
             && State == other.State;
+    }
+
+    /// <summary>
+    /// Updates the verdict of the analysis based on the highest verdict among the associated reports.
+    /// </summary>
+    private void UpdateVerdictFromReports()
+    {
+        var best = _reports
+            .Select(r => r.Verdict)
+            .OrderByDescending(v => VerdictRankMapping.Map[v])
+            .FirstOrDefault();
+        State = State.WithVerdict(best);
     }
 }

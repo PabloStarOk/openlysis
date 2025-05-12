@@ -15,9 +15,9 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
     public string ServiceName { get; }
 
     /// <summary>
-    /// Gets the current state of the analysis.
+    /// Gets or sets the current state of the analysis.
     /// </summary>
-    public AnalysisState State { get; private set; }
+    public AnalysisState State { get; protected set; }
 
     /// <summary>
     /// Gets the error message if the analysis failed.

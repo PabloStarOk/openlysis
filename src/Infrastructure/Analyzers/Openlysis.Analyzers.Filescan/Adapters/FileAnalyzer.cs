@@ -138,11 +138,10 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
             return Error.Unexpected("Filescan get analysis response contains more than 1 report.");
         }
 
-        AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];
         var serviceAnalysis = FileServiceAnalysis.Create(
             analysisResponse.FlowId,
             ServiceName,
-            status);
+            AnalysisStatus.Queued);
 
         if (analysisResponse.Reports.Count is 0)
         {
@@ -163,6 +162,7 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 
         Verdict verdict = Maps.VerdictMap[filescanReport.FinalVerdict?.Verdict ?? FilescanVerdict.Unknown];
         ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
+        AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];
 
         var report = Report.Create(
             filescanReportId,
@@ -170,6 +170,7 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
             threatZone,
             filescanReport.FinalVerdict?.ThreatLevel);
         serviceAnalysis.AddReport(report);
+        serviceAnalysis.UpdateStatus(status);
 
         return serviceAnalysis;
     }
