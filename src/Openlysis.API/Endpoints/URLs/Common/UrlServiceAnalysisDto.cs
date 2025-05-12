@@ -35,9 +35,9 @@ public record UrlServiceAnalysisDto(
             source.Id.Primary.Value,
             source.Id.Job,
             source.ServiceName,
-            source.Status,
-            source.Verdict,
-            source.ThreatZone,
+            source.State.Status,
+            source.State.Verdict,
+            source.State.ThreatZone,
             source.ThreatScore,
             source.Error);
     }

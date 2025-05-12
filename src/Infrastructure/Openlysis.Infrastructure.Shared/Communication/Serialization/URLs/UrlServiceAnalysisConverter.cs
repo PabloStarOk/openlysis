@@ -84,16 +84,16 @@ internal class UrlServiceAnalysisConverter : JsonConverter<UrlServiceAnalysis>
     {
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? IdKey;
         string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(UrlServiceAnalysis.ServiceName);
-        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(UrlServiceAnalysis.Status);
-        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(UrlServiceAnalysis.Verdict);
+        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(UrlServiceAnalysis.State.Status);
+        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(UrlServiceAnalysis.State.Verdict);
         string jobIdKey = options.PropertyNamingPolicy?.ConvertName(JobIdKey) ?? JobIdKey;
         string threatScoreKey = options.PropertyNamingPolicy?.ConvertName(ThreatScoreKey) ?? nameof(UrlServiceAnalysis.ThreatScore);
 
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.Primary.Value);
         writer.WriteString(serviceNameKey, value.ServiceName);
-        writer.WriteString(statusKey, value.Status.ToString());
-        writer.WriteString(verdictKey, value.Verdict.ToString());
+        writer.WriteString(statusKey, value.State.Status.ToString());
+        writer.WriteString(verdictKey, value.State.Verdict.ToString());
 
         if (value.Id.Job is not null)
         {

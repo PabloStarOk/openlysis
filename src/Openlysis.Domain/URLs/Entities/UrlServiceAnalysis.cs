@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 
-using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
@@ -16,16 +15,6 @@ namespace Openlysis.Domain.URLs.Entities;
 public sealed class UrlServiceAnalysis : ServiceAnalysis
 {
     /// <summary>
-    /// Gets the verdict of the analysis.
-    /// </summary>
-    public Verdict Verdict { get; private set; }
-
-    /// <summary>
-    /// Gets the threat zone associated with the analysis.
-    /// </summary>
-    public ThreatZone ThreatZone { get; private set; }
-
-    /// <summary>
     /// Gets the threat score of the analysis.
     /// </summary>
     [Range(.0f, 1.0f)]
@@ -36,23 +25,17 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
     /// </summary>
     /// <param name="id">The unique identifier for the service analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
-    /// <param name="status">The current status of the analysis.</param>
-    /// <param name="verdict">The verdict of the analysis.</param>
-    /// <param name="threatZone">The threat zone associated with the analysis.</param>
     /// <param name="threatScore">The threat score of the analysis. Optional.</param>
+    /// <param name="state">The current state of the analysis.</param>
     /// <param name="error">The error message if the analysis failed.</param>
     private UrlServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
-        AnalysisStatus status,
-        Verdict verdict,
-        ThreatZone threatZone,
+        AnalysisState state,
         float? threatScore,
         string? error)
-        : base(id, serviceName, status, error)
+        : base(id, serviceName, state, error)
     {
-        Verdict = verdict;
-        ThreatZone = threatZone;
         ThreatScore = threatScore;
     }
 
@@ -84,15 +67,15 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
         float? threatScore = null)
     {
         var composedId = ComposedServiceAnalysisId.Create(id, jobId);
-        ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
         float? normalizedThreatScore = NormalizeThreatScore(threatScore);
+        var state = AnalysisState.Initial()
+            .WithVerdict(verdict)
+            .WithStatus(status);
 
         return new UrlServiceAnalysis(
             composedId,
             serviceName,
-            status,
-            verdict,
-            threatZone,
+            state,
             normalizedThreatScore,
             error: null);
     }
@@ -116,29 +99,9 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
         return new UrlServiceAnalysis(
             composedId,
             serviceName,
-            AnalysisStatus.Failed,
-            Verdict.Unknown,
-            ThreatZone.Unknown,
+            AnalysisState.CreateFailed(),
             null,
             error: error);
-    }
-
-    /// <summary>
-    /// Updates the verdict of the analysis.
-    /// </summary>
-    /// <param name="newVerdict">The new verdict to set.</param>
-    /// <remarks>
-    /// The verdict can only be updated if the status is either Queued or InProgress.
-    /// </remarks>
-    public void UpdateVerdict(Verdict newVerdict)
-    {
-        if (Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
-        {
-            throw new InvalidOperationException("Trying to update verdict of UrlServiceAnalysis when analysis status is not queued or in-progress.");
-        }
-
-        Verdict = newVerdict;
-        ThreatZone = ThreatZoneMapping.Map[newVerdict];
     }
 
     /// <summary>
@@ -150,7 +113,9 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
     /// </remarks>
     public void UpdateThreatScore(float? threatScore)
     {
-        if (Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
+        if (State.Status
+            is not AnalysisStatus.Queued
+            and not AnalysisStatus.InProgress)
         {
             throw new InvalidOperationException("Trying to update threat score of the UrlServiceAnalysis when analysis status is not queued or in-progress.");
         }
@@ -172,9 +137,7 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
     /// </returns>
     public bool HasSameStateTo(UrlServiceAnalysis other)
     {
-        return Verdict == other.Verdict
-            && ThreatScore.Equals(other.ThreatScore)
-            && Status == other.Status;
+        return State == other.State;
     }
 
     /// <summary>

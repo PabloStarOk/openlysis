@@ -52,10 +52,23 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
             .HasMaxLength(30)
             .IsRequired();
 
-        builder.Property(s => s.Status)
-            .HasColumnName("status")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+        builder.OwnsOne(s => s.State, stateBuilder =>
+        {
+            stateBuilder.Property(s => s.Status)
+                .HasColumnName("status")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+
+            stateBuilder.Property(s => s.Verdict)
+                .HasColumnName("verdict")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+
+            stateBuilder.Property(s => s.ThreatZone)
+                .HasColumnName("threat_zone")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+        });
 
         builder.Property(u => u.Error)
             .HasColumnName("error")

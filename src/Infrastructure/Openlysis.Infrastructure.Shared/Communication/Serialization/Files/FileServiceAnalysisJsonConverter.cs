@@ -14,6 +14,7 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
     private const string IdKey = "id";
     private const string ServiceNameKey = "servicename";
     private const string StatusKey = "status";
+    private const string VerdictKey = "verdict";
     private const string ReportsKey = "reports";
 
     /// <inheritdoc/>
@@ -66,13 +67,15 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
     {
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? nameof(FileServiceAnalysis.Id);
         string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(FileServiceAnalysis.ServiceName);
-        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(FileServiceAnalysis.Status);
+        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(FileServiceAnalysis.State.Status);
+        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(FileServiceAnalysis.State.Verdict);
         string reportsKey = options.PropertyNamingPolicy?.ConvertName(ReportsKey) ?? nameof(FileServiceAnalysis.Reports);
 
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.ToString());
         writer.WriteString(serviceNameKey, value.ServiceName);
-        writer.WriteString(statusKey, value.Status.ToString());
+        writer.WriteString(statusKey, value.State.Status.ToString());
+        writer.WriteString(verdictKey, value.State.Verdict.ToString());
 
         writer.WriteStartArray(reportsKey);
         var reportJsonConverter = (JsonConverter<Report>)options.Converters.Single(c => c.Type == typeof(Report));

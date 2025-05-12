@@ -15,9 +15,9 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
     public string ServiceName { get; }
 
     /// <summary>
-    /// Gets the current status of the analysis.
+    /// Gets the current state of the analysis.
     /// </summary>
-    public AnalysisStatus Status { get; private set; }
+    public AnalysisState State { get; private set; }
 
     /// <summary>
     /// Gets the error message if the analysis failed.
@@ -29,17 +29,17 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
     /// </summary>
     /// <param name="id">The unique identifier for the service analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
-    /// <param name="status">The current status of the analysis.</param>
+    /// <param name="state">The current state of the analysis.</param>
     /// <param name="error">The error message if the analysis failed.</param>
     protected ServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
-        AnalysisStatus status,
+        AnalysisState state,
         string? error)
         : base(id)
     {
         ServiceName = serviceName;
-        Status = status;
+        State = state;
         Error = error;
     }
 
@@ -59,12 +59,31 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
 #pragma warning restore CS8618
 
     /// <summary>
+    /// Updates the verdict of the analysis.
+    /// </summary>
+    /// <param name="newVerdict">The new verdict to set.</param>
+    /// <remarks>
+    /// The verdict can only be updated if the status is either Queued or InProgress.
+    /// </remarks>
+    public void UpdateVerdict(Verdict newVerdict)
+    {
+        if (State.Status
+            is not AnalysisStatus.Queued
+            and not AnalysisStatus.InProgress)
+        {
+            throw new InvalidOperationException($"Trying to update verdict of {typeof(ServiceAnalysis)} when analysis status is not queued or in-progress.");
+        }
+
+        State = State.WithVerdict(newVerdict);
+    }
+
+    /// <summary>
     /// Updates the status of the analysis.
     /// </summary>
     /// <param name="newStatus">The new status to set.</param>
     public void UpdateStatus(AnalysisStatus newStatus)
     {
         ArgumentNullException.ThrowIfNull(newStatus);
-        Status = newStatus;
+        State = State.WithStatus(newStatus);
     }
 }

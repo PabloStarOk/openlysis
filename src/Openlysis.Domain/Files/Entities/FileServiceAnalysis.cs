@@ -21,16 +21,16 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
-    /// <param name="status">The initial status of the analysis.</param>
+    /// <param name="state">The current state of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
     /// <param name="error">The error message if the analysis failed.</param>
     private FileServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
-        AnalysisStatus status,
+        AnalysisState state,
         List<Report> reports,
         string? error)
-        : base(id, serviceName, status, error)
+        : base(id, serviceName, state, error)
     {
         _reports = reports;
     }
@@ -60,10 +60,13 @@ public class FileServiceAnalysis : ServiceAnalysis
         List<Report> reports,
         string? jobId = null)
     {
+        var state = AnalysisState
+            .Initial()
+            .WithStatus(status);
         return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
-            status,
+            state,
             reports,
             error: null);
     }
@@ -82,10 +85,13 @@ public class FileServiceAnalysis : ServiceAnalysis
         AnalysisStatus status,
         string? jobId = null)
     {
+        var state = AnalysisState
+            .Initial()
+            .WithStatus(status);
         return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
-            status,
+            state,
             [],
             error: null);
     }
@@ -105,7 +111,7 @@ public class FileServiceAnalysis : ServiceAnalysis
         return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
-            AnalysisStatus.Failed,
+            AnalysisState.CreateFailed(),
             [],
             error);
     }
@@ -153,6 +159,6 @@ public class FileServiceAnalysis : ServiceAnalysis
     public bool HasSameStateTo(FileServiceAnalysis other)
     {
         return Reports.SequenceEqual(other.Reports)
-            && Status == other.Status;
+            && State == other.State;
     }
 }

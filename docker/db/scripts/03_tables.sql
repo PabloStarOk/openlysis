@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS file_service_analyses
     file_service_analysis_id varchar(200) PRIMARY KEY,
     service_name varchar(30) NOT NULL,
     status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
     error varchar(250)
 );
 

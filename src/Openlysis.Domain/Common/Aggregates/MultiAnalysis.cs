@@ -127,7 +127,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         }
 
         TServiceAnalysis existingAnalysis = _serviceAnalyses.Single(a => a == analysis);
-        if (existingAnalysis is not
+        if (existingAnalysis.State is not
             {
                 Status: AnalysisStatus.Queued or AnalysisStatus.InProgress
             })
@@ -208,29 +208,29 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         IEnumerable<TServiceAnalysis> analyses = _serviceAnalyses;
 
         // If all timeout, set as timeout
-        if (analyses.All(a => a.Status is AnalysisStatus.Timeout))
+        if (analyses.All(a => a.State.Status is AnalysisStatus.Timeout))
         {
             State = State.WithStatus(AnalysisStatus.Timeout);
             return;
         }
 
         // If all failed, set as failed
-        if (analyses.All(a => a.Status is AnalysisStatus.Failed))
+        if (analyses.All(a => a.State.Status is AnalysisStatus.Failed))
         {
             State = State.WithStatus(AnalysisStatus.Failed);
             return;
         }
 
         // If is not queued nor in-progress and there's at least one completed, set as completed.
-        if (analyses.All(a => a.Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
-            && analyses.Any(a => a.Status is AnalysisStatus.Completed))
+        if (analyses.All(a => a.State.Status is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
+            && analyses.Any(a => a.State.Status is AnalysisStatus.Completed))
         {
             State = State.WithStatus(AnalysisStatus.Completed);
             return;
         }
 
         // The most frequent and lower status.
-        var statusCount = analyses.GroupBy(a => a.Status)
+        var statusCount = analyses.GroupBy(a => a.State.Status)
             .ToDictionary(g => g.Key, g => g.Count())
             .Where(g => g.Key is not AnalysisStatus.Completed);
 

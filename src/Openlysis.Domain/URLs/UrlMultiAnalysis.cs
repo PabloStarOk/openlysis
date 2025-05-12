@@ -86,16 +86,16 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
         UrlServiceAnalysis existingAnalysis,
         UrlServiceAnalysis updatedAnalysis)
     {
-        existingAnalysis.UpdateVerdict(updatedAnalysis.Verdict);
+        existingAnalysis.UpdateVerdict(updatedAnalysis.State.Verdict);
         existingAnalysis.UpdateThreatScore(updatedAnalysis.ThreatScore);
-        existingAnalysis.UpdateStatus(updatedAnalysis.Status);
+        existingAnalysis.UpdateStatus(updatedAnalysis.State.Status);
     }
 
     /// <inheritdoc/>
     protected override Verdict[] GetServiceAnalysesVerdicts()
     {
         return ServiceAnalyses
-            .Select(r => r.Verdict)
+            .Select(r => r.State.Verdict)
             .ToArray();
     }
 

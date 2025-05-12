@@ -37,20 +37,23 @@ public class UrlServiceAnalysisConfiguration : IEntityTypeConfiguration<UrlServi
             .HasMaxLength(30)
             .IsRequired();
 
-        builder.Property(u => u.Status)
-            .HasColumnName("status")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+        builder.OwnsOne(u => u.State, stateBuilder =>
+        {
+            stateBuilder.Property(s => s.Status)
+                .HasColumnName("status")
+                .HasColumnType(SmallintType)
+                .IsRequired();
 
-        builder.Property(u => u.Verdict)
-            .HasColumnName("verdict")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+            stateBuilder.Property(s => s.Verdict)
+                .HasColumnName("verdict")
+                .HasColumnType(SmallintType)
+                .IsRequired();
 
-        builder.Property(u => u.ThreatZone)
-            .HasColumnName("threat_zone")
-            .HasColumnType(SmallintType)
-            .IsRequired();
+            stateBuilder.Property(s => s.ThreatZone)
+                .HasColumnName("threat_zone")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+        });
 
         builder.Property(u => u.ThreatScore)
             .HasColumnName("threat_score")

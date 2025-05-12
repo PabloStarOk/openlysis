@@ -36,7 +36,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private readonly IFileStorageProvider _fileStorageProvider;
     private readonly Dictionary<ComposedServiceAnalysisId, FileServiceAnalysis> _serviceFileAnalyses = [];
     private readonly Func<FileServiceAnalysis, bool> _analysisFinished = s =>
-        s.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
+        s.State.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
 
     private GlobalId _multiAnalysisId;
     private ConsumeContext<AnalyzeFile> _context;
@@ -171,7 +171,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
 
                 FileServiceAnalysis updatedAnalysis = result.Value;
 
-                if (updatedAnalysis.Status != analysis.Status)
+                if (updatedAnalysis.State.Status != analysis.State.Status)
                 {
                     sendUpdate = true;
                 }

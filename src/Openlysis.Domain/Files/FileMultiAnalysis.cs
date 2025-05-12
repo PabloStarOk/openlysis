@@ -109,7 +109,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
             existingAnalysis.AddReport(report);
         }
 
-        existingAnalysis.UpdateStatus(updatedAnalysis.Status);
+        existingAnalysis.UpdateStatus(updatedAnalysis.State.Status);
     }
 
     /// <inheritdoc/>
