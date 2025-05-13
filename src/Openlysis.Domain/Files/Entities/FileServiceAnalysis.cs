@@ -118,9 +118,11 @@ public class FileServiceAnalysis : ServiceAnalysis
     }
 
     /// <summary>
-    /// Adds a fileReport to the analysis.
+    /// Adds a new file report to the analysis.
     /// </summary>
-    /// <param name="fileReport">The fileReport to add.</param>
+    /// <param name="fileReport">The file report to add to the analysis.</param>
+    /// <exception cref="ArgumentNullException">Thrown when the file report is null.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when the analysis state doesn't allow updates or when the report already exists.</exception>
     public void AddReport(FileReport fileReport)
     {
         ArgumentNullException.ThrowIfNull(fileReport);
@@ -132,7 +134,7 @@ public class FileServiceAnalysis : ServiceAnalysis
 
         if (_reports.Contains(fileReport))
         {
-            return;
+            throw new InvalidOperationException("File report already exists.");
         }
 
         _reports.Add(fileReport);
@@ -140,25 +142,23 @@ public class FileServiceAnalysis : ServiceAnalysis
     }
 
     /// <summary>
-    /// Updates an existing file report in the analysis.
+    /// Updates an existing file report with new verdict and threat score information.
     /// </summary>
-    /// <param name="fileReport">The file report to update.</param>
-    public void UpdateReport(FileReport fileReport)
+    /// <param name="updatedReport">The file report containing updated information.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <see cref="updatedReport"/> is null.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when analysis state doesn't allow updates.</exception>
+    public void UpdateReport(FileReport updatedReport)
     {
-        ArgumentNullException.ThrowIfNull(fileReport);
+        ArgumentNullException.ThrowIfNull(updatedReport);
 
         if (!State.CanBeUpdated)
         {
-            throw new InvalidOperationException("Cannot add a fileReport when analysis is completed, failed or timed out.");
+            throw new InvalidOperationException("Cannot update a file report when analysis is completed, failed or timed out.");
         }
 
-        if (!_reports.Contains(fileReport))
-        {
-            return;
-        }
-
-        int reportIndex = _reports.IndexOf(fileReport);
-        _reports[reportIndex] = fileReport;
+        FileReport existingReport = _reports.Single(r => r.Id == updatedReport.Id);
+        existingReport.UpdateVerdict(updatedReport.Verdict);
+        existingReport.UpdateThreatScore(updatedReport.ThreatScore);
         UpdateVerdictFromReports();
     }
 

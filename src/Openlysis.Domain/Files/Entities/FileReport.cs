@@ -1,4 +1,5 @@
 using Openlysis.Domain.Common.Abstractions;
+using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Files.ValueObjects;
 
@@ -12,17 +13,17 @@ public class FileReport : Entity<ReportId>
     /// <summary>
     /// Gets the verdict of the scan.
     /// </summary>
-    public Verdict Verdict { get; }
+    public Verdict Verdict { get; private set; }
 
     /// <summary>
     /// Gets the threat zone of the scan.
     /// </summary>
-    public ThreatZone ThreatZone { get; }
+    public ThreatZone ThreatZone { get; private set; }
 
     /// <summary>
     /// Gets the threat level of the scan.
     /// </summary>
-    public float? ThreatScore { get; }
+    public float? ThreatScore { get; private set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileReport"/> class.
@@ -72,6 +73,27 @@ public class FileReport : Entity<ReportId>
             verdict,
             threatZone,
             normalizedThreatScore);
+    }
+
+    /// <summary>
+    /// Updates the verdict of the file report and recalculates the threat zone based on the new verdict.
+    /// </summary>
+    /// <param name="verdict">The new verdict to set for the file report.</param>
+    /// <exception cref="ArgumentNullException">Thrown when the verdict is null.</exception>
+    public void UpdateVerdict(Verdict verdict)
+    {
+        ArgumentNullException.ThrowIfNull(verdict);
+        Verdict = verdict;
+        ThreatZone = ThreatZoneMapping.Map[verdict];
+    }
+
+    /// <summary>
+    /// Updates the threat score of the file report with a normalized value.
+    /// </summary>
+    /// <param name="threatScore">The new threat score to set. Can be null.</param>
+    public void UpdateThreatScore(float? threatScore)
+    {
+        ThreatScore = NormalizeThreatScore(threatScore);
     }
 
     /// <summary>
