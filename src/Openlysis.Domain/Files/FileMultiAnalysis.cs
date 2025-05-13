@@ -100,6 +100,12 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     {
         foreach (FileReport report in updatedAnalysis.Reports)
         {
+            if (existingAnalysis.Reports.Contains(report))
+            {
+                existingAnalysis.UpdateReport(report);
+                continue;
+            }
+
             existingAnalysis.AddReport(report);
         }
 
