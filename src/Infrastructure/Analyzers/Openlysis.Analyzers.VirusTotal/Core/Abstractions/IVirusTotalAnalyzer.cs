@@ -16,7 +16,7 @@ public interface IVirusTotalAnalyzer
     /// <param name="requestFactory">The factory to create the request.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis response.</returns>
-    public Task<ErrorOr<AnalyzeUrlResponse>> AnalyzeAsync(
+    public Task<ErrorOr<AnalyzeResponse>> AnalyzeAsync(
         HttpClient httpClient,
         IRequestFactory requestFactory,
         CancellationToken cancellationToken = default);

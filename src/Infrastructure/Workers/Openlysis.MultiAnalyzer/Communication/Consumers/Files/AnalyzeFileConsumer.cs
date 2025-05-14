@@ -80,19 +80,18 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task AnalyzeAsync(CancellationToken cancellationToken)
     {
-        await using var fileStream = await _fileStorageProvider
-            .DownloadAsync(_context.Message.FileId, cancellationToken);
-
-        var request = new AnalyzeFileRequest(
-            fileStream,
-            _context.Message.FileName,
-            _context.Message.FileContentType,
-            _context.Message.FilePassword,
-            _context.Message.IsPrivateFile);
-
         await Parallel.ForEachAsync(_analyzers, cancellationToken, async (analyzer, ct) =>
         {
-            fileStream.Position = 0;
+            await using var fileStream = await _fileStorageProvider
+                .DownloadAsync(_context.Message.FileId, ct);
+
+            var request = new AnalyzeFileRequest(
+                fileStream,
+                _context.Message.FileName,
+                _context.Message.FileContentType,
+                _context.Message.FilePassword,
+                _context.Message.IsPrivateFile);
+
             var analyzeResult = await analyzer.AnalyzeAsync(request, ct);
             if (analyzeResult.IsError)
             {

@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Client;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging;
@@ -16,6 +17,7 @@ using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Analysis;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Calculations;
+using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
@@ -65,6 +67,10 @@ public static class DependencyInjection
         // Add analyzer logger.
         services.AddAnalyzerLogger<VirusTotalAnalyzer, VirusTotalAnalyzerOptions>(
             VirusTotalAnalyzer.KeyedServicesKey);
+        services.AddAnalyzerLogger<LargeFileUploadProvider, VirusTotalAnalyzerOptions>(
+            VirusTotalAnalyzer.KeyedServicesKey);
+        services.AddAnalyzerLogger<FileAnalyzer, VirusTotalAnalyzerOptions>(
+            VirusTotalAnalyzer.KeyedServicesKey);
         services.AddAnalyzerLogger<UrlAnalyzer, VirusTotalAnalyzerOptions>(
             VirusTotalAnalyzer.KeyedServicesKey);
 
@@ -92,7 +98,11 @@ public static class DependencyInjection
         // Add verdict calculator
         services.AddSingleton<IVerdictCalculator, VerdictCalculator>();
 
-        // Add URL Analyzer.
+        // Add file analyzer.
+        services.AddTransient<ILargeFileUploadProvider, LargeFileUploadProvider>();
+        services.AddSingleton<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>, FileAnalyzer>();
+
+        // Add URL analyzer.
         services.AddSingleton<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
     }
 }

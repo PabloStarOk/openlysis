@@ -68,7 +68,6 @@ internal class LocalFileStorageProvider : IFileStorageProvider
             Access = fileAccess,
             Mode = fileMode,
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan,
-            Share = FileShare.None,
         };
 
         if (OperatingSystem.IsLinux()

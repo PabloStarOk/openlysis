@@ -41,7 +41,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<AnalyzeUrlResponse>> AnalyzeAsync(
+    public async Task<ErrorOr<AnalyzeResponse>> AnalyzeAsync(
         HttpClient httpClient,
         IRequestFactory requestFactory,
         CancellationToken cancellationToken = default)
@@ -67,7 +67,7 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
             dataElement = jsonDocument.RootElement.GetProperty("data").Clone();
         }
 
-        return _serviceDeserializer.Deserialize<AnalyzeUrlResponse>(dataElement);
+        return _serviceDeserializer.Deserialize<AnalyzeResponse>(dataElement);
     }
 
     /// <inheritdoc/>

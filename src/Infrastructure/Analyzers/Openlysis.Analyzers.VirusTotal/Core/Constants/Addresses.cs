@@ -6,9 +6,14 @@ namespace Openlysis.Analyzers.VirusTotal.Core.Constants;
 public static class Addresses
 {
     /// <summary>
-    /// The base address for the VirusTotal API.
+    /// The endpoint for small file submissions (files under 32MB).
     /// </summary>
-    public const string BaseAddress = "https://www.virustotal.com/api/v3/";
+    public const string SmallFilesEndpoint = "files";
+
+    /// <summary>
+    /// The endpoint for obtaining an upload URL for large files.
+    /// </summary>
+    public const string FileUploadUrlEndpoint = "files/upload_url";
 
     /// <summary>
     /// The endpoint for URL submissions.

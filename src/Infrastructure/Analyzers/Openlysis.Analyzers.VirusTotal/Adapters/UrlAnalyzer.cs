@@ -63,7 +63,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         CancellationToken cancellationToken = default)
     {
         var requestFactory = new UrlRequestFactory(request);
-        ErrorOr<AnalyzeUrlResponse> result = await _vtAnalyzer.AnalyzeAsync(
+        ErrorOr<AnalyzeResponse> result = await _vtAnalyzer.AnalyzeAsync(
             httpClient,
             requestFactory,
             cancellationToken);
@@ -73,10 +73,10 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             return result.Errors;
         }
 
-        AnalyzeUrlResponse analyzeUrlResponse = result.Value;
+        AnalyzeResponse analyzeResponse = result.Value;
 
         return UrlServiceAnalysis.Create(
-            analyzeUrlResponse.AnalysisId,
+            analyzeResponse.AnalysisId,
             ServiceName,
             AnalysisStatus.Queued,
             Verdict.Unknown);
