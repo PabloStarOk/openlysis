@@ -51,6 +51,7 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The initial status of the analysis.</param>
+    /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="reports">The list of reports associated with the analysis.</param>
     /// <param name="jobId">An optional job identifier associated with the analysis.</param>
     /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
@@ -58,12 +59,11 @@ public class FileServiceAnalysis : ServiceAnalysis
         string id,
         string serviceName,
         AnalysisStatus status,
+        Verdict verdict,
         List<FileReport> reports,
         string? jobId = null)
     {
-        var state = AnalysisState
-            .Initial()
-            .WithStatus(status);
+        var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
         return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
@@ -78,17 +78,17 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="status">The initial status of the analysis.</param>
+    /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="jobId">An optional job identifier associated with the analysis.</param>
     /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
     public static FileServiceAnalysis Create(
         string id,
         string serviceName,
         AnalysisStatus status,
+        Verdict verdict,
         string? jobId = null)
     {
-        var state = AnalysisState
-            .Initial()
-            .WithStatus(status);
+        var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
         return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,

@@ -86,7 +86,8 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         return FileServiceAnalysis.Create(
             result.Value.FlowId,
             ServiceName,
-            AnalysisStatus.Queued);
+            AnalysisStatus.Queued,
+            Verdict.Unknown);
     }
 
     /// <inheritdoc/>
@@ -132,7 +133,8 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         var serviceAnalysis = FileServiceAnalysis.Create(
             analysisResponse.FlowId,
             ServiceName,
-            AnalysisStatus.Queued);
+            AnalysisStatus.Queued,
+            Verdict.Unknown);
 
         if (analysisResponse.Reports.Count is 0)
         {

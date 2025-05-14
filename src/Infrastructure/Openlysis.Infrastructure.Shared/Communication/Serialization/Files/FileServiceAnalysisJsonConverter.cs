@@ -26,6 +26,7 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         string id = string.Empty;
         string serviceName = string.Empty;
         AnalysisStatus status = 0;
+        Verdict verdict = 0;
         List<FileReport> reports = [];
         while (reader.Read())
         {
@@ -47,7 +48,15 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
                     break;
 
                 case StatusKey:
-                    status = Enum.Parse<AnalysisStatus>(reader.GetString() ?? string.Empty, ignoreCase: true);
+                    status = Enum.Parse<AnalysisStatus>(
+                        reader.GetString() ?? string.Empty,
+                        ignoreCase: true);
+                    break;
+
+                case VerdictKey:
+                    verdict = Enum.Parse<Verdict>(
+                        reader.GetString() ?? string.Empty,
+                        ignoreCase: true);
                     break;
 
                 case ReportsKey:
@@ -56,7 +65,7 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
             }
         }
 
-        return FileServiceAnalysis.Create(id, serviceName, status, reports);
+        return FileServiceAnalysis.Create(id, serviceName, status, verdict, reports);
     }
 
     /// <inheritdoc/>
