@@ -4,10 +4,8 @@ using System.Text.Json;
 using ErrorOr;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
-using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
@@ -21,44 +19,39 @@ namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analysis;
 /// <summary>
 /// Represents an analyzer which sends request to Hybrid Analysis to analyze Files or URLs.
 /// </summary>
-public class SandboxAnalyzer : ISandboxAnalyzer
+internal class SandboxAnalyzer : ISandboxAnalyzer
 {
     /// <summary>
     /// This constant is used to identify and retrieve services that are keyed for the Hybrid Analysis sandbox analyzer.
     /// </summary>
     public const string KeyedServicesKey = "HybridAnalysisServices";
 
-    private readonly IOptionsMonitor<HybridAnalyzerOptions> _options;
     private readonly SandboxAnalyzerLogger<SandboxAnalyzer> _analyzerLogger;
     private readonly IServiceDeserializer _serviceDeserializer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SandboxAnalyzer"/> class.
     /// </summary>
-    /// <param name="options">The options monitor instance to access configuration settings.</param>
     /// <param name="analyzerLogger">The logger instance to log analyzer activities.</param>
     /// <param name="serviceDeserializer">The deserializer instance to handle response deserialization.</param>
     public SandboxAnalyzer(
-        IOptionsMonitor<HybridAnalyzerOptions> options,
         SandboxAnalyzerLogger<SandboxAnalyzer> analyzerLogger,
         [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
     {
-        _options = options;
         _analyzerLogger = analyzerLogger;
         _serviceDeserializer = serviceDeserializer;
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<SandboxSubmitResponse>> AnalyzeAsync<TContent>(
+    public async Task<ErrorOr<SandboxSubmitResponse>> AnalyzeAsync(
         HttpClient httpClient,
-        SandboxSubmitRequest<TContent> request,
+        IRequestFactory requestFactory,
         CancellationToken cancellationToken = default)
-        where TContent : notnull
     {
-        using HttpContent httpContent = GetHttpContentRequest(request, out string endpointAddress);
+        using HybridAnalysisSubmitRequest request = requestFactory.Create();
         using HttpResponseMessage response = await httpClient.PostAsync(
-            endpointAddress,
-            httpContent,
+            request.EndpointAddress,
+            request.HttpContent,
             cancellationToken);
 
         if (response.IsSuccessStatusCode)
@@ -105,7 +98,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<SanboxReportSummary>> GetReportSummaryAsync(
+    public async Task<ErrorOr<SandboxReportSummary>> GetReportSummaryAsync(
         HttpClient httpClient,
         string id,
         CancellationToken cancellationToken = default)
@@ -119,7 +112,7 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         }
 
         return await _serviceDeserializer
-            .DeserializeAsync<SanboxReportSummary>(response, cancellationToken);
+            .DeserializeAsync<SandboxReportSummary>(response, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -151,32 +144,5 @@ public class SandboxAnalyzer : ISandboxAnalyzer
         }
 
         return hash;
-    }
-
-    /// <summary>
-    /// Creates an HTTP content request for the sandbox analyzer.
-    /// </summary>
-    /// <typeparam name="TContent">The type of the content to be analyzed.</typeparam>
-    /// <param name="request">The request containing the content to be analyzed.</param>
-    /// <param name="endpointAddress">The endpoint address to which the request will be sent.</param>
-    /// <returns>The HTTP content to be sent in the request.</returns>
-    private HttpContent GetHttpContentRequest<TContent>(
-        SandboxSubmitRequest<TContent> request,
-        out string endpointAddress)
-        where TContent : notnull
-    {
-        if (request is not SubmitUrlRequest urlRequest)
-        {
-            throw new NotImplementedException();
-        }
-
-        endpointAddress = Addresses.SandboxSubmitUrlEndpoint;
-        int environmentId = (int)_options.CurrentValue.DefaultSandboxEnvironment;
-        var dictionary = new Dictionary<string, string>
-        {
-            { "url", urlRequest.Url.AbsoluteUri },
-            { "environment_id", environmentId.ToString() },
-        };
-        return new FormUrlEncodedContent(dictionary);
     }
 }

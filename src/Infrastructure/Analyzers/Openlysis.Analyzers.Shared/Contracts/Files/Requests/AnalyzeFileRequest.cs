@@ -9,11 +9,13 @@ namespace Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 /// <param name="FileName">The name of the file.</param>
 /// <param name="FileContentType">The content type of the file.</param>
 /// <param name="FilePassword">The password for the file, if any.</param>
+/// <param name="FileSha256">The SHA-256 hash of the file.</param>
 /// <param name="IsPrivateFile">Indicates whether the file is private.</param>
 public record AnalyzeFileRequest(
     Stream FileData,
     string FileName,
     string FileContentType,
     string FilePassword,
+    string FileSha256,
     bool IsPrivateFile)
     : AnalyzeRequest(string.Empty, IsPrivateFile);

@@ -22,4 +22,9 @@ public record HybridAnalyzerOptions : AnalyzerOptions
     /// Gets the default environment type.
     /// </summary>
     required public SandboxEnvironment DefaultSandboxEnvironment { get; init; }
+
+    /// <summary>
+    /// Gets a value indicating whether experimental anti-evasion techniques should be enabled.
+    /// </summary>
+    required public bool UseExperimentalAntiEvasion { get; init; }
 }

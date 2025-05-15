@@ -11,7 +11,7 @@ namespace Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
 /// <param name="Status">The status of the job.</param>
 /// <param name="RawVerdict">The verdict of the analysis as a string.</param>
 /// <param name="ThreatScore">The threat score of the analysis.</param>
-public record SanboxReportSummary(
+public record SandboxReportSummary(
     [property: JsonPropertyName("job_id")] string JobId,
     [property: JsonPropertyName("state")] Status Status,
     [property: JsonPropertyName("verdict")] string? RawVerdict,

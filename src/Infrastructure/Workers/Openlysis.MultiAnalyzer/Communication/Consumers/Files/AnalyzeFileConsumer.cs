@@ -90,6 +90,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
                 _context.Message.FileName,
                 _context.Message.FileContentType,
                 _context.Message.FilePassword,
+                _context.Message.FileSha256,
                 _context.Message.IsPrivateFile);
 
             var analyzeResult = await analyzer.AnalyzeAsync(request, ct);

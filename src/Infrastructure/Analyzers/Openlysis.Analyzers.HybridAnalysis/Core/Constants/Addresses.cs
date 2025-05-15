@@ -8,6 +8,11 @@ internal static class Addresses
     /// <summary>
     /// The endpoint for submitting a URL to the sandbox.
     /// </summary>
+    internal const string SandboxSubmitFileEndpoint = "submit/file";
+
+    /// <summary>
+    /// The endpoint for submitting a URL to the sandbox.
+    /// </summary>
     internal const string SandboxSubmitUrlEndpoint = "submit/url";
 
     /// <summary>

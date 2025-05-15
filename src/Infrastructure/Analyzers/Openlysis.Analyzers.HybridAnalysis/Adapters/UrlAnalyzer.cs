@@ -8,8 +8,8 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
-using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Factories;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
@@ -24,33 +24,33 @@ namespace Openlysis.Analyzers.HybridAnalysis.Adapters;
 /// <summary>
 /// Analyzer of URLs.
 /// </summary>
-public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
+internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 {
     /// <summary>
     /// Key of the service for tracking request limits.
     /// </summary>
     public const string LimitTrackerServiceKey = "HybridAnalysisLimitTracker";
 
-    private readonly IOptionsMonitor<HybridAnalyzerOptions> _hybridOptions;
+    private readonly IOptionsMonitor<HybridAnalyzerOptions> _analyzerOptions;
     private readonly ISandboxAnalyzer _sandboxAnalyzer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlAnalyzer"/> class.
     /// </summary>
-    /// <param name="options">The options monitor for <see cref="HybridAnalyzerOptions"/>.</param>
+    /// <param name="analyzerOptions">The options monitor for <see cref="HybridAnalyzerOptions"/>.</param>
     /// <param name="rateQuotaService">The request limit tracker.</param>
     /// <param name="httpClientFactory">The HTTP client factory.</param>
     /// <param name="logger">The logger instance.</param>
     /// <param name="sandboxAnalyzer">The sandbox analyzer.</param>
     public UrlAnalyzer(
-        IOptionsMonitor<HybridAnalyzerOptions> options,
+        IOptionsMonitor<HybridAnalyzerOptions> analyzerOptions,
         [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
         SandboxAnalyzerLogger<UrlAnalyzer> logger,
         ISandboxAnalyzer sandboxAnalyzer)
-        : base(options, rateQuotaService, httpClientFactory, logger)
+        : base(analyzerOptions, rateQuotaService, httpClientFactory, logger)
     {
-        _hybridOptions = options;
+        _analyzerOptions = analyzerOptions;
         _sandboxAnalyzer = sandboxAnalyzer;
     }
 
@@ -60,13 +60,12 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
     {
-        var submitUrlRequest = new SubmitUrlRequest(
-            request.Url,
-            _hybridOptions.CurrentValue.DefaultSandboxEnvironment,
-            true);
+        var requestFactory = new UrlRequestFactory(
+            _analyzerOptions.CurrentValue,
+            request);
         ErrorOr<SandboxSubmitResponse> result = await _sandboxAnalyzer.AnalyzeAsync(
             httpClient,
-            submitUrlRequest,
+            requestFactory,
             cancellationToken);
 
         if (result.Errors.Any(e => e.Code is ErrorCodes.TooManyRequests))
@@ -80,10 +79,10 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             }
 
             string hash = checkHashResult.Value;
-            int sandboxEnvironmentId = (int)_hybridOptions.CurrentValue.DefaultSandboxEnvironment;
+            int sandboxEnvironmentId = (int)_analyzerOptions.CurrentValue.DefaultSandboxEnvironment;
             string id = $"{hash}:{sandboxEnvironmentId}";
 
-            ErrorOr<SanboxReportSummary> reportResult =
+            ErrorOr<SandboxReportSummary> reportResult =
                 await _sandboxAnalyzer.GetReportSummaryAsync(httpClient, id, cancellationToken);
 
             if (reportResult.IsError)
@@ -132,7 +131,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         ComposedServiceAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        ErrorOr<SanboxReportSummary> result = await _sandboxAnalyzer.GetReportSummaryAsync(
+        ErrorOr<SandboxReportSummary> result = await _sandboxAnalyzer.GetReportSummaryAsync(
             httpClient,
             id.Primary.Value,
             cancellationToken);
@@ -142,7 +141,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             return result.Errors;
         }
 
-        SanboxReportSummary reportSummary = result.Value;
+        SandboxReportSummary reportSummary = result.Value;
 
         if (reportSummary.Status is Status.Error)
         {
@@ -162,11 +161,11 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <summary>
-    /// Maps from <see cref="SanboxReportSummary"/> to an <see cref="UrlServiceAnalysis"/> object.
+    /// Maps from <see cref="SandboxReportSummary"/> to an <see cref="UrlServiceAnalysis"/> object.
     /// </summary>
     /// <param name="reportSummary">The summary of the sandbox report.</param>
     /// <returns>A UrlServiceAnalysis object containing the mapped data.</returns>
-    private UrlServiceAnalysis MapServiceAnalysis(SanboxReportSummary reportSummary)
+    private UrlServiceAnalysis MapServiceAnalysis(SandboxReportSummary reportSummary)
     {
         AnalysisStatus status = Maps.AnalysisStatusMap[reportSummary.Status];
         Verdict verdict = Maps.VerdictMap[reportSummary.Verdict];
