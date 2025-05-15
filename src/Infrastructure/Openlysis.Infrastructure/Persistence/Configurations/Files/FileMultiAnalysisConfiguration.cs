@@ -88,8 +88,7 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
 
                 metadataBuilder.Property(m => m.ContentType)
                     .HasColumnName("content_type")
-                    .HasColumnType("varchar")
-                    .HasMaxLength(20)
+                    .HasColumnType("text")
                     .IsRequired();
             });
 

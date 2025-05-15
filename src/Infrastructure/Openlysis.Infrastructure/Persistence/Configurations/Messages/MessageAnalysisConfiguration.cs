@@ -219,8 +219,7 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
 
                         metadataBuilder.Property(m => m.ContentType)
                             .HasColumnName("content_type")
-                            .HasColumnType(VarcharType)
-                            .HasMaxLength(20)
+                            .HasColumnType("text")
                             .IsRequired();
                     }));
     }

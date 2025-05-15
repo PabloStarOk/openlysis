@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS file_multi_analyses
     average_threat_score real,
     file_name varchar(100) NOT NULL,
     size bigint NOT NULL,
-    content_type varchar(20) NOT NULL,
+    content_type text NOT NULL,
     user_id varchar(450) REFERENCES "AspNetUsers" ("Id"),
     sha256 char(64) REFERENCES hash_values(sha256) ON DELETE CASCADE
 );
@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS attached_file_results (
     data_type smallint NOT NULL,
     file_name varchar(100) NOT NULL,
     size bigint NOT NULL,
-    content_type varchar(20) NOT NULL,
+    content_type text NOT NULL,
     message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
     file_multi_analysis_id uuid NOT NULL REFERENCES file_multi_analyses (file_multi_analysis_id) ON DELETE RESTRICT
 );
