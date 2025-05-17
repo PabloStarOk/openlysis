@@ -3,7 +3,7 @@ namespace Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 /// <summary>
 /// Represents the verdict of a hybrid analysis.
 /// </summary>
-public enum HybridVerdict
+public enum HybridAnalysisVerdict
 {
     /// <summary>
     /// The verdict is unknown or could not be determined.

@@ -14,22 +14,22 @@ internal record AnalysisSummary(
     float ThreatScore)
 {
     /// <summary>
-    /// Gets the verdict of the analysis as a <see cref="HybridVerdict"/> enum.
+    /// Gets the verdict of the analysis as a <see cref="HybridAnalysisVerdict"/> enum.
     /// </summary>
     /// <remarks>
     /// The raw verdict string is trimmed and spaces are removed before parsing.
     /// </remarks>
     [JsonIgnore]
-    internal HybridVerdict Verdict
+    internal HybridAnalysisVerdict Verdict
     {
         get
         {
             if (RawVerdict is null)
             {
-                return HybridVerdict.Unknown;
+                return HybridAnalysisVerdict.Unknown;
             }
 
-            return Enum.Parse<HybridVerdict>(
+            return Enum.Parse<HybridAnalysisVerdict>(
                 RawVerdict
                     .Trim()
                     .Replace(" ", string.Empty),

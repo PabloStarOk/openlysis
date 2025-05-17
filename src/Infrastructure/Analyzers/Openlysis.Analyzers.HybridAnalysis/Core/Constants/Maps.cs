@@ -23,14 +23,14 @@ public static class Maps
     }.AsReadOnly();
 
     /// <summary>
-    /// A read-only dictionary that maps <see cref="HybridVerdict"/> values to <see cref="Verdict"/> values.
+    /// A read-only dictionary that maps <see cref="HybridAnalysisVerdict"/> values to <see cref="Verdict"/> values.
     /// </summary>
-    public static readonly ReadOnlyDictionary<HybridVerdict, Verdict> VerdictMap = new Dictionary<HybridVerdict, Verdict>(Enum.GetValues<Status>().Length)
+    public static readonly ReadOnlyDictionary<HybridAnalysisVerdict, Verdict> VerdictMap = new Dictionary<HybridAnalysisVerdict, Verdict>(Enum.GetValues<Status>().Length)
     {
-        { HybridVerdict.Unknown, Verdict.Unknown },
-        { HybridVerdict.NoVerdict, Verdict.Unknown },
-        { HybridVerdict.NoSpecificThreat, Verdict.Undetected },
-        { HybridVerdict.Suspicious, Verdict.Suspicious },
-        { HybridVerdict.Malicious, Verdict.Malicious },
+        { HybridAnalysisVerdict.Unknown, Verdict.Unknown },
+        { HybridAnalysisVerdict.NoVerdict, Verdict.Unknown },
+        { HybridAnalysisVerdict.NoSpecificThreat, Verdict.Undetected },
+        { HybridAnalysisVerdict.Suspicious, Verdict.Suspicious },
+        { HybridAnalysisVerdict.Malicious, Verdict.Malicious },
     }.AsReadOnly();
 }
