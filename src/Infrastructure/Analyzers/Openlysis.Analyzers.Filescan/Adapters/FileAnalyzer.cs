@@ -130,66 +130,79 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 
         GetAnalysisResponse analysisResponse = result.Value;
 
-        var serviceAnalysis = FileServiceAnalysis.Create(
-            analysisResponse.FlowId,
-            ServiceName,
-            AnalysisStatus.Queued,
-            Verdict.Unknown);
+#if DEBUG
+        DebugFilescanAnalysis(analysisResponse);
+#endif
 
-        if (analysisResponse.Reports.Count is 0)
-        {
-            return serviceAnalysis;
-        }
-
-        UpdateAnalysisFromResponse(serviceAnalysis, analysisResponse);
-        return serviceAnalysis;
+        return CreateAnalysisFromResponse(analysisResponse);
     }
 
     /// <summary>
-    /// Updates the provided analysis object with data from the given response.
+    /// Creates a <see cref="FileServiceAnalysis"/> instance from the Filescan analysis response.
     /// </summary>
-    /// <param name="analysis">The analysis object to update.</param>
-    /// <param name="response">The response containing data to update the analysis with.</param>
-    private void UpdateAnalysisFromResponse(
-        FileServiceAnalysis analysis,
-        GetAnalysisResponse response)
+    /// <param name="response">The analysis response containing reports from the Filescan service.</param>
+    /// <returns>A populated <see cref="FileServiceAnalysis"/> object with status and reports extracted from the response.</returns>
+    private FileServiceAnalysis CreateAnalysisFromResponse(GetAnalysisResponse response)
     {
-        foreach (var reportKeyValue in response.Reports)
+        var serviceAnalysis = FileServiceAnalysis.Create(
+            response.FlowId,
+            ServiceName,
+            AnalysisStatus.Queued,
+            Verdict.Unknown);
+        foreach (var reportKeyValuePair in response.Reports)
         {
-            string filescanReportId = reportKeyValue.Key;
-            FilescanReport filescanReport = reportKeyValue.Value;
+            string filescanReportId = reportKeyValuePair.Key;
+            FilescanReport filescanReport = reportKeyValuePair.Value;
+            FilescanVerdict filescanVerdict =
+                filescanReport.FinalVerdict?.Verdict ?? FilescanVerdict.Unknown;
 
-            Verdict verdict = Maps.VerdictMap[
-                filescanReport.FinalVerdict?.Verdict ?? FilescanVerdict.Unknown];
+            Verdict verdict = Maps.VerdictMap[filescanVerdict];
             ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
-
             var report = FileReport.Create(
                 filescanReportId,
                 verdict,
                 threatZone,
                 filescanReport.FinalVerdict?.ThreatLevel);
-            analysis.AddReport(report);
-            DebugFilescanReport(filescanReport);
+            serviceAnalysis.AddReport(report);
         }
 
         AnalysisStatus status = Maps.AnalysisStatusMap[response.Status];
-        analysis.UpdateStatus(status);
+        serviceAnalysis.UpdateStatus(status);
+        return serviceAnalysis;
+    }
+
+#if DEBUG
+    /// <summary>
+    /// Logs debug information about an analysis of Filescan service.
+    /// </summary>
+    /// <param name="response">The analysis response containing reports to log.</param>
+    private void DebugFilescanAnalysis(GetAnalysisResponse response)
+    {
+        foreach (var reportKeyValue in response.Reports)
+        {
+            DebugFilescanReport(
+                id: reportKeyValue.Key,
+                filescanReport: reportKeyValue.Value);
+        }
     }
 
     /// <summary>
-    /// Logs debug information about a given Filescan report.
+    /// Logs debug information about a specific Filescan report.
     /// </summary>
-    /// <param name="filescanReport">The Filescan report to log debug information for.</param>
+    /// <param name="id">The unique identifier of the report.</param>
+    /// <param name="filescanReport">The Filescan report containing analysis results to log.</param>
     private void DebugFilescanReport(
+        string id,
         FilescanReport filescanReport)
     {
-#if DEBUG
         _logger.LogDebug(
             "Filescan Report:"
+            + "\n\tID: {ReportId}"
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreatScore: {ThreatScore}",
+            id,
             filescanReport.FinalVerdict?.Verdict,
             filescanReport.FinalVerdict?.ThreatLevel);
-#endif
     }
+#endif
 }

@@ -184,6 +184,6 @@ public class FileServiceAnalysis : ServiceAnalysis
             .Select(r => r.Verdict)
             .OrderByDescending(v => VerdictRankMapping.Map[v])
             .FirstOrDefault();
-        State = State.WithVerdict(best);
+        UpdateVerdict(best);
     }
 }
