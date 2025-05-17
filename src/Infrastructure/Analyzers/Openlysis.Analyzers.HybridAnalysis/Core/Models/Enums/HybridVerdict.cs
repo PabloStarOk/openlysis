@@ -6,6 +6,11 @@ namespace Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 public enum HybridVerdict
 {
     /// <summary>
+    /// The verdict is unknown or could not be determined.
+    /// </summary>
+    Unknown,
+
+    /// <summary>
     /// No verdict has been determined or no analysis was performed.
     /// </summary>
     NoVerdict,

@@ -3,13 +3,27 @@ using ErrorOr;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
 
-namespace Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
+namespace Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
 
 /// <summary>
 /// Defines a base sandbox analyzer.
 /// </summary>
 internal interface ISandboxAnalyzer
 {
+    /// <summary>
+    /// Determines if the analyzer can process the specified MIME type.
+    /// </summary>
+    /// <param name="mimeType">The MIME type to check.</param>
+    /// <returns>True if the analyzer can process the MIME type; otherwise, false.</returns>
+    public bool CanAnalyzeMimeType(string mimeType);
+
+    /// <summary>
+    /// Determines the appropriate sandbox environment for the specified MIME type.
+    /// </summary>
+    /// <param name="mimeType">The MIME type to evaluate.</param>
+    /// <returns>The <see cref="SandboxEnvironment"/> suitable for the given MIME type.</returns>
+    public SandboxEnvironment DetermineEnvironment(string mimeType);
+
     /// <summary>
     /// Sends the given request content to a sandbox analysis.
     /// </summary>

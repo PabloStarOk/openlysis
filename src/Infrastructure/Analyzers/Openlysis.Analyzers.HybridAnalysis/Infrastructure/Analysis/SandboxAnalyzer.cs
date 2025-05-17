@@ -4,8 +4,10 @@ using System.Text.Json;
 using ErrorOr;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
+using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
+using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
@@ -26,20 +28,79 @@ internal class SandboxAnalyzer : ISandboxAnalyzer
     /// </summary>
     public const string KeyedServicesKey = "HybridAnalysisServices";
 
+    private readonly IOptionsMonitor<SandboxAnalyzerOptions> _options;
     private readonly SandboxAnalyzerLogger<SandboxAnalyzer> _analyzerLogger;
     private readonly IServiceDeserializer _serviceDeserializer;
+    private readonly IReadOnlyList<MimeEnvironmentMapping> _environmentMappings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SandboxAnalyzer"/> class.
     /// </summary>
+    /// <param name="options">The options monitor for accessing configuration settings for the analyzer.</param>
     /// <param name="analyzerLogger">The logger instance to log analyzer activities.</param>
     /// <param name="serviceDeserializer">The deserializer instance to handle response deserialization.</param>
     public SandboxAnalyzer(
+        IOptionsMonitor<SandboxAnalyzerOptions> options,
         SandboxAnalyzerLogger<SandboxAnalyzer> analyzerLogger,
         [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
     {
+        _options = options;
         _analyzerLogger = analyzerLogger;
         _serviceDeserializer = serviceDeserializer;
+
+        _environmentMappings =
+        [
+            new MimeEnvironmentMapping(
+                _options.CurrentValue.AnyOsSupportedMimeTypes,
+                SandboxEnvironment.Windows11X64),
+            new MimeEnvironmentMapping(
+                _options.CurrentValue.WinOnlySupportedMimeTypes,
+                SandboxEnvironment.Windows11X64),
+            new MimeEnvironmentMapping(
+                _options.CurrentValue.Win7HwpOnlySupportedMimeTypes,
+                SandboxEnvironment.Windows7X32HwpSupport),
+            new MimeEnvironmentMapping(
+                _options.CurrentValue.LinuxOnlySupportedMimeTypes,
+                SandboxEnvironment.LinuxUbuntuX64),
+            new MimeEnvironmentMapping(
+                _options.CurrentValue.MacOnlySupportedMimeTypes,
+                SandboxEnvironment.MacCatalinaX64),
+            new MimeEnvironmentMapping(
+                _options.CurrentValue.AndroidOnlySupportedMimeTypes,
+                SandboxEnvironment.AndroidStaticAnalysis)
+        ];
+    }
+
+    /// <inheritdoc/>
+    public bool CanAnalyzeMimeType(string mimeType)
+    {
+        return _options.CurrentValue.AllSupportedFiles
+            .Contains(mimeType, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <inheritdoc/>
+    public SandboxEnvironment DetermineEnvironment(string mimeType)
+    {
+        SandboxEnvironment? environment = null;
+
+        foreach (var mapping in _environmentMappings)
+        {
+            if (!mapping.SupportMimeType(mimeType))
+            {
+                continue;
+            }
+
+            environment = mapping.SandboxEnvironment;
+            break;
+        }
+
+        if (environment is null)
+        {
+            throw new NotSupportedException(
+                $"MIME type '{mimeType}' is not supported by any sandbox environment.");
+        }
+
+        return (SandboxEnvironment)environment;
     }
 
     /// <inheritdoc/>
@@ -48,7 +109,7 @@ internal class SandboxAnalyzer : ISandboxAnalyzer
         IRequestFactory requestFactory,
         CancellationToken cancellationToken = default)
     {
-        using HybridAnalysisSubmitRequest request = requestFactory.Create();
+        using HybridAnalysisAnalyzeRequest request = requestFactory.Create();
         using HttpResponseMessage response = await httpClient.PostAsync(
             request.EndpointAddress,
             request.HttpContent,
@@ -144,5 +205,25 @@ internal class SandboxAnalyzer : ISandboxAnalyzer
         }
 
         return hash;
+    }
+
+    /// <summary>
+    /// Represents a mapping between supported MIME types and a sandbox environment.
+    /// </summary>
+    /// <param name="SupportedMimeTypes">The set of MIME types supported by the environment.</param>
+    /// <param name="SandboxEnvironment">The sandbox environment associated with the MIME types.</param>
+    private sealed record MimeEnvironmentMapping(
+        IReadOnlySet<string> SupportedMimeTypes,
+        SandboxEnvironment SandboxEnvironment)
+    {
+        /// <summary>
+        /// Determines whether the specified MIME type is supported by this environment mapping.
+        /// </summary>
+        /// <param name="mimeType">The MIME type to check.</param>
+        /// <returns><c>true</c> if the MIME type is supported; otherwise, <c>false</c>.</returns>
+        internal bool SupportMimeType(string mimeType)
+            => SupportedMimeTypes
+                .Select(f => f.Trim())
+                .Contains(mimeType, StringComparer.OrdinalIgnoreCase);
     }
 }

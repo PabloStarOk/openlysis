@@ -1,7 +1,7 @@
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
 
-namespace Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
+namespace Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 
 /// <summary>
 /// Represents the options for the Hybrid Analyzer.
@@ -19,9 +19,14 @@ public record HybridAnalyzerOptions : AnalyzerOptions
     required public string UserAgent { get; init; }
 
     /// <summary>
-    /// Gets the default environment type.
+    /// Gets the default environment type to be used in URL sandbox analyses.
     /// </summary>
     required public SandboxEnvironment DefaultSandboxEnvironment { get; init; }
+
+    /// <summary>
+    /// Gets the preferred service to use for quick scanning operations.
+    /// </summary>
+    required public string PreferredQuickScanServiceName { get; init; }
 
     /// <summary>
     /// Gets a value indicating whether experimental anti-evasion techniques should be enabled.

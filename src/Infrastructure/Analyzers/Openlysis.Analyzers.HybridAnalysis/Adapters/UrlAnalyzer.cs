@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
-using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
+using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
+using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
@@ -60,7 +60,7 @@ internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
     {
-        var requestFactory = new UrlRequestFactory(
+        var requestFactory = new UrlSandboxRequestFactory(
             _analyzerOptions.CurrentValue,
             request);
         ErrorOr<SandboxSubmitResponse> result = await _sandboxAnalyzer.AnalyzeAsync(

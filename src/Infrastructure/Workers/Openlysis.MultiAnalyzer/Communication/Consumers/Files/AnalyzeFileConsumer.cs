@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -82,11 +83,11 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     {
         await Parallel.ForEachAsync(_analyzers, cancellationToken, async (analyzer, ct) =>
         {
-            await using var fileStream = await _fileStorageProvider
-                .DownloadAsync(_context.Message.FileId, ct);
+            await using var fileStream = await DownloadFileAsync(ct);
 
             var request = new AnalyzeFileRequest(
                 fileStream,
+                DownloadFileAsync,
                 _context.Message.FileName,
                 _context.Message.FileContentType,
                 _context.Message.FilePassword,
@@ -183,6 +184,19 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         {
             await SendUpdateAsync();
         }
+    }
+
+    /// <summary>
+    /// Downloads the file from the file storage provider.
+    /// </summary>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>A task that represents the asynchronous operation with a stream containing the downloaded file data.</returns>
+    private async Task<Stream> DownloadFileAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _fileStorageProvider.DownloadAsync(
+            _context.Message.FileId,
+            cancellationToken);
     }
 
     /// <summary>

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
+using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
 using Openlysis.Analyzers.Shared.Infrastructure.Logging.Services;
 

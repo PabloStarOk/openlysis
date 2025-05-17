@@ -3,12 +3,14 @@ using System.Text.Json.Serialization;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.HybridAnalysis.Adapters;
-using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
-using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
+using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
+using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analysis;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Files;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
@@ -52,8 +54,19 @@ public static class DependencyInjection
         // Add options
         services.Configure<HybridAnalyzerOptions>(analyzerOptionsSection);
 
-        // Add sandbox analyzer
+        configuration.GetRequiredSection(SandboxAnalyzerOptions.SectionName);
+        services.AddOptions<SandboxAnalyzerOptions>()
+            .BindConfiguration(SandboxAnalyzerOptions.SectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton<
+            IValidateOptions<SandboxAnalyzerOptions>,
+            SandboxAnalyzerOptionsValidator>();
+
+        // Add Hybrid Analysis analyzers
         services.AddSingleton<ISandboxAnalyzer, SandboxAnalyzer>();
+        services.AddSingleton<IQuickScanner, QuickScanner>();
 
         // Add request limit tracker
         services.AddRateQuotaService<AnalysisEndpointType>(
@@ -63,13 +76,14 @@ public static class DependencyInjection
 
         // Add analyzer loggers
         services.AddSingleton<SandboxAnalyzerLogger<SandboxAnalyzer>>();
+        services.AddSingleton<IServiceLogger<QuickScanner>, SandboxAnalyzerLogger<QuickScanner>>();
         services.AddSingleton<IServiceLogger<FileAnalyzer>, SandboxAnalyzerLogger<FileAnalyzer>>();
         services.AddSingleton<SandboxAnalyzerLogger<UrlAnalyzer>>();
 
         // Add analyzer deserializer.
         services.AddServiceDeserializer<HybridAnalyzerOptions>(
             SandboxAnalyzer.KeyedServicesKey,
-            () => new JsonSerializerOptions()
+            () => new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
                 Converters =
@@ -85,6 +99,7 @@ public static class DependencyInjection
             });
 
         // Add file analyzer
+        services.AddFileTypeDetector(configuration);
         services.AddSingleton<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>, FileAnalyzer>();
 
         // Add URL analyzer

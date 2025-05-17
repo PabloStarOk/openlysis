@@ -1,6 +1,6 @@
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 
-namespace Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
+namespace Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
 
 /// <summary>
 /// Factory interface for creating Hybrid Analysis request objects.
@@ -10,6 +10,6 @@ internal interface IRequestFactory
     /// <summary>
     /// Creates a new Hybrid Analysis submit request.
     /// </summary>
-    /// <returns>A new instance of <see cref="HybridAnalysisSubmitRequest"/>.</returns>
-    public HybridAnalysisSubmitRequest Create();
+    /// <returns>A new instance of <see cref="HybridAnalysisAnalyzeRequest"/>.</returns>
+    public HybridAnalysisAnalyzeRequest Create();
 }

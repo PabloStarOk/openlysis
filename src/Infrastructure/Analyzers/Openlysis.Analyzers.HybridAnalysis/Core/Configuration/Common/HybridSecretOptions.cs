@@ -1,6 +1,6 @@
 using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 
-namespace Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
+namespace Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 
 /// <summary>
 /// Represents the options for Hybrid Analysis secret configuration.

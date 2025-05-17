@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 
-using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
-using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
+using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
+using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
@@ -13,7 +13,7 @@ namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Factories;
 /// Factory for creating Hybrid Analysis API requests for file submission.
 /// Prepares multipart form data with file content, environment settings, and other required parameters.
 /// </summary>
-internal class FileRequestFactory : IRequestFactory
+internal class FileSandboxRequestFactory : IRequestFactory
 {
     private const string FileBodyParamName = "file";
     private const string EnvironmentIdBodyParamName = "environment_id";
@@ -22,22 +22,30 @@ internal class FileRequestFactory : IRequestFactory
 
     private readonly HybridAnalyzerOptions _analyzerOptions;
     private readonly AnalyzeFileRequest _request;
+    private readonly SandboxEnvironment _osEnvironment;
+    private readonly string _mimeType;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileRequestFactory"/> class.
+    /// Initializes a new instance of the <see cref="FileSandboxRequestFactory"/> class.
     /// </summary>
     /// <param name="analyzerOptions">The options containing configuration for hybrid analysis.</param>
     /// <param name="request">The file analysis request containing file data and metadata.</param>
-    internal FileRequestFactory(
+    /// <param name="osEnvironment">The sandbox environment configuration to use for analysis.</param>
+    /// <param name="mimeType">The MIME type of the file to be analyzed.</param>
+    internal FileSandboxRequestFactory(
         HybridAnalyzerOptions analyzerOptions,
-        AnalyzeFileRequest request)
+        AnalyzeFileRequest request,
+        SandboxEnvironment osEnvironment,
+        string mimeType)
     {
         _analyzerOptions = analyzerOptions;
         _request = request;
+        _osEnvironment = osEnvironment;
+        _mimeType = mimeType;
     }
 
     /// <inheritdoc/>
-    public HybridAnalysisSubmitRequest Create()
+    public HybridAnalysisAnalyzeRequest Create()
     {
         var content = new MultipartFormDataContent();
 
@@ -46,7 +54,7 @@ internal class FileRequestFactory : IRequestFactory
         AddEnvironmentIdToContent(content);
         AddAntiEvasionToContent(content);
 
-        return new HybridAnalysisSubmitRequest(
+        return new HybridAnalysisAnalyzeRequest(
             Addresses.SandboxSubmitFileEndpoint,
             content);
     }
@@ -58,8 +66,7 @@ internal class FileRequestFactory : IRequestFactory
     private void AddFileToContent(MultipartFormDataContent content)
     {
         var fileContent = new StreamContent(_request.FileData);
-        fileContent.Headers.ContentType =
-            new MediaTypeHeaderValue(_request.FileContentType);
+        fileContent.Headers.ContentType = new MediaTypeHeaderValue(_mimeType);
         content.Add(fileContent, FileBodyParamName, _request.FileName);
     }
 
@@ -86,8 +93,7 @@ internal class FileRequestFactory : IRequestFactory
     /// <param name="content">The multipart form data content to which the environment ID will be added.</param>
     private void AddEnvironmentIdToContent(MultipartFormDataContent content)
     {
-        SandboxEnvironment environmentId = _analyzerOptions.DefaultSandboxEnvironment;
-        string environmentIdString = environmentId.ToString("D");
+        string environmentIdString = _osEnvironment.ToString("D");
         var environmentContent = new StringContent(environmentIdString);
         content.Add(environmentContent, EnvironmentIdBodyParamName);
     }

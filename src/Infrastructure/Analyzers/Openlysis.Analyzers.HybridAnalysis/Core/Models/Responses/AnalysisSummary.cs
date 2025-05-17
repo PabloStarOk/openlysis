@@ -5,17 +5,13 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 namespace Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
 
 /// <summary>
-/// Represents a summary of a sandbox report.
+/// Represents a summary of an analysis performed by Hybrid Analysis.
 /// </summary>
-/// <param name="JobId">The job identifier.</param>
-/// <param name="Status">The status of the job.</param>
-/// <param name="RawVerdict">The verdict of the analysis as a string.</param>
-/// <param name="ThreatScore">The threat score of the analysis.</param>
-public record SandboxReportSummary(
-    [property: JsonPropertyName("job_id")] string JobId,
-    [property: JsonPropertyName("state")] Status Status,
+/// <param name="RawVerdict">The raw verdict string from the analysis result.</param>
+/// <param name="ThreatScore">The numerical threat score assigned to the analyzed sample.</param>
+internal record AnalysisSummary(
     [property: JsonPropertyName("verdict")] string? RawVerdict,
-    [property: JsonPropertyName("threat_score")] float? ThreatScore)
+    float ThreatScore)
 {
     /// <summary>
     /// Gets the verdict of the analysis as a <see cref="HybridVerdict"/> enum.
@@ -24,7 +20,7 @@ public record SandboxReportSummary(
     /// The raw verdict string is trimmed and spaces are removed before parsing.
     /// </remarks>
     [JsonIgnore]
-    public HybridVerdict Verdict
+    internal HybridVerdict Verdict
     {
         get
         {

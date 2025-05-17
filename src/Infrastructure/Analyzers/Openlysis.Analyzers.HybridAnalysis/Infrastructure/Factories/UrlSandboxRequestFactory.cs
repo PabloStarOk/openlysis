@@ -1,5 +1,5 @@
-using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions;
-using Openlysis.Analyzers.HybridAnalysis.Core.Configuration;
+using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
+using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
@@ -11,7 +11,7 @@ namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Factories;
 /// Factory for creating Hybrid Analysis URL submission requests.
 /// Handles the conversion of URL analysis requests into the format required by the Hybrid Analysis API.
 /// </summary>
-internal class UrlRequestFactory : IRequestFactory
+internal class UrlSandboxRequestFactory : IRequestFactory
 {
     private const string UrlBodyParamName = "url";
     private const string EnvironmentIdBodyParamName = "environment_id";
@@ -21,11 +21,11 @@ internal class UrlRequestFactory : IRequestFactory
     private readonly AnalyzeUrlRequest _request;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UrlRequestFactory"/> class.
+    /// Initializes a new instance of the <see cref="UrlSandboxRequestFactory"/> class.
     /// </summary>
     /// <param name="analyzerOptions">The options containing configuration for the Hybrid Analysis analyzer.</param>
     /// <param name="request">The URL request to be analyzed.</param>
-    public UrlRequestFactory(
+    public UrlSandboxRequestFactory(
         HybridAnalyzerOptions analyzerOptions,
         AnalyzeUrlRequest request)
     {
@@ -34,7 +34,7 @@ internal class UrlRequestFactory : IRequestFactory
     }
 
     /// <inheritdoc/>
-    public HybridAnalysisSubmitRequest Create()
+    public HybridAnalysisAnalyzeRequest Create()
     {
         var dictionary = new Dictionary<string, string>(3);
         AddUrlToDictionary(dictionary);
@@ -42,7 +42,7 @@ internal class UrlRequestFactory : IRequestFactory
         AddAntiEvasionToDictionary(dictionary);
         var content = new FormUrlEncodedContent(dictionary);
 
-        return new HybridAnalysisSubmitRequest(
+        return new HybridAnalysisAnalyzeRequest(
             Addresses.SandboxSubmitUrlEndpoint,
             content);
     }

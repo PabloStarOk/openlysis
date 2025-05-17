@@ -5,7 +5,7 @@ namespace Openlysis.Analyzers.HybridAnalysis.Core.Models.Requests;
 /// </summary>
 /// <param name="EndpointAddress">The API endpoint address to send the request to.</param>
 /// <param name="HttpContent">The HTTP content containing the sample data to be analyzed.</param>
-internal sealed record HybridAnalysisSubmitRequest(
+internal sealed record HybridAnalysisAnalyzeRequest(
     string EndpointAddress,
     HttpContent HttpContent)
     : IDisposable
