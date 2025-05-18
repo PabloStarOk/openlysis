@@ -81,30 +81,6 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="UrlServiceAnalysis"/> with Failed status.
-    /// </summary>
-    /// <param name="serviceName">The name of the service being analyzed.</param>
-    /// <param name="error">The error message indicating why the analysis failed.</param>
-    /// <returns>A new instance of <see cref="UrlServiceAnalysis"/> with Failed status, Unknown verdict, and Unknown threat zone.</returns>
-    /// <remarks>
-    /// This method is used when an analysis has failed and creates an analysis with empty IDs and appropriate failure indicators.
-    /// </remarks>
-    public static UrlServiceAnalysis CreateFailed(
-        string serviceName,
-        string error)
-    {
-        string id = string.Empty;
-        string jobId = string.Empty;
-        var composedId = ComposedServiceAnalysisId.Create(id, jobId);
-        return new UrlServiceAnalysis(
-            composedId,
-            serviceName,
-            AnalysisState.CreateFailed(),
-            null,
-            error: error);
-    }
-
-    /// <summary>
     /// Updates the threat score of the analysis.
     /// </summary>
     /// <param name="threatScore">The new threat score to set.</param>

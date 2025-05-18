@@ -98,26 +98,6 @@ public class FileServiceAnalysis : ServiceAnalysis
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="FileServiceAnalysis"/> with failed status.
-    /// </summary>
-    /// <param name="serviceName">The name of the service that failed analysis.</param>
-    /// <param name="error">The error message describing why the analysis failed.</param>
-    /// <returns>A new instance of <see cref="FileServiceAnalysis"/> with failed status and empty identifiers.</returns>
-    public static FileServiceAnalysis CreateFailed(
-        string serviceName,
-        string error)
-    {
-        string id = string.Empty;
-        string jobId = string.Empty;
-        return new FileServiceAnalysis(
-            ComposedServiceAnalysisId.Create(id, jobId),
-            serviceName,
-            AnalysisState.CreateFailed(),
-            [],
-            error);
-    }
-
-    /// <summary>
     /// Adds a new file report to the analysis.
     /// </summary>
     /// <param name="fileReport">The file report to add to the analysis.</param>
