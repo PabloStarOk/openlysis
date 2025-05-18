@@ -11,4 +11,9 @@ public record VirusTotalAnalyzerOptions : AnalyzerOptions
     /// The configuration section name for the VirusTotal analyzer.
     /// </summary>
     public const string SectionName = "VirusTotal:Analyzer";
+
+    /// <summary>
+    /// Gets the maximum allowed size of a file in bytes that can be analyzed.
+    /// </summary>
+    required public int FileMaxSizeInBytes { get; init; }
 }

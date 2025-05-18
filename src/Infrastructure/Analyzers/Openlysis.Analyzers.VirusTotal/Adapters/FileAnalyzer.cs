@@ -18,6 +18,7 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
 namespace Openlysis.Analyzers.VirusTotal.Adapters;
@@ -31,6 +32,7 @@ namespace Openlysis.Analyzers.VirusTotal.Adapters;
 /// </remarks>
 internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 {
+    private readonly IOptionsMonitor<VirusTotalAnalyzerOptions> _analyzerOptions;
     private readonly ILargeFileUploadProvider _largeFileUploadProvider;
     private readonly IVirusTotalAnalyzer _vtAnalyzer;
     private readonly IVerdictCalculator _verdictCalculator;
@@ -55,6 +57,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         IVerdictCalculator verdictCalculator)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {
+        _analyzerOptions = options;
         _largeFileUploadProvider = largeFileUploadProvider;
         _vtAnalyzer = vtAnalyzer;
         _verdictCalculator = verdictCalculator;
@@ -66,6 +69,12 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         AnalyzeFileRequest request,
         CancellationToken cancellationToken = default)
     {
+        int fileMaxSize = _analyzerOptions.CurrentValue.FileMaxSizeInBytes;
+        if (request.FileData.Length > fileMaxSize)
+        {
+            return ServiceErrors.FileTooLarge;
+        }
+
         string? fileUploadUrl = null;
         if (request.FileData.Length > Files.SmallFilesMaxSizeInBytes)
         {

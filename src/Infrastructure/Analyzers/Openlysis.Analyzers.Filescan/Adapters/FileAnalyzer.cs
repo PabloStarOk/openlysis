@@ -20,6 +20,7 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
 namespace Openlysis.Analyzers.Filescan.Adapters;
@@ -34,6 +35,7 @@ namespace Openlysis.Analyzers.Filescan.Adapters;
 /// </remarks>
 public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 {
+    private readonly IOptionsMonitor<FilescanAnalyzerOptions> _analyzerOptions;
     private readonly IFilescanAnalyzer _filescanAnalyzer;
 
     /// <summary>
@@ -54,6 +56,7 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         IFilescanAnalyzer filescanAnalyzer)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {
+        _analyzerOptions = options;
         _filescanAnalyzer = filescanAnalyzer;
     }
 
@@ -63,6 +66,12 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         AnalyzeFileRequest request,
         CancellationToken cancellationToken = default)
     {
+        int fileMaxSize = _analyzerOptions.CurrentValue.FileMaxSizeInBytes;
+        if (request.FileData.Length > fileMaxSize)
+        {
+            return ServiceErrors.FileTooLarge;
+        }
+
         var options = ScanOptions.True;
         var scanRequest = new ScanRequest(
             request.FileName,

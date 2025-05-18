@@ -8,6 +8,11 @@ namespace Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 public static class ServiceErrors
 {
     /// <summary>
+    /// Error indicating that the uploaded file exceeds the maximum allowed size.
+    /// </summary>
+    public static readonly Error FileTooLarge = Error.Validation("Response.FileTooLarge", "File size is too large");
+
+    /// <summary>
     /// Error indicating that the response status code was not successful.
     /// </summary>
     public static readonly Error NonSuccessStatusCode = Error.Unexpected("Response.NotSuccessful", "Response status code was not successful.");

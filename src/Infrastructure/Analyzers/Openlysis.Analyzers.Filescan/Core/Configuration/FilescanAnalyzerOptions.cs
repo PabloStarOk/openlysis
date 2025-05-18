@@ -11,4 +11,9 @@ public record FilescanAnalyzerOptions : AnalyzerOptions
     /// The section name in the configuration file.
     /// </summary>
     public const string SectionName = "Filescan:Analyzer";
+
+    /// <summary>
+    /// Gets the maximum allowed size of a file in bytes that can be analyzed.
+    /// </summary>
+    required public int FileMaxSizeInBytes { get; init; }
 }

@@ -29,6 +29,11 @@ public record HybridAnalyzerOptions : AnalyzerOptions
     required public string PreferredQuickScanServiceName { get; init; }
 
     /// <summary>
+    /// Gets the maximum allowed size of a file in bytes that can be analyzed.
+    /// </summary>
+    required public int FileMaxSizeInBytes { get; init; }
+
+    /// <summary>
     /// Gets a value indicating whether experimental anti-evasion techniques should be enabled.
     /// </summary>
     required public bool UseExperimentalAntiEvasion { get; init; }

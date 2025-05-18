@@ -20,6 +20,7 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 
 namespace Openlysis.Analyzers.HybridAnalysis.Adapters;
@@ -72,6 +73,12 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         AnalyzeFileRequest request,
         CancellationToken cancellationToken = default)
     {
+        int fileMaxSize = _analyzerOptions.CurrentValue.FileMaxSizeInBytes;
+        if (request.FileData.Length > fileMaxSize)
+        {
+            return ServiceErrors.FileTooLarge;
+        }
+
         string mimeType = await _mimeTypeDetector.DetectAsync(
             request.FileData,
             request.FileContentType,
