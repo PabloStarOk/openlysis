@@ -31,7 +31,7 @@ public class RateQuotaTracker<TEnum>
         _rateQuotaOptions.Get(_optionsKey).EndpointTypes;
 
     private readonly string _optionsKey;
-    private readonly IOptionsMonitor<RateQuotaOptions<TEnum>> _rateQuotaOptions;
+    private readonly IOptionsMonitor<RateQuotaEndpointOptions<TEnum>> _rateQuotaOptions;
     private readonly ConcurrentQueue<DateTimeOffset> _minuteRateWindow = [];
     private readonly ConcurrentQueue<DateTimeOffset> _hourlyRateWindow = [];
     private int _dailyQuotaUsage;
@@ -50,7 +50,7 @@ public class RateQuotaTracker<TEnum>
     /// </remarks>
     public RateQuotaTracker(
         string optionsKey,
-        IOptionsMonitor<RateQuotaOptions<TEnum>> rateQuotaOptions)
+        IOptionsMonitor<RateQuotaEndpointOptions<TEnum>> rateQuotaOptions)
     {
         _optionsKey = optionsKey;
         _rateQuotaOptions = rateQuotaOptions;
@@ -108,19 +108,19 @@ public class RateQuotaTracker<TEnum>
     /// </returns>
     public bool HasAvailableCapacity()
     {
-        RateQuotaOptions<TEnum> options = _rateQuotaOptions.Get(_optionsKey);
+        RateQuotaEndpointOptions<TEnum> endpointOptions = _rateQuotaOptions.Get(_optionsKey);
 
         bool hasMinuteRateCapacity =
-            options.MinuteRate <= 0 || _minuteRateWindow.Count < options.MinuteRate;
+            endpointOptions.MinuteRate <= 0 || _minuteRateWindow.Count < endpointOptions.MinuteRate;
 
         bool hasHourlyRateCapacity =
-            options.HourlyRate <= 0 || _hourlyRateWindow.Count < options.HourlyRate;
+            endpointOptions.HourlyRate <= 0 || _hourlyRateWindow.Count < endpointOptions.HourlyRate;
 
         bool hasDailyQuotaRemaining =
-            options.DailyQuota <= 0 || _dailyQuotaUsage < options.DailyQuota;
+            endpointOptions.DailyQuota <= 0 || _dailyQuotaUsage < endpointOptions.DailyQuota;
 
         bool hasMonthlyQuotaRemaining =
-            options.MonthlyQuota <= 0 || _monthlyQuotaUsage < options.MonthlyQuota;
+            endpointOptions.MonthlyQuota <= 0 || _monthlyQuotaUsage < endpointOptions.MonthlyQuota;
 
         return hasMinuteRateCapacity && hasHourlyRateCapacity
             && hasDailyQuotaRemaining && hasMonthlyQuotaRemaining;
@@ -154,29 +154,29 @@ public class RateQuotaTracker<TEnum>
     /// </summary>
     private void EvaluateExhaustedCapacity()
     {
-        RateQuotaOptions<TEnum> options = _rateQuotaOptions.Get(_optionsKey);
+        RateQuotaEndpointOptions<TEnum> endpointOptions = _rateQuotaOptions.Get(_optionsKey);
 
-        if (options.MonthlyQuota > 0
-            && _monthlyQuotaUsage >= options.MonthlyQuota)
+        if (endpointOptions.MonthlyQuota > 0
+            && _monthlyQuotaUsage >= endpointOptions.MonthlyQuota)
         {
             CapacityExhausted?.Invoke(EndpointTypes, RateQuotaPeriod.Month);
         }
 
-        if (options.DailyQuota > 0
-            && _dailyQuotaUsage >= options.DailyQuota)
+        if (endpointOptions.DailyQuota > 0
+            && _dailyQuotaUsage >= endpointOptions.DailyQuota)
         {
             CapacityExhausted?.Invoke(EndpointTypes, RateQuotaPeriod.Day);
         }
 
-        if (options.HourlyRate > 0
-            && _hourlyRateWindow.Count >= options.HourlyRate)
+        if (endpointOptions.HourlyRate > 0
+            && _hourlyRateWindow.Count >= endpointOptions.HourlyRate)
         {
             _isHourlyCapacityExhausted = true;
             CapacityExhausted?.Invoke(EndpointTypes, RateQuotaPeriod.Hour);
         }
 
-        if (options.MinuteRate > 0
-            && _minuteRateWindow.Count >= options.MinuteRate)
+        if (endpointOptions.MinuteRate > 0
+            && _minuteRateWindow.Count >= endpointOptions.MinuteRate)
         {
             _isMinuteCapacityExhausted = true;
             CapacityExhausted?.Invoke(EndpointTypes, RateQuotaPeriod.Minute);

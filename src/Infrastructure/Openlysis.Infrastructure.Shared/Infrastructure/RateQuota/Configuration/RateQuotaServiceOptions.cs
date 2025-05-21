@@ -7,7 +7,7 @@ namespace Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Configuration
 /// <summary>
 /// Options to configure a <see cref="RateQuotaService{TEnum}"/>.
 /// </summary>
-public record LimitTrackerOptions
+public record RateQuotaServiceOptions
 {
     /// <summary>
     /// The section name for the request limit options in the configuration.

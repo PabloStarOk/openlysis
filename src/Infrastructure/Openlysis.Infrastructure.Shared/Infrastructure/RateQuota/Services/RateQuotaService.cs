@@ -8,7 +8,7 @@ using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Models;
 namespace Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Services;
 
 /// <summary>
-/// Tracks rate and quota limits of external APIs according to <see cref="RateQuotaOptions{TEnum}"/>.
+/// Tracks rate and quota limits of external APIs according to <see cref="RateQuotaEndpointOptions{TEnum}"/>.
 /// </summary>
 /// <typeparam name="TEnum">The type of the enumeration used for endpoint types.</typeparam>
 public sealed class RateQuotaService<TEnum>
@@ -35,9 +35,9 @@ public sealed class RateQuotaService<TEnum>
     /// <param name="timeProvider">The time provider.</param>
     public RateQuotaService(
         string optionsInstanceName,
-        IOptionsMonitor<LimitTrackerOptions> limitTrackerOptions,
+        IOptionsMonitor<RateQuotaServiceOptions> limitTrackerOptions,
         string[] rateQuotaOptionKeys,
-        IOptionsMonitor<RateQuotaOptions<TEnum>> rateQuotaOptions,
+        IOptionsMonitor<RateQuotaEndpointOptions<TEnum>> rateQuotaOptions,
         TimeProvider timeProvider)
     {
         _timeProvider = timeProvider;

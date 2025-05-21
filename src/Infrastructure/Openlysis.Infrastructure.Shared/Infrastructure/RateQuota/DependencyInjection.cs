@@ -22,7 +22,7 @@ public static class DependencyInjection
     /// <typeparam name="TEnum">The type of the enumeration used for rate quota options.</typeparam>
     /// <param name="services">The <see cref="IServiceCollection"/> to add the service to.</param>
     /// <param name="configuration">The <see cref="IConfiguration"/> to retrieve the configuration settings from.</param>
-    /// <param name="serviceKey">The key used to identify the <see cref="IRateQuotaService{TEnum}"/> service and configured <see cref="RateQuotaOptions{TEnum}"/>.</param>
+    /// <param name="serviceKey">The key used to identify the <see cref="IRateQuotaService{TEnum}"/> service and configured <see cref="RateQuotaEndpointOptions{TEnum}"/>.</param>
     /// <param name="configSectionName">The name of the parent section in the configuration.</param>
     public static void AddRateQuotaService<TEnum>(
         this IServiceCollection services,
@@ -34,18 +34,18 @@ public static class DependencyInjection
         // Get options.
         var limitTrackerOptionsSection = configuration
             .GetRequiredSection(configSectionName)
-            .GetRequiredSection(LimitTrackerOptions.SectionName);
+            .GetRequiredSection(RateQuotaServiceOptions.SectionName);
 
         var rateQuotaOptionsSection = configuration
             .GetRequiredSection(configSectionName)
-            .GetRequiredSection(LimitTrackerOptions.SectionName)
-            .GetRequiredSection(RateQuotaOptions<TEnum>.SectionName);
+            .GetRequiredSection(RateQuotaServiceOptions.SectionName)
+            .GetRequiredSection(RateQuotaEndpointOptions<TEnum>.SectionName);
 
         ArgumentNullException.ThrowIfNull(limitTrackerOptionsSection);
         ArgumentNullException.ThrowIfNull(rateQuotaOptionsSection);
 
         // Add options.
-        services.AddOptionsWithValidateOnStart<LimitTrackerOptions>(serviceKey)
+        services.AddOptionsWithValidateOnStart<RateQuotaServiceOptions>(serviceKey)
             .Bind(limitTrackerOptionsSection)
             .ValidateDataAnnotations();
 
@@ -53,7 +53,7 @@ public static class DependencyInjection
         foreach (var childSection in rateQuotaOptionsSection.GetChildren())
         {
             string key = $"{configSectionName}{childSection.Key}";
-            services.AddOptionsWithValidateOnStart<RateQuotaOptions<TEnum>>(key)
+            services.AddOptionsWithValidateOnStart<RateQuotaEndpointOptions<TEnum>>(key)
                 .Bind(childSection)
                 .ValidateDataAnnotations();
             rateQuotaOptionKeys.Add(key);
@@ -62,12 +62,12 @@ public static class DependencyInjection
         services.AddSingleton<RateQuotaOptionsValidator<TEnum>>();
 
         // Get options monitor
-        IOptionsMonitor<LimitTrackerOptions> limitTrackerOptions;
-        IOptionsMonitor<RateQuotaOptions<TEnum>> rateQuotaOptions;
+        IOptionsMonitor<RateQuotaServiceOptions> limitTrackerOptions;
+        IOptionsMonitor<RateQuotaEndpointOptions<TEnum>> rateQuotaOptions;
         using (ServiceProvider serviceProvider = services.BuildServiceProvider())
         {
-            limitTrackerOptions = serviceProvider.GetRequiredService<IOptionsMonitor<LimitTrackerOptions>>();
-            rateQuotaOptions = serviceProvider.GetRequiredService<IOptionsMonitor<RateQuotaOptions<TEnum>>>();
+            limitTrackerOptions = serviceProvider.GetRequiredService<IOptionsMonitor<RateQuotaServiceOptions>>();
+            rateQuotaOptions = serviceProvider.GetRequiredService<IOptionsMonitor<RateQuotaEndpointOptions<TEnum>>>();
         }
 
         // Add rate quota service

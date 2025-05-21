@@ -5,7 +5,7 @@ namespace Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Configuration
 /// <summary>
 /// Represents the configuration options for the analyzer.
 /// </summary>
-public record RateQuotaOptions<TEnum>
+public record RateQuotaEndpointOptions<TEnum>
     where TEnum : Enum
 {
     /// <summary>
