@@ -50,7 +50,8 @@ internal sealed class UrlAnalysisStubBuilder
             Guid.NewGuid().ToString(),
             serviceName,
             AnalysisStatus.Queued,
-            Verdict.Unknown);
+            Verdict.Unknown,
+            GenerateJobId(options));
     }
 
     /// <inheritdoc/>

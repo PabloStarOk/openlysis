@@ -14,6 +14,11 @@ namespace Openlysis.TestTools.ServicesSimulation.Common.Configuration;
 internal record AnalysisStubFactoryOptions : StubFactoryOptions
 {
     /// <summary>
+    /// Gets or initializes a value indicating whether to return a job ID in the response.
+    /// </summary>
+    required public bool ReturnJobId { get; init; }
+
+    /// <summary>
     /// Gets the configuration for simulating the analysis status.
     /// </summary>
     [Required]

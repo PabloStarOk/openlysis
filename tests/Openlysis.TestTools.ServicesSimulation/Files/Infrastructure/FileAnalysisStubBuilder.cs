@@ -30,6 +30,19 @@ internal sealed class FileAnalysisStubBuilder
     }
 
     /// <inheritdoc/>
+    protected override FileServiceAnalysis HandleCreation(
+        string serviceName,
+        FileAnalysisStubFactoryOptions options)
+    {
+        return FileServiceAnalysis.Create(
+            Guid.NewGuid().ToString(),
+            serviceName,
+            AnalysisStatus.Queued,
+            Verdict.Unknown,
+            jobId: GenerateJobId(options));
+    }
+
+    /// <inheritdoc/>
     protected override void HandleFinalization(
         FileServiceAnalysis analysis,
         FileAnalysisStubFactoryOptions options)
@@ -78,18 +91,6 @@ internal sealed class FileAnalysisStubBuilder
             analysis.State.Status,
             analysis.Reports.Count,
             reportsLog);
-    }
-
-    /// <inheritdoc/>
-    protected override FileServiceAnalysis HandleCreation(
-        string serviceName,
-        FileAnalysisStubFactoryOptions options)
-    {
-        return FileServiceAnalysis.Create(
-            Guid.NewGuid().ToString(),
-            serviceName,
-            AnalysisStatus.Queued,
-            Verdict.Unknown);
     }
 
     /// <summary>

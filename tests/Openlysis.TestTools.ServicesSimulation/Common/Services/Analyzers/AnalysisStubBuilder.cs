@@ -43,6 +43,22 @@ internal abstract class AnalysisStubBuilder<TOptions, TAnalysisStub>
     }
 
     /// <summary>
+    /// Generates a job ID based on the provided options.
+    /// </summary>
+    /// <param name="options">The options that determine whether a job ID should be generated.</param>
+    /// <returns>A new GUID as a string if options.ReturnJobId is true; otherwise, null.</returns>
+    protected static string? GenerateJobId(TOptions options)
+    {
+        string? jobId = null;
+        if (options.ReturnJobId)
+        {
+            jobId = Guid.NewGuid().ToString();
+        }
+
+        return jobId;
+    }
+
+    /// <summary>
     /// Generates an analysis status based on the provided options.
     /// </summary>
     /// <param name="statusOptions">Configuration options that determine how the analysis status is generated.</param>
