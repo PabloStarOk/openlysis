@@ -72,48 +72,25 @@ internal static class DependencyInjectionExtensions
         var serviceOptionsMonitor =
             new SimulatedOptionsMonitor<RateQuotaServiceOptions>(rateQuotaServiceOptions);
 
-        var analyzerOptionsMonitor = serviceProvider.GetRequiredService<
+        var simulatedServiceOptions = serviceProvider.GetRequiredService<
             IOptionsMonitor<TServiceOptions>>();
-        var analyzerOptions = analyzerOptionsMonitor.Get(optionsName);
 
-        const string analyzeRateQuotaOptionsName = "Analyze";
-        var analyzeRateQuotaOptions = GenerateEndpointRateQuotaOptions(
-            AnalysisEndpointType.Analyze,
-            analyzerOptions.AnalyzeEndpoint);
-
-        const string getStatusRateQuotaOptionsName = "GetStatus";
-        var getStatusRateQuotaOptions = GenerateEndpointRateQuotaOptions(
-            AnalysisEndpointType.GetStatus,
-            analyzerOptions.GetStatusEndpoint);
-
-        const string getAnalysisRateQuotaOptionsName = "GetAnalysis";
-        var getAnalysisRateQuotaOptions = GenerateEndpointRateQuotaOptions(
-            AnalysisEndpointType.GetResults,
-            analyzerOptions.GetAnalysisEndpoint);
-
-        string[] rateQuotaEndpointOptionsNames =
-        [
-            analyzeRateQuotaOptionsName,
-            getAnalysisRateQuotaOptionsName,
-            getAnalysisRateQuotaOptionsName,
-        ];
-
-        var rateQuotaEndpointOptions =
-            new Dictionary<string, RateQuotaEndpointOptions<AnalysisEndpointType>>
+        var rateQuotaOptionsMap = new Dictionary<string, AnalysisEndpointType>()
         {
-            { analyzeRateQuotaOptionsName, analyzeRateQuotaOptions },
-            { getStatusRateQuotaOptionsName, getStatusRateQuotaOptions },
-            { getAnalysisRateQuotaOptionsName, getAnalysisRateQuotaOptions },
+            { "Analyze", AnalysisEndpointType.Analyze },
+            { "GetStatus", AnalysisEndpointType.GetStatus },
+            { "GetAnalysis", AnalysisEndpointType.GetResults },
         };
-
-        var endpointOptionsMonitor =
-            new SimulatedOptionsMonitor<RateQuotaEndpointOptions<AnalysisEndpointType>>(rateQuotaEndpointOptions);
+        var endpointOptionsMonitor = new RateQuotaOptionsMonitor<TStubFactoryOptions>(
+            optionsName,
+            simulatedServiceOptions,
+            rateQuotaOptionsMap);
 
         var timeProvider = serviceProvider.GetRequiredService<TimeProvider>();
         return new RateQuotaService<AnalysisEndpointType>(
             optionsInstanceName: serviceName,
             limitTrackerOptions: serviceOptionsMonitor,
-            rateQuotaOptionKeys: rateQuotaEndpointOptionsNames,
+            rateQuotaOptionKeys: rateQuotaOptionsMap.Keys.ToArray(),
             rateQuotaOptions: endpointOptionsMonitor,
             timeProvider);
     }
@@ -161,25 +138,5 @@ internal static class DependencyInjectionExtensions
             .ValidateOnStart();
 
         return optionsName;
-    }
-
-    /// <summary>
-    /// Generates rate quota options for a specific endpoint type based on the provided endpoint configuration.
-    /// </summary>
-    /// <param name="endpointType">The type of analysis endpoint to configure rate quotas for.</param>
-    /// <param name="endpointOptions">The endpoint configuration options containing rate limits.</param>
-    /// <returns>A configured <see cref="RateQuotaEndpointOptions{AnalysisEndpointType}"/> instance.</returns>
-    private static RateQuotaEndpointOptions<AnalysisEndpointType> GenerateEndpointRateQuotaOptions(
-        AnalysisEndpointType endpointType,
-        SimulatedEndpointOptions endpointOptions)
-    {
-        return new RateQuotaEndpointOptions<AnalysisEndpointType>
-        {
-            EndpointTypes = [endpointType],
-            MinuteRate = endpointOptions.MinuteRateLimit,
-            HourlyRate = endpointOptions.HourRateLimit,
-            DailyQuota = endpointOptions.DailyUsageLimit,
-            MonthlyQuota = endpointOptions.MonthlyUsageLimit,
-        };
     }
 }
