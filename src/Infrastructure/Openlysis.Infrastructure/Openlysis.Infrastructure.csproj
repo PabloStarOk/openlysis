@@ -18,6 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\tests\Openlysis.TestTools.ServicesSimulation\Openlysis.TestTools.ServicesSimulation.csproj" />
       <ProjectReference Include="..\..\Openlysis.Application\Openlysis.Application.csproj" />
       <ProjectReference Include="..\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj" />
       <ProjectReference Include="..\Evaluators\Openlysis.Evaluators.Ipqs\Openlysis.Evaluators.Ipqs.csproj" />

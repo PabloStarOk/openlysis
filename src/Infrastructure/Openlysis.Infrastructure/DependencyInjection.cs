@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
@@ -25,7 +26,9 @@ using Openlysis.Infrastructure.Services.Files;
 using Openlysis.Infrastructure.Services.Hashing;
 using Openlysis.Infrastructure.Services.Messages;
 using Openlysis.Infrastructure.Services.URLs;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
+using Openlysis.TestTools.ServicesSimulation;
 
 using PhoneNumbers;
 
@@ -47,12 +50,11 @@ public static class DependencyInjection
     {
         // Get options
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
 
         var regexSettings = configuration
             .GetRequiredSection(RegexSettings.SectionName)
             .Get<RegexSettings>();
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
         ArgumentNullException.ThrowIfNull(regexSettings);
 
         // Add options
@@ -84,9 +86,13 @@ public static class DependencyInjection
 
         // Add message senders
         services.AddUpdateAnalysisConsumers(configuration);
-
-        // Add phone number evaluators.
-        services.AddIpqsReputationEvaluators(configuration);
+        using (var sp = services.BuildServiceProvider())
+        {
+            var logger = sp
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger(nameof(Infrastructure));
+            RegisterReputationServices(services, configuration, logger);
+        }
 
         // Add rate quota service jobs.
         services.AddRateQuotaRestorerJobs(
@@ -107,5 +113,36 @@ public static class DependencyInjection
 
         // Add message analysis coordinator
         services.AddSingleton<IMessageAnalysisUpdater, MessageAnalysisUpdater>();
+    }
+
+    /// <summary>
+    /// Registers reputation services based on application configuration.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    /// <param name="configuration">The application configuration containing service registration options.</param>
+    /// <param name="logger">The logger used to log registration information.</param>
+    private static void RegisterReputationServices(
+        IServiceCollection services,
+        IConfiguration configuration,
+        ILogger logger)
+    {
+        var servicesRegistrationOptions = configuration
+            .GetRequiredSection(ServicesRegistrationOptions.SectionName)
+            .Get<ServicesRegistrationOptions>();
+        ArgumentNullException.ThrowIfNull(servicesRegistrationOptions);
+
+        if (servicesRegistrationOptions.RegisterRealServices)
+        {
+            logger.LogInformation("Real analysis services registered.");
+            services.AddIpqsReputationEvaluators(configuration);
+        }
+
+        if (!servicesRegistrationOptions.RegisterSimulatedServices)
+        {
+            return;
+        }
+
+        logger.LogInformation("Simulated analysis services registered.");
+        services.AddSimulatedReputationServices(configuration);
     }
 }

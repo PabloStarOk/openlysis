@@ -1,19 +1,21 @@
 using System;
-
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Openlysis.Analyzers.Filescan;
 using Openlysis.Analyzers.HybridAnalysis;
 using Openlysis.Analyzers.URLQuery;
 using Openlysis.Analyzers.VirusTotal;
 using Openlysis.Infrastructure.Shared.Communication;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 using Openlysis.MultiAnalyzer;
 using Openlysis.MultiAnalyzer.Communication.Consumers.Files;
 using Openlysis.MultiAnalyzer.Communication.Consumers.URLs;
 using Openlysis.MultiAnalyzer.Configuration;
+using Openlysis.TestTools.ServicesSimulation;
 
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureServices((context, services) =>
@@ -21,19 +23,15 @@ builder.ConfigureServices((context, services) =>
     // Get options
     var consumerSettingsSection = context.Configuration
         .GetRequiredSection(AnalyzeConsumerOptions.SectionName);
-
     ArgumentNullException.ThrowIfNull(consumerSettingsSection);
 
     // Add options
     services.Configure<AnalyzeConsumerOptions>(consumerSettingsSection);
 
     services.AddInfrastructure(context.Configuration);
+    services.AddHttpClient();
 
-    // Add analyzers
-    services.AddFilescanIoAnalyzers(context.Configuration);
-    services.AddUrlQueryAnalyzer(context.Configuration);
-    services.AddHybridAnalyzer(context.Configuration);
-    services.AddVirusTotalAnalyzers(context.Configuration);
+    RegisterAnalysisServices(services, context.Configuration);
 
     // Add limit tracker jobs
     services.AddRateQuotaRestorerJobs(
@@ -55,3 +53,35 @@ builder.ConfigureServices((context, services) =>
 
 IHost host = builder.Build();
 await host.RunAsync();
+return;
+
+static void RegisterAnalysisServices(
+    IServiceCollection services,
+    IConfiguration configuration)
+{
+    var servicesRegistrationOptions = configuration
+        .GetRequiredSection(ServicesRegistrationOptions.SectionName)
+        .Get<ServicesRegistrationOptions>();
+    ArgumentNullException.ThrowIfNull(servicesRegistrationOptions);
+
+    using var sp = services.BuildServiceProvider();
+
+    var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(Openlysis.MultiAnalyzer));
+
+    if (servicesRegistrationOptions.RegisterRealServices)
+    {
+        logger.LogInformation("Real analysis services registered.");
+        services.AddFilescanIoAnalyzers(configuration);
+        services.AddUrlQueryAnalyzer(configuration);
+        services.AddHybridAnalyzer(configuration);
+        services.AddVirusTotalAnalyzers(configuration);
+    }
+
+    if (!servicesRegistrationOptions.RegisterSimulatedServices)
+    {
+        return;
+    }
+
+    logger.LogInformation("Simulated analysis services registered.");
+    services.AddSimulatedAnalysisServices(configuration);
+}
