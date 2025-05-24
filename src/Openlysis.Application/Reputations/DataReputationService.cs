@@ -133,6 +133,11 @@ internal abstract class DataReputationService<
         ConcurrentBag<TServiceReputation> serviceReputations = [];
         await Parallel.ForEachAsync(_reputationEvaluators, cancellationToken, async (evaluator, ct) =>
         {
+            if (!evaluator.IsAvailable)
+            {
+                return;
+            }
+
             ErrorOr<TServiceReputation> result = await evaluator
                 .EvaluateAsync(data, ct);
 
