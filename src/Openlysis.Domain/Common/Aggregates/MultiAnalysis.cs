@@ -149,12 +149,6 @@ public abstract class MultiAnalysis<TServiceAnalysis>
         TServiceAnalysis updatedAnalysis);
 
     /// <summary>
-    /// Retrieves the verdicts from the associated service analyses.
-    /// </summary>
-    /// <returns>An array of verdicts from the service analyses.</returns>
-    protected abstract Verdict[] GetServiceAnalysesVerdicts();
-
-    /// <summary>
     /// Updates the average threat score of the analysis based on the associated service analyses.
     /// </summary>
     protected abstract void HandleAverageThreatScoreUpdate();
@@ -164,7 +158,9 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// </summary>
     private void UpdateFinalVerdict()
     {
-        Verdict[] servicesVerdicts = GetServiceAnalysesVerdicts();
+        Verdict[] servicesVerdicts = _serviceAnalyses
+            .Select(s => s.State.Verdict)
+            .ToArray();
 
         if (servicesVerdicts.Length is 0)
         {

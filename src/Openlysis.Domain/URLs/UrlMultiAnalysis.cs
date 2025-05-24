@@ -92,14 +92,6 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     }
 
     /// <inheritdoc/>
-    protected override Verdict[] GetServiceAnalysesVerdicts()
-    {
-        return ServiceAnalyses
-            .Select(r => r.State.Verdict)
-            .ToArray();
-    }
-
-    /// <inheritdoc/>
     protected override void HandleAverageThreatScoreUpdate()
     {
         if (ServiceAnalyses.All(s => s.ThreatScore is null))

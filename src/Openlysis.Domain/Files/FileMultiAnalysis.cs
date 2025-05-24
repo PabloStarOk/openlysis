@@ -114,14 +114,6 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     }
 
     /// <inheritdoc/>
-    protected override Verdict[] GetServiceAnalysesVerdicts()
-    {
-        return AllReports
-            .Select(r => r.Verdict)
-            .ToArray();
-    }
-
-    /// <inheritdoc/>
     protected override void HandleAverageThreatScoreUpdate()
     {
         if (AllReports.All(r => r.ThreatScore is null))
