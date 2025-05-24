@@ -163,7 +163,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
 
             // Get full analysis
             ErrorOr<UrlServiceAnalysis> getAnalysisResult = await analyzer.GetAnalysisAsync(analysis.Id, ct);
-            if (getStatusResult.IsError)
+            if (getAnalysisResult.IsError)
             {
                 return;
             }

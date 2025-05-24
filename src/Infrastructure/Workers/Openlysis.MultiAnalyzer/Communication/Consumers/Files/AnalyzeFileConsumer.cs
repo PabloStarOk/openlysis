@@ -1,9 +1,11 @@
-using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
+using ErrorOr;
 
 using MassTransit;
 
@@ -14,7 +16,6 @@ using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
 using Openlysis.Infrastructure.Shared.Communication.Models;
@@ -33,11 +34,10 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private readonly ILogger<AnalyzeFileConsumer> _logger;
     private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly IEnumerable<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>> _analyzers;
+    private readonly IDictionary<string, Analyzer<FileServiceAnalysis, AnalyzeFileRequest>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
-    private readonly Dictionary<ComposedServiceAnalysisId, FileServiceAnalysis> _serviceFileAnalyses = [];
-    private readonly Func<FileServiceAnalysis, bool> _analysisFinished = s =>
-        s.State.Status is AnalysisStatus.Completed or AnalysisStatus.Timeout;
+    private readonly Dictionary<ComposedServiceAnalysisId, FileServiceAnalysis> _pendingAnalyses = [];
+    private readonly ConcurrentBag<FileServiceAnalysis> _updatableAnalyses = [];
 
     private GlobalId _multiAnalysisId;
     private ConsumeContext<AnalyzeFile> _context;
@@ -61,7 +61,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         _endpointUriProvider = endpointUriProvider;
         _options = options;
         _fileStorageProvider = fileStorageProvider;
-        _analyzers = analyzers;
+        _analyzers = analyzers.ToDictionary(a => a.ServiceName);
     }
 
     /// <inheritdoc/>
@@ -81,7 +81,10 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task AnalyzeAsync(CancellationToken cancellationToken)
     {
-        await Parallel.ForEachAsync(_analyzers, cancellationToken, async (analyzer, ct) =>
+        await Parallel.ForEachAsync(
+            _analyzers.Values,
+            cancellationToken,
+            async (analyzer, ct) =>
         {
             await using var fileStream = await DownloadFileAsync(ct);
 
@@ -102,12 +105,12 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
             }
 
             FileServiceAnalysis analysis = analyzeResult.Value;
-            _serviceFileAnalyses.Add(analysis.Id, analysis);
+            _pendingAnalyses.Add(analysis.Id, analysis);
         });
 
         await Task.WhenAll(
             _fileStorageProvider.DeleteAsync(_context.Message.FileId, cancellationToken),
-            SendUpdateAsync());
+            SendUpdateAsync(_pendingAnalyses.Values.ToArray()));
     }
 
     /// <summary>
@@ -118,7 +121,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private async Task UpdateAnalysisStatusAsync(CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested
-               && !_serviceFileAnalyses.Values.All(_analysisFinished))
+               && _pendingAnalyses.Count > 0)
         {
             await RunRequestsBatchAsync(cancellationToken);
             await Task.Delay(_options.CurrentValue.RequestBatchWaitTimeMs, cancellationToken);
@@ -135,7 +138,14 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         for (int i = 0; i < _options.CurrentValue.RequestsPerBatch; i++)
         {
             await RunBatchCycleAsync(cancellationToken);
-            if (_serviceFileAnalyses.Values.All(_analysisFinished))
+
+            if (!_updatableAnalyses.IsEmpty)
+            {
+                await SendUpdateAsync(_updatableAnalyses.ToArray());
+                _updatableAnalyses.Clear();
+            }
+
+            if (_pendingAnalyses.Count is 0)
             {
                 break;
             }
@@ -151,35 +161,62 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task RunBatchCycleAsync(CancellationToken cancellationToken)
     {
-        bool sendUpdate = false;
-        var analyzersMap = _analyzers.ToDictionary(a => a.ServiceName);
         await Parallel.ForEachAsync(
-            _serviceFileAnalyses.Values,
+            _pendingAnalyses.Values,
             cancellationToken,
-            async (analysis, token) =>
+            async (analysis, ct) =>
             {
-                var analyzer = analyzersMap[analysis.ServiceName];
-                var result = await analyzer.GetAnalysisAsync(analysis.Id, token);
-                if (result.IsError)
+                var analyzer = _analyzers[analysis.ServiceName];
+                if (!analyzer.CanGetAnalysisStatus)
                 {
-                    _logger.LogError("One or more errors occurred while updating file service analysis {Error}", result.Errors);
                     return;
                 }
 
-                FileServiceAnalysis updatedAnalysis = result.Value;
-
-                if (updatedAnalysis.State.Status != analysis.State.Status)
+                // Get status
+                ErrorOr<AnalysisStatus> getStatusResult
+                    = await analyzer.GetStatusAsync(analysis.Id, ct);
+                if (getStatusResult.IsError)
                 {
-                    sendUpdate = true;
+                    _logger.LogError(
+                        "One or more errors occurred while updating file service analysis:"
+                        + "\n\t{Error}",
+                        getStatusResult.Errors);
+                    analysis.UpdateStatus(AnalysisStatus.Failed);
+                    _pendingAnalyses.Remove(analysis.Id);
+                    _updatableAnalyses.Add(analysis);
+                    return;
                 }
 
-                _serviceFileAnalyses[updatedAnalysis.Id] = updatedAnalysis;
-            });
+                // Update status
+                if (getStatusResult.Value
+                    is AnalysisStatus.Queued
+                    or AnalysisStatus.InProgress)
+                {
+                    return;
+                }
 
-        if (sendUpdate)
-        {
-            await SendUpdateAsync();
-        }
+                if (!analyzer.CanGetAnalysis)
+                {
+                    _logger.LogError("Could not get analysis because services is unavailable.");
+                    return;
+                }
+
+                // Get full analysis
+                ErrorOr<FileServiceAnalysis> getAnalysisResult
+                    = await analyzer.GetAnalysisAsync(analysis.Id, ct);
+                if (getAnalysisResult.IsError)
+                {
+                    _logger.LogError(
+                        "One error or more occurred while getting service analysis:"
+                        + "\n\t{Error}",
+                        getAnalysisResult.Errors);
+                    return;
+                }
+
+                analysis = getAnalysisResult.Value;
+                _pendingAnalyses.Remove(analysis.Id);
+                _updatableAnalyses.Add(analysis);
+            });
     }
 
     /// <summary>
@@ -196,14 +233,15 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     }
 
     /// <summary>
-    /// Sends a request to update a <see cref="FileMultiAnalysis"/> using updated <see cref="FileServiceAnalysis"/>.
+    /// Sends an update of file service analyses to the appropriate endpoint.
     /// </summary>
+    /// <param name="analyses">The file service analyses to update. If none are provided, all pending analyses will be sent.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task SendUpdateAsync()
+    private async Task SendUpdateAsync(params FileServiceAnalysis[] analyses)
     {
         var request = new UpdateFileMultiAnalysis(
             _multiAnalysisId,
-            _serviceFileAnalyses.Values.ToArray());
+            analyses);
         await _context.Send(_endpointUriProvider.UpdateFileMultiAnalysisUri, request);
     }
 }
