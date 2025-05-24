@@ -100,7 +100,8 @@ CREATE TABLE IF NOT EXISTS phone_multi_reputations
     phone_multi_reputation_id uuid PRIMARY KEY,
     evaluation_date timestamp with time zone NOT NULL,
     final_verdict smallint NOT NULL,
-    final_threat_zone smallint NOT NULL
+    final_threat_zone smallint NOT NULL,
+    phone_number varchar(16) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS phone_services_reputations
@@ -160,7 +161,7 @@ CREATE TABLE IF NOT EXISTS detected_email_address_results (
 CREATE TABLE IF NOT EXISTS detected_phone_number_results (
     detected_phone_number_results_id uuid PRIMARY KEY,
     data_type smallint NOT NULL,
-    phone_number varchar(15) NOT NULL,
+    phone_number varchar(16) NOT NULL,
     message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
     phone_multi_reputation_id uuid NOT NULL REFERENCES phone_multi_reputations (phone_multi_reputation_id) ON DELETE RESTRICT
 );

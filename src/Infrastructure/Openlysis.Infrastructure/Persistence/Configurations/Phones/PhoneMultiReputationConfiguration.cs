@@ -12,6 +12,7 @@ namespace Openlysis.Infrastructure.Persistence.Configurations.Phones;
 /// </summary>
 public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneMultiReputation>
 {
+    private const string VarcharType = "varchar";
     private const string SmallintType = "smallint";
 
     /// <inheritdoc/>
@@ -44,6 +45,12 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
         builder.Property(p => p.ReputationEvaluationDate)
             .HasColumnName("evaluation_date")
             .HasColumnType("timestamp with time zone")
+            .IsRequired();
+
+        builder.Property(p => p.PhoneNumber)
+            .HasColumnName("phone_number")
+            .HasColumnType(VarcharType)
+            .HasMaxLength(15)
             .IsRequired();
 
         builder.Property(p => p.FinalVerdict)
@@ -82,7 +89,7 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
 
         builder.Property(p => p.ServiceName)
             .HasColumnName("service_name")
-            .HasColumnType("varchar")
+            .HasColumnType(VarcharType)
             .HasMaxLength(30)
             .IsRequired();
 
@@ -100,7 +107,7 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
         {
             phoneBuilder.Property(p => p.LocalFormat)
                 .HasColumnName("phone_local_format")
-                .HasColumnType("varchar")
+                .HasColumnType(VarcharType)
                 .HasMaxLength(30)
                 .IsRequired();
 
@@ -117,7 +124,7 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
 
             phoneBuilder.Property(p => p.LineType)
                 .HasColumnName("phone_line_type")
-                .HasColumnType("varchar")
+                .HasColumnType(VarcharType)
                 .HasMaxLength(20)
                 .IsRequired();
         });
