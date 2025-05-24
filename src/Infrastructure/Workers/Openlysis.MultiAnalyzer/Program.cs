@@ -10,6 +10,7 @@ using Openlysis.Analyzers.URLQuery;
 using Openlysis.Analyzers.VirusTotal;
 using Openlysis.Infrastructure.Shared.Communication;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
+using Openlysis.Infrastructure.Shared.Infrastructure.ConfigLoader;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 using Openlysis.MultiAnalyzer;
 using Openlysis.MultiAnalyzer.Communication.Consumers.Files;
@@ -18,9 +19,9 @@ using Openlysis.MultiAnalyzer.Configuration;
 using Openlysis.TestTools.ServicesSimulation;
 
 var builder = Host.CreateDefaultBuilder(args);
+builder.ConfigureAppConfiguration(configBuilder => configBuilder.UseConfigLoader());
 builder.ConfigureServices((context, services) =>
 {
-    // Get options
     var consumerSettingsSection = context.Configuration
         .GetRequiredSection(AnalyzeConsumerOptions.SectionName);
     ArgumentNullException.ThrowIfNull(consumerSettingsSection);
