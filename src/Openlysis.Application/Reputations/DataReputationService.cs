@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 using ErrorOr;
 
 using Microsoft.Extensions.Logging;
@@ -128,6 +130,7 @@ internal abstract class DataReputationService<
         TMultiReputation multiReputation = CreateMultiReputation(data);
 
         // TODO: When service is unavailable, use a timeout to listen for an event from the service to know when it is available again.
+        ConcurrentBag<TServiceReputation> serviceReputations = [];
         await Parallel.ForEachAsync(_reputationEvaluators, cancellationToken, async (evaluator, ct) =>
         {
             ErrorOr<TServiceReputation> result = await evaluator
@@ -137,15 +140,22 @@ internal abstract class DataReputationService<
             {
                 errors.AddRange(result.Errors);
                 _logger.LogError(
-                    "Error received from {EvaluatorName}.\n\tIs Service Available: {IsAvailable}\n\tErrors: {Errors}",
+                    "Error received from {EvaluatorName}"
+                    + "\n\tIs Service Available: {IsAvailable}"
+                    + "\n\tErrors: {Errors}",
                     evaluator.ServiceName,
                     evaluator.IsAvailable,
                     errors);
                 return;
             }
 
-            multiReputation.AddServiceReputation(result.Value);
+            serviceReputations.Add(result.Value);
         });
+
+        foreach (var reputation in serviceReputations)
+        {
+            multiReputation.AddServiceReputation(reputation);
+        }
 
         return errors.Count > 0 ? errors : multiReputation;
     }
