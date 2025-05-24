@@ -27,8 +27,7 @@ CREATE TABLE IF NOT EXISTS file_service_analyses
     service_name varchar(30) NOT NULL,
     status smallint NOT NULL,
     verdict smallint NOT NULL,
-    threat_zone smallint NOT NULL,
-    error varchar(250)
+    threat_zone smallint NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS file_analyses
@@ -68,8 +67,7 @@ CREATE TABLE IF NOT EXISTS url_service_analyses
     status smallint NOT NULL,
     verdict smallint NOT NULL,
     threat_zone smallint NOT NULL,
-    threat_score real,
-    error varchar(250)
+    threat_score real
 );
 
 CREATE TABLE IF NOT EXISTS url_analyses
