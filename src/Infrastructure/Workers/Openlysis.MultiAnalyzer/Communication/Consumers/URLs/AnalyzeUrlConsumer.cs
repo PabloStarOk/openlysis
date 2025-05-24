@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -32,7 +33,8 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
     private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly Dictionary<string, Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>> _analyzers;
-    private readonly Dictionary<ComposedServiceAnalysisId, UrlServiceAnalysis> _serviceAnalyses = [];
+    private readonly Dictionary<ComposedServiceAnalysisId, UrlServiceAnalysis> _pendingAnalyses = [];
+    private readonly ConcurrentBag<UrlServiceAnalysis> _updatableAnalyses = [];
     private ConsumeContext<AnalyzeUrl> _context;
 
     /// <summary>
@@ -79,9 +81,9 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
                 return;
             }
 
-            _serviceAnalyses.Add(result.Value.Id, result.Value);
+            _pendingAnalyses.Add(result.Value.Id, result.Value);
         });
-        await SendUpdateAsync(_serviceAnalyses.Values.ToArray());
+        await SendUpdateAsync(_pendingAnalyses.Values.ToArray());
     }
 
     /// <summary>
@@ -90,7 +92,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     private async Task UpdateAnalysesAsync(CancellationToken cancellationToken)
     {
-        while (_serviceAnalyses.Count > 0)
+        while (_pendingAnalyses.Count > 0)
         {
             await ExecuteBatchAsync(cancellationToken);
             await Task.Delay(_options.CurrentValue.RequestBatchWaitTimeMs, cancellationToken);
@@ -106,7 +108,14 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
         for (int i = 0; i < _options.CurrentValue.RequestsPerBatch; i++)
         {
             await ExecuteBatchCycleAsync(cancellationToken);
-            if (_serviceAnalyses.Count is 0)
+
+            if (!_updatableAnalyses.IsEmpty)
+            {
+                await SendUpdateAsync(_updatableAnalyses.ToArray());
+                _updatableAnalyses.Clear();
+            }
+
+            if (_pendingAnalyses.Count is 0)
             {
                 break;
             }
@@ -121,7 +130,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     private async Task ExecuteBatchCycleAsync(CancellationToken cancellationToken)
     {
-        await Parallel.ForEachAsync(_serviceAnalyses.Values, cancellationToken, async (analysis, ct) =>
+        await Parallel.ForEachAsync(_pendingAnalyses.Values, cancellationToken, async (analysis, ct) =>
         {
             var analyzer = _analyzers[analysis.ServiceName];
             if (!analyzer.CanGetAnalysisStatus)
@@ -134,8 +143,8 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
             if (getStatusResult.IsError)
             {
                 analysis.UpdateStatus(AnalysisStatus.Failed);
-                _serviceAnalyses.Remove(analysis.Id);
-                await SendUpdateAsync(analysis);
+                _pendingAnalyses.Remove(analysis.Id);
+                _updatableAnalyses.Add(analysis);
                 return;
             }
 
@@ -160,8 +169,8 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
             }
 
             analysis = getAnalysisResult.Value;
-            _serviceAnalyses.Remove(analysis.Id);
-            await SendUpdateAsync(analysis);
+            _pendingAnalyses.Remove(analysis.Id);
+            _updatableAnalyses.Add(analysis);
         });
     }
 
