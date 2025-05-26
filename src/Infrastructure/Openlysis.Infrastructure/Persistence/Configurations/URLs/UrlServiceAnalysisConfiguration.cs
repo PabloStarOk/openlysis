@@ -58,10 +58,5 @@ public class UrlServiceAnalysisConfiguration : IEntityTypeConfiguration<UrlServi
         builder.Property(u => u.ThreatScore)
             .HasColumnName("threat_score")
             .HasColumnType("real");
-
-        builder.Property(u => u.Error)
-            .HasColumnName("error")
-            .HasColumnType("varchar")
-            .HasMaxLength(250);
     }
 }

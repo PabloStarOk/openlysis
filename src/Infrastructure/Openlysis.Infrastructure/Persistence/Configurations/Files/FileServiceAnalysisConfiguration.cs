@@ -69,11 +69,6 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
                 .HasColumnType(SmallintType)
                 .IsRequired();
         });
-
-        builder.Property(u => u.Error)
-            .HasColumnName("error")
-            .HasColumnType(VarcharType)
-            .HasMaxLength(250);
     }
 
     /// <summary>

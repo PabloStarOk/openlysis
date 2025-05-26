@@ -24,14 +24,12 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
-    /// <param name="error">The error message if the analysis failed.</param>
     private FileServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisState state,
-        List<FileReport> reports,
-        string? error)
-        : base(id, serviceName, state, error)
+        List<FileReport> reports)
+        : base(id, serviceName, state)
     {
         _reports = reports;
     }
@@ -68,8 +66,7 @@ public class FileServiceAnalysis : ServiceAnalysis
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             state,
-            reports,
-            error: null);
+            reports);
     }
 
     /// <summary>
@@ -93,8 +90,7 @@ public class FileServiceAnalysis : ServiceAnalysis
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             state,
-            [],
-            error: null);
+            []);
     }
 
     /// <summary>

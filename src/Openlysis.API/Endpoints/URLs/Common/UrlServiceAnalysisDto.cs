@@ -13,7 +13,6 @@ namespace Openlysis.API.Endpoints.URLs.Common;
 /// <param name="Verdict">The verdict of the analysis.</param>
 /// <param name="ThreatZone">The threat zone associated with the analysis.</param>
 /// <param name="ThreatScore">The optional threat score of the analysis.</param>
-/// <param name="Error">The error message if the analysis failed.</param>
 public record UrlServiceAnalysisDto(
     string Id,
     string? JobId,
@@ -21,8 +20,7 @@ public record UrlServiceAnalysisDto(
     AnalysisStatus Status,
     Verdict Verdict,
     ThreatZone ThreatZone,
-    float? ThreatScore,
-    string? Error)
+    float? ThreatScore)
 {
     /// <summary>
     /// Parses a <see cref="UrlServiceAnalysis"/> object into a <see cref="UrlServiceAnalysisDto"/>.
@@ -38,7 +36,6 @@ public record UrlServiceAnalysisDto(
             source.State.Status,
             source.State.Verdict,
             source.State.ThreatZone,
-            source.ThreatScore,
-            source.Error);
+            source.ThreatScore);
     }
 }

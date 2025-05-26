@@ -27,14 +27,12 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="threatScore">The threat score of the analysis. Optional.</param>
     /// <param name="state">The current state of the analysis.</param>
-    /// <param name="error">The error message if the analysis failed.</param>
     private UrlServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisState state,
-        float? threatScore,
-        string? error)
-        : base(id, serviceName, state, error)
+        float? threatScore)
+        : base(id, serviceName, state)
     {
         ThreatScore = threatScore;
     }
@@ -76,8 +74,7 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
             composedId,
             serviceName,
             state,
-            normalizedThreatScore,
-            error: null);
+            normalizedThreatScore);
     }
 
     /// <summary>
