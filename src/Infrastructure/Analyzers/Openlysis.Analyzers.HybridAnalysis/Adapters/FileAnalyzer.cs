@@ -353,7 +353,8 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
             formattedId.ToString(),
             ServiceName,
             status,
-            verdict);
+            verdict,
+            threatScore: reportSummary.ThreatScore);
     }
 
     /// <summary>
@@ -491,7 +492,8 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
             id.ToString(),
             ServiceName,
             status,
-            verdict);
+            verdict,
+            threatScore: analysisSummary.ThreatScore);
     }
 
     /// <summary>
