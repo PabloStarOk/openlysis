@@ -23,7 +23,7 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisState state,
-        float? threatScore)
+        ThreatScore threatScore)
         : base(id, serviceName, state, threatScore)
     {
     }
@@ -53,10 +53,9 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
         AnalysisStatus status,
         Verdict verdict,
         string? jobId = null,
-        float? threatScore = null)
+        ThreatScore? threatScore = null)
     {
         var composedId = ComposedServiceAnalysisId.Create(id, jobId);
-        float? normalizedThreatScore = NormalizeThreatScore(threatScore);
         var state = AnalysisState.Initial()
             .WithVerdict(verdict)
             .WithStatus(status);
@@ -65,7 +64,7 @@ public sealed class UrlServiceAnalysis : ServiceAnalysis
             composedId,
             serviceName,
             state,
-            normalizedThreatScore);
+            threatScore ?? ThreatScore.CreateNull());
     }
 
     /// <summary>

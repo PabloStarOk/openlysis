@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.TestTools.ServicesSimulation.Common.Configuration;
 using Openlysis.TestTools.ServicesSimulation.Common.Enums;
 using Openlysis.TestTools.ServicesSimulation.Common.Models;
@@ -86,14 +87,18 @@ internal abstract class AnalysisStubBuilder<TOptions, TAnalysisStub>
     /// </summary>
     /// <param name="scoreOptions">Configuration options that determine how the threat score is generated.</param>
     /// <returns>A float representing the threat score calculated according to the specified simulation type.</returns>
-    protected static float GenerateThreatScore(ThreatScoreOptions scoreOptions)
+    protected static ThreatScore GenerateThreatScore(ThreatScoreOptions scoreOptions)
     {
         return scoreOptions.SimulationType switch
         {
             SimulationType.Random => GenerateRandomThreatScore(),
-            SimulationType.Fixed => scoreOptions.FixedValue,
-            SimulationType.Range => GenerateRandomThreatScoreFromRange(scoreOptions.ValuesRange),
-            SimulationType.Set => GetRandomValue(scoreOptions.ValuesSet.ToList()),
+            SimulationType.Fixed => ThreatScore.Create(
+                scoreOptions.FixedValue,
+                scoreOptions.MaxPossibleValue),
+            SimulationType.Range => GenerateRandomThreatScoreFromRange(
+                    scoreOptions.ValuesRange,
+                    scoreOptions.MaxPossibleValue),
+            SimulationType.Set => GenerateThreatScoreFromSet(scoreOptions),
             _ => throw new InvalidOperationException($"Unsupported value for {nameof(scoreOptions.SimulationType)}"),
         };
     }
@@ -118,30 +123,45 @@ internal abstract class AnalysisStubBuilder<TOptions, TAnalysisStub>
     /// Generates a random threat score between 0 and 1.
     /// </summary>
     /// <returns>A random float value between 0 and 1.</returns>
-    private static float GenerateRandomThreatScore()
+    private static ThreatScore GenerateRandomThreatScore()
     {
+        const int maxPossibleValue = 100;
         var range = new SimulationRange<float>
         {
             Minimum = 0,
-            Maximum = 1,
+            Maximum = maxPossibleValue,
         };
-        return GenerateRandomThreatScoreFromRange(range);
+        return GenerateRandomThreatScoreFromRange(range, maxPossibleValue);
     }
 
     /// <summary>
-    /// Generates a random threat score within the specified range.
+    /// Generates a random <see cref="ThreatScore"/> within the specified range and maximum possible value.
     /// </summary>
-    /// <param name="range">The range containing minimum and maximum values for the threat score.</param>
-    /// <returns>A random float value between the minimum and maximum values of the range.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when the range parameter is null.</exception>
-    private static float GenerateRandomThreatScoreFromRange(
-        SimulationRange<float>? range)
+    /// <param name="range">The range of possible float values for the threat score.</param>
+    /// <param name="maxPossibleValue">The maximum possible value for the threat score.</param>
+    /// <returns>A <see cref="ThreatScore"/> generated from a random value within the given range.</returns>
+    private static ThreatScore GenerateRandomThreatScoreFromRange(
+        SimulationRange<float>? range,
+        float maxPossibleValue)
     {
         ArgumentNullException.ThrowIfNull(range);
 
-        const int mantissaBits = 23;
-        const int maxMantissa = 1 << mantissaBits;
-        long m = Random.Shared.NextInt64(0, maxMantissa + 1);
-        return m / (float)maxMantissa;
+        const int multiplier = 10_000_000;
+        long scaledMin = (long)(multiplier * range.Minimum);
+        long scaledMax = (long)(multiplier * range.Maximum);
+        long random = Random.Shared.NextInt64(scaledMin, scaledMax + 1);
+        float randomThreatScore = random / (float)multiplier;
+        return ThreatScore.Create(randomThreatScore, maxPossibleValue);
+    }
+
+    /// <summary>
+    /// Generates a threat score by selecting a random value from the provided set of possible values.
+    /// </summary>
+    /// <param name="options">The options containing the set of possible threat score values and the maximum possible value.</param>
+    /// <returns>A <see cref="ThreatScore"/> created from a randomly selected value in the set.</returns>
+    private static ThreatScore GenerateThreatScoreFromSet(ThreatScoreOptions options)
+    {
+        float value = GetRandomValue(options.ValuesSet.ToList());
+        return ThreatScore.Create(value, options.MaxPossibleValue);
     }
 }

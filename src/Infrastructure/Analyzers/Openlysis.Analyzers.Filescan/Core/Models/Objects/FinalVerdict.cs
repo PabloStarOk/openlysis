@@ -9,5 +9,13 @@ namespace Openlysis.Analyzers.Filescan.Core.Models.Objects;
 /// <param name="Verdict">A <see cref="FilescanVerdict"/>.</param>
 /// <param name="ThreatLevel">The threat level associated with the analysis.</param>
 public record FinalVerdict(
-    [property: JsonPropertyName("verdict")] FilescanVerdict? Verdict,
-    [property: JsonPropertyName("threatLevel")] float? ThreatLevel);
+    [property: JsonPropertyName("verdict")]
+    FilescanVerdict? Verdict,
+    [property: JsonPropertyName("threatLevel")]
+    float? ThreatLevel)
+{
+    /// <summary>
+    /// The maximum possible threat level value.
+    /// </summary>
+    public const float MaxPossibleThreatLevel = 1.0f;
+}

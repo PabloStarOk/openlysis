@@ -169,11 +169,14 @@ internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     {
         AnalysisStatus status = Maps.AnalysisStatusMap[reportSummary.Status];
         Verdict verdict = Maps.VerdictMap[reportSummary.Verdict];
+        ThreatScore threatScore = ThreatScore.Create(
+            reportSummary.ThreatScore,
+            AnalysisSummary.MaxPossibleThreatScore);
         return UrlServiceAnalysis.Create(
             reportSummary.JobId,
             ServiceName,
             status,
             verdict,
-            threatScore: reportSummary.ThreatScore);
+            threatScore: threatScore);
     }
 }

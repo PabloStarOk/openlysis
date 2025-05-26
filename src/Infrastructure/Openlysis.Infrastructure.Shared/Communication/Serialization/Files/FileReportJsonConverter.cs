@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 
 namespace Openlysis.Infrastructure.Shared.Communication.Serialization.Files;
@@ -9,12 +10,12 @@ namespace Openlysis.Infrastructure.Shared.Communication.Serialization.Files;
 /// <summary>
 /// Converts a <see cref="FileReport"/> object to and from JSON.
 /// </summary>
-internal class ReportJsonConverter : JsonConverter<FileReport>
+internal class FileReportJsonConverter : JsonConverter<FileReport>
 {
     private const string IdKey = "id";
     private const string VerdictKey = "verdict";
     private const string ThreatZoneKey = "threatzone";
-    private const string ThreatLevelKey = "threatlevel";
+    private const string ThreatScoreKey = "threatscore";
 
     /// <inheritdoc/>
     public override FileReport Read(
@@ -25,7 +26,7 @@ internal class ReportJsonConverter : JsonConverter<FileReport>
         string id = string.Empty;
         Verdict verdict = 0;
         ThreatZone threatZone = 0;
-        float? threatLevel = null;
+        ThreatScore threatScore = ThreatScore.Create(null, null);
         while (reader.Read())
         {
             if (reader.TokenType is JsonTokenType.StartObject)
@@ -54,13 +55,8 @@ internal class ReportJsonConverter : JsonConverter<FileReport>
                     threatZone = Enum.Parse<ThreatZone>(reader.GetString() ?? string.Empty, ignoreCase: true);
                     break;
 
-                case ThreatLevelKey:
-                    if (reader.TokenType is not JsonTokenType.Null
-                        && reader.TryGetDecimal(out decimal threatLevelDecimal))
-                    {
-                        threatLevel = (float)threatLevelDecimal;
-                    }
-
+                case ThreatScoreKey when reader.TokenType is JsonTokenType.StartObject:
+                    threatScore = ReadThreatScore(ref reader, options);
                     break;
             }
         }
@@ -69,7 +65,7 @@ internal class ReportJsonConverter : JsonConverter<FileReport>
             id,
             verdict,
             threatZone,
-            threatLevel);
+            threatScore);
     }
 
     /// <inheritdoc/>
@@ -81,21 +77,38 @@ internal class ReportJsonConverter : JsonConverter<FileReport>
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? nameof(FileReport.Id);
         string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(FileReport.Verdict);
         string threatZoneKey = options.PropertyNamingPolicy?.ConvertName(ThreatZoneKey) ?? nameof(FileReport.ThreatZone);
-        string threatLevelKey = options.PropertyNamingPolicy?.ConvertName(ThreatLevelKey) ?? nameof(FileReport.ThreatScore);
 
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.Value);
         writer.WriteString(verdictKey, value.Verdict.ToString());
         writer.WriteString(threatZoneKey, value.ThreatZone.ToString());
-        if (value.ThreatScore is null)
+        var threatScoreConverter =
+            (JsonConverter<ThreatScore>)options.GetConverter(typeof(ThreatScore));
+        threatScoreConverter.Write(writer, value.ThreatScore, options);
+        writer.WriteEndObject();
+    }
+
+    /// <summary>
+    /// Reads a <see cref="ThreatScore"/> value from the JSON reader using the provided serializer options.
+    /// </summary>
+    /// <param name="reader">The <see cref="Utf8JsonReader"/> to read from.</param>
+    /// <param name="options">The <see cref="JsonSerializerOptions"/> to use for deserialization.</param>
+    /// <returns>The deserialized <see cref="ThreatScore"/>.</returns>
+    /// <exception cref="JsonException">Thrown if the ThreatScore value is missing or invalid.</exception>
+    private static ThreatScore ReadThreatScore(
+        ref Utf8JsonReader reader,
+        JsonSerializerOptions options)
+    {
+        var threatScoreConverter =
+            (JsonConverter<ThreatScore>)options.GetConverter(typeof(ThreatScore));
+        ThreatScore? threatScore =
+            threatScoreConverter.Read(ref reader, typeof(ThreatScore), options);
+
+        if (threatScore is null)
         {
-            writer.WriteNull(threatLevelKey);
-        }
-        else
-        {
-            writer.WriteNumber(threatLevelKey, (decimal)value.ThreatScore);
+            throw new JsonException("ThreatScore value is missing or invalid.");
         }
 
-        writer.WriteEndObject();
+        return threatScore;
     }
 }

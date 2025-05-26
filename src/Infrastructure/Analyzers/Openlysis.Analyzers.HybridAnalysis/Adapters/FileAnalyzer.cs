@@ -349,12 +349,15 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 
         AnalysisStatus status = Maps.AnalysisStatusMap[reportSummary.Status];
         Verdict verdict = Maps.VerdictMap[reportSummary.Verdict];
+        ThreatScore threatScore = ThreatScore.Create(
+            reportSummary.ThreatScore,
+            AnalysisSummary.MaxPossibleThreatScore);
         return FileServiceAnalysis.Create(
             formattedId.ToString(),
             ServiceName,
             status,
             verdict,
-            threatScore: reportSummary.ThreatScore);
+            threatScore: threatScore);
     }
 
     /// <summary>
@@ -488,12 +491,15 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         DebugAnalysisSummary(analysisSummary);
 #endif
 
+        ThreatScore threatScore = ThreatScore.Create(
+            analysisSummary.ThreatScore,
+            AnalysisSummary.MaxPossibleThreatScore);
         return FileServiceAnalysis.Create(
             id.ToString(),
             ServiceName,
             status,
             verdict,
-            threatScore: analysisSummary.ThreatScore);
+            threatScore: threatScore);
     }
 
     /// <summary>

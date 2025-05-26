@@ -14,7 +14,7 @@ public record FileReportDto(
     string Id,
     Verdict Verdict,
     ThreatZone ThreatZone,
-    float? ThreatScore)
+    int? ThreatScore)
 {
     /// <summary>
     /// Converts a <see cref="FileReport"/> entity to a <see cref="FileReportDto"/>.
@@ -27,6 +27,6 @@ public record FileReportDto(
             fileReport.Id.Value,
             fileReport.Verdict,
             fileReport.ThreatZone,
-            fileReport.ThreatScore);
+            fileReport.ThreatScore.NormalizedValue);
     }
 }

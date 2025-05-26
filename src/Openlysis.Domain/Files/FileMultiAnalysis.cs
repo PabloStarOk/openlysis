@@ -116,12 +116,14 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     /// <inheritdoc/>
     protected override void HandleAverageThreatScoreUpdate()
     {
-        float?[] allScores = [
+        int?[] allScores = [
             ..ServiceAnalyses
                 .SelectMany(s => s.Reports)
-                .Select(r => r.ThreatScore)
+                .Select(r => r.ThreatScore.NormalizedValue)
                 .Where(t => t is not null),
-            ..ServiceAnalyses.Select(s => s.ThreatScore).Where(t => t is not null),
+            ..ServiceAnalyses
+                .Select(s => s.ThreatScore.NormalizedValue)
+                .Where(t => t is not null),
         ];
 
         if (allScores.Length is 0)
@@ -129,6 +131,12 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
             return;
         }
 
-        AverageThreatScore = allScores.Average();
+        double? average = allScores.Average();
+        if (!average.HasValue)
+        {
+            return;
+        }
+
+        AverageThreatScore = (int?)Math.Round(average.Value);
     }
 }

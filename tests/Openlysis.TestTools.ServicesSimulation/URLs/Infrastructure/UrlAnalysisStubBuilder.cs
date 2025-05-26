@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.TestTools.ServicesSimulation.Common.Configuration;
 using Openlysis.TestTools.ServicesSimulation.Common.Services.Analyzers;
@@ -34,7 +35,7 @@ internal sealed class UrlAnalysisStubBuilder
         Verdict verdict = GenerateVerdict(options.VerdictSimulation);
         analysis.UpdateVerdict(verdict);
 
-        float threatScore = GenerateThreatScore(options.ThreatScoreSimulation);
+        ThreatScore threatScore = GenerateThreatScore(options.ThreatScoreSimulation);
         analysis.UpdateThreatScore(threatScore);
 
         AnalysisStatus status = GenerateAnalysisStatus(options.StatusSimulation);

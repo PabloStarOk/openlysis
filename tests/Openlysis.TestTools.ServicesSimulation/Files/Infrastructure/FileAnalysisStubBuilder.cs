@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 
 using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.TestTools.ServicesSimulation.Common.Configuration;
 using Openlysis.TestTools.ServicesSimulation.Common.Enums;
@@ -56,7 +57,7 @@ internal sealed class FileAnalysisStubBuilder
         Verdict verdict = GenerateVerdict(options.VerdictSimulation);
         analysis.UpdateVerdict(verdict);
 
-        float threatScore = GenerateThreatScore(options.ThreatScoreSimulation);
+        ThreatScore threatScore = GenerateThreatScore(options.ThreatScoreSimulation);
         analysis.UpdateThreatScore(threatScore);
 
         AnalysisStatus status = GenerateAnalysisStatus(options.StatusSimulation);
@@ -148,7 +149,8 @@ internal sealed class FileAnalysisStubBuilder
     private static FileReport GenerateRandomFileReport(FileReportStubOptions stubOptions)
     {
         Verdict verdict = GenerateVerdict(stubOptions.VerdictSimulation);
-        float threatScore = GenerateThreatScore(stubOptions.ThreatScoreSimulation);
+        ThreatScore threatScore =
+            GenerateThreatScore(stubOptions.ThreatScoreSimulation);
         return FileReport.Create(
             Guid.NewGuid().ToString(),
             verdict,

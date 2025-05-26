@@ -42,7 +42,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     /// <summary>
     /// Gets or sets the average threat score of the analysis.
     /// </summary>
-    public float? AverageThreatScore { get; protected set; }
+    public int? AverageThreatScore { get; protected set; }
 
     /// <summary>
     /// Gets the set of data hashes associated with the analysis.

@@ -126,14 +126,16 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         }
 
         Verdict verdict = Verdict.Unknown;
-        float? threatLevel = null;
+        ThreatScore threatScore = ThreatScore.Create(null, null);
         if (analysisResponse.Reports.Count is not 0)
         {
             FilescanReport filescanReport = analysisResponse.Reports.First().Value;
 
             verdict = Maps.VerdictMap[filescanReport.FinalVerdict?.Verdict
                 ?? FilescanVerdict.Unknown];
-            threatLevel = filescanReport.FinalVerdict?.ThreatLevel;
+            threatScore = ThreatScore.Create(
+                filescanReport.FinalVerdict?.ThreatLevel,
+                FinalVerdict.MaxPossibleThreatLevel);
 
 #if DEBUG
             _logger.LogDebug(
@@ -151,6 +153,6 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
             ServiceName,
             status,
             verdict,
-            threatScore: threatLevel);
+            threatScore: threatScore);
     }
 }

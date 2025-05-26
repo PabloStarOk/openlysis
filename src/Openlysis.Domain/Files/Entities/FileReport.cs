@@ -1,6 +1,7 @@
 using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Domain.Files.Entities;
@@ -21,9 +22,9 @@ public class FileReport : Entity<ReportId>
     public ThreatZone ThreatZone { get; private set; }
 
     /// <summary>
-    /// Gets the threat level of the scan.
+    /// Gets the threat score of the file.
     /// </summary>
-    public float? ThreatScore { get; private set; }
+    public ThreatScore ThreatScore { get; private set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileReport"/> class.
@@ -31,12 +32,12 @@ public class FileReport : Entity<ReportId>
     /// <param name="id">The unique identifier for the report.</param>
     /// <param name="verdict">The verdict of the scan.</param>
     /// <param name="threatZone">The threat zone of the scan.</param>
-    /// <param name="threatScore">The threat level of the scan. Optional.</param>
-    protected FileReport(
+    /// <param name="threatScore">The threat score of the file.</param>
+    private FileReport(
         ReportId id,
         Verdict verdict,
         ThreatZone threatZone,
-        float? threatScore = null)
+        ThreatScore threatScore)
         : base(id)
     {
         Verdict = verdict;
@@ -59,20 +60,19 @@ public class FileReport : Entity<ReportId>
     /// <param name="id">The unique identifier for the report.</param>
     /// <param name="verdict">The verdict of the scan.</param>
     /// <param name="threatZone">The threat zone of the scan.</param>
-    /// <param name="threatScore">The threat score of the scan.</param>
-    /// <returns>A new instance of the <see cref="FileReport"/> class.</returns>
+    /// <param name="threatScore">The threat score of the file.</param>
+    /// <returns>A new instance of the <see cref="FileReport"/> class with a normalized threat score.</returns>
     public static FileReport Create(
         string id,
         Verdict verdict,
         ThreatZone threatZone,
-        float? threatScore)
+        ThreatScore? threatScore = null)
     {
-        float? normalizedThreatScore = NormalizeThreatScore(threatScore);
         return new FileReport(
             ReportId.Create(id),
             verdict,
             threatZone,
-            normalizedThreatScore);
+            threatScore ?? ThreatScore.CreateNull());
     }
 
     /// <summary>
@@ -88,12 +88,15 @@ public class FileReport : Entity<ReportId>
     }
 
     /// <summary>
-    /// Updates the threat score of the file report with a normalized value.
+    /// Updates the threat score of the file report.
     /// </summary>
-    /// <param name="threatScore">The new threat score to set. Can be null.</param>
-    public void UpdateThreatScore(float? threatScore)
+    /// <param name="threatScore">
+    /// The new <see cref="ThreatScore"/> value to set for the file report.
+    /// </param>
+    public void UpdateThreatScore(ThreatScore threatScore)
     {
-        ThreatScore = NormalizeThreatScore(threatScore);
+        ArgumentNullException.ThrowIfNull(threatScore);
+        ThreatScore = threatScore;
     }
 
     /// <summary>
@@ -109,27 +112,5 @@ public class FileReport : Entity<ReportId>
         return Verdict == other.Verdict
             && ThreatZone == other.ThreatZone
             && ThreatScore.Equals(other.ThreatScore);
-    }
-
-    /// <summary>
-    /// Normalizes the given threat score to ensure it falls within the range of 0.0 to 1.0.
-    /// </summary>
-    /// <param name="threatScore">The threat score to normalize. Can be null.</param>
-    /// <returns>
-    /// A normalized threat score between 0.0 and 1.0, or null if the input is null.
-    /// If the input is greater than 1.0, it is divided by 100.0 before clamping.
-    /// </returns>
-    private static float? NormalizeThreatScore(float? threatScore)
-    {
-        switch (threatScore)
-        {
-            case null:
-                return null;
-            case > 1.0f:
-                threatScore /= 100.0f;
-                break;
-        }
-
-        return Math.Clamp((float)threatScore, 0.0f, 1.0f);
     }
 }

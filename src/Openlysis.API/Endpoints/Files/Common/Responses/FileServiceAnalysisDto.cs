@@ -21,7 +21,7 @@ public record FileServiceAnalysisDto(
     AnalysisStatus Status,
     Verdict Verdict,
     ThreatZone ThreatZone,
-    float? ThreatScore,
+    int? ThreatScore,
     FileReportDto[] Reports)
 {
     /// <summary>
@@ -42,7 +42,7 @@ public record FileServiceAnalysisDto(
             source.State.Status,
             source.State.Verdict,
             source.State.ThreatZone,
-            source.ThreatScore,
+            source.ThreatScore.NormalizedValue,
             reports);
     }
 }

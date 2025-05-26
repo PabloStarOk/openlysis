@@ -158,6 +158,7 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
             ServiceName,
             AnalysisStatus.Queued,
             Verdict.Unknown);
+
         foreach (var reportKeyValuePair in response.Reports)
         {
             string filescanReportId = reportKeyValuePair.Key;
@@ -167,11 +168,14 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 
             Verdict verdict = Maps.VerdictMap[filescanVerdict];
             ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
+            ThreatScore threatScore = ThreatScore.Create(
+                filescanReport.FinalVerdict?.ThreatLevel,
+                FinalVerdict.MaxPossibleThreatLevel);
             var report = FileReport.Create(
                 filescanReportId,
                 verdict,
                 threatZone,
-                filescanReport.FinalVerdict?.ThreatLevel);
+                threatScore);
             serviceAnalysis.AddReport(report);
         }
 

@@ -30,7 +30,7 @@ public class FileServiceAnalysis : ServiceAnalysis
         string serviceName,
         AnalysisState state,
         List<FileReport> reports,
-        float? threatScore)
+        ThreatScore threatScore)
         : base(id, serviceName, state, threatScore)
     {
         _reports = reports;
@@ -63,7 +63,7 @@ public class FileServiceAnalysis : ServiceAnalysis
         Verdict verdict,
         List<FileReport> reports,
         string? jobId = null,
-        float? threatScore = null)
+        ThreatScore? threatScore = null)
     {
         var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
         return new FileServiceAnalysis(
@@ -71,11 +71,12 @@ public class FileServiceAnalysis : ServiceAnalysis
             serviceName,
             state,
             reports,
-            threatScore);
+            threatScore ?? ThreatScore.CreateNull());
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="FileServiceAnalysis"/> with the specified parameters.
+    /// Creates a new instance of <see cref="FileServiceAnalysis"/> with the specified parameters,
+    /// but without any initial file reports.
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
@@ -83,14 +84,14 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="jobId">An optional job identifier associated with the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
-    /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
+    /// <returns>A new instance of <see cref="FileServiceAnalysis"/> with no file reports.</returns>
     public static FileServiceAnalysis Create(
         string id,
         string serviceName,
         AnalysisStatus status,
         Verdict verdict,
         string? jobId = null,
-        float? threatScore = null)
+        ThreatScore? threatScore = null)
     {
         var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
         return new FileServiceAnalysis(
@@ -98,7 +99,7 @@ public class FileServiceAnalysis : ServiceAnalysis
             serviceName,
             state,
             [],
-            threatScore);
+            threatScore ?? ThreatScore.CreateNull());
     }
 
     /// <summary>

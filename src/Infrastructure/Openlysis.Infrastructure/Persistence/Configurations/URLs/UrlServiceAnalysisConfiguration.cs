@@ -55,8 +55,17 @@ public class UrlServiceAnalysisConfiguration : IEntityTypeConfiguration<UrlServi
                 .IsRequired();
         });
 
-        builder.Property(u => u.ThreatScore)
-            .HasColumnName("threat_score")
-            .HasColumnType("real");
+        builder.OwnsOne(r => r.ThreatScore, tsBuilder =>
+        {
+            tsBuilder.Ignore(t => t.NormalizedValue);
+
+            tsBuilder.Property(t => t.RawValue)
+                .HasColumnName("raw_threat_score")
+                .HasColumnType("real");
+
+            tsBuilder.Property(t => t.MaxPossibleRawValue)
+                .HasColumnName("max_possible_threat_score")
+                .HasColumnType("real");
+        });
     }
 }

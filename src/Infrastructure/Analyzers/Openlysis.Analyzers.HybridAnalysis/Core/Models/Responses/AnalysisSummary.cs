@@ -14,6 +14,11 @@ internal record AnalysisSummary(
     float ThreatScore)
 {
     /// <summary>
+    /// The maximum possible threat score that can be assigned by the analysis.
+    /// </summary>
+    public const int MaxPossibleThreatScore = 100;
+
+    /// <summary>
     /// Gets the verdict of the analysis as a <see cref="HybridAnalysisVerdict"/> enum.
     /// </summary>
     /// <remarks>

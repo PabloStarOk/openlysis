@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 
 namespace Openlysis.Infrastructure.Shared.Communication.Serialization.Files;
@@ -29,7 +30,7 @@ internal class FileServiceAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         AnalysisStatus status = 0;
         Verdict verdict = 0;
         List<FileReport> reports = [];
-        float? threatScore = null;
+        ThreatScore threatScore = ThreatScore.Create(null, null);
         while (reader.Read())
         {
             if (reader.TokenType is JsonTokenType.EndObject)
@@ -61,8 +62,8 @@ internal class FileServiceAnalysisJsonConverter : JsonConverter<FileServiceAnaly
                         ignoreCase: true);
                     break;
 
-                case ThreatScoreKey when reader.TokenType is JsonTokenType.Number:
-                    threatScore = (float?)reader.GetDecimal();
+                case ThreatScoreKey when reader.TokenType is JsonTokenType.StartObject:
+                    threatScore = ReadThreatScore(ref reader, options);
                     break;
 
                 case ReportsKey:
@@ -90,7 +91,6 @@ internal class FileServiceAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(FileServiceAnalysis.ServiceName);
         string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(FileServiceAnalysis.State.Status);
         string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(FileServiceAnalysis.State.Verdict);
-        string threatScoreKey = options.PropertyNamingPolicy?.ConvertName(ThreatScoreKey) ?? nameof(FileServiceAnalysis.ThreatScore);
         string reportsKey = options.PropertyNamingPolicy?.ConvertName(ReportsKey) ?? nameof(FileServiceAnalysis.Reports);
 
         writer.WriteStartObject();
@@ -98,11 +98,9 @@ internal class FileServiceAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         writer.WriteString(serviceNameKey, value.ServiceName);
         writer.WriteString(statusKey, value.State.Status.ToString());
         writer.WriteString(verdictKey, value.State.Verdict.ToString());
-
-        if (value.ThreatScore is not null)
-        {
-            writer.WriteNumber(threatScoreKey, (decimal)value.ThreatScore);
-        }
+        var threatScoreConverter =
+            (JsonConverter<ThreatScore>)options.GetConverter(typeof(ThreatScore));
+        threatScoreConverter.Write(writer, value.ThreatScore, options);
 
         writer.WriteStartArray(reportsKey);
         var reportJsonConverter = (JsonConverter<FileReport>)options.Converters.Single(c => c.Type == typeof(FileReport));
@@ -150,5 +148,29 @@ internal class FileServiceAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         }
 
         return reports;
+    }
+
+    /// <summary>
+    /// Reads a <see cref="ThreatScore"/> value from the JSON reader using the provided serializer options.
+    /// </summary>
+    /// <param name="reader">The <see cref="Utf8JsonReader"/> to read from.</param>
+    /// <param name="options">The <see cref="JsonSerializerOptions"/> to use for deserialization.</param>
+    /// <returns>The deserialized <see cref="ThreatScore"/>.</returns>
+    /// <exception cref="JsonException">Thrown if the ThreatScore value is missing or invalid.</exception>
+    private static ThreatScore ReadThreatScore(
+        ref Utf8JsonReader reader,
+        JsonSerializerOptions options)
+    {
+        var threatScoreConverter =
+            (JsonConverter<ThreatScore>)options.GetConverter(typeof(ThreatScore));
+        ThreatScore? threatScore =
+            threatScoreConverter.Read(ref reader, typeof(ThreatScore), options);
+
+        if (threatScore is null)
+        {
+            throw new JsonException("ThreatScore value is missing or invalid.");
+        }
+
+        return threatScore;
     }
 }

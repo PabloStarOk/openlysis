@@ -1,6 +1,5 @@
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
-using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Domain.Users.ValueObjects;
@@ -94,14 +93,20 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// <inheritdoc/>
     protected override void HandleAverageThreatScoreUpdate()
     {
-        if (ServiceAnalyses.All(s => s.ThreatScore is null))
+        if (ServiceAnalyses.All(s => s.ThreatScore.NormalizedValue is null))
         {
             return;
         }
 
-        AverageThreatScore = ServiceAnalyses
-            .Where(s => s.ThreatScore is not null)
-            .Select(s => s.ThreatScore)
+        double? average = ServiceAnalyses
+            .Where(s => s.ThreatScore.NormalizedValue is not null)
+            .Select(s => s.ThreatScore.NormalizedValue)
             .Average();
+        if (!average.HasValue)
+        {
+            return;
+        }
+
+        AverageThreatScore = (int?)Math.Round(average.Value);
     }
 }

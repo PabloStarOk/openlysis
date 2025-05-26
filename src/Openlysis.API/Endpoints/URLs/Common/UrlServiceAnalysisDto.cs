@@ -20,7 +20,7 @@ public record UrlServiceAnalysisDto(
     AnalysisStatus Status,
     Verdict Verdict,
     ThreatZone ThreatZone,
-    float? ThreatScore)
+    int? ThreatScore)
 {
     /// <summary>
     /// Parses a <see cref="UrlServiceAnalysis"/> object into a <see cref="UrlServiceAnalysisDto"/>.
@@ -36,6 +36,6 @@ public record UrlServiceAnalysisDto(
             source.State.Status,
             source.State.Verdict,
             source.State.ThreatZone,
-            source.ThreatScore);
+            source.ThreatScore.NormalizedValue);
     }
 }

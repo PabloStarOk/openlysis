@@ -15,6 +15,7 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
 {
     private const string SmallintType = "smallint";
     private const string VarcharType = "varchar";
+    private const string RealType = "real";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<FileServiceAnalysis> builder)
@@ -70,9 +71,18 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
                 .IsRequired();
         });
 
-        builder.Property(s => s.ThreatScore)
-            .HasColumnName("threat_score")
-            .HasColumnType("real");
+        builder.OwnsOne(s => s.ThreatScore, tsBuilder =>
+        {
+            tsBuilder.Ignore(t => t.NormalizedValue);
+
+            tsBuilder.Property(t => t.RawValue)
+                .HasColumnName("raw_threat_score")
+                .HasColumnType(RealType);
+
+            tsBuilder.Property(t => t.MaxPossibleRawValue)
+                .HasColumnName("max_possible_threat_score")
+                .HasColumnType(RealType);
+        });
     }
 
     /// <summary>
@@ -110,8 +120,17 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Property(r => r.ThreatScore)
-            .HasColumnName("threat_score")
-            .HasColumnType("real");
+        builder.OwnsOne(r => r.ThreatScore, tsBuilder =>
+        {
+            tsBuilder.Ignore(t => t.NormalizedValue);
+
+            tsBuilder.Property(t => t.RawValue)
+                .HasColumnName("raw_threat_score")
+                .HasColumnType(RealType);
+
+            tsBuilder.Property(t => t.MaxPossibleRawValue)
+                .HasColumnName("max_possible_threat_score")
+                .HasColumnType(RealType);
+        });
     }
 }
