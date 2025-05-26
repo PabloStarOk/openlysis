@@ -27,7 +27,8 @@ CREATE TABLE IF NOT EXISTS file_service_analyses
     service_name varchar(30) NOT NULL,
     status smallint NOT NULL,
     verdict smallint NOT NULL,
-    threat_zone smallint NOT NULL
+    threat_zone smallint NOT NULL,
+    threat_score real
 );
 
 CREATE TABLE IF NOT EXISTS file_analyses

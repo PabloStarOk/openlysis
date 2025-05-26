@@ -69,6 +69,10 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
                 .HasColumnType(SmallintType)
                 .IsRequired();
         });
+
+        builder.Property(s => s.ThreatScore)
+            .HasColumnName("threat_score")
+            .HasColumnType("real");
     }
 
     /// <summary>

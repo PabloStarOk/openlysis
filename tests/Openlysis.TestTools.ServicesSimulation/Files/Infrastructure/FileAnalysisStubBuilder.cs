@@ -56,6 +56,9 @@ internal sealed class FileAnalysisStubBuilder
         Verdict verdict = GenerateVerdict(options.VerdictSimulation);
         analysis.UpdateVerdict(verdict);
 
+        float threatScore = GenerateThreatScore(options.ThreatScoreSimulation);
+        analysis.UpdateThreatScore(threatScore);
+
         AnalysisStatus status = GenerateAnalysisStatus(options.StatusSimulation);
         analysis.UpdateStatus(status);
     }
@@ -82,6 +85,7 @@ internal sealed class FileAnalysisStubBuilder
             + "\n\tID: {Id}"
             + "\n\tVerdict: {Verdict}"
             + "\n\tStatus: {Status}"
+            + "\n\tThreat score: {ThreatScore}"
             + "\n\tReports amount: {ReportsAmount}"
             + "\n\tReports: {Reports}",
             typeof(FileServiceAnalysis),
@@ -89,6 +93,7 @@ internal sealed class FileAnalysisStubBuilder
             analysis.Id,
             analysis.State.Verdict,
             analysis.State.Status,
+            analysis.ThreatScore,
             analysis.Reports.Count,
             reportsLog);
     }

@@ -1,6 +1,5 @@
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
-using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.Files.ValueObjects;
@@ -110,20 +109,26 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
         }
 
         existingAnalysis.UpdateVerdict(updatedAnalysis.State.Verdict);
+        existingAnalysis.UpdateThreatScore(updatedAnalysis.ThreatScore);
         existingAnalysis.UpdateStatus(updatedAnalysis.State.Status);
     }
 
     /// <inheritdoc/>
     protected override void HandleAverageThreatScoreUpdate()
     {
-        if (AllReports.All(r => r.ThreatScore is null))
+        float?[] allScores = [
+            ..ServiceAnalyses
+                .SelectMany(s => s.Reports)
+                .Select(r => r.ThreatScore)
+                .Where(t => t is not null),
+            ..ServiceAnalyses.Select(s => s.ThreatScore).Where(t => t is not null),
+        ];
+
+        if (allScores.Length is 0)
         {
             return;
         }
 
-        AverageThreatScore = AllReports
-            .Where(r => r.ThreatScore is not null)
-            .Select(r => r.ThreatScore)
-            .Average();
+        AverageThreatScore = allScores.Average();
     }
 }

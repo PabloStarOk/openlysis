@@ -77,7 +77,7 @@ public static class DependencyInjection
                 options =>
                 {
                     options.Converters.Add(new GlobalIdConverter());
-                    options.Converters.Add(new ServiceFileAnalysisJsonConverter());
+                    options.Converters.Add(new FileServiceAnalysisJsonConverter());
                     options.Converters.Add(new ReportJsonConverter());
                     options.Converters.Add(new UrlServiceAnalysisConverter());
                     return options;

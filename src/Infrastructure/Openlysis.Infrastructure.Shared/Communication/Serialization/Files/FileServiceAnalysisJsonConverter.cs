@@ -9,12 +9,13 @@ namespace Openlysis.Infrastructure.Shared.Communication.Serialization.Files;
 /// <summary>
 /// Converts a <see cref="FileServiceAnalysis"/> object to and from JSON.
 /// </summary>
-internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnalysis>
+internal class FileServiceAnalysisJsonConverter : JsonConverter<FileServiceAnalysis>
 {
     private const string IdKey = "id";
     private const string ServiceNameKey = "servicename";
     private const string StatusKey = "status";
     private const string VerdictKey = "verdict";
+    private const string ThreatScoreKey = "threatscore";
     private const string ReportsKey = "reports";
 
     /// <inheritdoc/>
@@ -28,6 +29,7 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         AnalysisStatus status = 0;
         Verdict verdict = 0;
         List<FileReport> reports = [];
+        float? threatScore = null;
         while (reader.Read())
         {
             if (reader.TokenType is JsonTokenType.EndObject)
@@ -59,13 +61,23 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
                         ignoreCase: true);
                     break;
 
+                case ThreatScoreKey when reader.TokenType is JsonTokenType.Number:
+                    threatScore = (float?)reader.GetDecimal();
+                    break;
+
                 case ReportsKey:
                     reports = ConvertReports(ref reader, options);
                     break;
             }
         }
 
-        return FileServiceAnalysis.Create(id, serviceName, status, verdict, reports);
+        return FileServiceAnalysis.Create(
+            id,
+            serviceName,
+            status,
+            verdict,
+            reports,
+            threatScore: threatScore);
     }
 
     /// <inheritdoc/>
@@ -78,6 +90,7 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(FileServiceAnalysis.ServiceName);
         string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(FileServiceAnalysis.State.Status);
         string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(FileServiceAnalysis.State.Verdict);
+        string threatScoreKey = options.PropertyNamingPolicy?.ConvertName(ThreatScoreKey) ?? nameof(FileServiceAnalysis.ThreatScore);
         string reportsKey = options.PropertyNamingPolicy?.ConvertName(ReportsKey) ?? nameof(FileServiceAnalysis.Reports);
 
         writer.WriteStartObject();
@@ -85,6 +98,11 @@ internal class ServiceFileAnalysisJsonConverter : JsonConverter<FileServiceAnaly
         writer.WriteString(serviceNameKey, value.ServiceName);
         writer.WriteString(statusKey, value.State.Status.ToString());
         writer.WriteString(verdictKey, value.State.Verdict.ToString());
+
+        if (value.ThreatScore is not null)
+        {
+            writer.WriteNumber(threatScoreKey, (decimal)value.ThreatScore);
+        }
 
         writer.WriteStartArray(reportsKey);
         var reportJsonConverter = (JsonConverter<FileReport>)options.Converters.Single(c => c.Type == typeof(FileReport));

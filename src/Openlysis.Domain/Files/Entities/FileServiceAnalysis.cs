@@ -24,12 +24,14 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
+    /// <param name="threatScore">The threat score assigned by the service.</param>
     private FileServiceAnalysis(
         ComposedServiceAnalysisId id,
         string serviceName,
         AnalysisState state,
-        List<FileReport> reports)
-        : base(id, serviceName, state)
+        List<FileReport> reports,
+        float? threatScore)
+        : base(id, serviceName, state, threatScore)
     {
         _reports = reports;
     }
@@ -52,6 +54,7 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="reports">The list of reports associated with the analysis.</param>
     /// <param name="jobId">An optional job identifier associated with the analysis.</param>
+    /// <param name="threatScore">The threat score assigned by the service.</param>
     /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
     public static FileServiceAnalysis Create(
         string id,
@@ -59,14 +62,16 @@ public class FileServiceAnalysis : ServiceAnalysis
         AnalysisStatus status,
         Verdict verdict,
         List<FileReport> reports,
-        string? jobId = null)
+        string? jobId = null,
+        float? threatScore = null)
     {
         var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
         return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             state,
-            reports);
+            reports,
+            threatScore);
     }
 
     /// <summary>
@@ -77,20 +82,23 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="jobId">An optional job identifier associated with the analysis.</param>
+    /// <param name="threatScore">The threat score assigned by the service.</param>
     /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
     public static FileServiceAnalysis Create(
         string id,
         string serviceName,
         AnalysisStatus status,
         Verdict verdict,
-        string? jobId = null)
+        string? jobId = null,
+        float? threatScore = null)
     {
         var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
         return new FileServiceAnalysis(
             ComposedServiceAnalysisId.Create(id, jobId),
             serviceName,
             state,
-            []);
+            [],
+            threatScore);
     }
 
     /// <summary>
