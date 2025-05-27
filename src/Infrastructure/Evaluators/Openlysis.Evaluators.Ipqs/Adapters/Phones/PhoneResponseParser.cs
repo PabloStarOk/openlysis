@@ -16,9 +16,9 @@ using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstraction
 namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
 
 /// <summary>
-/// Parses the response from the IPQS phone service and converts it into a <see cref="PhoneServiceReputation"/> object.
+/// Parses the response from the IPQS phone service and converts it into a <see cref="PhoneReputation"/> object.
 /// </summary>
-public class PhoneResponseParser : IResponseParser<PhoneServiceReputation>
+public class PhoneResponseParser : IResponseParser<PhoneReputation>
 {
     private readonly ILogger<PhoneResponseParser> _logger;
     private readonly IOptionsSnapshot<IpqsEvaluatorOptions> _evaluatorOptions;
@@ -45,7 +45,7 @@ public class PhoneResponseParser : IResponseParser<PhoneServiceReputation>
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<PhoneServiceReputation>> ParseAsync(
+    public async Task<ErrorOr<PhoneReputation>> ParseAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken = default)
     {
@@ -83,7 +83,7 @@ public class PhoneResponseParser : IResponseParser<PhoneServiceReputation>
 
         Verdict verdict = _verdictCalculator.Calculate(phoneResponse);
 
-        return PhoneServiceReputation.Create(
+        return PhoneReputation.Create(
             _evaluatorOptions.Value.ServiceName,
             verdict,
             phoneInfo);

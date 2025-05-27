@@ -15,7 +15,7 @@ namespace Openlysis.Evaluators.Ipqs.Adapters.Phones;
 /// Evaluates the reputation of phone numbers using the IPQS service.
 /// </summary>
 public class PhoneReputationEvaluator
-    : ReputationEvaluator<string, PhoneServiceReputation>
+    : ReputationEvaluator<string, PhoneReputation>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="PhoneReputationEvaluator"/> class.
@@ -32,7 +32,7 @@ public class PhoneReputationEvaluator
         IHttpClientFactory httpClientFactory,
         [FromKeyedServices(KeyedServices.GlobalKey)] IRateQuotaService<ReputationEndpointType> rateQuotaService,
         [FromKeyedServices(KeyedServices.PhoneKey)] IEndpointAddressFactory<string> endpointAddressFactory,
-        [FromKeyedServices(KeyedServices.PhoneKey)] IResponseParser<PhoneServiceReputation> responseParser)
+        [FromKeyedServices(KeyedServices.PhoneKey)] IResponseParser<PhoneReputation> responseParser)
         : base(logger, options, httpClientFactory, rateQuotaService, endpointAddressFactory, responseParser)
     {
     }

@@ -86,8 +86,8 @@ CREATE TABLE IF NOT EXISTS email_address_multi_reputations (
     email_address varchar(254) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS email_address_service_reputations (
-    email_address_service_reputation_id uuid PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS email_address_reputations (
+    email_address_reputation_id uuid PRIMARY KEY,
     service_name varchar(30) NOT NULL,
     verdict smallint NOT NULL,
     threat_zone smallint NOT NULL,
@@ -105,9 +105,9 @@ CREATE TABLE IF NOT EXISTS phone_multi_reputations
     phone_number varchar(16) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS phone_services_reputations
+CREATE TABLE IF NOT EXISTS phone_reputations
 (
-    phone_service_reputation_id uuid PRIMARY KEY,
+    phone_reputation_id uuid PRIMARY KEY,
     service_name varchar(30) NOT NULL,
     verdict smallint NOT NULL,
     threat_zone smallint NOT NULL,

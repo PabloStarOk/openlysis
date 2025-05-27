@@ -9,14 +9,14 @@ using Openlysis.TestTools.ServicesSimulation.PhonesNumbers.Configuration;
 namespace Openlysis.TestTools.ServicesSimulation.PhonesNumbers.Infrastructure;
 
 /// <summary>
-/// Factory for creating stubbed <see cref="PhoneServiceReputation"/> instances.
+/// Factory for creating stubbed <see cref="PhoneReputation"/> instances.
 /// </summary>
 /// <remarks>
 /// This factory generates phone reputation data with configurable options
 /// or random data when no specific options are provided.
 /// </remarks>
 internal sealed class PhoneReputationStubFactory
-    : StubFactory<PhoneReputationStubFactoryOptions, PhoneServiceReputation>
+    : StubFactory<PhoneReputationStubFactoryOptions, PhoneReputation>
 {
     private const ushort ExistingDiallingCodes = 250;
     private const ushort MinPhoneNumberDigits = 8;
@@ -32,7 +32,7 @@ internal sealed class PhoneReputationStubFactory
     }
 
     /// <inheritdoc/>
-    protected override PhoneServiceReputation HandleCreation(
+    protected override PhoneReputation HandleCreation(
         string serviceName,
         PhoneReputationStubFactoryOptions options)
     {
@@ -40,14 +40,14 @@ internal sealed class PhoneReputationStubFactory
 
         PhoneInfo phoneInfo = options.PhoneInfoStub ?? GenerateRandomPhoneInfo();
 
-        return PhoneServiceReputation.Create(
+        return PhoneReputation.Create(
             serviceName,
             verdict,
             phoneInfo);
     }
 
     /// <inheritdoc/>
-    protected override void LogCreatedStub(PhoneServiceReputation stub)
+    protected override void LogCreatedStub(PhoneReputation stub)
     {
         Logger.LogTrace(
             "{TypeName} created:"
@@ -58,7 +58,7 @@ internal sealed class PhoneReputationStubFactory
             + "\n\tCountry code: {CountryCode}"
             + "\n\tDialing code: {DialingCode}"
             + "\n\tLine type: {LineType}",
-            nameof(PhoneServiceReputation),
+            nameof(PhoneReputation),
             stub.ServiceName,
             stub.Id,
             stub.Verdict,

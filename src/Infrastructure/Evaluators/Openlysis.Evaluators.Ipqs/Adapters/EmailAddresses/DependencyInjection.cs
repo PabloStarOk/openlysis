@@ -88,12 +88,12 @@ internal static class DependencyInjection
 
         // Add response parser.
         services.AddKeyedScoped<
-            IResponseParser<EmailAddressServiceReputation>,
+            IResponseParser<EmailAddressReputation>,
             EmailAddressResponseParser>(KeyedServices.EmailAddressKey);
 
         // Add reputation evaluator.
         services.AddScoped<
-            IReputationEvaluator<MailAddress, EmailAddressServiceReputation>,
+            IReputationEvaluator<MailAddress, EmailAddressReputation>,
             EmailAddressReputationEvaluator>();
     }
 }

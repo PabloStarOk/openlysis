@@ -6,13 +6,9 @@ using Openlysis.Domain.Common.ValueObjects;
 namespace Openlysis.Domain.EmailAddresses.Entities;
 
 /// <summary>
-/// Represents a service that evaluates the reputation of an email address.
+/// The reputation for an email address returned by a service.
 /// </summary>
-/// <remarks>
-/// Inherits from the <see cref="ServiceReputation"/> class to provide additional
-/// properties and methods specific to email address reputation evaluation.
-/// </remarks>
-public class EmailAddressServiceReputation : ServiceReputation
+public class EmailAddressReputation : Reputation
 {
     /// <summary>
     /// Gets a value indicating whether the email address is disposable.
@@ -25,15 +21,15 @@ public class EmailAddressServiceReputation : ServiceReputation
     public bool? IsRiskyTld { get; private set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EmailAddressServiceReputation"/> class.
+    /// Initializes a new instance of the <see cref="EmailAddressReputation"/> class.
     /// </summary>
-    /// <param name="id">The unique identifier for the service.</param>
+    /// <param name="id">The unique identifier of the reputation.</param>
     /// <param name="serviceName">The name of the service.</param>
     /// <param name="verdict">The reputation verdict of the email address.</param>
     /// <param name="threatZone">The threat zone associated with the email address.</param>
     /// <param name="isDisposable">Indicates whether the email address is disposable.</param>
     /// <param name="isRiskyTld">Indicates whether the email address has a risky top-level domain (TLD).</param>
-    private EmailAddressServiceReputation(
+    private EmailAddressReputation(
         GlobalId id,
         string serviceName,
         Verdict verdict,
@@ -49,21 +45,21 @@ public class EmailAddressServiceReputation : ServiceReputation
     // For EF core.
 #pragma warning disable CS8618
 #pragma warning disable S1144
-    private EmailAddressServiceReputation()
+    private EmailAddressReputation()
     {
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of the <see cref="EmailAddressServiceReputation"/> class.
+    /// Creates a new instance of the <see cref="EmailAddressReputation"/> class.
     /// </summary>
     /// <param name="serviceName">The name of the service.</param>
     /// <param name="verdict">The reputation verdict of the email address.</param>
     /// <param name="isDisposable">Indicates whether the email address is disposable.</param>
     /// <param name="isRiskyTld">Indicates whether the email address has a risky top-level domain (TLD).</param>
-    /// <returns>A new instance of <see cref="EmailAddressServiceReputation"/>.</returns>
-    public static EmailAddressServiceReputation Create(
+    /// <returns>A new instance of <see cref="EmailAddressReputation"/>.</returns>
+    public static EmailAddressReputation Create(
         string serviceName,
         Verdict verdict,
         bool? isDisposable,
@@ -72,7 +68,7 @@ public class EmailAddressServiceReputation : ServiceReputation
         GlobalId globalId = GlobalId.CreateUnique();
         ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
 
-        return new EmailAddressServiceReputation(
+        return new EmailAddressReputation(
             globalId,
             serviceName,
             verdict,

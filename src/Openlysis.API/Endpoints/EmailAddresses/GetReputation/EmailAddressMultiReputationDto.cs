@@ -4,21 +4,21 @@ using Openlysis.Domain.EmailAddresses;
 namespace Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 
 /// <summary>
-/// Represents the reputation details of an email address, including its evaluation date,
-/// final verdict, final threat zone, and service-specific reputations.
+/// Data transfer object for <see cref="EmailAddressMultiReputation"/>.
 /// </summary>
 /// <param name="Id">The unique identifier of the email address.</param>
 /// <param name="ReputationEvaluationDate">The date when the reputation was evaluated.</param>
-/// <param name="FinalVerdict">The final verdict of the email address reputation.</param>
-/// <param name="FinalThreatZone">The final threat zone of the email address reputation.</param>
-/// <param name="ServiceReputations">An array of service-specific reputation details.</param>
+/// <param name="FinalVerdict">The final verdict assigned to the email address based on multiple reputations.</param>
+/// <param name="FinalThreatZone">The final threat zone classification for the email address.</param>
+/// <param name="EmailAddress">The email address being evaluated.</param>
+/// <param name="Reputations">An array of reputation details from different sources or services.</param>
 public record EmailAddressMultiReputationDto(
     string Id,
     DateTime ReputationEvaluationDate,
     Verdict FinalVerdict,
     ThreatZone FinalThreatZone,
     string EmailAddress,
-    EmailAddressServiceReputationDto[] ServiceReputations)
+    EmailAddressReputationDto[] Reputations)
 {
     /// <summary>
     /// Converts an <see cref="EmailAddressMultiReputation"/> instance to an <see cref="EmailAddressMultiReputationDto"/>.
@@ -28,8 +28,8 @@ public record EmailAddressMultiReputationDto(
     public static EmailAddressMultiReputationDto Parse(
         EmailAddressMultiReputation source)
     {
-        EmailAddressServiceReputationDto[] serviceReputations = source.ServicesReputations
-            .Select(EmailAddressServiceReputationDto.Parse)
+        EmailAddressReputationDto[] reputations = source.Reputations
+            .Select(EmailAddressReputationDto.Parse)
             .ToArray();
 
         return new EmailAddressMultiReputationDto(
@@ -38,6 +38,6 @@ public record EmailAddressMultiReputationDto(
             source.FinalVerdict,
             source.FinalThreatZone,
             source.EmailAddress.Address,
-            serviceReputations);
+            reputations);
     }
 }

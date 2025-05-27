@@ -17,7 +17,7 @@ namespace Openlysis.Application.Phones.Services;
 /// and provides functionality to store the results in a database.
 /// </remarks>
 internal class PhoneReputationService :
-    DataReputationService<string, PhoneServiceReputation, PhoneMultiReputation>,
+    DataReputationService<string, PhoneReputation, PhoneMultiReputation>,
     IPhoneReputationService
 {
     /// <summary>
@@ -35,7 +35,7 @@ internal class PhoneReputationService :
         ILogger<PhoneReputationService> logger,
         IRepository<PhoneMultiReputation, GlobalId> repository,
         TimeProvider timeProvider,
-        IEnumerable<IReputationEvaluator<string, PhoneServiceReputation>> reputationEvaluators)
+        IEnumerable<IReputationEvaluator<string, PhoneReputation>> reputationEvaluators)
         : base(logger, repository, timeProvider, reputationEvaluators)
     {
     }

@@ -42,10 +42,10 @@ internal static class DependencyInjection
             ReputationServiceOptionsValidator<PhoneReputationStubFactoryOptions>>();
 
         services.AddSingleton<
-            StubFactory<PhoneReputationStubFactoryOptions, PhoneServiceReputation>,
+            StubFactory<PhoneReputationStubFactoryOptions, PhoneReputation>,
             PhoneReputationStubFactory>();
         services.AddSingleton<ReputationBehaviorSimulator<
-            PhoneServiceReputation,
+            PhoneReputation,
             PhoneReputationStubFactoryOptions>>();
 
         IEnumerable<IConfigurationSection> servicesSections = configuration
@@ -60,7 +60,7 @@ internal static class DependencyInjection
                 PhoneReputationStubFactoryOptions>(section, services);
             servicesOptionsNames.Add(optionsName);
 
-            services.AddSingleton<IReputationEvaluator<string, PhoneServiceReputation>>(
+            services.AddSingleton<IReputationEvaluator<string, PhoneReputation>>(
                     sp => BuildSimulatedService(sp, optionsName));
         }
 
@@ -84,7 +84,7 @@ internal static class DependencyInjection
             IOptionsMonitor<ReputationServiceOptions<PhoneReputationStubFactoryOptions>>>();
 
         var behaviorSimulator = sp.GetRequiredService<ReputationBehaviorSimulator<
-            PhoneServiceReputation,
+            PhoneReputation,
             PhoneReputationStubFactoryOptions>>();
 
         return new SimulatedPhoneReputationService(

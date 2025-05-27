@@ -44,10 +44,10 @@ internal static class DependencyInjection
             ReputationServiceOptionsValidator<EmailReputationStubFactoryOptions>>();
 
         services.AddSingleton<
-            StubFactory<EmailReputationStubFactoryOptions, EmailAddressServiceReputation>,
+            StubFactory<EmailReputationStubFactoryOptions, EmailAddressReputation>,
             EmailReputationStubFactory>();
         services.AddSingleton<ReputationBehaviorSimulator<
-            EmailAddressServiceReputation,
+            EmailAddressReputation,
             EmailReputationStubFactoryOptions>>();
 
         IEnumerable<IConfigurationSection> servicesSections = configuration
@@ -62,7 +62,7 @@ internal static class DependencyInjection
                 EmailReputationStubFactoryOptions>(section, services);
             servicesOptionsNames.Add(optionsName);
 
-            services.AddSingleton<IReputationEvaluator<MailAddress, EmailAddressServiceReputation>>(
+            services.AddSingleton<IReputationEvaluator<MailAddress, EmailAddressReputation>>(
                 sp => BuildSimulatedService(sp, optionsName));
         }
 
@@ -86,7 +86,7 @@ internal static class DependencyInjection
             IOptionsMonitor<ReputationServiceOptions<EmailReputationStubFactoryOptions>>>();
 
         var behaviorSimulator = sp.GetRequiredService<ReputationBehaviorSimulator<
-            EmailAddressServiceReputation,
+            EmailAddressReputation,
             EmailReputationStubFactoryOptions>>();
 
         return new SimulatedEmailReputationService(

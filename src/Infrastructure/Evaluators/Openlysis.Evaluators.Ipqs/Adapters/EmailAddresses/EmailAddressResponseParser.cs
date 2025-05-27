@@ -19,9 +19,9 @@ namespace Openlysis.Evaluators.Ipqs.Adapters.EmailAddresses;
 /// </summary>
 /// <remarks>
 /// Implements the <see cref="IResponseParser{T}"/> interface for parsing
-/// <see cref="EmailAddressServiceReputation"/> objects.
+/// <see cref="EmailAddressReputation"/> objects.
 /// </remarks>
-internal class EmailAddressResponseParser : IResponseParser<EmailAddressServiceReputation>
+internal class EmailAddressResponseParser : IResponseParser<EmailAddressReputation>
 {
     private readonly ILogger<EmailAddressResponseParser> _logger;
     private readonly IOptionsSnapshot<IpqsEvaluatorOptions> _evaluatorOptions;
@@ -57,7 +57,7 @@ internal class EmailAddressResponseParser : IResponseParser<EmailAddressServiceR
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<EmailAddressServiceReputation>> ParseAsync(
+    public async Task<ErrorOr<EmailAddressReputation>> ParseAsync(
         HttpResponseMessage response,
         CancellationToken cancellationToken = default)
     {
@@ -98,7 +98,7 @@ internal class EmailAddressResponseParser : IResponseParser<EmailAddressServiceR
         }
 
         Verdict verdict = _verdictCalculator.Calculate(emailResponse);
-        return EmailAddressServiceReputation.Create(
+        return EmailAddressReputation.Create(
             _evaluatorOptions.Value.ServiceName,
             verdict,
             emailResponse.IsDisposable,

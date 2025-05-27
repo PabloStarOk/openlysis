@@ -6,23 +6,23 @@ using Openlysis.Domain.Phones.Entities;
 namespace Openlysis.Domain.Phones;
 
 /// <summary>
-/// Represents multiple reputations for a phone from different services.
+/// An aggregate that contains multiple reputations for a phone number.
 /// </summary>
-public class PhoneMultiReputation : MultiReputation<PhoneServiceReputation>
+public class PhoneMultiReputation : MultiReputation<PhoneReputation>
 {
     /// <summary>
-    /// Gets the phone number associated with the reputation.
+    /// Gets the phone number associated with the multi-reputation.
     /// </summary>
     public string PhoneNumber { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PhoneMultiReputation"/> class.
     /// </summary>
-    /// <param name="id">The unique identifier for the reputation.</param>
-    /// <param name="reputationEvaluationDate">The date when the reputation was evaluated.</param>
-    /// <param name="finalVerdict">The final verdict of the reputation.</param>
-    /// <param name="finalThreatZone">The final threat zone of the reputation.</param>
-    /// <param name="phoneNumber">The phone number associated with the reputation.</param>
+    /// <param name="id">The unique identifier for the multi-reputation.</param>
+    /// <param name="reputationEvaluationDate">The date when the multi-reputation was evaluated.</param>
+    /// <param name="finalVerdict">The final verdict of the multi-reputation.</param>
+    /// <param name="finalThreatZone">The final threat zone of the multi-reputation.</param>
+    /// <param name="phoneNumber">The phone number associated with the multi-reputation.</param>
     private PhoneMultiReputation(
         GlobalId id,
         DateTime reputationEvaluationDate,
@@ -46,8 +46,8 @@ public class PhoneMultiReputation : MultiReputation<PhoneServiceReputation>
     /// <summary>
     /// Creates a new instance of <see cref="PhoneMultiReputation"/>.
     /// </summary>
-    /// <param name="reputationEvaluationDate">The date when the reputation was evaluated.</param>
-    /// <param name="phoneNumber">The phone number associated with the reputation.</param>
+    /// <param name="reputationEvaluationDate">The date when the multi-reputation was evaluated.</param>
+    /// <param name="phoneNumber">The phone number associated with the multi-reputation.</param>
     /// <returns>A new instance of <see cref="PhoneMultiReputation"/>.</returns>
     public static PhoneMultiReputation Create(
         DateTime reputationEvaluationDate,

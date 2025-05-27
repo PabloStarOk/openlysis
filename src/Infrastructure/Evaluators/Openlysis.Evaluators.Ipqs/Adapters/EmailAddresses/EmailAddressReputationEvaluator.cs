@@ -17,7 +17,7 @@ namespace Openlysis.Evaluators.Ipqs.Adapters.EmailAddresses;
 /// Evaluates the reputation of email addresses using the IPQS service.
 /// </summary>
 public class EmailAddressReputationEvaluator
-    : ReputationEvaluator<MailAddress, EmailAddressServiceReputation>
+    : ReputationEvaluator<MailAddress, EmailAddressReputation>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="EmailAddressReputationEvaluator"/> class.
@@ -34,7 +34,7 @@ public class EmailAddressReputationEvaluator
         IHttpClientFactory httpClientFactory,
         [FromKeyedServices(KeyedServices.GlobalKey)] IRateQuotaService<ReputationEndpointType> rateQuotaService,
         [FromKeyedServices(KeyedServices.EmailAddressKey)] IEndpointAddressFactory<MailAddress> endpointAddressFactory,
-        [FromKeyedServices(KeyedServices.EmailAddressKey)] IResponseParser<EmailAddressServiceReputation> responseParser)
+        [FromKeyedServices(KeyedServices.EmailAddressKey)] IResponseParser<EmailAddressReputation> responseParser)
         : base(logger, options, httpClientFactory, rateQuotaService, endpointAddressFactory, responseParser)
     {
     }

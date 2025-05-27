@@ -15,7 +15,7 @@ namespace Openlysis.TestTools.ServicesSimulation.EmailAddresses.Infrastructure;
 /// configurable email address reputation entries for simulation purposes.
 /// </remarks>
 internal sealed class EmailReputationStubFactory
-    : StubFactory<EmailReputationStubFactoryOptions, EmailAddressServiceReputation>
+    : StubFactory<EmailReputationStubFactoryOptions, EmailAddressReputation>
 {
     private static readonly IReadOnlyList<bool?> BoolValues = [true, false, null];
 
@@ -29,7 +29,7 @@ internal sealed class EmailReputationStubFactory
     }
 
     /// <inheritdoc/>
-    protected override EmailAddressServiceReputation HandleCreation(
+    protected override EmailAddressReputation HandleCreation(
         string serviceName,
         EmailReputationStubFactoryOptions options)
     {
@@ -43,7 +43,7 @@ internal sealed class EmailReputationStubFactory
             ? GetRandomValue(BoolValues)
             : options.FixedIsRiskyTld;
 
-        return EmailAddressServiceReputation.Create(
+        return EmailAddressReputation.Create(
             serviceName,
             verdict,
             isDisposable,
@@ -51,7 +51,7 @@ internal sealed class EmailReputationStubFactory
     }
 
     /// <inheritdoc/>
-    protected override void LogCreatedStub(EmailAddressServiceReputation stub)
+    protected override void LogCreatedStub(EmailAddressReputation stub)
     {
         Logger.LogTrace(
             "{TypeName} created:"
@@ -60,7 +60,7 @@ internal sealed class EmailReputationStubFactory
             + "\n\tVerdict: {Verdict}"
             + "\n\tIs disposable: {IsDisposable}"
             + "\n\tIs risky tld: {IsRiskyTld}",
-            nameof(EmailAddressServiceReputation),
+            nameof(EmailAddressReputation),
             stub.ServiceName,
             stub.Id,
             stub.Verdict,

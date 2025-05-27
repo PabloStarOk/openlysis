@@ -322,7 +322,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         return multiReputations
             .Select(p => DataAssessmentResult<string>.Create(
                 DataType.PhoneNumber,
-                p.ServicesReputations[0].PhoneInfo.LocalFormat,
+                p.Reputations[0].PhoneInfo.LocalFormat,
                 p.Id))
             .ToArray();
     }

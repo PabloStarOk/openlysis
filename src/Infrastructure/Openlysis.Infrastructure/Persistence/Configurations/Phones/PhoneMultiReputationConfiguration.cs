@@ -8,7 +8,7 @@ using Openlysis.Domain.Phones.Entities;
 namespace Openlysis.Infrastructure.Persistence.Configurations.Phones;
 
 /// <summary>
-/// Configuration class for the PhoneMultiReputation entity.
+/// Provides the Entity Framework Core configuration for the <see cref="PhoneMultiReputation"/> entity.
 /// </summary>
 public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneMultiReputation>
 {
@@ -19,7 +19,7 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
     public void Configure(EntityTypeBuilder<PhoneMultiReputation> builder)
     {
         ConfigureMultiReputation(builder);
-        builder.OwnsMany(p => p.ServicesReputations, ConfigureServicesReputations);
+        builder.OwnsMany(p => p.Reputations, ConfigureReputations);
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
             .HasColumnType(SmallintType)
             .IsRequired();
 
-        builder.Navigation(p => p.ServicesReputations)
+        builder.Navigation(p => p.Reputations)
             .AutoInclude();
     }
 
@@ -71,15 +71,15 @@ public class PhoneMultiReputationConfiguration : IEntityTypeConfiguration<PhoneM
     /// Configures the properties and relationships of the PhoneServiceReputation entity.
     /// </summary>
     /// <param name="builder">The builder used to configure the PhoneServiceReputation entity.</param>
-    private static void ConfigureServicesReputations(
-        OwnedNavigationBuilder<PhoneMultiReputation, PhoneServiceReputation> builder)
+    private static void ConfigureReputations(
+        OwnedNavigationBuilder<PhoneMultiReputation, PhoneReputation> builder)
     {
-        builder.ToTable("phone_services_reputations");
+        builder.ToTable("phone_reputations");
 
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Id)
-            .HasColumnName("phone_service_reputation_id")
+            .HasColumnName("phone_reputation_id")
             .HasColumnType("uuid")
             .IsRequired()
             .ValueGeneratedNever()

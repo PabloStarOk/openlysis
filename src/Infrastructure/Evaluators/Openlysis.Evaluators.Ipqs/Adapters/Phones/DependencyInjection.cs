@@ -73,12 +73,12 @@ internal static class DependencyInjection
 
         // Add response parser
         services.AddKeyedScoped<
-            IResponseParser<PhoneServiceReputation>,
+            IResponseParser<PhoneReputation>,
             PhoneResponseParser>(KeyedServices.PhoneKey);
 
         // Add evaluator.
         services.AddScoped<
-            IReputationEvaluator<string, PhoneServiceReputation>,
+            IReputationEvaluator<string, PhoneReputation>,
             PhoneReputationEvaluator>();
     }
 }

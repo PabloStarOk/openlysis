@@ -15,7 +15,7 @@ namespace Openlysis.TestTools.ServicesSimulation.Common.Services.Reputations;
 /// <typeparam name="TReputation">The type of service reputation to simulate, must derive from ServiceReputation.</typeparam>
 /// <typeparam name="TStubFactoryOptions">The options for configuring stub factories, must derive from StubFactoryOptions.</typeparam>
 internal sealed class ReputationBehaviorSimulator<TReputation, TStubFactoryOptions>
-    where TReputation : ServiceReputation
+    where TReputation : Reputation
     where TStubFactoryOptions : StubFactoryOptions
 {
     private readonly ILogger<ReputationBehaviorSimulator<TReputation, TStubFactoryOptions>> _logger;

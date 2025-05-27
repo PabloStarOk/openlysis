@@ -19,7 +19,7 @@ namespace Openlysis.TestTools.ServicesSimulation.EmailAddresses.Infrastructure;
 /// without making actual service calls.
 /// </summary>
 internal sealed class SimulatedEmailReputationService :
-    IReputationEvaluator<MailAddress, EmailAddressServiceReputation>, IDisposable
+    IReputationEvaluator<MailAddress, EmailAddressReputation>, IDisposable
 {
     /// <inheritdoc/>
     public string ServiceName => _serviceOptions.Name;
@@ -28,7 +28,7 @@ internal sealed class SimulatedEmailReputationService :
     public bool IsAvailable => _serviceOptions.IsAvailable;
 
     private readonly ILogger<SimulatedEmailReputationService> _logger;
-    private readonly ReputationBehaviorSimulator<EmailAddressServiceReputation, EmailReputationStubFactoryOptions> _behaviorSimulator;
+    private readonly ReputationBehaviorSimulator<EmailAddressReputation, EmailReputationStubFactoryOptions> _behaviorSimulator;
     private readonly string _optionsName;
     private readonly IDisposable? _optionsObserver;
     private ReputationServiceOptions<EmailReputationStubFactoryOptions> _serviceOptions;
@@ -45,7 +45,7 @@ internal sealed class SimulatedEmailReputationService :
         ILogger<SimulatedEmailReputationService> logger,
         string optionsName,
         IOptionsMonitor<ReputationServiceOptions<EmailReputationStubFactoryOptions>> optionsMonitor,
-        ReputationBehaviorSimulator<EmailAddressServiceReputation, EmailReputationStubFactoryOptions> behaviorSimulator)
+        ReputationBehaviorSimulator<EmailAddressReputation, EmailReputationStubFactoryOptions> behaviorSimulator)
     {
         _logger = logger;
         _optionsName = optionsName;
@@ -55,7 +55,7 @@ internal sealed class SimulatedEmailReputationService :
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<EmailAddressServiceReputation>> EvaluateAsync(
+    public async Task<ErrorOr<EmailAddressReputation>> EvaluateAsync(
         MailAddress data,
         CancellationToken cancellationToken = default)
     {

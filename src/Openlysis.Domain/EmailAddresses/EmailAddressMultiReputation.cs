@@ -8,10 +8,9 @@ using Openlysis.Domain.EmailAddresses.Entities;
 namespace Openlysis.Domain.EmailAddresses;
 
 /// <summary>
-/// Represents the multi-reputation of an email address, which aggregates reputations
-/// from various email address service providers.
+/// An aggregate that contains multiple reputations for an email address.
 /// </summary>
-public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceReputation>
+public class EmailAddressMultiReputation : MultiReputation<EmailAddressReputation>
 {
     /// <summary>
     /// Gets the email address associated with the reputation.
@@ -21,11 +20,11 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceRe
     /// <summary>
     /// Initializes a new instance of the <see cref="EmailAddressMultiReputation"/> class.
     /// </summary>
-    /// <param name="id">The unique identifier for the reputation.</param>
+    /// <param name="id">The unique identifier for the multi-reputation.</param>
     /// <param name="evaluationReputationDate">The date when the reputation was evaluated.</param>
-    /// <param name="finalVerdict">The final verdict of the reputation.</param>
-    /// <param name="finalThreatZone">The final threat zone of the reputation.</param>
-    /// <param name="emailAddress">The email address associated with the reputation.</param>
+    /// <param name="finalVerdict">The final verdict of the multi-reputation.</param>
+    /// <param name="finalThreatZone">The final threat zone of the multi-reputation.</param>
+    /// <param name="emailAddress">The email address associated with the multi-reputation.</param>
     private EmailAddressMultiReputation(
         GlobalId id,
         DateTime evaluationReputationDate,
@@ -50,7 +49,7 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressServiceRe
     /// Creates a new instance of <see cref="EmailAddressMultiReputation"/>.
     /// </summary>
     /// <param name="reputationEvaluationDate">The date when the reputation was evaluated.</param>
-    /// <param name="emailAddress">The email address associated with the reputation.</param>
+    /// <param name="emailAddress">The email address associated with the multi-reputation.</param>
     /// <returns>A new instance of <see cref="EmailAddressMultiReputation"/>.</returns>
     public static EmailAddressMultiReputation Create(
         DateTime reputationEvaluationDate,

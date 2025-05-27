@@ -23,7 +23,7 @@ internal abstract class DataReputationService<
     TServiceReputation,
     TMultiReputation>
     where TData : notnull
-    where TServiceReputation : ServiceReputation
+    where TServiceReputation : Reputation
     where TMultiReputation : MultiReputation<TServiceReputation>
 {
     /// <summary>
@@ -90,7 +90,7 @@ internal abstract class DataReputationService<
 
         TMultiReputation multiReputation = evaluateResult.Value;
 
-        if (multiReputation.ServicesReputations.Count is 0)
+        if (multiReputation.Reputations.Count is 0)
         {
             string errorMessage = $"{typeof(TMultiReputation)} object doesn't contain {typeof(TServiceReputation)} objects and none error was returned by evaluator services.";
             _logger.LogError(errorMessage);
@@ -159,7 +159,7 @@ internal abstract class DataReputationService<
 
         foreach (var reputation in serviceReputations)
         {
-            multiReputation.AddServiceReputation(reputation);
+            multiReputation.AddReputation(reputation);
         }
 
         return errors.Count > 0 ? errors : multiReputation;

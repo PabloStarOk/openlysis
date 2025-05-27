@@ -17,7 +17,7 @@ namespace Openlysis.TestTools.ServicesSimulation.PhonesNumbers.Infrastructure;
 /// without making actual service calls.
 /// </summary>
 internal sealed class SimulatedPhoneReputationService
-    : IReputationEvaluator<string, PhoneServiceReputation>, IDisposable
+    : IReputationEvaluator<string, PhoneReputation>, IDisposable
 {
     /// <inheritdoc/>
     public string ServiceName => _serviceOptions.Name;
@@ -26,7 +26,7 @@ internal sealed class SimulatedPhoneReputationService
     public bool IsAvailable => _serviceOptions.IsAvailable;
 
     private readonly ILogger<SimulatedPhoneReputationService> _logger;
-    private readonly ReputationBehaviorSimulator<PhoneServiceReputation, PhoneReputationStubFactoryOptions> _behaviorSimulator;
+    private readonly ReputationBehaviorSimulator<PhoneReputation, PhoneReputationStubFactoryOptions> _behaviorSimulator;
     private readonly string _optionsName;
     private readonly IDisposable? _optionsObserver;
     private ReputationServiceOptions<PhoneReputationStubFactoryOptions> _serviceOptions;
@@ -43,7 +43,7 @@ internal sealed class SimulatedPhoneReputationService
         ILogger<SimulatedPhoneReputationService> logger,
         string optionsName,
         IOptionsMonitor<ReputationServiceOptions<PhoneReputationStubFactoryOptions>> optionsMonitor,
-        ReputationBehaviorSimulator<PhoneServiceReputation, PhoneReputationStubFactoryOptions> behaviorSimulator)
+        ReputationBehaviorSimulator<PhoneReputation, PhoneReputationStubFactoryOptions> behaviorSimulator)
     {
         _logger = logger;
         _optionsName = optionsName;
@@ -53,7 +53,7 @@ internal sealed class SimulatedPhoneReputationService
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<PhoneServiceReputation>> EvaluateAsync(
+    public async Task<ErrorOr<PhoneReputation>> EvaluateAsync(
         string data,
         CancellationToken cancellationToken = default)
     {

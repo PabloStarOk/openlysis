@@ -20,7 +20,7 @@ public class EmailAddressMultiReputationConfiguration : IEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<EmailAddressMultiReputation> builder)
     {
         ConfigureMultiReputations(builder);
-        builder.OwnsMany(e => e.ServicesReputations, ConfigureServiceReputations);
+        builder.OwnsMany(e => e.Reputations, ConfigureReputations);
     }
 
     /// <summary>
@@ -69,25 +69,25 @@ public class EmailAddressMultiReputationConfiguration : IEntityTypeConfiguration
                 emailAddress => emailAddress.Address,
                 dbValue => new MailAddress(dbValue));
 
-        builder.Navigation(p => p.ServicesReputations)
+        builder.Navigation(p => p.Reputations)
             .AutoInclude();
     }
 
     /// <summary>
-    /// Configures the owned navigation property for <see cref="EmailAddressServiceReputation"/>.
+    /// Configures the owned navigation property for <see cref="EmailAddressReputation"/>.
     /// </summary>
     /// <param name="builder">
     /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned entity type.
     /// </param>
-    private static void ConfigureServiceReputations(
-        OwnedNavigationBuilder<EmailAddressMultiReputation, EmailAddressServiceReputation> builder)
+    private static void ConfigureReputations(
+        OwnedNavigationBuilder<EmailAddressMultiReputation, EmailAddressReputation> builder)
     {
-        builder.ToTable("email_address_service_reputations");
+        builder.ToTable("email_address_reputations");
 
         builder.HasKey(p => p.Id);
 
         builder.Property(p => p.Id)
-            .HasColumnName("email_address_service_reputation_id")
+            .HasColumnName("email_address_reputation_id")
             .HasColumnType("uuid")
             .IsRequired()
             .ValueGeneratedNever()

@@ -16,7 +16,7 @@ namespace Openlysis.Application.EmailAddresses.Services;
 /// by using multiple reputation evaluators.
 /// </summary>
 internal class EmailAddressReputationService :
-    DataReputationService<MailAddress, EmailAddressServiceReputation, EmailAddressMultiReputation>,
+    DataReputationService<MailAddress, EmailAddressReputation, EmailAddressMultiReputation>,
     IEmailAddressReputationService
 {
     /// <summary>
@@ -34,7 +34,7 @@ internal class EmailAddressReputationService :
         ILogger<EmailAddressReputationService> logger,
         IRepository<EmailAddressMultiReputation, GlobalId> repository,
         TimeProvider timeProvider,
-        IEnumerable<IReputationEvaluator<MailAddress, EmailAddressServiceReputation>> reputationEvaluators)
+        IEnumerable<IReputationEvaluator<MailAddress, EmailAddressReputation>> reputationEvaluators)
         : base(logger, repository, timeProvider, reputationEvaluators)
     {
     }

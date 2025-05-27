@@ -7,16 +7,16 @@ using Openlysis.Domain.Common.ValueObjects;
 namespace Openlysis.Domain.Common.Aggregates;
 
 /// <summary>
-/// Represents a base aggregate for managing reputations from multiple services.
+/// A base aggregate that contains multiple reputations returned by external services.
 /// </summary>
-/// <typeparam name="TServiceReputation">
-/// The type of service reputation, which must inherit from <see cref="ServiceReputation"/>.
+/// <typeparam name="TReputation">
+/// The type of reputation, which must inherit from <see cref="Reputation"/>.
 /// </typeparam>
-public abstract class MultiReputation<TServiceReputation>
+public abstract class MultiReputation<TReputation>
     : AggregateRoot<GlobalId>
-    where TServiceReputation : ServiceReputation
+    where TReputation : Reputation
 {
-    private readonly List<TServiceReputation> _servicesReputations = [];
+    private readonly List<TReputation> _reputations = [];
 
     /// <summary>
     /// Gets the date when the reputation evaluation was performed.
@@ -36,10 +36,10 @@ public abstract class MultiReputation<TServiceReputation>
     /// <summary>
     /// Gets a list of reputations of different services.
     /// </summary>
-    public IReadOnlyList<TServiceReputation> ServicesReputations => _servicesReputations;
+    public IReadOnlyList<TReputation> Reputations => _reputations;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MultiReputation{TServiceReputation}"/> class.
+    /// Initializes a new instance of the <see cref="MultiReputation{TReputation}"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the aggregate.</param>
     /// <param name="reputationEvaluationDate">The date when the reputation evaluation was performed.</param>
@@ -61,7 +61,7 @@ public abstract class MultiReputation<TServiceReputation>
 #pragma warning disable CS8618
 #pragma warning disable S1144
     /// <summary>
-    /// Initializes a new instance of the <see cref="MultiReputation{TServiceReputation}"/> class for EF Core.
+    /// Initializes a new instance of the <see cref="MultiReputation{TReputation}"/> class for EF Core.
     /// </summary>
     /// <remarks>
     /// This constructor must not be used in the application code.
@@ -73,54 +73,54 @@ public abstract class MultiReputation<TServiceReputation>
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Adds a new service reputation to the collection.
+    /// Adds a new reputation to the multi-reputation.
     /// </summary>
-    /// <param name="serviceReputation">The service reputation to add. Must not already exist in the collection.</param>
+    /// <param name="reputation">The reputation to add.</param>
     /// <exception cref="ArgumentException">
-    /// Thrown if the given service reputation already exists in the collection.
+    /// Thrown if the given reputation already exists in the collection.
     /// </exception>
-    public void AddServiceReputation(TServiceReputation serviceReputation)
+    public void AddReputation(TReputation reputation)
     {
-        if (_servicesReputations.Contains(serviceReputation))
+        if (_reputations.Contains(reputation))
         {
             throw new ArgumentException(
-                "Given ServiceReputation already exists in the collection.",
-                nameof(serviceReputation));
+                "Given reputation already exists in the collection.",
+                nameof(reputation));
         }
 
-        _servicesReputations.Add(serviceReputation);
+        _reputations.Add(reputation);
         UpdateVerdict();
         UpdateThreatZone();
     }
 
     /// <summary>
-    /// Updates the final verdict based on the service reputations.
+    /// Updates the final verdict based on the reputations.
     /// </summary>
     private void UpdateVerdict()
     {
-        Verdict[] servicesVerdicts = ServicesReputations
+        Verdict[] reputationsVerdicts = Reputations
             .Select(s => s.Verdict)
             .ToArray();
 
-        if (servicesVerdicts.Length is 0)
+        if (reputationsVerdicts.Length is 0)
         {
             FinalVerdict = Verdict.Unknown;
             return;
         }
 
-        if (servicesVerdicts.Contains(Verdict.Malicious))
+        if (reputationsVerdicts.Contains(Verdict.Malicious))
         {
             FinalVerdict = Verdict.Malicious;
             return;
         }
 
-        if (servicesVerdicts.Contains(Verdict.Suspicious))
+        if (reputationsVerdicts.Contains(Verdict.Suspicious))
         {
             FinalVerdict = Verdict.Suspicious;
             return;
         }
 
-        if (servicesVerdicts.Contains(Verdict.Undetected))
+        if (reputationsVerdicts.Contains(Verdict.Undetected))
         {
             FinalVerdict = Verdict.Undetected;
         }

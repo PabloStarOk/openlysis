@@ -7,9 +7,9 @@ using Openlysis.Domain.Phones.ValueObjects;
 namespace Openlysis.Domain.Phones.Entities;
 
 /// <summary>
-/// Represents the reputation of a phone given by a service.
+/// The reputation for a phone number address returned by a service.
 /// </summary>
-public class PhoneServiceReputation : ServiceReputation
+public class PhoneReputation : Reputation
 {
     /// <summary>
     /// Gets the phone information associated with the service.
@@ -17,14 +17,14 @@ public class PhoneServiceReputation : ServiceReputation
     public PhoneInfo PhoneInfo { get; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="PhoneServiceReputation"/> class.
+    /// Initializes a new instance of the <see cref="PhoneReputation"/> class.
     /// </summary>
-    /// <param name="id">The unique identifier for the service.</param>
+    /// <param name="id">The unique identifier for the reputation.</param>
     /// <param name="serviceName">The name of the service.</param>
-    /// <param name="verdict">The verdict of the service.</param>
+    /// <param name="verdict">The verdict of the reputation.</param>
     /// <param name="threatZone">The threat zone associated with the verdict.</param>
-    /// <param name="phoneInfo">The phone information associated with the service.</param>
-    private PhoneServiceReputation(
+    /// <param name="phoneInfo">The phone information associated with the reputation.</param>
+    private PhoneReputation(
         GlobalId id,
         string serviceName,
         Verdict verdict,
@@ -38,27 +38,27 @@ public class PhoneServiceReputation : ServiceReputation
     // For EF core.
 #pragma warning disable CS8618
 #pragma warning disable S1144
-    private PhoneServiceReputation()
+    private PhoneReputation()
     {
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of <see cref="PhoneServiceReputation"/>.
+    /// Creates a new instance of <see cref="PhoneReputation"/>.
     /// </summary>
     /// <param name="serviceName">The name of the service.</param>
     /// <param name="verdict">The verdict of the reputation.</param>
     /// <param name="phoneInfo">The phone information associated with the reputation.</param>
-    /// <returns>A new instance of <see cref="PhoneServiceReputation"/>.</returns>
-    public static PhoneServiceReputation Create(
+    /// <returns>A new instance of <see cref="PhoneReputation"/>.</returns>
+    public static PhoneReputation Create(
         string serviceName,
         Verdict verdict,
         PhoneInfo phoneInfo)
     {
         GlobalId globalId = GlobalId.CreateUnique();
         ThreatZone threatZone = ThreatZoneMapping.Map[verdict];
-        return new PhoneServiceReputation(
+        return new PhoneReputation(
             globalId,
             serviceName,
             verdict,
