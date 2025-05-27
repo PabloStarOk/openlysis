@@ -8,9 +8,9 @@ using Openlysis.Domain.URLs.Entities;
 namespace Openlysis.Infrastructure.Shared.Communication.Serialization.URLs;
 
 /// <summary>
-/// Converts JSON to and from <see cref="UrlServiceAnalysis"/> objects.
+/// Converts JSON to and from <see cref="UrlAnalysis"/> objects.
 /// </summary>
-internal class UrlServiceAnalysisConverter : JsonConverter<UrlServiceAnalysis>
+internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
 {
     private const string IdKey = "id";
     private const string ServiceNameKey = "servicename";
@@ -20,7 +20,7 @@ internal class UrlServiceAnalysisConverter : JsonConverter<UrlServiceAnalysis>
     private const string ThreatScoreKey = "threatscore";
 
     /// <inheritdoc/>
-    public override UrlServiceAnalysis Read(
+    public override UrlAnalysis Read(
         ref Utf8JsonReader reader,
         Type typeToConvert,
         JsonSerializerOptions options)
@@ -68,7 +68,7 @@ internal class UrlServiceAnalysisConverter : JsonConverter<UrlServiceAnalysis>
             }
         }
 
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             id,
             serviceName,
             status,
@@ -80,13 +80,13 @@ internal class UrlServiceAnalysisConverter : JsonConverter<UrlServiceAnalysis>
     /// <inheritdoc/>
     public override void Write(
         Utf8JsonWriter writer,
-        UrlServiceAnalysis value,
+        UrlAnalysis value,
         JsonSerializerOptions options)
     {
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? IdKey;
-        string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(UrlServiceAnalysis.ServiceName);
-        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(UrlServiceAnalysis.State.Status);
-        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(UrlServiceAnalysis.State.Verdict);
+        string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(UrlAnalysis.ServiceName);
+        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(UrlAnalysis.State.Status);
+        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(UrlAnalysis.State.Verdict);
         string jobIdKey = options.PropertyNamingPolicy?.ConvertName(JobIdKey) ?? JobIdKey;
 
         writer.WriteStartObject();

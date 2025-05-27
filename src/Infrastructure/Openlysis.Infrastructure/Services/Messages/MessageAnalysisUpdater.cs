@@ -150,7 +150,7 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
         /// <param name="multiAnalyses">A collection of multi-analyses to process and register terminal child analyses from.</param>
         public void CacheTerminalChildAnalyses<TServiceAnalysis>(
             IEnumerable<MultiAnalysis<TServiceAnalysis>> multiAnalyses)
-            where TServiceAnalysis : ServiceAnalysis
+            where TServiceAnalysis : Analysis
         {
             ArgumentNullException.ThrowIfNull(multiAnalyses);
 

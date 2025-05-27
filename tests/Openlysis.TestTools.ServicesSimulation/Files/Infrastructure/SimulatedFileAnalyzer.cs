@@ -24,23 +24,23 @@ namespace Openlysis.TestTools.ServicesSimulation.Files.Infrastructure;
 /// without making actual service calls.
 /// </summary>
 internal sealed class SimulatedFileAnalyzer
-    : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
+    : Analyzer<FileAnalysis, AnalyzeFileRequest>
 {
     private readonly string _optionsName;
-    private readonly AnalysisBehaviorSimulator<FileServiceAnalysis, FileAnalysisStubFactoryOptions> _behaviorSimulator;
+    private readonly AnalysisBehaviorSimulator<FileAnalysis, FileAnalysisStubFactoryOptions> _behaviorSimulator;
     private readonly IDisposable? _optionsObserver;
-    private AnalysisServiceOptions<FileAnalysisStubFactoryOptions> _analyzerOptions;
+    private AnalysisServiceOptions<FileAnalysisStubFactoryOptions> _analyzerServiceOptions;
     private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SimulatedFileAnalyzer"/> class.
     /// </summary>
-    /// <param name="options">The analyzer configuration options.</param>
+    /// <param name="options">The analyzer configuration serviceOptions.</param>
     /// <param name="rateQuotaService">The service for handling rate quota limits.</param>
     /// <param name="httpClientFactory">The factory for creating HTTP clients.</param>
     /// <param name="logger">The logger for the service.</param>
-    /// <param name="optionsName">The name of the options to retrieve from the options monitor.</param>
-    /// <param name="analyzerOptions">The monitor for file analysis configuration options.</param>
+    /// <param name="optionsName">The name of the serviceOptions to retrieve from the serviceOptions monitor.</param>
+    /// <param name="analyzerOptions">The monitor for file analysis configuration serviceOptions.</param>
     /// <param name="behaviorSimulator">The simulator for controlling analysis behavior.</param>
     public SimulatedFileAnalyzer(
         IOptionsMonitor<AnalyzerOptions> options,
@@ -49,48 +49,48 @@ internal sealed class SimulatedFileAnalyzer
         IServiceLogger<SimulatedFileAnalyzer> logger,
         string optionsName,
         IOptionsMonitor<AnalysisServiceOptions<FileAnalysisStubFactoryOptions>> analyzerOptions,
-        AnalysisBehaviorSimulator<FileServiceAnalysis, FileAnalysisStubFactoryOptions> behaviorSimulator)
+        AnalysisBehaviorSimulator<FileAnalysis, FileAnalysisStubFactoryOptions> behaviorSimulator)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {
         _optionsName = optionsName;
-        _analyzerOptions = analyzerOptions.Get(optionsName);
+        _analyzerServiceOptions = analyzerOptions.Get(optionsName);
         _behaviorSimulator = behaviorSimulator;
         _optionsObserver = analyzerOptions.OnChange(OnOptionsChanged);
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<FileServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<FileAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeFileRequest request,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Request received to analyze a file.");
         return await _behaviorSimulator.SimulateAnalyzeAsync(
-            _analyzerOptions,
+            _analyzerServiceOptions,
             cancellationToken);
     }
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Request received to get status a file analysis.");
         return await _behaviorSimulator.SimulateGetStatusAsync(
-            _analyzerOptions,
+            _analyzerServiceOptions,
             id,
             cancellationToken);
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<FileServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateGetAnalysisAsync(
-            _analyzerOptions,
+            _analyzerServiceOptions,
             id,
             cancellationToken);
     }
@@ -115,12 +115,12 @@ internal sealed class SimulatedFileAnalyzer
     }
 
     /// <summary>
-    /// Handles changes to the analyzer options configuration.
+    /// Handles changes to the analyzer serviceOptions configuration.
     /// </summary>
-    /// <param name="changedOptions">The updated analyzer options configuration.</param>
-    /// <param name="name">The name of the options that changed. Used to identify if the change is relevant to this instance.</param>
+    /// <param name="changedServiceOptions">The updated analyzer serviceOptions configuration.</param>
+    /// <param name="name">The name of the serviceOptions that changed. Used to identify if the change is relevant to this instance.</param>
     private void OnOptionsChanged(
-        AnalysisServiceOptions<FileAnalysisStubFactoryOptions> changedOptions,
+        AnalysisServiceOptions<FileAnalysisStubFactoryOptions> changedServiceOptions,
         string? name)
     {
         if (name is null || !name.Equals(_optionsName))
@@ -128,7 +128,7 @@ internal sealed class SimulatedFileAnalyzer
             return;
         }
 
-        _analyzerOptions = changedOptions;
+        _analyzerServiceOptions = changedServiceOptions;
         _logger.LogDebug("Options with name {Name} were changed", name);
     }
 }

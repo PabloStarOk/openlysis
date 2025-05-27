@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS file_multi_analyses
     sha256 char(64) REFERENCES hash_values(sha256) ON DELETE CASCADE
 );
 
-CREATE TABLE file_service_analyses (
-    file_service_analysis_id varchar(200) PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS file_analyses (
+    file_analysis_id varchar(200) PRIMARY KEY,
     service_name varchar(30) NOT NULL,
     status smallint NOT NULL,
     verdict smallint NOT NULL,
@@ -31,20 +31,20 @@ CREATE TABLE file_service_analyses (
     max_possible_threat_score real
 );
 
-CREATE TABLE IF NOT EXISTS file_analyses
+CREATE TABLE IF NOT EXISTS file_multi_service_analysis_links
 (
-    multi_analysis_id uuid REFERENCES file_multi_analyses(file_multi_analysis_id) ON DELETE RESTRICT,
-    service_analysis_id varchar(200) REFERENCES file_service_analyses (file_service_analysis_id) ON DELETE RESTRICT,
-    CONSTRAINT PK_file_analysis PRIMARY KEY (multi_analysis_id, service_analysis_id)
+    file_multi_analysis_id uuid REFERENCES file_multi_analyses(file_multi_analysis_id) ON DELETE RESTRICT,
+    file_analysis_id varchar(200) REFERENCES file_analyses(file_analysis_id) ON DELETE RESTRICT,
+    CONSTRAINT PK_file_multi_service_analysis_links PRIMARY KEY (file_multi_analysis_id, file_analysis_id)
 );
 
-CREATE TABLE reports (
+CREATE TABLE IF NOT EXISTS reports (
     report_id VARCHAR(200) PRIMARY KEY,
     verdict smallint NOT NULL,
     threat_zone smallint NOT NULL,
     raw_threat_score real,
     max_possible_threat_score real,
-    file_service_analysis_id VARCHAR(200) NOT NULL REFERENCES file_service_analyses (file_service_analysis_id) ON DELETE RESTRICT
+    file_analysis_id VARCHAR(200) NOT NULL REFERENCES file_analyses (file_analysis_id) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS url_multi_analyses
@@ -61,8 +61,8 @@ CREATE TABLE IF NOT EXISTS url_multi_analyses
     sha256 char(64) NOT NULL REFERENCES hash_values(sha256)
 );
 
-CREATE TABLE url_service_analyses (
-    url_service_analysis_id varchar(200) PRIMARY KEY,
+CREATE TABLE url_analyses (
+    url_analysis_id varchar(200) PRIMARY KEY,
     service_name varchar(30) NOT NULL,
     status smallint NOT NULL,
     verdict smallint NOT NULL,
@@ -71,11 +71,11 @@ CREATE TABLE url_service_analyses (
     max_possible_threat_score real
 );
 
-CREATE TABLE IF NOT EXISTS url_analyses
+CREATE TABLE IF NOT EXISTS url_multi_service_analysis_links
 (
-    multi_analysis_id uuid REFERENCES url_multi_analyses(url_multi_analysis_id),
-    service_analysis_id varchar(200) REFERENCES url_service_analyses(url_service_analysis_id),
-    CONSTRAINT PK_url_analyses PRIMARY KEY (multi_analysis_id, service_analysis_id)
+    url_multi_analysis_id uuid REFERENCES url_multi_analyses(url_multi_analysis_id),
+    url_analysis_id varchar(200) REFERENCES url_analyses(url_analysis_id),
+    CONSTRAINT PK_url_multi_service_analysis_links PRIMARY KEY (url_multi_analysis_id, url_analysis_id)
 );
 
 CREATE TABLE IF NOT EXISTS email_address_multi_reputations (

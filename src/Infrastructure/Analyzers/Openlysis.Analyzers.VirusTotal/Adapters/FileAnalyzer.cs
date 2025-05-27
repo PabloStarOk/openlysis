@@ -30,7 +30,7 @@ namespace Openlysis.Analyzers.VirusTotal.Adapters;
 /// Supports both standard and large file uploads, handling the different submission requirements
 /// and processing the returned analysis results from VirusTotal's service.
 /// </remarks>
-internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
+internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
 {
     private readonly IOptionsMonitor<VirusTotalAnalyzerOptions> _analyzerOptions;
     private readonly ILargeFileUploadProvider _largeFileUploadProvider;
@@ -64,7 +64,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<FileServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<FileAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeFileRequest request,
         CancellationToken cancellationToken = default)
@@ -101,7 +101,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 
         AnalyzeResponse analyzeResponse = result.Value;
 
-        return FileServiceAnalysis.Create(
+        return FileAnalysis.Create(
             analyzeResponse.AnalysisId,
             ServiceName,
             AnalysisStatus.Queued,
@@ -111,7 +111,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
@@ -128,9 +128,9 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<FileServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
@@ -157,7 +157,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// </summary>
     /// <param name="analysisResponse">The response data from VirusTotal's analysis.</param>
     /// <returns>A configured FileServiceAnalysis object with updated verdict and status.</returns>
-    private FileServiceAnalysis CreateAnalysisFromResponse(
+    private FileAnalysis CreateAnalysisFromResponse(
         GetAnalysisResponse analysisResponse)
     {
         AnalysisStatus status = Maps.AnalysisStatusMap[
@@ -165,7 +165,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         Verdict verdict = _verdictCalculator.Calculate(
             analysisResponse.Attributes.Stats);
 
-        var serviceAnalysis = FileServiceAnalysis.Create(
+        var serviceAnalysis = FileAnalysis.Create(
             analysisResponse.Id,
             ServiceName,
             status,

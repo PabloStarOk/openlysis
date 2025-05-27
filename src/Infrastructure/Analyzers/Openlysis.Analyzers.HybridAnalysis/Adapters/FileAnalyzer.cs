@@ -32,7 +32,7 @@ namespace Openlysis.Analyzers.HybridAnalysis.Adapters;
 /// This class handles the analysis workflow for files, communicating with the sandbox analyzer
 /// and managing analysis status and results.
 /// </remarks>
-internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
+internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
 {
     private const int InitialSandboxAnalysisStatusCheckDelayMs = 300;
 
@@ -68,7 +68,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<FileServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<FileAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeFileRequest request,
         CancellationToken cancellationToken = default)
@@ -86,7 +86,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
 
         bool useSandbox = _sandboxAnalyzer.CanAnalyzeMimeType(mimeType);
 
-        ErrorOr<FileServiceAnalysis>? analyzeResult = null;
+        ErrorOr<FileAnalysis>? analyzeResult = null;
         if (useSandbox)
         {
             analyzeResult = await AnalyzeWithSandboxAsync(
@@ -116,7 +116,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         var formattedId = FormattedAnalysisId.Parse(id.Primary.Value);
@@ -134,9 +134,9 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<FileServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         var formattedId = FormattedAnalysisId.Parse(id.Primary.Value);
@@ -173,8 +173,8 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// <param name="request">The file analysis request containing file data and metadata to analyze.</param>
     /// <param name="mimeType">The MIME type of the file to be analyzed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>An <see cref="ErrorOr{T}"/> containing either a <see cref="FileServiceAnalysis"/> with analysis results or error details if the operation fails.</returns>
-    private async Task<ErrorOr<FileServiceAnalysis>> AnalyzeWithSandboxAsync(
+    /// <returns>An <see cref="ErrorOr{T}"/> containing either a <see cref="FileAnalysis"/> with analysis results or error details if the operation fails.</returns>
+    private async Task<ErrorOr<FileAnalysis>> AnalyzeWithSandboxAsync(
         HttpClient httpClient,
         AnalyzeFileRequest request,
         string mimeType,
@@ -222,7 +222,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
             response.JobId,
             AnalysisType.Sandbox);
 
-        var serviceAnalysis = FileServiceAnalysis.Create(
+        var serviceAnalysis = FileAnalysis.Create(
             formattedId.ToString(),
             ServiceName,
             AnalysisStatus.Queued,
@@ -280,8 +280,8 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// <param name="httpClient">The HTTP client used for making API requests to the sandbox service.</param>
     /// <param name="id">The formatted analysis ID containing the job identifier and analysis type.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>An <see cref="ErrorOr{T}"/> containing either a <see cref="FileServiceAnalysis"/> with analysis results or error details if the operation fails.</returns>
-    private async Task<ErrorOr<FileServiceAnalysis>> GetSandboxAnalysisAsync(
+    /// <returns>An <see cref="ErrorOr{T}"/> containing either a <see cref="FileAnalysis"/> with analysis results or error details if the operation fails.</returns>
+    private async Task<ErrorOr<FileAnalysis>> GetSandboxAnalysisAsync(
         HttpClient httpClient,
         FormattedAnalysisId id,
         CancellationToken cancellationToken)
@@ -319,7 +319,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="ErrorOr{T}"/> containing either a boolean indicating failure status (true if failed or timed out) or error details if the operation fails.</returns>
     private async Task<ErrorOr<bool>> HasSandboxAnalysisFailedAsync(
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<AnalysisStatus> result = await GetStatusAsync(id, cancellationToken);
@@ -339,8 +339,8 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// Creates a new file service analysis from a sandbox report summary.
     /// </summary>
     /// <param name="reportSummary">The summary of the sandbox analysis report containing verdict and status information.</param>
-    /// <returns>A new <see cref="FileServiceAnalysis"/> instance with information from the report summary.</returns>
-    private FileServiceAnalysis CreateAnalysisFromReport(
+    /// <returns>A new <see cref="FileAnalysis"/> instance with information from the report summary.</returns>
+    private FileAnalysis CreateAnalysisFromReport(
         SandboxReportSummary reportSummary)
     {
         var formattedId = FormattedAnalysisId.Create(
@@ -352,7 +352,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         ThreatScore threatScore = ThreatScore.Create(
             reportSummary.ThreatScore,
             AnalysisSummary.MaxPossibleThreatScore);
-        return FileServiceAnalysis.Create(
+        return FileAnalysis.Create(
             formattedId.ToString(),
             ServiceName,
             status,
@@ -387,8 +387,8 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// <param name="request">The file analysis request containing file data and metadata to analyze.</param>
     /// <param name="mimeType">The MIME type of the file to be analyzed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>An <see cref="ErrorOr{T}"/> containing either a <see cref="FileServiceAnalysis"/> with analysis results or error details if the operation fails.</returns>
-    private async Task<ErrorOr<FileServiceAnalysis>> AnalyzeWithQuickScanAsync(
+    /// <returns>An <see cref="ErrorOr{T}"/> containing either a <see cref="FileAnalysis"/> with analysis results or error details if the operation fails.</returns>
+    private async Task<ErrorOr<FileAnalysis>> AnalyzeWithQuickScanAsync(
         HttpClient httpClient,
         AnalyzeFileRequest request,
         string mimeType,
@@ -434,7 +434,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
                 cancellationToken);
         }
 
-        return FileServiceAnalysis.Create(
+        return FileAnalysis.Create(
             formattedId.ToString(),
             ServiceName,
             AnalysisStatus.Queued,
@@ -447,8 +447,8 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// <param name="httpClient">The HTTP client used for making API requests to the quick scan service.</param>
     /// <param name="id">The formatted analysis ID for the quick scan.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>An <see cref="ErrorOr{T}"/> containing either a <see cref="FileServiceAnalysis"/> with quick scan results or error details if the operation fails.</returns>
-    private async Task<ErrorOr<FileServiceAnalysis>> GetQuickScanAnalysisAsync(
+    /// <returns>An <see cref="ErrorOr{T}"/> containing either a <see cref="FileAnalysis"/> with quick scan results or error details if the operation fails.</returns>
+    private async Task<ErrorOr<FileAnalysis>> GetQuickScanAnalysisAsync(
         HttpClient httpClient,
         FormattedAnalysisId id,
         CancellationToken cancellationToken = default)
@@ -494,7 +494,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         ThreatScore threatScore = ThreatScore.Create(
             analysisSummary.ThreatScore,
             AnalysisSummary.MaxPossibleThreatScore);
-        return FileServiceAnalysis.Create(
+        return FileAnalysis.Create(
             id.ToString(),
             ServiceName,
             status,
@@ -514,7 +514,7 @@ internal class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
         FormattedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        ErrorOr<FileServiceAnalysis> analysisResult =
+        ErrorOr<FileAnalysis> analysisResult =
             await GetQuickScanAnalysisAsync(httpClient, id, cancellationToken);
 
         if (analysisResult.IsError)

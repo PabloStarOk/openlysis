@@ -33,9 +33,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<FileMultiAnalysis> FileMultiAnalyses { get; init; } = null!;
 
     /// <summary>
-    /// Gets the file service analyses set of the database.
+    /// Gets the file analyses set of the database.
     /// </summary>
-    public DbSet<FileServiceAnalysis> FileServiceAnalyses { get; init; } = null!;
+    public DbSet<FileAnalysis> FileAnalyses { get; init; } = null!;
 
     /// <summary>
     /// Gets the URL analyses set of the database.
@@ -43,9 +43,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<UrlMultiAnalysis> UrlMultiAnalyses { get; init; } = null!;
 
     /// <summary>
-    /// Gets the URL service analyses set of the database.
+    /// Gets the URL analyses set of the database.
     /// </summary>
-    public DbSet<UrlServiceAnalysis> UrlServiceAnalyses { get; init; } = null!;
+    public DbSet<UrlAnalysis> UrlAnalyses { get; init; } = null!;
 
     /// <summary>
     /// Gets a database set of <see cref="PhoneMultiReputation"/>.
@@ -75,9 +75,9 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ContentHashSetConfiguration());
-        modelBuilder.ApplyConfiguration(new FileServiceAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new FileAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new FileMultiAnalysisConfiguration());
-        modelBuilder.ApplyConfiguration(new UrlServiceAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new UrlAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new UrlMultiAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new PhoneMultiReputationConfiguration());
         modelBuilder.ApplyConfiguration(new EmailAddressMultiReputationConfiguration());

@@ -18,7 +18,7 @@ namespace Openlysis.TestTools.ServicesSimulation.Common.Services.Analyzers;
 internal abstract class AnalysisStubBuilder<TOptions, TAnalysisStub>
     : StubFactory<TOptions, TAnalysisStub>
     where TOptions : AnalysisStubFactoryOptions
-    where TAnalysisStub : ServiceAnalysis
+    where TAnalysisStub : Analysis
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalysisStubBuilder{TOptions, TAnalysisStub}"/> class.

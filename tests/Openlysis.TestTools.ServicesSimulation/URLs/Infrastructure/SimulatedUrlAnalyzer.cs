@@ -23,23 +23,23 @@ namespace Openlysis.TestTools.ServicesSimulation.URLs.Infrastructure;
 /// without making actual service calls.
 /// </summary>
 internal sealed class SimulatedUrlAnalyzer
-    : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
+    : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 {
     private readonly string _optionsName;
-    private readonly AnalysisBehaviorSimulator<UrlServiceAnalysis, AnalysisStubFactoryOptions> _behaviorSimulator;
+    private readonly AnalysisBehaviorSimulator<UrlAnalysis, AnalysisStubFactoryOptions> _behaviorSimulator;
     private readonly IDisposable? _optionsObserver;
-    private AnalysisServiceOptions<AnalysisStubFactoryOptions> _analyzerOptions;
+    private AnalysisServiceOptions<AnalysisStubFactoryOptions> _analyzerServiceOptions;
     private bool _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SimulatedUrlAnalyzer"/> class.
     /// </summary>
-    /// <param name="options">The analyzer configuration options.</param>
+    /// <param name="options">The analyzer configuration serviceOptions.</param>
     /// <param name="rateQuotaService">The service that manages rate quotas for analysis endpoints.</param>
     /// <param name="httpClientFactory">The factory for creating HTTP clients.</param>
     /// <param name="logger">The logger for this analyzer.</param>
-    /// <param name="optionsName">The name of the options to retrieve from the monitor.</param>
-    /// <param name="analyzerOptions">The monitor for analyzer-specific options.</param>
+    /// <param name="optionsName">The name of the serviceOptions to retrieve from the monitor.</param>
+    /// <param name="analyzerOptions">The monitor for analyzer-specific serviceOptions.</param>
     /// <param name="behaviorSimulator">The simulator that provides simulated analysis behavior.</param>
     public SimulatedUrlAnalyzer(
         IOptionsMonitor<AnalyzerOptions> options,
@@ -48,46 +48,46 @@ internal sealed class SimulatedUrlAnalyzer
         IServiceLogger<SimulatedUrlAnalyzer> logger,
         string optionsName,
         IOptionsMonitor<AnalysisServiceOptions<AnalysisStubFactoryOptions>> analyzerOptions,
-        AnalysisBehaviorSimulator<UrlServiceAnalysis, AnalysisStubFactoryOptions> behaviorSimulator)
+        AnalysisBehaviorSimulator<UrlAnalysis, AnalysisStubFactoryOptions> behaviorSimulator)
         : base(options, rateQuotaService, httpClientFactory, logger)
     {
         _optionsName = optionsName;
-        _analyzerOptions = analyzerOptions.Get(optionsName);
+        _analyzerServiceOptions = analyzerOptions.Get(optionsName);
         _behaviorSimulator = behaviorSimulator;
         _optionsObserver = analyzerOptions.OnChange(OnOptionsChanged);
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateAnalyzeAsync(
-            _analyzerOptions,
+            _analyzerServiceOptions,
             cancellationToken);
     }
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateGetStatusAsync(
-            _analyzerOptions,
+            _analyzerServiceOptions,
             id,
             cancellationToken);
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateGetAnalysisAsync(
-            _analyzerOptions,
+            _analyzerServiceOptions,
             id,
             cancellationToken);
     }
@@ -112,12 +112,12 @@ internal sealed class SimulatedUrlAnalyzer
     }
 
     /// <summary>
-    /// Handles changes to the analyzer options configuration.
+    /// Handles changes to the analyzer serviceOptions configuration.
     /// </summary>
-    /// <param name="changedOptions">The updated analyzer options configuration.</param>
-    /// <param name="name">The name of the options that changed. Used to identify if the change is relevant to this instance.</param>
+    /// <param name="changedServiceOptions">The updated analyzer serviceOptions configuration.</param>
+    /// <param name="name">The name of the serviceOptions that changed. Used to identify if the change is relevant to this instance.</param>
     private void OnOptionsChanged(
-        AnalysisServiceOptions<AnalysisStubFactoryOptions> changedOptions,
+        AnalysisServiceOptions<AnalysisStubFactoryOptions> changedServiceOptions,
         string? name)
     {
         if (name is null || !name.Equals(_optionsName))
@@ -125,7 +125,7 @@ internal sealed class SimulatedUrlAnalyzer
             return;
         }
 
-        _analyzerOptions = changedOptions;
+        _analyzerServiceOptions = changedServiceOptions;
         _logger.LogDebug("Options with name {Name} were changed", name);
     }
 }

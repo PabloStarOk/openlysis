@@ -106,21 +106,21 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
             .HasForeignKey("sha256")
             .IsRequired();
 
-        builder.HasMany(u => u.ServiceAnalyses)
+        builder.HasMany(u => u.Analyses)
             .WithMany()
             .UsingEntity(
-                "file_analyses",
-                r => r.HasOne(typeof(FileServiceAnalysis)).WithMany().HasForeignKey("service_analysis_id"),
-                l => l.HasOne(typeof(FileMultiAnalysis)).WithMany().HasForeignKey("multi_analysis_id"),
+                "file_multi_service_analysis_links",
+                r => r.HasOne(typeof(FileAnalysis)).WithMany().HasForeignKey("file_analysis_id"),
+                l => l.HasOne(typeof(FileMultiAnalysis)).WithMany().HasForeignKey("file_multi_analysis_id"),
                 joinEntity =>
                 {
-                    joinEntity.HasKey("multi_analysis_id", "service_analysis_id");
+                    joinEntity.HasKey("file_multi_analysis_id", "file_analysis_id");
                 });
 
         builder.Navigation(f => f.DataHashValues)
             .AutoInclude();
 
-        builder.Navigation(f => f.ServiceAnalyses)
+        builder.Navigation(f => f.Analyses)
             .AutoInclude();
 
         builder.Ignore(f => f.AllReports);

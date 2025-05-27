@@ -7,29 +7,29 @@ using Openlysis.Domain.URLs.Entities;
 namespace Openlysis.Infrastructure.Persistence.Configurations.URLs;
 
 /// <summary>
-/// Configuration class for the <see cref="UrlServiceAnalysis"/> entity.
-/// Implements the <see cref="IEntityTypeConfiguration{TEntity}"/> interface to configure the <see cref="UrlServiceAnalysis"/> entity.
+/// Configuration class for the <see cref="UrlAnalysis"/> entity.
+/// Implements the <see cref="IEntityTypeConfiguration{TEntity}"/> interface to configure the <see cref="UrlAnalysis"/> entity.
 /// </summary>
-public class UrlServiceAnalysisConfiguration : IEntityTypeConfiguration<UrlServiceAnalysis>
+public class UrlAnalysisConfiguration : IEntityTypeConfiguration<UrlAnalysis>
 {
     private const string SmallintType = "smallint";
 
     /// <inheritdoc/>
-    public void Configure(EntityTypeBuilder<UrlServiceAnalysis> builder)
+    public void Configure(EntityTypeBuilder<UrlAnalysis> builder)
     {
-        builder.ToTable("url_service_analyses");
+        builder.ToTable("url_analyses");
 
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Id)
-            .HasColumnName("url_service_analysis_id")
+            .HasColumnName("url_analysis_id")
             .HasColumnType("varchar")
             .HasMaxLength(100)
             .IsRequired()
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.ToString(),
-                id => ComposedServiceAnalysisId.Parse(id));
+                id => ComposedAnalysisId.Parse(id));
 
         builder.Property(u => u.ServiceName)
             .HasColumnName("service_name")

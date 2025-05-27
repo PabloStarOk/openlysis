@@ -34,7 +34,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
 
         return await _dbContext.UrlMultiAnalyses
             .AsSplitQuery()
-            .Include(u => u.ServiceAnalyses)
+            .Include(u => u.Analyses)
             .FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
     }
 
@@ -47,7 +47,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
     {
         IQueryable<UrlMultiAnalysis> query = _dbContext.UrlMultiAnalyses
             .AsNoTracking()
-            .Include(u => u.ServiceAnalyses);
+            .Include(u => u.Analyses);
 
         if (filter is not null)
         {
@@ -74,7 +74,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
         return await _dbContext.UrlMultiAnalyses
             .AsNoTracking()
             .AsSplitQuery()
-            .Include(u => u.ServiceAnalyses)
+            .Include(u => u.Analyses)
             .Where(u => ids.Contains(u.Id))
             .ToListAsync(cancellationToken);
     }
@@ -105,7 +105,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
         ArgumentNullException.ThrowIfNull(model);
 
         var multiAnalysis = await _dbContext.UrlMultiAnalyses
-            .Include(u => u.ServiceAnalyses)
+            .Include(u => u.Analyses)
             .FirstOrDefaultAsync(m => m == model, cancellationToken);
         if (multiAnalysis is null)
         {
@@ -136,10 +136,10 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
         EntityEntry<UrlMultiAnalysis> multiAnalysisEntry,
         CancellationToken cancellationToken = default)
     {
-        var existingAnalyses = _dbContext.UrlServiceAnalyses
-            .Where(u => multiAnalysisEntry.Entity.ServiceAnalyses.Contains(u));
+        var existingAnalyses = _dbContext.UrlAnalyses
+            .Where(u => multiAnalysisEntry.Entity.Analyses.Contains(u));
 
-        foreach (var incomingAnalysis in multiAnalysisEntry.Entity.ServiceAnalyses)
+        foreach (var incomingAnalysis in multiAnalysisEntry.Entity.Analyses)
         {
             var existingAnalysis = await existingAnalyses
                 .AsNoTracking()

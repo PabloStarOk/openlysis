@@ -32,9 +32,9 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
 {
     private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly Dictionary<string, Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>> _analyzers;
-    private readonly Dictionary<ComposedServiceAnalysisId, UrlServiceAnalysis> _pendingAnalyses = [];
-    private readonly ConcurrentBag<UrlServiceAnalysis> _updatableAnalyses = [];
+    private readonly Dictionary<string, Analyzer<UrlAnalysis, AnalyzeUrlRequest>> _analyzers;
+    private readonly Dictionary<ComposedAnalysisId, UrlAnalysis> _pendingAnalyses = [];
+    private readonly ConcurrentBag<UrlAnalysis> _updatableAnalyses = [];
     private ConsumeContext<AnalyzeUrl> _context;
 
     /// <summary>
@@ -46,7 +46,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
     public AnalyzeUrlConsumer(
         IOptionsMonitor<AnalyzeConsumerOptions> options,
         IEndpointUriProvider endpointUriProvider,
-        IEnumerable<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>> analyzers)
+        IEnumerable<Analyzer<UrlAnalysis, AnalyzeUrlRequest>> analyzers)
     {
         _options = options;
         _endpointUriProvider = endpointUriProvider;
@@ -75,7 +75,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
                 return;
             }
 
-            ErrorOr<UrlServiceAnalysis> result = await analyzer.AnalyzeAsync(request, ct);
+            ErrorOr<UrlAnalysis> result = await analyzer.AnalyzeAsync(request, ct);
             if (result.IsError)
             {
                 return;
@@ -162,7 +162,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
             }
 
             // Get full analysis
-            ErrorOr<UrlServiceAnalysis> getAnalysisResult = await analyzer.GetAnalysisAsync(analysis.Id, ct);
+            ErrorOr<UrlAnalysis> getAnalysisResult = await analyzer.GetAnalysisAsync(analysis.Id, ct);
             if (getAnalysisResult.IsError)
             {
                 return;
@@ -179,7 +179,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
     /// </summary>
     /// <param name="analyses">The URL service analyses to be updated.</param>
     private async Task SendUpdateAsync(
-        params UrlServiceAnalysis[] analyses)
+        params UrlAnalysis[] analyses)
     {
         var request = new UpdateUrlMultiAnalysis(
             _context.Message.MultiAnalysisId,

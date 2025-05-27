@@ -100,9 +100,9 @@ public static class DependencyInjection
 
         // Add file analyzer
         services.AddFileTypeDetector(configuration);
-        services.AddSingleton<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>, FileAnalyzer>();
+        services.AddSingleton<Analyzer<FileAnalysis, AnalyzeFileRequest>, FileAnalyzer>();
 
         // Add URL analyzer
-        services.AddSingleton<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
+        services.AddSingleton<Analyzer<UrlAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
     }
 }

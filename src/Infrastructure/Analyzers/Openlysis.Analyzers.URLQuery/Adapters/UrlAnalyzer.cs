@@ -29,7 +29,7 @@ namespace Openlysis.Analyzers.URLQuery.Adapters;
 /// <summary>
 /// Analyzer of URLs using the 'urlquery.net' service.
 /// </summary>
-public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
+public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 {
     /// <summary>
     /// The key used to retrieve keyed services for the URL analyzer.
@@ -72,7 +72,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
@@ -112,7 +112,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         // Return analysis
         SubmitUrlResponse submitUrlResponse = result.Value;
         AnalysisStatus status = Maps.AnalysisStatusMap[submitUrlResponse.Status];
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             submitUrlResponse.ReportId,
             ServiceName,
             status,
@@ -123,7 +123,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id.Job);
@@ -149,9 +149,9 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         string formattedUrl = string.Format(Addresses.ReportEndpoint, id.Primary.Value);
@@ -187,6 +187,6 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         AnalysisStatus status = Maps.AnalysisStatusMap[report.Status];
         Verdict verdict = _verdictCalculator.Calculate(report.Sensors);
-        return UrlServiceAnalysis.Create(report.ReportId, ServiceName, status, verdict, id.Job);
+        return UrlAnalysis.Create(report.ReportId, ServiceName, status, verdict, id.Job);
     }
 }

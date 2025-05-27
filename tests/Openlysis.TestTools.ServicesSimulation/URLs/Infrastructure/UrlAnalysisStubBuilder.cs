@@ -16,7 +16,7 @@ namespace Openlysis.TestTools.ServicesSimulation.URLs.Infrastructure;
 /// with configurable behaviors based on provided options.
 /// </remarks>
 internal sealed class UrlAnalysisStubBuilder
-    : AnalysisStubBuilder<AnalysisStubFactoryOptions, UrlServiceAnalysis>
+    : AnalysisStubBuilder<AnalysisStubFactoryOptions, UrlAnalysis>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlAnalysisStubBuilder"/> class.
@@ -29,7 +29,7 @@ internal sealed class UrlAnalysisStubBuilder
 
     /// <inheritdoc/>
     protected override void HandleFinalization(
-        UrlServiceAnalysis analysis,
+        UrlAnalysis analysis,
         AnalysisStubFactoryOptions options)
     {
         Verdict verdict = GenerateVerdict(options.VerdictSimulation);
@@ -43,11 +43,11 @@ internal sealed class UrlAnalysisStubBuilder
     }
 
     /// <inheritdoc/>
-    protected override UrlServiceAnalysis HandleCreation(
+    protected override UrlAnalysis HandleCreation(
         string serviceName,
         AnalysisStubFactoryOptions options)
     {
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             Guid.NewGuid().ToString(),
             serviceName,
             AnalysisStatus.Queued,
@@ -56,13 +56,13 @@ internal sealed class UrlAnalysisStubBuilder
     }
 
     /// <inheritdoc/>
-    protected override void LogCreatedStub(UrlServiceAnalysis stub)
+    protected override void LogCreatedStub(UrlAnalysis stub)
     {
-        Logger.LogDebug($"{nameof(UrlServiceAnalysis)} created in an initial state.");
+        Logger.LogDebug($"{nameof(UrlAnalysis)} created in an initial state.");
     }
 
     /// <inheritdoc/>
-    protected override void LogFinalizedAnalysis(UrlServiceAnalysis analysis)
+    protected override void LogFinalizedAnalysis(UrlAnalysis analysis)
     {
         Logger.LogTrace(
             "{TypeName} created:"
@@ -71,7 +71,7 @@ internal sealed class UrlAnalysisStubBuilder
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreat score: {ThreatScore}"
             + "\n\tStatus: {Status}",
-            nameof(UrlServiceAnalysis),
+            nameof(UrlAnalysis),
             analysis.ServiceName,
             analysis.Id,
             analysis.State.Verdict,

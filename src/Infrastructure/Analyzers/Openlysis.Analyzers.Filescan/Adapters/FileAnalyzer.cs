@@ -33,7 +33,7 @@ namespace Openlysis.Analyzers.Filescan.Adapters;
 /// providing specific implementations for analyzing files, retrieving analysis status,
 /// and fetching analysis results.
 /// </remarks>
-public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
+public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
 {
     private readonly IOptionsMonitor<FilescanAnalyzerOptions> _analyzerOptions;
     private readonly IFilescanAnalyzer _filescanAnalyzer;
@@ -61,7 +61,7 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<FileServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<FileAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeFileRequest request,
         CancellationToken cancellationToken = default)
@@ -92,7 +92,7 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
             return result.Errors;
         }
 
-        return FileServiceAnalysis.Create(
+        return FileAnalysis.Create(
             result.Value.FlowId,
             ServiceName,
             AnalysisStatus.Queued,
@@ -102,7 +102,7 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         var getScanRequest = new GetScanRequest(id.Primary.Value);
@@ -121,9 +121,9 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<FileServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         var getScanRequest = new GetScanRequest(id.Primary.Value);
@@ -147,13 +147,13 @@ public class FileAnalyzer : Analyzer<FileServiceAnalysis, AnalyzeFileRequest>
     }
 
     /// <summary>
-    /// Creates a <see cref="FileServiceAnalysis"/> instance from the Filescan analysis response.
+    /// Creates a <see cref="FileAnalysis"/> instance from the Filescan analysis response.
     /// </summary>
     /// <param name="response">The analysis response containing reports from the Filescan service.</param>
-    /// <returns>A populated <see cref="FileServiceAnalysis"/> object with status and reports extracted from the response.</returns>
-    private FileServiceAnalysis CreateAnalysisFromResponse(GetAnalysisResponse response)
+    /// <returns>A populated <see cref="FileAnalysis"/> object with status and reports extracted from the response.</returns>
+    private FileAnalysis CreateAnalysisFromResponse(GetAnalysisResponse response)
     {
-        var serviceAnalysis = FileServiceAnalysis.Create(
+        var serviceAnalysis = FileAnalysis.Create(
             response.FlowId,
             ServiceName,
             AnalysisStatus.Queued,

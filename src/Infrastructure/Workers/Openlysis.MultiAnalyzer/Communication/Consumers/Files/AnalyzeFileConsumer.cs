@@ -34,10 +34,10 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     private readonly ILogger<AnalyzeFileConsumer> _logger;
     private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
     private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly IDictionary<string, Analyzer<FileServiceAnalysis, AnalyzeFileRequest>> _analyzers;
+    private readonly IDictionary<string, Analyzer<FileAnalysis, AnalyzeFileRequest>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
-    private readonly Dictionary<ComposedServiceAnalysisId, FileServiceAnalysis> _pendingAnalyses = [];
-    private readonly ConcurrentBag<FileServiceAnalysis> _updatableAnalyses = [];
+    private readonly Dictionary<ComposedAnalysisId, FileAnalysis> _pendingAnalyses = [];
+    private readonly ConcurrentBag<FileAnalysis> _updatableAnalyses = [];
 
     private GlobalId _multiAnalysisId;
     private ConsumeContext<AnalyzeFile> _context;
@@ -55,7 +55,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         IEndpointUriProvider endpointUriProvider,
         IOptionsMonitor<AnalyzeConsumerOptions> options,
         IFileStorageProvider fileStorageProvider,
-        IEnumerable<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>> analyzers)
+        IEnumerable<Analyzer<FileAnalysis, AnalyzeFileRequest>> analyzers)
     {
         _logger = logger;
         _endpointUriProvider = endpointUriProvider;
@@ -104,7 +104,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
                 return;
             }
 
-            FileServiceAnalysis analysis = analyzeResult.Value;
+            FileAnalysis analysis = analyzeResult.Value;
             _pendingAnalyses.Add(analysis.Id, analysis);
         });
 
@@ -155,7 +155,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     }
 
     /// <summary>
-    /// Executes an HTTP request for each <see cref="FileServiceAnalysis"/> to update them.
+    /// Executes an HTTP request for each <see cref="FileAnalysis"/> to update them.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
@@ -202,7 +202,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
                 }
 
                 // Get full analysis
-                ErrorOr<FileServiceAnalysis> getAnalysisResult
+                ErrorOr<FileAnalysis> getAnalysisResult
                     = await analyzer.GetAnalysisAsync(analysis.Id, ct);
                 if (getAnalysisResult.IsError)
                 {
@@ -237,7 +237,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// </summary>
     /// <param name="analyses">The file service analyses to update. If none are provided, all pending analyses will be sent.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    private async Task SendUpdateAsync(params FileServiceAnalysis[] analyses)
+    private async Task SendUpdateAsync(params FileAnalysis[] analyses)
     {
         var request = new UpdateFileMultiAnalysis(
             _multiAnalysisId,

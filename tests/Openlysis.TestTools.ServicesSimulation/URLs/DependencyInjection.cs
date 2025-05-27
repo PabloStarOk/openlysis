@@ -41,9 +41,9 @@ internal static class DependencyInjection
             AnalysisServiceOptionsValidator<AnalysisStubFactoryOptions>>();
 
         services.AddSingleton<
-            AnalysisStubBuilder<AnalysisStubFactoryOptions, UrlServiceAnalysis>,
+            AnalysisStubBuilder<AnalysisStubFactoryOptions, UrlAnalysis>,
             UrlAnalysisStubBuilder>();
-        services.AddSingleton<AnalysisBehaviorSimulator<UrlServiceAnalysis, AnalysisStubFactoryOptions>>();
+        services.AddSingleton<AnalysisBehaviorSimulator<UrlAnalysis, AnalysisStubFactoryOptions>>();
 
         IEnumerable<IConfigurationSection> servicesSections = configuration
             .GetRequiredSection(SectionName)
@@ -58,7 +58,7 @@ internal static class DependencyInjection
                 AnalysisStubFactoryOptions>(section, services);
             analyzersOptionsNames.Add(optionsName);
 
-            services.AddSingleton<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>>(sp =>
+            services.AddSingleton<Analyzer<UrlAnalysis, AnalyzeUrlRequest>>(sp =>
             {
                 var serviceOptions = sp.GetRequiredService<IOptionsMonitor<AnalysisServiceOptions<AnalysisStubFactoryOptions>>>();
                 string serviceName = serviceOptions.Get(optionsName).Name;
@@ -113,7 +113,7 @@ internal static class DependencyInjection
             IOptionsMonitor<AnalysisServiceOptions<AnalysisStubFactoryOptions>>>();
 
         var behaviorSimulator = sp.GetRequiredService<
-            AnalysisBehaviorSimulator<UrlServiceAnalysis, AnalysisStubFactoryOptions>>();
+            AnalysisBehaviorSimulator<UrlAnalysis, AnalysisStubFactoryOptions>>();
 
         return new SimulatedUrlAnalyzer(
             analyzerOptionsStubMonitor,

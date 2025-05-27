@@ -10,4 +10,4 @@ namespace Openlysis.Infrastructure.Shared.Communication.Models;
 /// <param name="ServiceFileAnalyses">An array of service file analyses associated with the update.</param>
 public record UpdateFileMultiAnalysis(
     GlobalId Id,
-    FileServiceAnalysis[] ServiceFileAnalyses);
+    FileAnalysis[] ServiceFileAnalyses);

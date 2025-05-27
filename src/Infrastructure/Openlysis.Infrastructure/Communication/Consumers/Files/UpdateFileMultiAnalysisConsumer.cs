@@ -47,13 +47,13 @@ public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis
 
         foreach (var serviceAnalysis in request.ServiceFileAnalyses)
         {
-            if (fileMultiAnalysis.ServiceAnalyses.Contains(serviceAnalysis))
+            if (fileMultiAnalysis.Analyses.Contains(serviceAnalysis))
             {
-                fileMultiAnalysis.UpdateServiceAnalysis(serviceAnalysis);
+                fileMultiAnalysis.UpdateAnalysis(serviceAnalysis);
                 continue;
             }
 
-            fileMultiAnalysis.AddServiceAnalysis(serviceAnalysis);
+            fileMultiAnalysis.AddAnalysis(serviceAnalysis);
         }
 
         await _multiAnalysisRepository.UpdateAsync(

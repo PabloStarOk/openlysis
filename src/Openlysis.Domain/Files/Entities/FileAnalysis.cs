@@ -6,27 +6,27 @@ using Openlysis.Domain.Common.ValueObjects;
 namespace Openlysis.Domain.Files.Entities;
 
 /// <summary>
-/// Represents a file analysis of a service.
+/// An analysis for a file performed by an external service.
 /// </summary>
-public class FileServiceAnalysis : ServiceAnalysis
+public class FileAnalysis : Analysis
 {
     private readonly List<FileReport> _reports = [];
 
     /// <summary>
-    /// Gets the reports associated with the analysis as a read-only dictionary.
+    /// Gets the reports associated with the analysisy.
     /// </summary>
     public IReadOnlyList<FileReport> Reports => _reports.AsReadOnly();
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileServiceAnalysis"/> class.
+    /// Initializes a new instance of the <see cref="FileAnalysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
-    /// <param name="serviceName">The name of the service being analyzed.</param>
+    /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
-    private FileServiceAnalysis(
-        ComposedServiceAnalysisId id,
+    private FileAnalysis(
+        ComposedAnalysisId id,
         string serviceName,
         AnalysisState state,
         List<FileReport> reports,
@@ -39,24 +39,24 @@ public class FileServiceAnalysis : ServiceAnalysis
     // For EF core.
 #pragma warning disable CS8618
 #pragma warning disable S1144
-    private FileServiceAnalysis()
+    private FileAnalysis()
     {
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of <see cref="FileServiceAnalysis"/> with the specified parameters.
+    /// Creates a new instance of <see cref="FileAnalysis"/> with the specified parameters.
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
-    /// <param name="serviceName">The name of the service being analyzed.</param>
+    /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="reports">The list of reports associated with the analysis.</param>
     /// <param name="jobId">An optional job identifier associated with the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
-    /// <returns>A new instance of <see cref="FileServiceAnalysis"/>.</returns>
-    public static FileServiceAnalysis Create(
+    /// <returns>A new instance of <see cref="FileAnalysis"/>.</returns>
+    public static FileAnalysis Create(
         string id,
         string serviceName,
         AnalysisStatus status,
@@ -66,8 +66,8 @@ public class FileServiceAnalysis : ServiceAnalysis
         ThreatScore? threatScore = null)
     {
         var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
-        return new FileServiceAnalysis(
-            ComposedServiceAnalysisId.Create(id, jobId),
+        return new FileAnalysis(
+            ComposedAnalysisId.Create(id, jobId),
             serviceName,
             state,
             reports,
@@ -75,17 +75,17 @@ public class FileServiceAnalysis : ServiceAnalysis
     }
 
     /// <summary>
-    /// Creates a new instance of <see cref="FileServiceAnalysis"/> with the specified parameters,
+    /// Creates a new instance of <see cref="FileAnalysis"/> with the specified parameters,
     /// but without any initial file reports.
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
-    /// <param name="serviceName">The name of the service being analyzed.</param>
+    /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="jobId">An optional job identifier associated with the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
-    /// <returns>A new instance of <see cref="FileServiceAnalysis"/> with no file reports.</returns>
-    public static FileServiceAnalysis Create(
+    /// <returns>A new instance of <see cref="FileAnalysis"/> with no file reports.</returns>
+    public static FileAnalysis Create(
         string id,
         string serviceName,
         AnalysisStatus status,
@@ -94,8 +94,8 @@ public class FileServiceAnalysis : ServiceAnalysis
         ThreatScore? threatScore = null)
     {
         var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
-        return new FileServiceAnalysis(
-            ComposedServiceAnalysisId.Create(id, jobId),
+        return new FileAnalysis(
+            ComposedAnalysisId.Create(id, jobId),
             serviceName,
             state,
             [],
@@ -150,11 +150,11 @@ public class FileServiceAnalysis : ServiceAnalysis
     /// <summary>
     /// Determines whether the current analysis has the same state as the specified analysis.
     /// </summary>
-    /// <param name="other">The other <see cref="FileServiceAnalysis"/> to compare with.</param>
+    /// <param name="other">The other <see cref="FileAnalysis"/> to compare with.</param>
     /// <returns>
     /// <c>true</c> if the current analysis has the same state as the specified analysis; otherwise, <c>false</c>.
     /// </returns>
-    public bool HasSameStateTo(FileServiceAnalysis other)
+    public bool HasSameStateTo(FileAnalysis other)
     {
         return Reports.SequenceEqual(other.Reports)
             && State == other.State;

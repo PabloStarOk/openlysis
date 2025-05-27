@@ -24,7 +24,7 @@ namespace Openlysis.Analyzers.VirusTotal.Adapters;
 /// <summary>
 /// URL analyzer for VirusTotal service.
 /// </summary>
-public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
+public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 {
     /// <summary>
     /// Key of the service for tracking request limits.
@@ -57,7 +57,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
@@ -75,7 +75,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         AnalyzeResponse analyzeResponse = result.Value;
 
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             analyzeResponse.AnalysisId,
             ServiceName,
             AnalysisStatus.Queued,
@@ -85,7 +85,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
@@ -102,9 +102,9 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
@@ -135,7 +135,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
 
         AnalysisStatus status = Maps.AnalysisStatusMap[analysis.Attributes.Status];
         Verdict verdict = _verdictCalculator.Calculate(analysis.Attributes.Stats);
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             analysis.Id,
             ServiceName,
             status,

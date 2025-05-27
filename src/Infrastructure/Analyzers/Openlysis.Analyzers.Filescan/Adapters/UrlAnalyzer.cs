@@ -26,7 +26,7 @@ namespace Openlysis.Analyzers.Filescan.Adapters;
 /// <summary>
 /// Represents an analyzer for URLs, inheriting from the base Analyzer class.
 /// </summary>
-public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
+public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 {
     private readonly IFilescanAnalyzer _filescanAnalyzer;
 
@@ -50,7 +50,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
@@ -68,7 +68,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         }
 
         ScanResponse scanResponse = result.Value;
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             scanResponse.FlowId,
             ServiceName,
             AnalysisStatus.Queued,
@@ -78,7 +78,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         var getScanRequest = new GetScanRequest(id.Primary.Value);
@@ -97,9 +97,9 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         var getScanRequest = new GetScanRequest(id.Primary.Value);
@@ -148,7 +148,7 @@ public class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         }
 
         AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             analysisResponse.FlowId,
             ServiceName,
             status,

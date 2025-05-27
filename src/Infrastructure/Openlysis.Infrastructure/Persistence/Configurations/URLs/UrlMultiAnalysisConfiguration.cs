@@ -102,15 +102,15 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
 
         builder.HasIndex(u => u.UserId);
 
-        builder.HasMany(u => u.ServiceAnalyses)
+        builder.HasMany(u => u.Analyses)
             .WithMany()
             .UsingEntity(
-                "url_analyses",
-                r => r.HasOne(typeof(UrlServiceAnalysis)).WithMany().HasForeignKey("service_analysis_id"),
-                l => l.HasOne(typeof(UrlMultiAnalysis)).WithMany().HasForeignKey("multi_analysis_id"),
+                "url_multi_service_analysis_links",
+                r => r.HasOne(typeof(UrlAnalysis)).WithMany().HasForeignKey("url_analysis_id"),
+                l => l.HasOne(typeof(UrlMultiAnalysis)).WithMany().HasForeignKey("url_multi_analysis_id"),
                 joinEntity =>
                 {
-                    joinEntity.HasKey("multi_analysis_id", "service_analysis_id");
+                    joinEntity.HasKey("url_multi_analysis_id", "url_analysis_id");
                 });
     }
 }

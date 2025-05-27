@@ -7,9 +7,9 @@ using Openlysis.Domain.Users.ValueObjects;
 namespace Openlysis.Domain.URLs;
 
 /// <summary>
-/// Represents a multi-analysis of a URL, containing multiple service analyses.
+/// An aggregate that contains multiple analyses for a URL.
 /// </summary>
-public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
+public sealed class UrlMultiAnalysis : MultiAnalysis<UrlAnalysis>
 {
     /// <summary>
     /// Gets the URL being analyzed.
@@ -81,9 +81,9 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     }
 
     /// <inheritdoc/>
-    protected override void HandleServiceAnalysisUpdate(
-        UrlServiceAnalysis existingAnalysis,
-        UrlServiceAnalysis updatedAnalysis)
+    protected override void HandleAnalysisUpdate(
+        UrlAnalysis existingAnalysis,
+        UrlAnalysis updatedAnalysis)
     {
         existingAnalysis.UpdateVerdict(updatedAnalysis.State.Verdict);
         existingAnalysis.UpdateThreatScore(updatedAnalysis.ThreatScore);
@@ -93,12 +93,12 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlServiceAnalysis>
     /// <inheritdoc/>
     protected override void HandleAverageThreatScoreUpdate()
     {
-        if (ServiceAnalyses.All(s => s.ThreatScore.NormalizedValue is null))
+        if (Analyses.All(s => s.ThreatScore.NormalizedValue is null))
         {
             return;
         }
 
-        double? average = ServiceAnalyses
+        double? average = Analyses
             .Where(s => s.ThreatScore.NormalizedValue is not null)
             .Select(s => s.ThreatScore.NormalizedValue)
             .Average();

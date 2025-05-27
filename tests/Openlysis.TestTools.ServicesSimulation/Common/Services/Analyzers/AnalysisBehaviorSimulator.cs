@@ -21,12 +21,12 @@ namespace Openlysis.TestTools.ServicesSimulation.Common.Services.Analyzers;
 /// <typeparam name="TStubFactoryOptions">The options type used by the stub factory to create analysis objects.</typeparam>
 internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     : IDisposable, IAsyncDisposable
-    where TAnalysis : ServiceAnalysis
+    where TAnalysis : Analysis
     where TStubFactoryOptions : AnalysisStubFactoryOptions
 {
     private readonly ILogger<AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>> _logger;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly ConcurrentDictionary<ComposedServiceAnalysisId, AnalysisProcess<TAnalysis>> _processes = [];
+    private readonly ConcurrentDictionary<ComposedAnalysisId, AnalysisProcess<TAnalysis>> _processes = [];
     private readonly TimeProvider _timeProvider;
     private readonly AnalysisStubBuilder<TStubFactoryOptions, TAnalysis> _analysisBuilder;
     private bool _disposed;
@@ -85,19 +85,19 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// <summary>
     /// Handles an analysis request asynchronously.
     /// </summary>
-    /// <param name="analyzerOptions">The options that configure the behavior of this analysis.</param>
+    /// <param name="analyzerServiceOptions">The serviceOptions that configure the behavior of this analysis.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation, containing either the created analysis
     /// or an error if the operation fails.
     /// </returns>
     internal async Task<ErrorOr<TAnalysis>> SimulateAnalyzeAsync(
-        AnalysisServiceOptions<TStubFactoryOptions> analyzerOptions,
+        AnalysisServiceOptions<TStubFactoryOptions> analyzerServiceOptions,
         CancellationToken cancellationToken = default)
     {
-        LogRequestReceived(analyzerOptions, nameof(SimulateAnalyzeAsync));
+        LogRequestReceived(analyzerServiceOptions, nameof(SimulateAnalyzeAsync));
 
-        SimulatedEndpointOptions endpointOptions = analyzerOptions.AnalyzeEndpoint;
+        SimulatedEndpointOptions endpointOptions = analyzerServiceOptions.AnalyzeEndpoint;
         if (endpointOptions.ReturnError)
         {
             return SimulationErrors.Analyze;
@@ -107,16 +107,16 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
         await Task.Delay(latency, cancellationToken);
 
         var analysis = _analysisBuilder.Create(
-            analyzerOptions.Name,
-            analyzerOptions.StubFactory);
-        CreateProcess(analyzerOptions, analysis);
+            analyzerServiceOptions.Name,
+            analyzerServiceOptions.StubFactory);
+        CreateProcess(analyzerServiceOptions, analysis);
         return analysis;
     }
 
     /// <summary>
     /// Retrieves the current status of an analysis asynchronously.
     /// </summary>
-    /// <param name="analyzerOptions">The options that configure the behavior of this analysis service.</param>
+    /// <param name="analyzerServiceOptions">The serviceOptions that configure the behavior of this analysis service.</param>
     /// <param name="id">The unique identifier of the analysis whose status is being requested.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
@@ -124,13 +124,13 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// of the requested analysis or an error if the operation fails.
     /// </returns>
     internal async Task<ErrorOr<AnalysisStatus>> SimulateGetStatusAsync(
-        AnalysisServiceOptions<TStubFactoryOptions> analyzerOptions,
-        ComposedServiceAnalysisId id,
+        AnalysisServiceOptions<TStubFactoryOptions> analyzerServiceOptions,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        LogRequestReceived(analyzerOptions, nameof(SimulateGetStatusAsync));
+        LogRequestReceived(analyzerServiceOptions, nameof(SimulateGetStatusAsync));
 
-        SimulatedEndpointOptions endpointOptions = analyzerOptions.GetStatusEndpoint;
+        SimulatedEndpointOptions endpointOptions = analyzerServiceOptions.GetStatusEndpoint;
         if (endpointOptions.ReturnError)
         {
             return SimulationErrors.GetAnalysisStatus;
@@ -145,7 +145,7 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// <summary>
     /// Retrieves a completed analysis by its identifier asynchronously.
     /// </summary>
-    /// <param name="analyzerOptions">The options that configure the behavior of this analysis service.</param>
+    /// <param name="analyzerServiceOptions">The serviceOptions that configure the behavior of this analysis service.</param>
     /// <param name="id">The unique identifier of the analysis to retrieve.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
@@ -153,13 +153,13 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// or an error if the operation fails.
     /// </returns>
     internal async Task<ErrorOr<TAnalysis>> SimulateGetAnalysisAsync(
-        AnalysisServiceOptions<TStubFactoryOptions> analyzerOptions,
-        ComposedServiceAnalysisId id,
+        AnalysisServiceOptions<TStubFactoryOptions> analyzerServiceOptions,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        LogRequestReceived(analyzerOptions, nameof(SimulateGetAnalysisAsync));
+        LogRequestReceived(analyzerServiceOptions, nameof(SimulateGetAnalysisAsync));
 
-        SimulatedEndpointOptions endpointOptions = analyzerOptions.GetAnalysisEndpoint;
+        SimulatedEndpointOptions endpointOptions = analyzerServiceOptions.GetAnalysisEndpoint;
         if (endpointOptions.ReturnError)
         {
             return SimulationErrors.GetAnalysis;
@@ -224,7 +224,7 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// <summary>
     /// Creates a new analysis process for the given analysis and starts tracking it.
     /// </summary>
-    /// <param name="analyzerOptions">The options that configure the analyzer behavior.</param>
+    /// <param name="analyzerServiceOptions">The serviceOptions that configure the analyzer behavior.</param>
     /// <param name="analysis">The analysis for which to create a process.</param>
     /// <remarks>
     /// The created process is added to the <see cref="_processes"/> dictionary using the analysis ID as the key.
@@ -232,17 +232,17 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// a finished analysis when complete.
     /// </remarks>
     private void CreateProcess(
-        AnalysisServiceOptions<TStubFactoryOptions> analyzerOptions,
+        AnalysisServiceOptions<TStubFactoryOptions> analyzerServiceOptions,
         TAnalysis analysis)
     {
         var processLogger = _loggerFactory.CreateLogger<AnalysisProcess<TAnalysis>>();
         var analysisProcess = new AnalysisProcess<TAnalysis>(processLogger, analysis, _timeProvider);
         int secondsDuration =
-            CreateAnalysisDuration(analyzerOptions.AnalysisSecondsDuration);
+            CreateAnalysisDuration(analyzerServiceOptions.AnalysisSecondsDuration);
         analysisProcess.Start(
             processAnalysis => _analysisBuilder.Finalize(
                 processAnalysis,
-                analyzerOptions.StubFactory),
+                analyzerServiceOptions.StubFactory),
             secondsDuration);
         _processes.TryAdd(analysis.Id, analysisProcess);
 
@@ -252,15 +252,15 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// <summary>
     /// Logs a debug message indicating that a request was received and is being processed.
     /// </summary>
-    /// <param name="analyzerOptions">The options that configure the analyzer's behavior for this request.</param>
+    /// <param name="analyzerServiceOptions">The serviceOptions that configure the analyzer's behavior for this request.</param>
     /// <param name="methodName">The name of the method that is handling the request.</param>
     private void LogRequestReceived(
-        AnalysisServiceOptions<TStubFactoryOptions> analyzerOptions,
+        AnalysisServiceOptions<TStubFactoryOptions> analyzerServiceOptions,
         string methodName)
     {
         _logger.LogDebug(
             "{ServiceName}: Behavior simulated with {MethodName} method.",
-            analyzerOptions.Name,
+            analyzerServiceOptions.Name,
             methodName);
     }
 

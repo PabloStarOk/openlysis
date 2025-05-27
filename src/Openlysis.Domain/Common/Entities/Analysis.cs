@@ -7,7 +7,7 @@ namespace Openlysis.Domain.Common.Entities;
 /// <summary>
 /// Defines a base entity to store an analysis from an external service.
 /// </summary>
-public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
+public abstract class Analysis : Entity<ComposedAnalysisId>
 {
     /// <summary>
     /// Gets the name of the service.
@@ -25,14 +25,14 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
     public ThreatScore ThreatScore { get; private set; }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ServiceAnalysis"/> class.
+    /// Initializes a new instance of the <see cref="Analysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the service analysis.</param>
     /// <param name="serviceName">The name of the service being analyzed.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
-    protected ServiceAnalysis(
-        ComposedServiceAnalysisId id,
+    protected Analysis(
+        ComposedAnalysisId id,
         string serviceName,
         AnalysisState state,
         ThreatScore threatScore)
@@ -47,12 +47,12 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
 #pragma warning disable CS8618
 #pragma warning disable S1144
     /// <summary>
-    /// Initializes a new instance of the <see cref="ServiceAnalysis"/> class for EF Core.
+    /// Initializes a new instance of the <see cref="Analysis"/> class for EF Core.
     /// </summary>
     /// <remarks>
     /// This constructor is required by EF Core and should not be used directly in application code.
     /// </remarks>
-    protected ServiceAnalysis()
+    protected Analysis()
     {
     }
 #pragma warning restore S1144
@@ -69,7 +69,7 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
     {
         if (!State.CanBeUpdated)
         {
-            throw new InvalidOperationException($"Trying to update verdict of {typeof(ServiceAnalysis)} when status is not queued or in-progress.");
+            throw new InvalidOperationException($"Trying to update verdict of {typeof(Analysis)} when status is not queued or in-progress.");
         }
 
         State = State.WithVerdict(newVerdict);
@@ -84,7 +84,7 @@ public abstract class ServiceAnalysis : Entity<ComposedServiceAnalysisId>
         ArgumentNullException.ThrowIfNull(threatScore);
         if (!State.CanBeUpdated)
         {
-            throw new InvalidOperationException($"Trying to update threat score of {typeof(ServiceAnalysis)} when status is not queued or in-progress.");
+            throw new InvalidOperationException($"Trying to update threat score of {typeof(Analysis)} when status is not queued or in-progress.");
         }
 
         ThreatScore = threatScore;

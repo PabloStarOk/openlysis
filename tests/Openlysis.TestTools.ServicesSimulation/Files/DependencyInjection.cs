@@ -46,9 +46,9 @@ internal static class DependencyInjection
             AnalysisServiceOptionsValidator<FileAnalysisStubFactoryOptions>>();
 
         services.AddSingleton<
-            AnalysisStubBuilder<FileAnalysisStubFactoryOptions, FileServiceAnalysis>,
+            AnalysisStubBuilder<FileAnalysisStubFactoryOptions, FileAnalysis>,
             FileAnalysisStubBuilder>();
-        services.AddSingleton<AnalysisBehaviorSimulator<FileServiceAnalysis, FileAnalysisStubFactoryOptions>>();
+        services.AddSingleton<AnalysisBehaviorSimulator<FileAnalysis, FileAnalysisStubFactoryOptions>>();
 
         IEnumerable<IConfigurationSection> servicesSections = configuration
             .GetRequiredSection(SectionName)
@@ -63,7 +63,7 @@ internal static class DependencyInjection
                 FileAnalysisStubFactoryOptions>(section, services);
             analyzersOptionsNames.Add(optionsName);
 
-            services.AddSingleton<Analyzer<FileServiceAnalysis, AnalyzeFileRequest>>(sp =>
+            services.AddSingleton<Analyzer<FileAnalysis, AnalyzeFileRequest>>(sp =>
             {
                 var serviceOptions = sp.GetRequiredService<IOptionsMonitor<AnalysisServiceOptions<FileAnalysisStubFactoryOptions>>>();
                 string serviceName = serviceOptions.Get(optionsName).Name;
@@ -117,7 +117,7 @@ internal static class DependencyInjection
             IOptionsMonitor<AnalysisServiceOptions<FileAnalysisStubFactoryOptions>>>();
 
         var behaviorSimulator = sp.GetRequiredService<
-            AnalysisBehaviorSimulator<FileServiceAnalysis, FileAnalysisStubFactoryOptions>>();
+            AnalysisBehaviorSimulator<FileAnalysis, FileAnalysisStubFactoryOptions>>();
 
         return new SimulatedFileAnalyzer(
             analyzerOptionsStubMonitor,

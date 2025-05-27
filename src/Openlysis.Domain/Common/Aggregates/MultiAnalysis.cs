@@ -7,17 +7,17 @@ using Openlysis.Domain.Users.ValueObjects;
 namespace Openlysis.Domain.Common.Aggregates;
 
 /// <summary>
-/// Defines a base aggregate for multiple analyses from external services.
+/// A base aggregate that contains multiple analyses performed by external services.
 /// </summary>
-/// <typeparam name="TServiceAnalysis">
-/// The type of service analysis associated with the multi-analysis.
-/// Must inherit from <see cref="ServiceAnalysis"/>.
+/// <typeparam name="TAnalysis">
+/// The type of  analysis associated with the multi-analysis.
+/// Must inherit from <see cref="Analysis"/>.
 /// </typeparam>
-public abstract class MultiAnalysis<TServiceAnalysis>
+public abstract class MultiAnalysis<TAnalysis>
     : AggregateRoot<GlobalId>
-    where TServiceAnalysis : ServiceAnalysis
+    where TAnalysis : Analysis
 {
-    private readonly List<TServiceAnalysis> _serviceAnalyses = [];
+    private readonly List<TAnalysis> _analyses = [];
 
     /// <summary>
     /// Gets the identifier of the user associated with the analysis.
@@ -50,12 +50,12 @@ public abstract class MultiAnalysis<TServiceAnalysis>
     public HashValues DataHashValues { get; }
 
     /// <summary>
-    /// Gets the list of service analyses associated with the analysis.
+    /// Gets analyses of the multi-analysis.
     /// </summary>
-    public IReadOnlyList<TServiceAnalysis> ServiceAnalyses => _serviceAnalyses;
+    public IReadOnlyList<TAnalysis> Analyses => _analyses;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MultiAnalysis{TServiceAnalysis}"/> class.
+    /// Initializes a new instance of the <see cref="MultiAnalysis{TAnalysis}"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the multi-analysis.</param>
     /// <param name="userId">The identifier of the user associated with the analysis.</param>
@@ -83,7 +83,7 @@ public abstract class MultiAnalysis<TServiceAnalysis>
 #pragma warning disable CS8618
 #pragma warning disable S1144
     /// <summary>
-    /// Initializes a new instance of the <see cref="MultiAnalysis{TServiceAnalysis}"/> class for EF Core.
+    /// Initializes a new instance of the <see cref="MultiAnalysis{TAnalysis}"/> class for EF Core.
     /// </summary>
     /// <remarks>
     /// This constructor is required by EF Core and should not be used directly in application code.
@@ -95,38 +95,38 @@ public abstract class MultiAnalysis<TServiceAnalysis>
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Adds a new service analysis to the collection.
+    /// Adds a new analysis to the multi-analysis.
     /// </summary>
-    /// <param name="analysis">The service analysis to add.</param>
+    /// <param name="analysis">The analysis to add.</param>
     /// <exception cref="ArgumentNullException">Thrown if the provided analysis is null.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the analysis already exists in the collection.</exception>
-    public void AddServiceAnalysis(TServiceAnalysis analysis)
+    public void AddAnalysis(TAnalysis analysis)
     {
         ArgumentNullException.ThrowIfNull(analysis);
-        if (_serviceAnalyses.Contains(analysis))
+        if (_analyses.Contains(analysis))
         {
-            throw new InvalidOperationException("Service analysis already contains the given UrlServiceAnalysis.");
+            throw new InvalidOperationException("Multi-analysis already contains the given analysis.");
         }
 
-        _serviceAnalyses.Add(analysis);
+        _analyses.Add(analysis);
         UpdateInformation();
     }
 
     /// <summary>
-    /// Updates an existing service analysis in the collection.
+    /// Updates an existing analysis in the collection.
     /// </summary>
-    /// <param name="analysis">The service analysis to update.</param>
+    /// <param name="analysis">The analysis to update.</param>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if the service analysis does not exist in the collection.
+    /// Thrown if the analysis does not exist in the collection.
     /// </exception>
-    public void UpdateServiceAnalysis(TServiceAnalysis analysis)
+    public void UpdateAnalysis(TAnalysis analysis)
     {
-        if (!_serviceAnalyses.Contains(analysis))
+        if (!_analyses.Contains(analysis))
         {
-            throw new InvalidOperationException("Service analysis does not exist in the collection.");
+            throw new InvalidOperationException("Analysis does not exist in the multi-analysis.");
         }
 
-        TServiceAnalysis existingAnalysis = _serviceAnalyses.Single(a => a == analysis);
+        TAnalysis existingAnalysis = _analyses.Single(a => a == analysis);
         if (existingAnalysis.State is not
             {
                 Status: AnalysisStatus.Queued or AnalysisStatus.InProgress
@@ -135,73 +135,73 @@ public abstract class MultiAnalysis<TServiceAnalysis>
             return;
         }
 
-        HandleServiceAnalysisUpdate(existingAnalysis, analysis);
+        HandleAnalysisUpdate(existingAnalysis, analysis);
         UpdateInformation();
     }
 
     /// <summary>
-    /// Invoked when an existing service analysis in the collection is updated.
+    /// Invoked when an existing analysis in the multi-analysis is updated.
     /// </summary>
-    /// <param name="existingAnalysis">The current service analysis instance that exists in the collection.</param>
-    /// <param name="updatedAnalysis">The updated service analysis instance that will replace the existing one.</param>
-    protected abstract void HandleServiceAnalysisUpdate(
-        TServiceAnalysis existingAnalysis,
-        TServiceAnalysis updatedAnalysis);
+    /// <param name="existingAnalysis">The current analysis instance that exists in the multi-analysis.</param>
+    /// <param name="updatedAnalysis">The updated analysis instance that will replace the existing one.</param>
+    protected abstract void HandleAnalysisUpdate(
+        TAnalysis existingAnalysis,
+        TAnalysis updatedAnalysis);
 
     /// <summary>
-    /// Updates the average threat score of the analysis based on the associated service analyses.
+    /// Updates the average threat score of the multi-analysis based on the associated analyses.
     /// </summary>
     protected abstract void HandleAverageThreatScoreUpdate();
 
     /// <summary>
-    /// Updates the final verdict of the multi-analysis based on the associated service analyses.
+    /// Updates the final verdict of the multi-analysis based on the associated analyses.
     /// </summary>
     private void UpdateFinalVerdict()
     {
-        Verdict[] servicesVerdicts = _serviceAnalyses
+        Verdict[] analysesVerdicts = _analyses
             .Select(s => s.State.Verdict)
             .ToArray();
 
-        if (servicesVerdicts.Length is 0)
+        if (analysesVerdicts.Length is 0)
         {
             State = State.WithVerdict(Verdict.Unknown);
             return;
         }
 
-        if (servicesVerdicts.Contains(Verdict.Malicious))
+        if (analysesVerdicts.Contains(Verdict.Malicious))
         {
             State = State.WithVerdict(Verdict.Malicious);
             return;
         }
 
-        if (servicesVerdicts.Contains(Verdict.Suspicious))
+        if (analysesVerdicts.Contains(Verdict.Suspicious))
         {
             State = State.WithVerdict(Verdict.Suspicious);
             return;
         }
 
-        if (servicesVerdicts.Contains(Verdict.Undetected))
+        if (analysesVerdicts.Contains(Verdict.Undetected))
         {
             State = State.WithVerdict(Verdict.Undetected);
         }
     }
 
     /// <summary>
-    /// Updates the overall status of the analysis based on the statuses of the associated service analyses.
+    /// Updates the status of the multi-analysis based on the statuses of the associated analyses.
     /// </summary>
     /// <remarks>
-    /// The method evaluates the statuses of all service analyses in the collection and determines the most appropriate
-    /// overall status for the analysis. It handles scenarios such as all analyses timing out, failing, or completing,
+    /// The method evaluates the statuses of all analyses in the multi-analysis and determines the most appropriate
+    /// overall status for the multi-analysis. It handles scenarios such as all analyses timing out, failing, or completing,
     /// and prioritizes the most frequent or highest status for queued or in-progress analyses.
     /// </remarks>
     private void UpdateStatus()
     {
-        if (_serviceAnalyses.Count < 1)
+        if (_analyses.Count < 1)
         {
             return;
         }
 
-        IEnumerable<TServiceAnalysis> analyses = _serviceAnalyses;
+        IEnumerable<TAnalysis> analyses = _analyses;
 
         // If all timeout, set as timeout
         if (analyses.All(a => a.State.Status is AnalysisStatus.Timeout))

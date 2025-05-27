@@ -16,7 +16,7 @@ public interface IFilescanAnalyzer
     /// <param name="httpClient">The HTTP client to use for the request.</param>
     /// <param name="requestFactory">The factory to create the request.</param>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains an ErrorOr object with a ServiceAnalysisId.</returns>
+    /// <returns>A task that represents the asynchronous operation. The task result contains an ErrorOr object with a <see cref="ScanResponse"/>.</returns>
     public Task<ErrorOr<ScanResponse>> AnalyzeAsync(
         HttpClient httpClient,
         IRequestFactory requestFactory,
@@ -28,7 +28,7 @@ public interface IFilescanAnalyzer
     /// <param name="httpClient">The HTTP client to use for the request.</param>
     /// <param name="getScanRequest">The request object containing the scan details.</param>
     /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains an ErrorOr object with a GetAnalysisResponse.</returns>
+    /// <returns>A task that represents the asynchronous operation. The task result contains an ErrorOr object with a <see cref="GetAnalysisResponse"/>.</returns>
     public Task<ErrorOr<GetAnalysisResponse>> GetAnalysisAsync(
         HttpClient httpClient,
         GetScanRequest getScanRequest,

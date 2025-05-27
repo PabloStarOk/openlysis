@@ -8,44 +8,44 @@ using Openlysis.Domain.Files.ValueObjects;
 namespace Openlysis.Infrastructure.Persistence.Configurations.Files;
 
 /// <summary>
-/// Provides configuration for the <see cref="FileServiceAnalysis"/> entity in the database.
+/// Provides configuration for the <see cref="FileAnalysis"/> entity in the database.
 /// Implements the <see cref="IEntityTypeConfiguration{TEntity}"/> interface to configure the entity.
 /// </summary>
-public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileServiceAnalysis>
+public class FileAnalysisConfiguration : IEntityTypeConfiguration<FileAnalysis>
 {
     private const string SmallintType = "smallint";
     private const string VarcharType = "varchar";
     private const string RealType = "real";
 
     /// <inheritdoc/>
-    public void Configure(EntityTypeBuilder<FileServiceAnalysis> builder)
+    public void Configure(EntityTypeBuilder<FileAnalysis> builder)
     {
         ConfigureServiceAnalyses(builder);
         builder.OwnsMany(s => s.Reports, ConfigureReportEntity);
     }
 
     /// <summary>
-    /// Configures the properties and relationships for the <see cref="FileServiceAnalysis"/> entity.
+    /// Configures the properties and relationships for the <see cref="FileAnalysis"/> entity.
     /// </summary>
     /// <param name="builder">
     /// The <see cref="EntityTypeBuilder{TEntity}"/> used to configure the entity.
     /// </param>
     private static void ConfigureServiceAnalyses(
-        EntityTypeBuilder<FileServiceAnalysis> builder)
+        EntityTypeBuilder<FileAnalysis> builder)
     {
-        builder.ToTable("file_service_analyses");
+        builder.ToTable("file_analyses");
 
         builder.HasKey(s => s.Id);
 
         builder.Property(s => s.Id)
-            .HasColumnName("file_service_analysis_id")
+            .HasColumnName("file_analysis_id")
             .HasColumnType(VarcharType)
             .HasMaxLength(200)
             .IsRequired()
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.ToString(),
-                dbValue => ComposedServiceAnalysisId.Parse(dbValue));
+                dbValue => ComposedAnalysisId.Parse(dbValue));
 
         builder.Property(s => s.ServiceName)
             .HasColumnName("service_name")
@@ -87,17 +87,17 @@ public class FileServiceAnalysisConfiguration : IEntityTypeConfiguration<FileSer
 
     /// <summary>
     /// Configures the properties and relationships for the <see cref="FileReport"/> entity
-    /// as an owned navigation property of <see cref="FileServiceAnalysis"/>.
+    /// as an owned navigation property of <see cref="FileAnalysis"/>.
     /// </summary>
     /// <param name="builder">
     /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned entity.
     /// </param>
     private static void ConfigureReportEntity(
-        OwnedNavigationBuilder<FileServiceAnalysis, FileReport> builder)
+        OwnedNavigationBuilder<FileAnalysis, FileReport> builder)
     {
         builder.ToTable("reports");
 
-        builder.WithOwner().HasForeignKey("file_service_analysis_id");
+        builder.WithOwner().HasForeignKey("file_analysis_id");
 
         builder.HasKey(r => r.Id);
 

@@ -1,22 +1,22 @@
 namespace Openlysis.Domain.Common.ValueObjects;
 
 /// <summary>
-/// Represents a composed service analysis identifier which contains the ID of the analysis
+/// Represents a composed identifier which contains the primary ID of the analysis
 /// and the ID of an optional job when required.
 /// </summary>
-public record ComposedServiceAnalysisId
+public record ComposedAnalysisId
 {
     private readonly string? _job;
 
     /// <summary>
-    /// The character used to separate the primary ID and the job ID in a composed service analysis identifier.
+    /// The character used to separate the primary ID and the job ID in a composed analysis identifier.
     /// </summary>
     private const char IdCharSeparator = ':';
 
     /// <summary>
-    /// Gets the service analysis identifier.
+    /// Gets the primary analysis identifier.
     /// </summary>
-    public ServiceAnalysisId Primary { get; init; }
+    public AnalysisId Primary { get; init; }
 
     /// <summary>
     /// Gets an optional job identifier.
@@ -31,40 +31,40 @@ public record ComposedServiceAnalysisId
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ComposedServiceAnalysisId"/> class.
+    /// Initializes a new instance of the <see cref="ComposedAnalysisId"/> class.
     /// </summary>
-    /// <param name="primary">The service analysis identifier.</param>
+    /// <param name="primary">The analysis identifier.</param>
     /// <param name="job">The job identifier.</param>
-    private ComposedServiceAnalysisId(ServiceAnalysisId primary, string? job = null)
+    private ComposedAnalysisId(AnalysisId primary, string? job = null)
     {
         Primary = primary;
         Job = job;
     }
 
     /// <summary>
-    /// Creates a new instance of the <see cref="ComposedServiceAnalysisId"/> record.
+    /// Creates a new instance of the <see cref="ComposedAnalysisId"/> record.
     /// </summary>
-    /// <param name="id">The service analysis identifier as a string.</param>
+    /// <param name="id">The analysis identifier as a string.</param>
     /// <param name="jobId">The job identifier.</param>
-    /// <returns>A new instance of the <see cref="ComposedServiceAnalysisId"/> record.</returns>
-    public static ComposedServiceAnalysisId Create(
+    /// <returns>A new instance of the <see cref="ComposedAnalysisId"/> record.</returns>
+    public static ComposedAnalysisId Create(
         string id,
         string? jobId = null)
     {
-        return new ComposedServiceAnalysisId(
-            ServiceAnalysisId.Create(id),
+        return new ComposedAnalysisId(
+            AnalysisId.Create(id),
             jobId);
     }
 
     /// <summary>
-    /// Parses a composed service analysis identifier from its string representation.
+    /// Parses a composed analysis identifier from its string representation.
     /// </summary>
     /// <param name="input">
-    /// The string representation of the composed service analysis identifier.
+    /// The string representation of the composed analysis identifier.
     /// It can contain a single ID or two IDs separated by the defined separator character.
     /// </param>
     /// <returns>
-    /// A new instance of the <see cref="ComposedServiceAnalysisId"/> record created from the input string.
+    /// A new instance of the <see cref="ComposedAnalysisId"/> record created from the input string.
     /// </returns>
     /// <exception cref="InvalidOperationException">
     /// Thrown when the input string contains more than two values separated by the defined separator character.
@@ -72,7 +72,7 @@ public record ComposedServiceAnalysisId
     /// <remarks>
     /// The input string must follow the format: "PrimaryID[:JobID]".
     /// </remarks>
-    public static ComposedServiceAnalysisId Parse(string input)
+    public static ComposedAnalysisId Parse(string input)
     {
         string[] values = input.Split(IdCharSeparator);
         if (values.Length > 2)

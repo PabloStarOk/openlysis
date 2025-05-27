@@ -10,7 +10,7 @@ using Openlysis.Infrastructure.Shared.Communication.Models;
 namespace Openlysis.Infrastructure.Communication.Consumers.URLs;
 
 /// <summary>
-/// Consumer class for handling the update of <see cref="UrlMultiAnalysis"/> with incoming <see cref="UrlServiceAnalysis"/> objects.
+/// Consumer class for handling the update of <see cref="UrlMultiAnalysis"/> with incoming <see cref="UrlAnalysis"/> objects.
 /// </summary>
 /// <remarks>
 /// This class consumes messages of type <see cref="UpdateUrlMultiAnalysis"/> and updates the corresponding URL multi-analysis in the repository.
@@ -42,7 +42,7 @@ public class UpdateUrlMultiAnalysisConsumer : IConsumer<UpdateUrlMultiAnalysis>
     /// <inheritdoc/>
     public async Task Consume(ConsumeContext<UpdateUrlMultiAnalysis> context)
     {
-        UrlServiceAnalysis[] serviceAnalyses = context.Message.Analyses;
+        UrlAnalysis[] serviceAnalyses = context.Message.Analyses;
         UrlMultiAnalysis? multiAnalysis = await _repository.GetAsync(
             context.Message.MultiAnalysisId,
             context.CancellationToken);
@@ -50,13 +50,13 @@ public class UpdateUrlMultiAnalysisConsumer : IConsumer<UpdateUrlMultiAnalysis>
 
         foreach (var analysis in serviceAnalyses)
         {
-            if (multiAnalysis.ServiceAnalyses.Contains(analysis))
+            if (multiAnalysis.Analyses.Contains(analysis))
             {
-                multiAnalysis.UpdateServiceAnalysis(analysis);
+                multiAnalysis.UpdateAnalysis(analysis);
                 continue;
             }
 
-            multiAnalysis.AddServiceAnalysis(analysis);
+            multiAnalysis.AddAnalysis(analysis);
         }
 
         await _repository.UpdateAsync(multiAnalysis, context.CancellationToken);

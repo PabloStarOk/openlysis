@@ -6,7 +6,7 @@ using Openlysis.Domain.Files.ValueObjects;
 namespace Openlysis.API.Endpoints.Files.Common.Responses;
 
 /// <summary>
-/// Represents the response for a file multi analysis.
+/// Data transfer object for <see cref="FileMultiAnalysis"/>.
 /// </summary>
 /// <param name="Id">The unique identifier of the file multi analysis.</param>
 /// <param name="IsPrivate">Indicates if the analysis is private.</param>
@@ -29,7 +29,7 @@ public record FileMultiAnalysisDto(
     float? AverageThreatScore,
     FileMetadata FileMetadata,
     HashValues FileHashValues,
-    FileServiceAnalysisDto[] ServiceAnalyses,
+    FileAnalysisDto[] ServiceAnalyses,
     int ReportsAmount)
 {
     /// <summary>
@@ -39,8 +39,8 @@ public record FileMultiAnalysisDto(
     /// <returns>A <see cref="FileMultiAnalysisDto"/> object.</returns>
     public static FileMultiAnalysisDto Parse(FileMultiAnalysis source)
     {
-        FileServiceAnalysisDto[] servicesAnalyses = source.ServiceAnalyses
-            .Select(FileServiceAnalysisDto.Parse)
+        FileAnalysisDto[] servicesAnalyses = source.Analyses
+            .Select(FileAnalysisDto.Parse)
             .ToArray();
 
         return new FileMultiAnalysisDto(

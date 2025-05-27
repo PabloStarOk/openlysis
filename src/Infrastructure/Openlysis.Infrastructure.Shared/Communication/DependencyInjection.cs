@@ -78,9 +78,9 @@ public static class DependencyInjection
                 {
                     options.Converters.Add(new GlobalIdConverter());
                     options.Converters.Add(new ThreatScoreJsonConverter());
-                    options.Converters.Add(new FileServiceAnalysisJsonConverter());
+                    options.Converters.Add(new FileAnalysisJsonConverter());
                     options.Converters.Add(new FileReportJsonConverter());
-                    options.Converters.Add(new UrlServiceAnalysisConverter());
+                    options.Converters.Add(new UrlAnalysisJsonConverter());
                     return options;
                 });
 

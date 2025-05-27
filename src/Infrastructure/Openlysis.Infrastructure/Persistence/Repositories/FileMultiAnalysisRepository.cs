@@ -99,7 +99,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     {
         var multiAnalysis = await _dbContext.FileMultiAnalyses
             .AsSplitQuery()
-            .Include(u => u.ServiceAnalyses)
+            .Include(u => u.Analyses)
             .FirstOrDefaultAsync(m => m == model, cancellationToken);
 
         if (multiAnalysis is null)
@@ -131,11 +131,11 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
         EntityEntry<FileMultiAnalysis> multiAnalysisEntry,
         CancellationToken cancellationToken = default)
     {
-        var existingAnalyses = _dbContext.FileServiceAnalyses
+        var existingAnalyses = _dbContext.FileAnalyses
             .AsSplitQuery()
-            .Where(f => multiAnalysisEntry.Entity.ServiceAnalyses.Contains(f));
+            .Where(f => multiAnalysisEntry.Entity.Analyses.Contains(f));
 
-        foreach (var incomingAnalysis in multiAnalysisEntry.Entity.ServiceAnalyses)
+        foreach (var incomingAnalysis in multiAnalysisEntry.Entity.Analyses)
         {
             var existingAnalysis = await existingAnalyses
                 .AsNoTracking()
@@ -146,7 +146,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
                 continue;
             }
 
-            EntityEntry<FileServiceAnalysis> incomingEntry = _dbContext.Entry(incomingAnalysis);
+            EntityEntry<FileAnalysis> incomingEntry = _dbContext.Entry(incomingAnalysis);
             incomingEntry.State = incomingAnalysis.HasSameStateTo(existingAnalysis)
                     ? EntityState.Unchanged
                     : EntityState.Modified;
@@ -156,12 +156,12 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
     }
 
     /// <summary>
-    /// Synchronizes the reports of a given <see cref="FileServiceAnalysis"/> entity with the database.
+    /// Synchronizes the reports of a given <see cref="FileAnalysis"/> entity with the database.
     /// </summary>
-    /// <param name="serviceAnalysisEntry">The entity entry of the <see cref="FileServiceAnalysis"/> to synchronize.</param>
+    /// <param name="serviceAnalysisEntry">The entity entry of the <see cref="FileAnalysis"/> to synchronize.</param>
     /// <param name="existingReports">The array of existing reports in the database to compare against.</param>
     private void SyncReportsAsync(
-        EntityEntry<FileServiceAnalysis> serviceAnalysisEntry,
+        EntityEntry<FileAnalysis> serviceAnalysisEntry,
         FileReport[] existingReports)
     {
         foreach (FileReport incomingReport in serviceAnalysisEntry.Entity.Reports)

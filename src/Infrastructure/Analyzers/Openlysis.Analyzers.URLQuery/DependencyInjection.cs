@@ -77,6 +77,6 @@ public static class DependencyInjection
 
         // Add URL analyzer
         services.AddSingleton<IVerdictCalculator, VerdictCalculator>();
-        services.AddSingleton<Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
+        services.AddSingleton<Analyzer<UrlAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
     }
 }

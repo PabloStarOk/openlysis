@@ -13,7 +13,7 @@ namespace Openlysis.TestTools.ServicesSimulation.Common.Services.Analyzers;
 /// <typeparam name="TAnalysis">The type of analysis being processed.</typeparam>
 internal sealed class AnalysisProcess<TAnalysis>
     : IDisposable, IAsyncDisposable
-    where TAnalysis : ServiceAnalysis
+    where TAnalysis : Analysis
 {
     /// <summary>
     /// Gets the analysis object being processed.

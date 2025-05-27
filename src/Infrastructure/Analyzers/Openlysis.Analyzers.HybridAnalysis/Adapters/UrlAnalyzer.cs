@@ -24,7 +24,7 @@ namespace Openlysis.Analyzers.HybridAnalysis.Adapters;
 /// <summary>
 /// Analyzer of URLs.
 /// </summary>
-internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
+internal class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 {
     /// <summary>
     /// Key of the service for tracking request limits.
@@ -55,7 +55,7 @@ internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnAnalyzeAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnAnalyzeAsync(
         HttpClient httpClient,
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
@@ -99,7 +99,7 @@ internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
         }
 
         SandboxSubmitResponse response = result.Value;
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             response.JobId,
             ServiceName,
             AnalysisStatus.Queued,
@@ -109,7 +109,7 @@ internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<Status> result = await _sandboxAnalyzer.GetReportStatusAsync(
@@ -126,9 +126,9 @@ internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <inheritdoc/>
-    protected override async Task<ErrorOr<UrlServiceAnalysis>> OnGetAnalysisAsync(
+    protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedServiceAnalysisId id,
+        ComposedAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<SandboxReportSummary> result = await _sandboxAnalyzer.GetReportSummaryAsync(
@@ -161,18 +161,18 @@ internal class UrlAnalyzer : Analyzer<UrlServiceAnalysis, AnalyzeUrlRequest>
     }
 
     /// <summary>
-    /// Maps from <see cref="SandboxReportSummary"/> to an <see cref="UrlServiceAnalysis"/> object.
+    /// Maps from <see cref="SandboxReportSummary"/> to an <see cref="UrlAnalysis"/> object.
     /// </summary>
     /// <param name="reportSummary">The summary of the sandbox report.</param>
     /// <returns>A UrlServiceAnalysis object containing the mapped data.</returns>
-    private UrlServiceAnalysis MapServiceAnalysis(SandboxReportSummary reportSummary)
+    private UrlAnalysis MapServiceAnalysis(SandboxReportSummary reportSummary)
     {
         AnalysisStatus status = Maps.AnalysisStatusMap[reportSummary.Status];
         Verdict verdict = Maps.VerdictMap[reportSummary.Verdict];
         ThreatScore threatScore = ThreatScore.Create(
             reportSummary.ThreatScore,
             AnalysisSummary.MaxPossibleThreatScore);
-        return UrlServiceAnalysis.Create(
+        return UrlAnalysis.Create(
             reportSummary.JobId,
             ServiceName,
             status,

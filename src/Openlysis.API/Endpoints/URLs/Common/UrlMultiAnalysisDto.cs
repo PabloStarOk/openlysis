@@ -27,7 +27,7 @@ public record UrlMultiAnalysisDto(
     float? AverageThreatScore,
     Uri Url,
     HashValues UrlHashValues,
-    UrlServiceAnalysisDto[] ServiceAnalyses)
+    UrlAnalysisDto[] ServiceAnalyses)
 {
     /// <summary>
     /// Parses a <see cref="UrlMultiAnalysis"/> object into a <see cref="UrlMultiAnalysisDto"/>.
@@ -36,8 +36,8 @@ public record UrlMultiAnalysisDto(
     /// <returns>A <see cref="UrlMultiAnalysisDto"/> object.</returns>
     public static UrlMultiAnalysisDto Parse(UrlMultiAnalysis source)
     {
-        UrlServiceAnalysisDto[] serviceAnalyses = source.ServiceAnalyses
-            .Select(UrlServiceAnalysisDto.Parse)
+        UrlAnalysisDto[] serviceAnalyses = source.Analyses
+            .Select(UrlAnalysisDto.Parse)
             .ToArray();
 
         return new UrlMultiAnalysisDto(

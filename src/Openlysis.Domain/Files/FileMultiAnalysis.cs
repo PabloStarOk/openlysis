@@ -8,9 +8,9 @@ using Openlysis.Domain.Users.ValueObjects;
 namespace Openlysis.Domain.Files;
 
 /// <summary>
-/// Represents a report for a file.
+/// An aggregate that contains multiple analyses for a file.
 /// </summary>
-public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
+public class FileMultiAnalysis : MultiAnalysis<FileAnalysis>
 {
     /// <summary>
     /// Gets the information of the file.
@@ -18,9 +18,9 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     public FileMetadata FileMetadata { get; init; }
 
     /// <summary>
-    /// Gets all reports from the service file analyses.
+    /// Gets all reports from the file analyses.
     /// </summary>
-    public IReadOnlyList<FileReport> AllReports => ServiceAnalyses
+    public IReadOnlyList<FileReport> AllReports => Analyses
         .SelectMany(s => s.Reports).ToList().AsReadOnly();
 
     /// <summary>
@@ -93,9 +93,9 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     }
 
     /// <inheritdoc/>
-    protected override void HandleServiceAnalysisUpdate(
-        FileServiceAnalysis existingAnalysis,
-        FileServiceAnalysis updatedAnalysis)
+    protected override void HandleAnalysisUpdate(
+        FileAnalysis existingAnalysis,
+        FileAnalysis updatedAnalysis)
     {
         foreach (FileReport report in updatedAnalysis.Reports)
         {
@@ -117,11 +117,11 @@ public class FileMultiAnalysis : MultiAnalysis<FileServiceAnalysis>
     protected override void HandleAverageThreatScoreUpdate()
     {
         int?[] allScores = [
-            ..ServiceAnalyses
+            ..Analyses
                 .SelectMany(s => s.Reports)
                 .Select(r => r.ThreatScore.NormalizedValue)
                 .Where(t => t is not null),
-            ..ServiceAnalyses
+            ..Analyses
                 .Select(s => s.ThreatScore.NormalizedValue)
                 .Where(t => t is not null),
         ];

@@ -19,7 +19,7 @@ namespace Openlysis.TestTools.ServicesSimulation.Files.Infrastructure;
 /// specific to file analysis simulations.
 /// </remarks>
 internal sealed class FileAnalysisStubBuilder
-    : AnalysisStubBuilder<FileAnalysisStubFactoryOptions, FileServiceAnalysis>
+    : AnalysisStubBuilder<FileAnalysisStubFactoryOptions, FileAnalysis>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="FileAnalysisStubBuilder"/> class.
@@ -31,11 +31,11 @@ internal sealed class FileAnalysisStubBuilder
     }
 
     /// <inheritdoc/>
-    protected override FileServiceAnalysis HandleCreation(
+    protected override FileAnalysis HandleCreation(
         string serviceName,
         FileAnalysisStubFactoryOptions options)
     {
-        return FileServiceAnalysis.Create(
+        return FileAnalysis.Create(
             Guid.NewGuid().ToString(),
             serviceName,
             AnalysisStatus.Queued,
@@ -45,7 +45,7 @@ internal sealed class FileAnalysisStubBuilder
 
     /// <inheritdoc/>
     protected override void HandleFinalization(
-        FileServiceAnalysis analysis,
+        FileAnalysis analysis,
         FileAnalysisStubFactoryOptions options)
     {
         if (options.UseFileReports)
@@ -65,13 +65,13 @@ internal sealed class FileAnalysisStubBuilder
     }
 
     /// <inheritdoc/>
-    protected override void LogCreatedStub(FileServiceAnalysis stub)
+    protected override void LogCreatedStub(FileAnalysis stub)
     {
-        Logger.LogDebug($"{nameof(FileServiceAnalysis)} created in an initial state.");
+        Logger.LogDebug($"{nameof(FileAnalysis)} created in an initial state.");
     }
 
     /// <inheritdoc/>
-    protected override void LogFinalizedAnalysis(FileServiceAnalysis analysis)
+    protected override void LogFinalizedAnalysis(FileAnalysis analysis)
     {
         IEnumerable<string> reportAsStrings = analysis.Reports
             .Select(r => $"{{ "
@@ -89,7 +89,7 @@ internal sealed class FileAnalysisStubBuilder
             + "\n\tThreat score: {ThreatScore}"
             + "\n\tReports amount: {ReportsAmount}"
             + "\n\tReports: {Reports}",
-            typeof(FileServiceAnalysis),
+            typeof(FileAnalysis),
             analysis.ServiceName,
             analysis.Id,
             analysis.State.Verdict,
@@ -105,7 +105,7 @@ internal sealed class FileAnalysisStubBuilder
     /// <param name="analysis">The file service analysis to update with reports.</param>
     /// <param name="options">The configuration options that define how reports should be generated.</param>
     private static void UpdateWithReports(
-        FileServiceAnalysis analysis,
+        FileAnalysis analysis,
         FileAnalysisStubFactoryOptions options)
     {
         IEnumerable<FileReport> fileReports = GenerateFileReports(options);
