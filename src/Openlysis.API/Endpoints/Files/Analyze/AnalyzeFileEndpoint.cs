@@ -118,16 +118,11 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
             return;
         }
 
-        Response = new AnalyzeFileResponse(
-            result.Value.Id.Value.ToString(),
-            result.Value.DataHashValues.Md5,
-            result.Value.DataHashValues.Sha1,
-            result.Value.DataHashValues.Sha256,
-            result.Value.DataHashValues.Sha512);
+        Response = AnalyzeFileResponse.Parse(result.Value);
 
         var routeValues = new Dictionary<string, string>
         {
-            { "id", Response.FileAnalysisId },
+            { "id", Response.Id },
         };
 
         await SendResultAsync(Results.AcceptedAtRoute(
