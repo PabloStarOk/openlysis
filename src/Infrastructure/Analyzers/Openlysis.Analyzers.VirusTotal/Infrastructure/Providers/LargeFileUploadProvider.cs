@@ -7,11 +7,12 @@ using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Responses;
+using Openlysis.Analyzers.VirusTotal.Infrastructure.Analysis;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
-namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Analysis;
+namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Providers;
 
 /// <summary>
 /// Provides functionality for obtaining URLs for uploading large files to the VirusTotal service.

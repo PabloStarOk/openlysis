@@ -17,6 +17,7 @@ using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Analysis;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Calculations;
+using Openlysis.Analyzers.VirusTotal.Infrastructure.Providers;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
