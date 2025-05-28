@@ -9,7 +9,7 @@ using Openlysis.Analyzers.HybridAnalysis.Adapters;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
-using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analysis;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analyzers;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Files;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;

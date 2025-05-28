@@ -9,7 +9,7 @@ using Openlysis.Analyzers.Filescan.Core.Abstractions;
 using Openlysis.Analyzers.Filescan.Core.Configuration;
 using Openlysis.Analyzers.Filescan.Core.Constants;
 using Openlysis.Analyzers.Filescan.Core.Models.Enums;
-using Openlysis.Analyzers.Filescan.Infrastructure.Analysis;
+using Openlysis.Analyzers.Filescan.Infrastructure.Analyzers;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;

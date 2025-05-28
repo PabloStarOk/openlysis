@@ -11,7 +11,7 @@ using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
-namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analysis;
+namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analyzers;
 
 /// <summary>
 /// Provides functionality for performing quick scans against Hybrid Analysis sandbox services.

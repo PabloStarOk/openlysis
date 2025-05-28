@@ -12,7 +12,7 @@ using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
 
-namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Analysis;
+namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Analyzers;
 
 /// <summary>
 /// Analyzes URLs and retrieves analysis results from VirusTotal.

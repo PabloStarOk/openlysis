@@ -15,7 +15,7 @@ using Openlysis.Analyzers.VirusTotal.Adapters;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;
-using Openlysis.Analyzers.VirusTotal.Infrastructure.Analysis;
+using Openlysis.Analyzers.VirusTotal.Infrastructure.Analyzers;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Calculations;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Providers;
 using Openlysis.Domain.Files.Entities;
