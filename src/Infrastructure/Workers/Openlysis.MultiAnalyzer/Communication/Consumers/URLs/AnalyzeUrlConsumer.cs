@@ -16,7 +16,7 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
-using Openlysis.Infrastructure.Shared.Communication.Models;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
 using Openlysis.MultiAnalyzer.Configuration;
 
 namespace Openlysis.MultiAnalyzer.Communication.Consumers.URLs;
@@ -181,7 +181,7 @@ public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
     private async Task SendUpdateAsync(
         params UrlAnalysis[] analyses)
     {
-        var request = new UpdateUrlMultiAnalysis(
+        var request = new UpdateMultiAnalysis<UrlAnalysis>(
             _context.Message.MultiAnalysisId,
             analyses);
         await _context.Send(_endpointUriProvider.UpdateUrlMultiAnalysisUri, request);

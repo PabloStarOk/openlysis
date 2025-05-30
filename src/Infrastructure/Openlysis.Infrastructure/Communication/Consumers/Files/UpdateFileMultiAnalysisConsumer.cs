@@ -4,25 +4,25 @@ using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Infrastructure.Shared.Communication.Models;
+using Openlysis.Domain.Files.Entities;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
 
 namespace Openlysis.Infrastructure.Communication.Consumers.Files;
 
 /// <summary>
-/// Consumer class for handling the UpdateFileMultiAnalysis message.
+/// MassTransit consumer that handles updates to <see cref="FileMultiAnalysis"/> entities
+/// by processing <see cref="UpdateMultiAnalysis{TAnalysis}"/> messages containing <see cref="FileAnalysis"/> updates.
 /// </summary>
-/// <remarks>
-/// This class consumes messages of type <see cref="UpdateFileMultiAnalysis"/> and processes them.
-/// </remarks>
-public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis>
+public class UpdateFileMultiAnalysisConsumer
+    : IConsumer<UpdateMultiAnalysis<FileAnalysis>>
 {
-    private readonly IRepository<FileMultiAnalysis, GlobalId> _multiAnalysisRepository;
+    private readonly IRepository<FileMultiAnalysis, GlobalId> _repository;
     private readonly IMessageAnalysisUpdater _messageAnalysisUpdater;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFileMultiAnalysisConsumer"/> class.
     /// </summary>
-    /// <param name="multiAnalysisRepository">
+    /// <param name="repository">
     /// An instance of <see cref="IRepository{TModel,TModelId}"/> used to manage
     /// <see cref="FileMultiAnalysis"/> entities in the persistence layer.
     /// </param>
@@ -31,21 +31,24 @@ public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis
     /// about child analysis states.
     /// </param>
     public UpdateFileMultiAnalysisConsumer(
-        IRepository<FileMultiAnalysis, GlobalId> multiAnalysisRepository,
+        IRepository<FileMultiAnalysis, GlobalId> repository,
         IMessageAnalysisUpdater messageAnalysisUpdater)
     {
-        _multiAnalysisRepository = multiAnalysisRepository;
+        _repository = repository;
         _messageAnalysisUpdater = messageAnalysisUpdater;
     }
 
     /// <inheritdoc/>
-    public async Task Consume(ConsumeContext<UpdateFileMultiAnalysis> context)
+    public async Task Consume(
+        ConsumeContext<UpdateMultiAnalysis<FileAnalysis>> context)
     {
-        UpdateFileMultiAnalysis request = context.Message;
-        FileMultiAnalysis? fileMultiAnalysis = await _multiAnalysisRepository.GetAsync(request.Id);
+        UpdateMultiAnalysis<FileAnalysis> message = context.Message;
+        FileMultiAnalysis? fileMultiAnalysis = await _repository.GetAsync(
+                message.MultiAnalysisId,
+                context.CancellationToken);
         ArgumentNullException.ThrowIfNull(fileMultiAnalysis);
 
-        foreach (var serviceAnalysis in request.ServiceFileAnalyses)
+        foreach (var serviceAnalysis in message.UpdatableAnalyses)
         {
             if (fileMultiAnalysis.Analyses.Contains(serviceAnalysis))
             {
@@ -56,7 +59,7 @@ public class UpdateFileMultiAnalysisConsumer : IConsumer<UpdateFileMultiAnalysis
             fileMultiAnalysis.AddAnalysis(serviceAnalysis);
         }
 
-        await _multiAnalysisRepository.UpdateAsync(
+        await _repository.UpdateAsync(
             fileMultiAnalysis,
             context.CancellationToken);
 

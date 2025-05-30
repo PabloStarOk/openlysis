@@ -18,7 +18,7 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
-using Openlysis.Infrastructure.Shared.Communication.Models;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
 using Openlysis.MultiAnalyzer.Configuration;
 
 namespace Openlysis.MultiAnalyzer.Communication.Consumers.Files;
@@ -239,7 +239,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task SendUpdateAsync(params FileAnalysis[] analyses)
     {
-        var request = new UpdateFileMultiAnalysis(
+        var request = new UpdateMultiAnalysis<FileAnalysis>(
             _multiAnalysisId,
             analyses);
         await _context.Send(_endpointUriProvider.UpdateFileMultiAnalysisUri, request);

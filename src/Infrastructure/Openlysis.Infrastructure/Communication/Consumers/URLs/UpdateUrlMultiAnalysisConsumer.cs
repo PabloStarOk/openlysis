@@ -5,17 +5,16 @@ using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;
-using Openlysis.Infrastructure.Shared.Communication.Models;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
 
 namespace Openlysis.Infrastructure.Communication.Consumers.URLs;
 
 /// <summary>
-/// Consumer class for handling the update of <see cref="UrlMultiAnalysis"/> with incoming <see cref="UrlAnalysis"/> objects.
+/// Consumer for handling updates to <see cref="UrlMultiAnalysis"/> entities,
+/// processing incoming <see cref="UpdateMultiAnalysis{TAnalysis}"/> messages for <see cref="UrlAnalysis"/>.
 /// </summary>
-/// <remarks>
-/// This class consumes messages of type <see cref="UpdateUrlMultiAnalysis"/> and updates the corresponding URL multi-analysis in the repository.
-/// </remarks>
-public class UpdateUrlMultiAnalysisConsumer : IConsumer<UpdateUrlMultiAnalysis>
+public class UpdateUrlMultiAnalysisConsumer
+    : IConsumer<UpdateMultiAnalysis<UrlAnalysis>>
 {
     private readonly IRepository<UrlMultiAnalysis, GlobalId> _repository;
     private readonly IMessageAnalysisUpdater _messageAnalysisUpdater;
@@ -40,15 +39,16 @@ public class UpdateUrlMultiAnalysisConsumer : IConsumer<UpdateUrlMultiAnalysis>
     }
 
     /// <inheritdoc/>
-    public async Task Consume(ConsumeContext<UpdateUrlMultiAnalysis> context)
+    public async Task Consume(
+        ConsumeContext<UpdateMultiAnalysis<UrlAnalysis>> context)
     {
-        UrlAnalysis[] serviceAnalyses = context.Message.Analyses;
+        UpdateMultiAnalysis<UrlAnalysis> message = context.Message;
         UrlMultiAnalysis? multiAnalysis = await _repository.GetAsync(
-            context.Message.MultiAnalysisId,
+            message.MultiAnalysisId,
             context.CancellationToken);
         ArgumentNullException.ThrowIfNull(multiAnalysis);
 
-        foreach (var analysis in serviceAnalyses)
+        foreach (var analysis in message.UpdatableAnalyses)
         {
             if (multiAnalysis.Analyses.Contains(analysis))
             {

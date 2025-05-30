@@ -1,6 +1,6 @@
 using Openlysis.Domain.Common.ValueObjects;
 
-namespace Openlysis.Infrastructure.Shared.Communication.Models;
+namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 
 /// <summary>
 /// Represents a request to start a job to analyze a file.
