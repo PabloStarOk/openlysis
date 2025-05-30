@@ -23,11 +23,6 @@ namespace Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analyzers;
 /// </summary>
 internal class SandboxAnalyzer : ISandboxAnalyzer
 {
-    /// <summary>
-    /// This constant is used to identify and retrieve services that are keyed for the Hybrid Analysis sandbox analyzer.
-    /// </summary>
-    public const string KeyedServicesKey = "HybridAnalysisServices";
-
     private readonly IOptionsMonitor<SandboxAnalyzerOptions> _options;
     private readonly SandboxAnalyzerLogger<SandboxAnalyzer> _analyzerLogger;
     private readonly IServiceDeserializer _serviceDeserializer;
@@ -42,7 +37,7 @@ internal class SandboxAnalyzer : ISandboxAnalyzer
     public SandboxAnalyzer(
         IOptionsMonitor<SandboxAnalyzerOptions> options,
         SandboxAnalyzerLogger<SandboxAnalyzer> analyzerLogger,
-        [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceDeserializer serviceDeserializer)
     {
         _options = options;
         _analyzerLogger = analyzerLogger;

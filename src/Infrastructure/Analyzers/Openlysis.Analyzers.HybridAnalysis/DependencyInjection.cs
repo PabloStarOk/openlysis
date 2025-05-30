@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Openlysis.Analyzers.HybridAnalysis.Adapters;
 using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
 using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
+using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analyzers;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Files;
@@ -82,7 +83,7 @@ public static class DependencyInjection
 
         // Add analyzer deserializer.
         services.AddServiceDeserializer<HybridAnalyzerOptions>(
-            SandboxAnalyzer.KeyedServicesKey,
+            KeyedServices.GlobalKey,
             () => new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,

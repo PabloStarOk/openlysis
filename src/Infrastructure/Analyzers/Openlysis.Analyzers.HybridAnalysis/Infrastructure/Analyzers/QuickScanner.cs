@@ -33,7 +33,7 @@ internal class QuickScanner : IQuickScanner
     /// retrieved from keyed services using the SandboxAnalyzer key.</param>
     public QuickScanner(
         IServiceLogger<QuickScanner> logger,
-        [FromKeyedServices(SandboxAnalyzer.KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceDeserializer serviceDeserializer)
     {
         _logger = logger;
         _serviceDeserializer = serviceDeserializer;
