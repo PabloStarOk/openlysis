@@ -11,7 +11,6 @@ using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Responses;
-using Openlysis.Analyzers.VirusTotal.Infrastructure.Analyzers;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Factories;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
@@ -26,11 +25,6 @@ namespace Openlysis.Analyzers.VirusTotal.Adapters;
 /// </summary>
 public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 {
-    /// <summary>
-    /// Key of the service for tracking request limits.
-    /// </summary>
-    public const string LimitTrackerServiceKey = "VirusTotalLimitTracker";
-
     private readonly IVirusTotalAnalyzer _vtAnalyzer;
     private readonly IVerdictCalculator _verdictCalculator;
 
@@ -45,9 +39,9 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <param name="verdictCalculator">The verdict calculator instance.</param>
     public UrlAnalyzer(
         IOptionsMonitor<VirusTotalAnalyzerOptions> options,
-        [FromKeyedServices(LimitTrackerServiceKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
+        [FromKeyedServices(KeyedServices.GlobalKey)] IRateQuotaService<AnalysisEndpointType> rateQuotaService,
         IHttpClientFactory httpClientFactory,
-        [FromKeyedServices(VirusTotalAnalyzer.KeyedServicesKey)] IServiceLogger<UrlAnalyzer> logger,
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceLogger<UrlAnalyzer> logger,
         IVirusTotalAnalyzer vtAnalyzer,
         IVerdictCalculator verdictCalculator)
         : base(options, rateQuotaService, httpClientFactory, logger)

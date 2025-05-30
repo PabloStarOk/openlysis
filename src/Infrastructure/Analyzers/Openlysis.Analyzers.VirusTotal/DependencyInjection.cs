@@ -14,6 +14,7 @@ using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Analyzers.VirusTotal.Adapters;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
+using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Enums;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Analyzers;
 using Openlysis.Analyzers.VirusTotal.Infrastructure.Calculations;
@@ -67,17 +68,17 @@ public static class DependencyInjection
 
         // Add analyzer logger.
         services.AddAnalyzerLogger<VirusTotalAnalyzer, VirusTotalAnalyzerOptions>(
-            VirusTotalAnalyzer.KeyedServicesKey);
+            KeyedServices.GlobalKey);
         services.AddAnalyzerLogger<LargeFileUploadProvider, VirusTotalAnalyzerOptions>(
-            VirusTotalAnalyzer.KeyedServicesKey);
+            KeyedServices.GlobalKey);
         services.AddAnalyzerLogger<FileAnalyzer, VirusTotalAnalyzerOptions>(
-            VirusTotalAnalyzer.KeyedServicesKey);
+            KeyedServices.GlobalKey);
         services.AddAnalyzerLogger<UrlAnalyzer, VirusTotalAnalyzerOptions>(
-            VirusTotalAnalyzer.KeyedServicesKey);
+            KeyedServices.GlobalKey);
 
         // Add analyzer deserializer.
         services.AddServiceDeserializer<VirusTotalAnalyzerOptions>(
-            VirusTotalAnalyzer.KeyedServicesKey,
+            KeyedServices.GlobalKey,
             () => new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
@@ -93,7 +94,7 @@ public static class DependencyInjection
         // Add limit tracker
         services.AddRateQuotaService<AnalysisEndpointType>(
             configuration,
-            UrlAnalyzer.LimitTrackerServiceKey,
+            KeyedServices.GlobalKey,
             analyzerOptions.ServiceName);
 
         // Add verdict calculator

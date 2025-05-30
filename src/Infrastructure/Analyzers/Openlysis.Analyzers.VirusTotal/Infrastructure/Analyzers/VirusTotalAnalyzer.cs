@@ -19,11 +19,6 @@ namespace Openlysis.Analyzers.VirusTotal.Infrastructure.Analyzers;
 /// </summary>
 public class VirusTotalAnalyzer : IVirusTotalAnalyzer
 {
-    /// <summary>
-    /// Key used to identify VirusTotal services.
-    /// </summary>
-    public const string KeyedServicesKey = "VirusTotalServices";
-
     private readonly IServiceLogger<VirusTotalAnalyzer> _logger;
     private readonly IServiceDeserializer _serviceDeserializer;
 
@@ -33,8 +28,8 @@ public class VirusTotalAnalyzer : IVirusTotalAnalyzer
     /// <param name="logger">The analyzer logger instance to use for logging analysis-specific information.</param>
     /// <param name="serviceDeserializer">The analyzer deserializer instance to use for deserializing analysis responses.</param>
     public VirusTotalAnalyzer(
-        [FromKeyedServices(KeyedServicesKey)] IServiceLogger<VirusTotalAnalyzer> logger,
-        [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceLogger<VirusTotalAnalyzer> logger,
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceDeserializer serviceDeserializer)
     {
         _logger = logger;
         _serviceDeserializer = serviceDeserializer;

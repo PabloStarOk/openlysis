@@ -7,7 +7,6 @@ using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
 using Openlysis.Analyzers.VirusTotal.Core.Configuration;
 using Openlysis.Analyzers.VirusTotal.Core.Constants;
 using Openlysis.Analyzers.VirusTotal.Core.Models.Responses;
-using Openlysis.Analyzers.VirusTotal.Infrastructure.Analyzers;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Constants;
 using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization.Abstractions;
@@ -33,10 +32,10 @@ internal class LargeFileUploadProvider : ILargeFileUploadProvider
     /// <param name="httpClientFactory">The factory for creating HTTP clients.</param>
     /// <param name="deserializer">The service for deserializing HTTP responses.</param>
     public LargeFileUploadProvider(
-        [FromKeyedServices(VirusTotalAnalyzer.KeyedServicesKey)] IServiceLogger<LargeFileUploadProvider> logger,
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceLogger<LargeFileUploadProvider> logger,
         IOptions<VirusTotalAnalyzerOptions> analyzerOptions,
         IHttpClientFactory httpClientFactory,
-        [FromKeyedServices(VirusTotalAnalyzer.KeyedServicesKey)] IServiceDeserializer deserializer)
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceDeserializer deserializer)
     {
         _logger = logger;
         _analyzerOptions = analyzerOptions;
