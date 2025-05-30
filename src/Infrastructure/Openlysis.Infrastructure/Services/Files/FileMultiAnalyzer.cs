@@ -46,9 +46,9 @@ internal class FileMultiAnalyzer : IFileMultiAnalyzer
             fileMultiAnalysis.FileMetadata.Name,
             fileMultiAnalysis.FileMetadata.ContentType,
             fileMultiAnalysis.DataHashValues.Sha256,
-            fileId,
             filePassword,
-            isPrivateFile);
+            isPrivateFile,
+            fileId);
 
         ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(_endpointUriProvider.AnalyzeFileUri);
         await sendEndpoint.Send(analyzeFile, cancellationToken);

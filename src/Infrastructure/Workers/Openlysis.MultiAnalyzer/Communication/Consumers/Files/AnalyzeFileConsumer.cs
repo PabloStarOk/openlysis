@@ -68,7 +68,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     public async Task Consume(ConsumeContext<AnalyzeFile> context)
     {
         _context = context;
-        _multiAnalysisId = context.Message.FileMultiAnalysisId;
+        _multiAnalysisId = context.Message.MultiAnalysisId;
 
         await AnalyzeAsync(context.CancellationToken);
         await UpdateAnalysisStatusAsync(context.CancellationToken);
@@ -91,7 +91,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
             var request = new AnalyzeFileRequest(
                 fileStream,
                 DownloadFileAsync,
-                _context.Message.FileName,
+                _context.Message.Filename,
                 _context.Message.FileContentType,
                 _context.Message.FilePassword,
                 _context.Message.FileSha256,
@@ -109,7 +109,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         });
 
         await Task.WhenAll(
-            _fileStorageProvider.DeleteAsync(_context.Message.FileId, cancellationToken),
+            _fileStorageProvider.DeleteAsync(_context.Message.FileInstanceId, cancellationToken),
             SendUpdateAsync(_pendingAnalyses.Values.ToArray()));
     }
 
@@ -228,7 +228,7 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
         CancellationToken cancellationToken = default)
     {
         return await _fileStorageProvider.DownloadAsync(
-            _context.Message.FileId,
+            _context.Message.FileInstanceId,
             cancellationToken);
     }
 
