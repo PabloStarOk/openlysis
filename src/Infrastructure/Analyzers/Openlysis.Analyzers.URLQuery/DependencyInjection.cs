@@ -11,6 +11,7 @@ using Openlysis.Analyzers.Shared.Infrastructure.Logging;
 using Openlysis.Analyzers.URLQuery.Adapters;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
+using Openlysis.Analyzers.URLQuery.Core.Constants;
 using Openlysis.Analyzers.URLQuery.Core.Models.Enums;
 using Openlysis.Analyzers.URLQuery.Infrastructure.Calculations;
 using Openlysis.Domain.URLs.Entities;
@@ -56,11 +57,11 @@ public static class DependencyInjection
 
         // Add analyzer logger.
         services.AddAnalyzerLogger<UrlAnalyzer, UrlQueryAnalyzerOptions>(
-            UrlAnalyzer.KeyedServicesKey);
+            KeyedServices.GlobalKey);
 
         // Add analyzer deserializer.
         services.AddServiceDeserializer<UrlQueryAnalyzerOptions>(
-            UrlAnalyzer.KeyedServicesKey,
+            KeyedServices.GlobalKey,
             () => new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,

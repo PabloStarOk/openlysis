@@ -31,11 +31,6 @@ namespace Openlysis.Analyzers.URLQuery.Adapters;
 /// </summary>
 public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 {
-    /// <summary>
-    /// The key used to retrieve keyed services for the URL analyzer.
-    /// </summary>
-    public const string KeyedServicesKey = "UrlqueryServices";
-
     private readonly IOptionsMonitor<UrlQueryAnalyzerOptions> _urlQueryOptions;
     private readonly IVerdictCalculator _verdictCalculator;
     private readonly IServiceDeserializer _serviceDeserializer;
@@ -62,8 +57,8 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
         IOptionsMonitor<UrlQueryAnalyzerOptions> options,
         IHttpClientFactory httpClientFactory,
         IVerdictCalculator verdictCalculator,
-        [FromKeyedServices(KeyedServicesKey)] IServiceLogger<UrlAnalyzer> logger,
-        [FromKeyedServices(KeyedServicesKey)] IServiceDeserializer serviceDeserializer)
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceLogger<UrlAnalyzer> logger,
+        [FromKeyedServices(KeyedServices.GlobalKey)] IServiceDeserializer serviceDeserializer)
         : base(options, httpClientFactory, logger)
     {
         _urlQueryOptions = options;
