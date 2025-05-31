@@ -2,7 +2,7 @@ using System.Net;
 
 using Microsoft.Extensions.DependencyInjection;
 
-using Openlysis.Evaluators.Shared.Contracts.Configuration;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 
 namespace Openlysis.Evaluators.Shared.Infrastructure.Client;
 
@@ -18,7 +18,7 @@ public static class DependencyInjection
     /// <param name="evaluatorOptions">The options for configuring the evaluator.</param>
     public static void ConfigureHttpClient(
         this IServiceCollection services,
-        ReputationEvaluatorOptions evaluatorOptions)
+        ServiceOptions evaluatorOptions)
     {
         services.AddHttpClient(evaluatorOptions.ServiceName, httpClient =>
         {

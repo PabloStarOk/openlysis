@@ -3,8 +3,8 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Openlysis.Evaluators.Shared.Contracts.Configuration;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 
 namespace Openlysis.Evaluators.Shared.Infrastructure.Logging.Services;
 
@@ -28,7 +28,7 @@ public class ReputationEvaluatorLogger<TCategoryName>
     /// <summary>
     /// Gets the options monitor for accessing the current evaluator options.
     /// </summary>
-    private IOptionsMonitor<ReputationEvaluatorOptions> Options { get; }
+    private IOptionsMonitor<ServiceOptions> Options { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ReputationEvaluatorLogger{TCategoryName}"/> class.
@@ -37,7 +37,7 @@ public class ReputationEvaluatorLogger<TCategoryName>
     /// <param name="options">The options for the evaluator.</param>
     public ReputationEvaluatorLogger(
         ILogger<TCategoryName> logger,
-        IOptionsMonitor<ReputationEvaluatorOptions> options)
+        IOptionsMonitor<ServiceOptions> options)
     {
         Logger = logger;
         Options = options;

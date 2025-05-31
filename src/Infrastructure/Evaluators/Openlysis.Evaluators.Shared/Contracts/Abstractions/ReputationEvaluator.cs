@@ -4,9 +4,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Application.Common.Abstractions.Contracts;
-using Openlysis.Evaluators.Shared.Contracts.Configuration;
 using Openlysis.Evaluators.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Abstractions;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Models;
@@ -31,7 +31,7 @@ public abstract class ReputationEvaluator<TData, TModel>
     public bool IsAvailable { get; private set; } = true;
 
     private readonly IServiceLogger<ReputationEvaluator<TData, TModel>> _logger;
-    private readonly IOptionsMonitor<ReputationEvaluatorOptions> _options;
+    private readonly IOptionsMonitor<ServiceOptions> _options;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IRateQuotaService<ReputationEndpointType>? _rateQuotaService;
     private readonly IEndpointAddressFactory<TData> _endpointAddressFactory;
@@ -49,7 +49,7 @@ public abstract class ReputationEvaluator<TData, TModel>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
     protected ReputationEvaluator(
         IServiceLogger<ReputationEvaluator<TData, TModel>> logger,
-        IOptionsMonitor<ReputationEvaluatorOptions> options,
+        IOptionsMonitor<ServiceOptions> options,
         IHttpClientFactory httpClientFactory,
         IRateQuotaService<ReputationEndpointType> rateQuotaService,
         IEndpointAddressFactory<TData> endpointAddressFactory,
@@ -76,7 +76,7 @@ public abstract class ReputationEvaluator<TData, TModel>
     /// <param name="responseParser">The parser to parse the HTTP response into the model type.</param>
     protected ReputationEvaluator(
         IServiceLogger<ReputationEvaluator<TData, TModel>> logger,
-        IOptionsMonitor<ReputationEvaluatorOptions> options,
+        IOptionsMonitor<ServiceOptions> options,
         IHttpClientFactory httpClientFactory,
         IEndpointAddressFactory<TData> endpointAddressFactory,
         IResponseParser<TModel> responseParser)
