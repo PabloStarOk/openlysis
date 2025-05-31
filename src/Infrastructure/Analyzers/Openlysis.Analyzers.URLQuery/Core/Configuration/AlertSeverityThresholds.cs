@@ -10,12 +10,12 @@ public record AlertSeverityThresholds
     /// <summary>
     /// Gets the threshold of alerts with a high severity to determine as malicious.
     /// </summary>
-    [Required]
+    [Range(1, int.MaxValue)]
     required public int HighSeverityMaliciousThreshold { get; init; }
 
     /// <summary>
     /// Gets the threshold of alerts with a medium severity to determine as suspicious.
     /// </summary>
-    [Required]
+    [Range(1, int.MaxValue)]
     required public int MediumSeveritySuspiciousThreshold { get; init; }
 }

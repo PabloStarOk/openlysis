@@ -45,15 +45,18 @@ public static class DependencyInjection
         var verdictCalculationOptionsSection = configuration
             .GetRequiredSection(VerdictCalculationOptions.SectionName);
 
-        ArgumentNullException.ThrowIfNull(analyzerOptionsSection);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
         ArgumentNullException.ThrowIfNull(secretOptions);
-        ArgumentNullException.ThrowIfNull(verdictCalculationOptionsSection);
 
-        services.Configure<UrlQueryAnalyzerOptions>(analyzerOptionsSection);
-        services.AddOptionsWithValidateOnStart<VerdictCalculationOptions>()
+        services.AddOptions<UrlQueryAnalyzerOptions>()
+            .Bind(analyzerOptionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<VerdictCalculationOptions>()
             .Bind(verdictCalculationOptionsSection)
-            .ValidateDataAnnotations();
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         // Add analyzer logger.
         services.AddAnalyzerLogger<UrlAnalyzer, UrlQueryAnalyzerOptions>(

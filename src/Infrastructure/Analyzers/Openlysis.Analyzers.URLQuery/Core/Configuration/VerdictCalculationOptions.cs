@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+using Microsoft.Extensions.Options;
+
 using Openlysis.Analyzers.URLQuery.Core.Models.Objects;
 using Openlysis.Domain.Common.Enums;
 
@@ -18,61 +20,67 @@ public record VerdictCalculationOptions
     /// <summary>
     /// Gets the threshold count of malicious verdicts to determine a verdict as malicious.
     /// </summary>
-    [Required]
+    [Range(1, int.MaxValue)]
     required public int MaliciousVerdictCountThreshold { get; init; }
 
     /// <summary>
     /// Gets the threshold count of suspicious verdicts to determine a verdict as suspicious.
     /// </summary>
-    [Required]
+    [Range(1, int.MaxValue)]
     required public int SuspiciousVerdictCountThreshold { get; init; }
 
     /// <summary>
     /// Gets the threshold count of malicious alert messages to determine a verdict as malicious.
     /// </summary>
-    [Required]
+    [Range(1, int.MaxValue)]
     required public int MaliciousAlertMessageThreshold { get; init; }
 
     /// <summary>
     /// Gets the threshold count of suspicious alert messages to determine a verdict as suspicious.
     /// </summary>
-    [Required]
+    [Range(1, int.MaxValue)]
     required public int SuspiciousAlertMessageThreshold { get; init; }
 
     /// <summary>
     /// Gets the weights for different types of sensors.
     /// </summary>
     [Required]
+    [ValidateObjectMembers]
     required public SensorWeightsOptions SensorWeights { get; init; }
 
     /// <summary>
     /// Gets the alert verdicts options.
     /// </summary>
     [Required]
+    [ValidateObjectMembers]
     required public AlertVerdictsOptions AlertVerdicts { get; init; }
 
     /// <summary>
     /// Gets the alert messages options.
     /// </summary>
     [Required]
+    [ValidateObjectMembers]
     required public AlertMessagesOptions AlertMessages { get; init; }
 
     /// <summary>
     /// Gets the severity thresholds for IDS.
     /// </summary>
     [Required]
+    [ValidateObjectMembers]
     required public AlertSeverityThresholds AlertSeverityThresholds { get; init; }
 
     /// <summary>
     /// Gets the alert count thresholds for TDS.
     /// </summary>
     [Required]
+    [ValidateObjectMembers]
     required public AlertCountThresholdsOptions TdsAlertThresholds { get; init; }
 
     /// <summary>
     /// Gets the alert count thresholds for URL query.
     /// </summary>
     [Required]
+    [ValidateObjectMembers]
     required public AlertCountThresholdsOptions UrlqueryAlertThresholds { get; init; }
 
     /// <summary>
