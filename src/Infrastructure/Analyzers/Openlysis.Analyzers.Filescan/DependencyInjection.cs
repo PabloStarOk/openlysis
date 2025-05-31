@@ -48,7 +48,10 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(analyzerOptions);
 
         // Add options
-        services.Configure<FilescanAnalyzerOptions>(analyzerOptionsSection);
+        services.AddOptions<FilescanAnalyzerOptions>()
+            .Bind(analyzerOptionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         // Add analyzer loggers
         services.AddAnalyzerLogger<FilescanAnalyzer, FilescanAnalyzerOptions>(

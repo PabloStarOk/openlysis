@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
 
 namespace Openlysis.Analyzers.Filescan.Core.Configuration;
@@ -15,5 +17,6 @@ public record FilescanAnalyzerOptions : AnalyzerOptions
     /// <summary>
     /// Gets the maximum allowed size of a file in bytes that can be analyzed.
     /// </summary>
+    [Range(1, int.MaxValue)]
     required public int FileMaxSizeInBytes { get; init; }
 }
