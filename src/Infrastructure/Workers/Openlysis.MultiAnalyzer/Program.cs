@@ -27,7 +27,10 @@ builder.ConfigureServices((context, services) =>
     ArgumentNullException.ThrowIfNull(consumerSettingsSection);
 
     // Add options
-    services.Configure<AnalyzeConsumerOptions>(consumerSettingsSection);
+    services.AddOptions<AnalyzeConsumerOptions>()
+        .Bind(consumerSettingsSection)
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
 
     services.AddInfrastructure(context.Configuration);
     services.AddHttpClient();
