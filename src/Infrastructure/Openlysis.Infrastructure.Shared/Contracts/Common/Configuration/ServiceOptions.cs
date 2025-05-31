@@ -25,6 +25,6 @@ public abstract record ServiceOptions
     /// <summary>
     /// Gets the timeout for requests in milliseconds.
     /// </summary>
-    [Required]
+    [Range(1, int.MaxValue)]
     required public int RequestsTimeoutMs { get; init; }
 }

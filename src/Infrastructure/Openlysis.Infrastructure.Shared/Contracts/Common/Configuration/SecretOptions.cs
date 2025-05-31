@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 
 /// <summary>
@@ -11,5 +13,6 @@ public abstract record SecretOptions
     /// <summary>
     /// Gets the API key for the secrets' configuration.
     /// </summary>
+    [Required]
     required public string ApiKey { get; init; }
 }

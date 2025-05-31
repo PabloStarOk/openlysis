@@ -23,24 +23,24 @@ public record RateQuotaEndpointOptions<TEnum>
     /// <summary>
     /// Gets the maximum number of requests allowed per minute.
     /// </summary>
-    [Required]
+    [Range(0, int.MaxValue)]
     required public int MinuteRate { get; init; }
 
     /// <summary>
     /// Gets the maximum number of requests allowed per hour.
     /// </summary>
-    [Required]
+    [Range(0, int.MaxValue)]
     required public int HourlyRate { get; init; }
 
     /// <summary>
     /// Gets the maximum number of requests allowed per day.
     /// </summary>
-    [Required]
+    [Range(0, int.MaxValue)]
     required public int DailyQuota { get; init; }
 
     /// <summary>
     /// Gets the maximum number of requests allowed per month.
     /// </summary>
-    [Required]
+    [Range(0, int.MaxValue)]
     required public int MonthlyQuota { get; init; }
 }

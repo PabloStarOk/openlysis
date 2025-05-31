@@ -17,6 +17,6 @@ public record RateQuotaServiceOptions
     /// <summary>
     /// Gets the frequency in milliseconds at which the request limits are updated.
     /// </summary>]
-    [Required]
+    [Range(1, int.MaxValue)]
     required public int RateWindowRefreshIntervalMs { get; init; }
 }

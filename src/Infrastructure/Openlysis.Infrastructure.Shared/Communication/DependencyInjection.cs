@@ -35,7 +35,10 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(brokerSettingsSection);
 
         // Add options
-        services.Configure<BrokerSettings>(brokerSettingsSection);
+        services.AddOptions<BrokerSettings>()
+            .Bind(brokerSettingsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         // Add local file storage provider
         services.AddLocalFileStorageProvider(configuration);
