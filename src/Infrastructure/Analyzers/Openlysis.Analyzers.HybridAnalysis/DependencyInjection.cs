@@ -49,15 +49,20 @@ public static class DependencyInjection
             .GetRequiredSection(HybridAnalyzerOptions.SectionName);
         var analyzerOptions = analyzerOptionsSection.Get<HybridAnalyzerOptions>();
 
+        var sandboxAnalyzerOptions =
+            configuration.GetRequiredSection(SandboxAnalyzerOptions.SectionName);
+
         ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
 
         // Add options
-        services.Configure<HybridAnalyzerOptions>(analyzerOptionsSection);
+        services.AddOptions<HybridAnalyzerOptions>()
+            .Bind(analyzerOptionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
-        configuration.GetRequiredSection(SandboxAnalyzerOptions.SectionName);
         services.AddOptions<SandboxAnalyzerOptions>()
-            .BindConfiguration(SandboxAnalyzerOptions.SectionName)
+            .Bind(sandboxAnalyzerOptions)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
