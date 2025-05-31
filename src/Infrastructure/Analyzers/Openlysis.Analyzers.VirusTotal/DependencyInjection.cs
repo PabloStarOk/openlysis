@@ -56,11 +56,15 @@ public static class DependencyInjection
         ArgumentNullException.ThrowIfNull(analyzerOptions);
 
         // Add options.
-        services.Configure<VirusTotalAnalyzerOptions>(analyzerOptionsSection);
+        services.AddOptions<VirusTotalAnalyzerOptions>()
+            .Bind(analyzerOptionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
 
         services.AddSingleton<IValidateOptions<VerdictCalculationOptions>, VerdictCalculationOptionsValidator>();
         services.AddOptions<VerdictCalculationOptions>()
             .Bind(verdictCalculationOptionSection)
+            .ValidateDataAnnotations()
             .ValidateOnStart();
 
         // Add VT Analyzer.
