@@ -22,6 +22,7 @@ internal class FileSandboxRequestFactory : IRequestFactory
 
     private readonly HybridAnalyzerOptions _analyzerOptions;
     private readonly AnalyzeFileRequest _request;
+    private readonly Stream _fileData;
     private readonly SandboxEnvironment _osEnvironment;
     private readonly string _mimeType;
 
@@ -30,16 +31,19 @@ internal class FileSandboxRequestFactory : IRequestFactory
     /// </summary>
     /// <param name="analyzerOptions">The options containing configuration for hybrid analysis.</param>
     /// <param name="request">The file analysis request containing file data and metadata.</param>
+    /// <param name="fileData">The stream containing the file data to be scanned.</param>
     /// <param name="osEnvironment">The sandbox environment configuration to use for analysis.</param>
     /// <param name="mimeType">The MIME type of the file to be analyzed.</param>
     internal FileSandboxRequestFactory(
         HybridAnalyzerOptions analyzerOptions,
         AnalyzeFileRequest request,
+        Stream fileData,
         SandboxEnvironment osEnvironment,
         string mimeType)
     {
         _analyzerOptions = analyzerOptions;
         _request = request;
+        _fileData = fileData;
         _osEnvironment = osEnvironment;
         _mimeType = mimeType;
     }
@@ -65,7 +69,7 @@ internal class FileSandboxRequestFactory : IRequestFactory
     /// <param name="content">The multipart form data content to which the file will be added.</param>
     private void AddFileToContent(MultipartFormDataContent content)
     {
-        var fileContent = new StreamContent(_request.FileData);
+        var fileContent = new StreamContent(_fileData);
         fileContent.Headers.ContentType = new MediaTypeHeaderValue(_mimeType);
         content.Add(fileContent, FileBodyParamName, _request.FileName);
     }

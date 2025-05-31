@@ -45,6 +45,7 @@ internal class FileMultiAnalyzer : IFileMultiAnalyzer
             fileMultiAnalysis.Id,
             fileMultiAnalysis.FileMetadata.Name,
             fileMultiAnalysis.FileMetadata.ContentType,
+            fileMultiAnalysis.FileMetadata.Size,
             fileMultiAnalysis.DataHashValues.Sha256,
             filePassword,
             isPrivateFile,

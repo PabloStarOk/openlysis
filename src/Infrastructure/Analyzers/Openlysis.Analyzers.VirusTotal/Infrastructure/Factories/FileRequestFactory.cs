@@ -16,32 +16,35 @@ internal class FileRequestFactory : IRequestFactory
     private const string PasswordBodyParamName = "password";
 
     private readonly AnalyzeFileRequest _request;
+    private readonly Stream _fileData;
     private readonly string? _largeFileUploadUrl;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileRequestFactory"/> class.
     /// </summary>
     /// <param name="request">The file analysis request containing file data and metadata.</param>
+    /// <param name="fileData">The stream containing the file data to be scanned.</param>
     /// <param name="largeFileUploadUrl">Optional URL for uploading large files (greater than 32MB).</param>
     internal FileRequestFactory(
         AnalyzeFileRequest request,
+        Stream fileData,
         string? largeFileUploadUrl)
     {
         _request = request;
+        _fileData = fileData;
         _largeFileUploadUrl = largeFileUploadUrl;
     }
 
     /// <inheritdoc/>
     public VirusTotalAnalysisRequest Create()
     {
-        long fileSize = _request.FileData.Length;
+        long fileSize = _fileData.Length;
         if (fileSize > Files.SmallFilesMaxSizeInBytes && _largeFileUploadUrl is null)
         {
             throw new InvalidOperationException("Cannot process files larger than 32MB without a valid large file upload URL.");
         }
 
-        string endpointUrl =
-            _request.FileData.Length <= Files.SmallFilesMaxSizeInBytes
+        string endpointUrl = _fileData.Length <= Files.SmallFilesMaxSizeInBytes
             || string.IsNullOrWhiteSpace(_largeFileUploadUrl)
                 ? Addresses.SmallFilesEndpoint
                 : _largeFileUploadUrl;
@@ -61,7 +64,7 @@ internal class FileRequestFactory : IRequestFactory
     /// <param name="httpContent">The HTTP content to add the file to.</param>
     private void AddFileToContent(MultipartFormDataContent httpContent)
     {
-        var fileContent = new StreamContent(_request.FileData);
+        var fileContent = new StreamContent(_fileData);
         var disposition = new ContentDispositionHeaderValue("form-data")
         {
             Name = $"\"{FileBodyParamName}\"",

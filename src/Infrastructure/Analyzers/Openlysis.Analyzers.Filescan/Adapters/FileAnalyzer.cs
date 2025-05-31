@@ -67,16 +67,17 @@ public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         CancellationToken cancellationToken = default)
     {
         int fileMaxSize = _analyzerOptions.CurrentValue.FileMaxSizeInBytes;
-        if (request.FileData.Length > fileMaxSize)
+        if (request.FileSize > fileMaxSize)
         {
             return ServiceErrors.FileTooLarge;
         }
 
+        Stream fileData = await request.StreamFactory.CreateStreamAsync();
         var options = ScanOptions.True;
         var scanRequest = new ScanRequest(
             request.FileName,
             request.FileContentType,
-            request.FileData,
+            fileData,
             Password: request.FilePassword,
             IsPrivateFile: request.IsPrivateFile,
             Options: options);

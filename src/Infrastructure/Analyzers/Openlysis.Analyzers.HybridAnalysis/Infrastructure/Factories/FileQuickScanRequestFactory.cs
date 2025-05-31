@@ -18,6 +18,7 @@ internal class FileQuickScanRequestFactory : IRequestFactory
     private const string FileBodyParamName = "file";
 
     private readonly AnalyzeFileRequest _request;
+    private readonly Stream _fileData;
     private readonly string _scanType;
     private readonly string _mimeType;
 
@@ -25,14 +26,17 @@ internal class FileQuickScanRequestFactory : IRequestFactory
     /// Initializes a new instance of the <see cref="FileQuickScanRequestFactory"/> class.
     /// </summary>
     /// <param name="request">The analysis file request containing file data and name.</param>
+    /// <param name="fileData">The stream containing the file data to be scanned.</param>
     /// <param name="scanType">The type of scan to be performed.</param>
     /// <param name="mimeType">The MIME type of the file being scanned.</param>
     public FileQuickScanRequestFactory(
         AnalyzeFileRequest request,
+        Stream fileData,
         string scanType,
         string mimeType)
     {
         _request = request;
+        _fileData = fileData;
         _scanType = scanType;
         _mimeType = mimeType;
     }
@@ -66,7 +70,7 @@ internal class FileQuickScanRequestFactory : IRequestFactory
     /// <param name="content">The multipart form data content to add the file to.</param>
     private void AddFileToContent(MultipartFormDataContent content)
     {
-        var fileContent = new StreamContent(_request.FileData);
+        var fileContent = new StreamContent(_fileData);
         var disposition = new ContentDispositionHeaderValue("form-data")
         {
             Name = FileBodyParamName,

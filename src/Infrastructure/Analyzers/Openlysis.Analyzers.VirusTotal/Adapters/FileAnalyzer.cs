@@ -69,13 +69,14 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         CancellationToken cancellationToken = default)
     {
         int fileMaxSize = _analyzerOptions.CurrentValue.FileMaxSizeInBytes;
-        if (request.FileData.Length > fileMaxSize)
+        if (request.FileSize > fileMaxSize)
         {
             return ServiceErrors.FileTooLarge;
         }
 
+        Stream fileData = await request.StreamFactory.CreateStreamAsync();
         string? fileUploadUrl = null;
-        if (request.FileData.Length > Files.SmallFilesMaxSizeInBytes)
+        if (fileData.Length > Files.SmallFilesMaxSizeInBytes)
         {
             ErrorOr<string> getUploadUrlResult =
                 await _largeFileUploadProvider.GetFileUploadUrlAsync(cancellationToken);
@@ -87,7 +88,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
             fileUploadUrl = getUploadUrlResult.Value;
         }
 
-        var factory = new FileRequestFactory(request, fileUploadUrl);
+        var factory = new FileRequestFactory(request, fileData, fileUploadUrl);
         ErrorOr<AnalyzeResponse> result = await _vtAnalyzer.AnalyzeAsync(
             httpClient,
             factory,

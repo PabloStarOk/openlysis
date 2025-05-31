@@ -74,13 +74,14 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         CancellationToken cancellationToken = default)
     {
         int fileMaxSize = _analyzerOptions.CurrentValue.FileMaxSizeInBytes;
-        if (request.FileData.Length > fileMaxSize)
+        if (request.FileSize > fileMaxSize)
         {
             return ServiceErrors.FileTooLarge;
         }
 
+        Stream fileData = await request.StreamFactory.CreateStreamAsync();
         string mimeType = await _mimeTypeDetector.DetectAsync(
-            request.FileData,
+            fileData,
             request.FileContentType,
             cancellationToken);
 
@@ -100,11 +101,6 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         {
             return analyzeResult.Value;
         }
-
-        request = request with
-        {
-            FileData = await request.CreateFileDataStreamAsync(cancellationToken),
-        };
 
         return await AnalyzeWithQuickScanAsync(
             httpClient,
@@ -189,6 +185,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         var requestFactory = new FileSandboxRequestFactory(
             _analyzerOptions.CurrentValue,
             request,
+            await request.StreamFactory.CreateStreamAsync(),
             osEnvironment,
             mimeType);
         ErrorOr<SandboxSubmitResponse> result = await _sandboxAnalyzer.AnalyzeAsync(
@@ -409,6 +406,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         QuickScanService bestQuickScanService = serviceResult.Value;
         var requestFactory = new FileQuickScanRequestFactory(
             request,
+            await request.StreamFactory.CreateStreamAsync(),
             bestQuickScanService.Name,
             mimeType);
         ErrorOr<QuickScanResponse> scanResult = await _quickScanner.ScanAsync(

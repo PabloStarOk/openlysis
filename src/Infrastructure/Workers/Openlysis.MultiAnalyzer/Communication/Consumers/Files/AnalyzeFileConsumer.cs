@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
+using Openlysis.Analyzers.Shared.Infrastructure.Files.Services;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
@@ -81,18 +82,20 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
     /// <returns>A task that represents the asynchronous operation.</returns>
     private async Task AnalyzeAsync(CancellationToken cancellationToken)
     {
+        await using var fileStreamFactory = new FileStreamFactory(
+            _context.Message.FileInstanceId,
+            _fileStorageProvider);
+
         await Parallel.ForEachAsync(
             _analyzers.Values,
             cancellationToken,
             async (analyzer, ct) =>
         {
-            await using var fileStream = await DownloadFileAsync(ct);
-
             var request = new AnalyzeFileRequest(
-                fileStream,
-                DownloadFileAsync,
+                fileStreamFactory,
                 _context.Message.Filename,
                 _context.Message.FileContentType,
+                _context.Message.FileSize,
                 _context.Message.FilePassword,
                 _context.Message.FileSha256,
                 _context.Message.IsPrivateFile);
@@ -217,19 +220,6 @@ public class AnalyzeFileConsumer : IConsumer<AnalyzeFile>
                 _pendingAnalyses.Remove(analysis.Id);
                 _updatableAnalyses.Add(analysis);
             });
-    }
-
-    /// <summary>
-    /// Downloads the file from the file storage provider.
-    /// </summary>
-    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-    /// <returns>A task that represents the asynchronous operation with a stream containing the downloaded file data.</returns>
-    private async Task<Stream> DownloadFileAsync(
-        CancellationToken cancellationToken = default)
-    {
-        return await _fileStorageProvider.DownloadAsync(
-            _context.Message.FileInstanceId,
-            cancellationToken);
     }
 
     /// <summary>
