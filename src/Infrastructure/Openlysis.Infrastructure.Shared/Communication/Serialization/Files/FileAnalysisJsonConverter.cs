@@ -18,6 +18,7 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
     private const string VerdictKey = "verdict";
     private const string ThreatScoreKey = "threatscore";
     private const string ReportsKey = "reports";
+    private const string JobIdKey = "jobid";
 
     /// <inheritdoc/>
     public override FileAnalysis Read(
@@ -29,6 +30,7 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
         string serviceName = string.Empty;
         AnalysisStatus status = 0;
         Verdict verdict = 0;
+        string? jobId = null;
         List<FileReport> reports = [];
         ThreatScore threatScore = ThreatScore.Create(null, null);
         while (reader.Read())
@@ -62,6 +64,10 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
                         ignoreCase: true);
                     break;
 
+                case JobIdKey when reader.TokenType is JsonTokenType.String:
+                    jobId = reader.GetString();
+                    break;
+
                 case ThreatScoreKey when reader.TokenType is JsonTokenType.StartObject:
                     threatScore = ReadThreatScore(ref reader, options);
                     break;
@@ -78,7 +84,8 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
             status,
             verdict,
             reports,
-            threatScore: threatScore);
+            jobId,
+            threatScore);
     }
 
     /// <inheritdoc/>
@@ -91,13 +98,20 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
         string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(FileAnalysis.ServiceName);
         string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(FileAnalysis.State.Status);
         string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(FileAnalysis.State.Verdict);
+        string jobIdKey = options.PropertyNamingPolicy?.ConvertName(JobIdKey) ?? JobIdKey;
         string reportsKey = options.PropertyNamingPolicy?.ConvertName(ReportsKey) ?? nameof(FileAnalysis.Reports);
 
         writer.WriteStartObject();
-        writer.WriteString(idKey, value.Id.ToString());
+        writer.WriteString(idKey, value.Id.Primary.Value);
         writer.WriteString(serviceNameKey, value.ServiceName);
         writer.WriteString(statusKey, value.State.Status.ToString());
         writer.WriteString(verdictKey, value.State.Verdict.ToString());
+
+        if (value.Id.Job is not null)
+        {
+            writer.WriteString(jobIdKey, value.Id.Job);
+        }
+
         var threatScoreConverter =
             (JsonConverter<ThreatScore>)options.GetConverter(typeof(ThreatScore));
         threatScoreConverter.Write(writer, value.ThreatScore, options);
