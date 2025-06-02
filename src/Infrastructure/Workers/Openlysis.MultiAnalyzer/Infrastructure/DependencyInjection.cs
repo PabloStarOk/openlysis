@@ -5,6 +5,7 @@ using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Communication.Contracts;
 using Openlysis.MultiAnalyzer.Abstractions;
+using Openlysis.MultiAnalyzer.Communication;
 using Openlysis.MultiAnalyzer.Configuration;
 using Openlysis.MultiAnalyzer.Infrastructure.Communication;
 using Openlysis.MultiAnalyzer.Infrastructure.Orchestrators;
@@ -23,7 +24,7 @@ internal static class DependencyInjection
     /// </summary>
     /// <param name="services">The service collection to add dependencies to.</param>
     /// <param name="configuration">The application configuration instance.</param>
-    internal static void AddWorkerInfrastructure(
+    internal static void AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration)
     {
