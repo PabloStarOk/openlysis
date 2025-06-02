@@ -59,6 +59,11 @@ public class UpdateUrlMultiAnalysisConsumer
             multiAnalysis.AddAnalysis(analysis);
         }
 
+        if (message.Timeout)
+        {
+            multiAnalysis.SetAsTimedOut();
+        }
+
         await _repository.UpdateAsync(multiAnalysis, context.CancellationToken);
 
         await _messageAnalysisUpdater.NotifyChildAnalysisStateAsync(

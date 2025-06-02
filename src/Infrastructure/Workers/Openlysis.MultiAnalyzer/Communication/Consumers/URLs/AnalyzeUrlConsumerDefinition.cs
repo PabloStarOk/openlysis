@@ -9,7 +9,8 @@ namespace Openlysis.MultiAnalyzer.Communication.Consumers.URLs;
 /// <summary>
 /// Defines the consumer for analyzing URLs.
 /// </summary>
-public class AnalyzeUrlConsumerDefinition : ConsumerDefinition<AnalyzeUrlConsumer>
+internal sealed class AnalyzeUrlConsumerDefinition
+    : ConsumerDefinition<AnalyzeUrlConsumer>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeUrlConsumerDefinition"/> class.

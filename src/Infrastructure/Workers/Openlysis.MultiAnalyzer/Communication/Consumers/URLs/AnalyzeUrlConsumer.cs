@@ -1,189 +1,36 @@
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-
-using ErrorOr;
 
 using MassTransit;
 
-using Microsoft.Extensions.Options;
-
-using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
-using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
-using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Domain.URLs.Entities;
-using Openlysis.Infrastructure.Shared.Communication.Abstractions;
 using Openlysis.Infrastructure.Shared.Communication.Contracts;
-using Openlysis.MultiAnalyzer.Configuration;
+using Openlysis.MultiAnalyzer.Abstractions;
+using Openlysis.MultiAnalyzer.Models;
 
 namespace Openlysis.MultiAnalyzer.Communication.Consumers.URLs;
 
 /// <summary>
-/// Consumer class for handling AnalyzeUrl messages.
+/// MassTransit consumer that handles <see cref="AnalyzeUrl"/> messages.
 /// </summary>
-/// <remarks>
-/// This class consumes AnalyzeUrl messages and processes them by analyzing URLs
-/// and updating the analysis status.
-/// </remarks>
-public class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
+internal sealed class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
 {
-    private readonly IOptionsMonitor<AnalyzeConsumerOptions> _options;
-    private readonly IEndpointUriProvider _endpointUriProvider;
-    private readonly Dictionary<string, Analyzer<UrlAnalysis, AnalyzeUrlRequest>> _analyzers;
-    private readonly Dictionary<ComposedAnalysisId, UrlAnalysis> _pendingAnalyses = [];
-    private readonly ConcurrentBag<UrlAnalysis> _updatableAnalyses = [];
-    private ConsumeContext<AnalyzeUrl> _context;
+    private readonly TimeoutRequestFactory<AnalyzeUrl> _requestFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeUrlConsumer"/> class.
     /// </summary>
-    /// <param name="options">The options monitor for consumer configuration.</param>
-    /// <param name="endpointUriProvider">The provider for endpoint URIs.</param>
-    /// <param name="analyzers">The collection of analyzers for URL service analysis.</param>
-    public AnalyzeUrlConsumer(
-        IOptionsMonitor<AnalyzeConsumerOptions> options,
-        IEndpointUriProvider endpointUriProvider,
-        IEnumerable<Analyzer<UrlAnalysis, AnalyzeUrlRequest>> analyzers)
+    /// <param name="requestFactory">
+    /// The factory used to create <see cref="TimeoutRequest{AnalyzeUrl}"/> instances.
+    /// </param>
+    public AnalyzeUrlConsumer(TimeoutRequestFactory<AnalyzeUrl> requestFactory)
     {
-        _options = options;
-        _endpointUriProvider = endpointUriProvider;
-        _analyzers = analyzers.ToDictionary(a => a.ServiceName);
+        _requestFactory = requestFactory;
     }
 
     /// <inheritdoc/>
     public async Task Consume(ConsumeContext<AnalyzeUrl> context)
     {
-        _context = context;
-        await AnalyzeAsync(context.CancellationToken);
-        await UpdateAnalysesAsync(context.CancellationToken);
-    }
-
-    /// <summary>
-    /// Analyzes the URL asynchronously using the available analyzers.
-    /// </summary>
-    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    private async Task AnalyzeAsync(CancellationToken cancellationToken)
-    {
-        var request = new AnalyzeUrlRequest(_context.Message.Url);
-        await Parallel.ForEachAsync(_analyzers.Values, cancellationToken, async (analyzer, ct) =>
-        {
-            if (!analyzer.CanAnalyze)
-            {
-                return;
-            }
-
-            ErrorOr<UrlAnalysis> result = await analyzer.AnalyzeAsync(request, ct);
-            if (result.IsError)
-            {
-                return;
-            }
-
-            _pendingAnalyses.Add(result.Value.Id, result.Value);
-        });
-        await SendUpdateAsync(_pendingAnalyses.Values.ToArray());
-    }
-
-    /// <summary>
-    /// Updates the analyses by executing batches of URL service analyses asynchronously.
-    /// </summary>
-    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    private async Task UpdateAnalysesAsync(CancellationToken cancellationToken)
-    {
-        while (_pendingAnalyses.Count > 0)
-        {
-            await ExecuteBatchAsync(cancellationToken);
-            await Task.Delay(_options.CurrentValue.RequestBatchWaitTimeMs, cancellationToken);
-        }
-    }
-
-    /// <summary>
-    /// Executes a batch of URL service analyses asynchronously.
-    /// </summary>
-    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    private async Task ExecuteBatchAsync(CancellationToken cancellationToken)
-    {
-        for (int i = 0; i < _options.CurrentValue.RequestsPerBatch; i++)
-        {
-            await ExecuteBatchCycleAsync(cancellationToken);
-
-            if (!_updatableAnalyses.IsEmpty)
-            {
-                await SendUpdateAsync(_updatableAnalyses.ToArray());
-                _updatableAnalyses.Clear();
-            }
-
-            if (_pendingAnalyses.Count is 0)
-            {
-                break;
-            }
-
-            await Task.Delay(_options.CurrentValue.RequestFrequencyMs, cancellationToken);
-        }
-    }
-
-    /// <summary>
-    /// Executes a batch cycle to process URL service analyses.
-    /// </summary>
-    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-    private async Task ExecuteBatchCycleAsync(CancellationToken cancellationToken)
-    {
-        await Parallel.ForEachAsync(_pendingAnalyses.Values, cancellationToken, async (analysis, ct) =>
-        {
-            var analyzer = _analyzers[analysis.ServiceName];
-            if (!analyzer.CanGetAnalysisStatus)
-            {
-                return;
-            }
-
-            // Get status
-            ErrorOr<AnalysisStatus> getStatusResult = await analyzer.GetStatusAsync(analysis.Id, ct);
-            if (getStatusResult.IsError)
-            {
-                analysis.UpdateStatus(AnalysisStatus.Failed);
-                _pendingAnalyses.Remove(analysis.Id);
-                _updatableAnalyses.Add(analysis);
-                return;
-            }
-
-            // Update status
-            if (getStatusResult.Value
-                is AnalysisStatus.Queued
-                or AnalysisStatus.InProgress)
-            {
-                return;
-            }
-
-            if (!analyzer.CanGetAnalysis)
-            {
-                return;
-            }
-
-            // Get full analysis
-            ErrorOr<UrlAnalysis> getAnalysisResult = await analyzer.GetAnalysisAsync(analysis.Id, ct);
-            if (getAnalysisResult.IsError)
-            {
-                return;
-            }
-
-            analysis = getAnalysisResult.Value;
-            _pendingAnalyses.Remove(analysis.Id);
-            _updatableAnalyses.Add(analysis);
-        });
-    }
-
-    /// <summary>
-    /// Sends an update for the given URL service analysis to the main application.
-    /// </summary>
-    /// <param name="analyses">The URL service analyses to be updated.</param>
-    private async Task SendUpdateAsync(
-        params UrlAnalysis[] analyses)
-    {
-        var request = new UpdateMultiAnalysis<UrlAnalysis>(
-            _context.Message.MultiAnalysisId,
-            analyses);
-        await _context.Send(_endpointUriProvider.UpdateUrlMultiAnalysisUri, request);
+        TimeoutRequest<AnalyzeUrl> timeoutRequest = _requestFactory.Create();
+        await timeoutRequest.ProcessAsync(context, context.CancellationToken);
+        await _requestFactory.DisposeRequestAsync(timeoutRequest);
     }
 }

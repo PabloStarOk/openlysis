@@ -1,9 +1,13 @@
 using System;
+using System.Threading;
+
 using MassTransit;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using Openlysis.Analyzers.Filescan;
 using Openlysis.Analyzers.HybridAnalysis;
 using Openlysis.Analyzers.URLQuery;
@@ -15,24 +19,17 @@ using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 using Openlysis.MultiAnalyzer;
 using Openlysis.MultiAnalyzer.Communication.Consumers.Files;
 using Openlysis.MultiAnalyzer.Communication.Consumers.URLs;
-using Openlysis.MultiAnalyzer.Configuration;
+using Openlysis.MultiAnalyzer.Infrastructure;
 using Openlysis.TestTools.ServicesSimulation;
 
 var builder = Host.CreateDefaultBuilder(args);
 builder.ConfigureAppConfiguration(configBuilder => configBuilder.UseConfigLoader());
+var shutdownTokenSource = new CancellationTokenSource();
 builder.ConfigureServices((context, services) =>
 {
-    var consumerSettingsSection = context.Configuration
-        .GetRequiredSection(AnalyzeConsumerOptions.SectionName);
-    ArgumentNullException.ThrowIfNull(consumerSettingsSection);
-
-    // Add options
-    services.AddOptions<AnalyzeConsumerOptions>()
-        .Bind(consumerSettingsSection)
-        .ValidateDataAnnotations()
-        .ValidateOnStart();
-
-    services.AddInfrastructure(context.Configuration);
+    services.AddSingleton(shutdownTokenSource);
+    services.AddWorkerInfrastructure(context.Configuration);
+    services.AddInfrastructure(context.Configuration); // TODO: Rename this method to AddCommunicationInfrastructure.
     services.AddHttpClient();
 
     RegisterAnalysisServices(services, context.Configuration);
@@ -56,7 +53,7 @@ builder.ConfigureServices((context, services) =>
 });
 
 IHost host = builder.Build();
-await host.RunAsync();
+await host.RunAsync(shutdownTokenSource.Token);
 return;
 
 static void RegisterAnalysisServices(

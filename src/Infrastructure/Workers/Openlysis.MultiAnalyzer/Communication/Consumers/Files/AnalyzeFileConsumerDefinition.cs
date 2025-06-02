@@ -9,7 +9,8 @@ namespace Openlysis.MultiAnalyzer.Communication.Consumers.Files;
 /// <summary>
 /// Defines the consumer for file multi-analysis.
 /// </summary>
-public class AnalyzeFileConsumerDefinition : ConsumerDefinition<AnalyzeFileConsumer>
+internal sealed class AnalyzeFileConsumerDefinition
+    : ConsumerDefinition<AnalyzeFileConsumer>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileConsumerDefinition"/> class.

@@ -43,28 +43,33 @@ public class UpdateFileMultiAnalysisConsumer
         ConsumeContext<UpdateMultiAnalysis<FileAnalysis>> context)
     {
         UpdateMultiAnalysis<FileAnalysis> message = context.Message;
-        FileMultiAnalysis? fileMultiAnalysis = await _repository.GetAsync(
+        FileMultiAnalysis? multiAnalysis = await _repository.GetAsync(
                 message.MultiAnalysisId,
                 context.CancellationToken);
-        ArgumentNullException.ThrowIfNull(fileMultiAnalysis);
+        ArgumentNullException.ThrowIfNull(multiAnalysis);
 
         foreach (var serviceAnalysis in message.UpdatableAnalyses)
         {
-            if (fileMultiAnalysis.Analyses.Contains(serviceAnalysis))
+            if (multiAnalysis.Analyses.Contains(serviceAnalysis))
             {
-                fileMultiAnalysis.UpdateAnalysis(serviceAnalysis);
+                multiAnalysis.UpdateAnalysis(serviceAnalysis);
                 continue;
             }
 
-            fileMultiAnalysis.AddAnalysis(serviceAnalysis);
+            multiAnalysis.AddAnalysis(serviceAnalysis);
+        }
+
+        if (message.Timeout)
+        {
+            multiAnalysis.SetAsTimedOut();
         }
 
         await _repository.UpdateAsync(
-            fileMultiAnalysis,
+            multiAnalysis,
             context.CancellationToken);
 
         await _messageAnalysisUpdater.NotifyChildAnalysisStateAsync(
-            fileMultiAnalysis.Id,
+            multiAnalysis.Id,
             context.CancellationToken);
     }
 }

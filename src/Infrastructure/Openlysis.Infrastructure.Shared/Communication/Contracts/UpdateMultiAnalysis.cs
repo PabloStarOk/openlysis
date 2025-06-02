@@ -6,10 +6,12 @@ namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 /// <summary>
 /// Represents a generic request to update the analyses of a multi-analysis aggregate.
 /// </summary>
-/// <typeparam name="TAnalysis">The type of analysis to be updated, constrained to <see cref="Analysis"/>.</typeparam>
-/// <param name="MultiAnalysisId">The unique identifier for the multi-analysis.</param>
-/// <param name="UpdatableAnalyses">A collection of analyses to be updated.</param>
+/// <typeparam name="TAnalysis">The type of analysis to be updated. Must inherit from <see cref="Analysis"/>.</typeparam>
+/// <param name="MultiAnalysisId">The unique identifier for the multi-analysis aggregate to be updated.</param>
+/// <param name="Timeout">Indicates whether the update is due to a timeout.</param>
+/// <param name="UpdatableAnalyses">A collection of analyses to be updated within the multi-analysis aggregate.</param>
 public record UpdateMultiAnalysis<TAnalysis>(
     GlobalId MultiAnalysisId,
+    bool Timeout,
     IEnumerable<TAnalysis> UpdatableAnalyses)
     where TAnalysis : Analysis;
