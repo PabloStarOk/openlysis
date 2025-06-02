@@ -24,7 +24,7 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">The IServiceCollection to add services to.</param>
     /// <param name="configuration">The IConfiguration to use for configuring services.</param>
-    public static void AddInfrastructure(
+    public static void AddCommunicationInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration)
     {

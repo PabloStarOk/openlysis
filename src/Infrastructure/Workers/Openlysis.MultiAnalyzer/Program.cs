@@ -29,7 +29,7 @@ builder.ConfigureServices((context, services) =>
 {
     services.AddSingleton(shutdownTokenSource);
     services.AddWorkerInfrastructure(context.Configuration);
-    services.AddInfrastructure(context.Configuration); // TODO: Rename this method to AddCommunicationInfrastructure.
+    services.AddCommunicationInfrastructure(context.Configuration);
     services.AddHttpClient();
 
     RegisterAnalysisServices(services, context.Configuration);

@@ -23,7 +23,7 @@ internal static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        Shared.Communication.DependencyInjection.AddInfrastructure(services, configuration);
+        services.AddCommunicationInfrastructure(configuration);
         services.AddMassTransit(
             x =>
             {
