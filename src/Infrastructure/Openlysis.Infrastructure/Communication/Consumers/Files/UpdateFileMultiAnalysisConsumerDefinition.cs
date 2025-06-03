@@ -2,6 +2,9 @@ using MassTransit;
 
 using Microsoft.Extensions.Options;
 
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.Entities;
+using Openlysis.Infrastructure.Communication.Consumers.Common;
 using Openlysis.Infrastructure.Shared.Communication.Configuration;
 
 namespace Openlysis.Infrastructure.Communication.Consumers.Files;
@@ -9,7 +12,8 @@ namespace Openlysis.Infrastructure.Communication.Consumers.Files;
 /// <summary>
 /// Defines the consumer for updating file multi-analysis.
 /// </summary>
-public class UpdateFileMultiAnalysisConsumerDefinition : ConsumerDefinition<UpdateFileMultiAnalysisConsumer>
+internal sealed class UpdateFileMultiAnalysisConsumerDefinition
+    : ConsumerDefinition<UpdateMultiAnalysisConsumer<FileMultiAnalysis, FileAnalysis>>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFileMultiAnalysisConsumerDefinition"/> class.

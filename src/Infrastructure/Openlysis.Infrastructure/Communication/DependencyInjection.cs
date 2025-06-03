@@ -3,6 +3,11 @@ using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.Entities;
+using Openlysis.Domain.URLs;
+using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Communication.Consumers.Common;
 using Openlysis.Infrastructure.Communication.Consumers.Files;
 using Openlysis.Infrastructure.Communication.Consumers.URLs;
 using Openlysis.Infrastructure.Shared.Communication;
@@ -28,8 +33,12 @@ internal static class DependencyInjection
             x =>
             {
                 x.SetKebabCaseEndpointNameFormatter();
-                x.AddConsumer<UpdateFileMultiAnalysisConsumer, UpdateFileMultiAnalysisConsumerDefinition>();
-                x.AddConsumer<UpdateUrlMultiAnalysisConsumer, UpdateUrlMultiAnalysisConsumerDefinition>();
+                x.AddConsumer<
+                    UpdateMultiAnalysisConsumer<FileMultiAnalysis, FileAnalysis>,
+                    UpdateFileMultiAnalysisConsumerDefinition>();
+                x.AddConsumer<
+                    UpdateMultiAnalysisConsumer<UrlMultiAnalysis, UrlAnalysis>,
+                    UpdateUrlMultiAnalysisConsumerDefinition>();
                 x.AddRabbitMqBroker(services);
             });
     }
