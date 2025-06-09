@@ -26,7 +26,8 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
 {
     private readonly ILogger<AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>> _logger;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly ConcurrentDictionary<ComposedAnalysisId, AnalysisProcess<TAnalysis>> _processes = [];
+    private readonly ConcurrentDictionary<ComposedAnalysisId, AnalysisProcess<TAnalysis>> _activeProcesses = [];
+    private readonly ConcurrentDictionary<ComposedAnalysisId, TAnalysis> _finalizedAnalyses = [];
     private readonly TimeProvider _timeProvider;
     private readonly AnalysisStubBuilder<TStubFactoryOptions, TAnalysis> _analysisBuilder;
     private bool _disposed;
@@ -59,10 +60,10 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
         }
 
         _disposed = true;
-        IEnumerable<Task> disposeProcesses = _processes.Values
+        IEnumerable<Task> disposeProcesses = _activeProcesses.Values
             .Select(p => p.DisposeAsync().AsTask());
         await Task.WhenAll(disposeProcesses);
-        _processes.Clear();
+        _activeProcesses.Clear();
     }
 
     /// <inheritdoc/>
@@ -74,12 +75,12 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
         }
 
         _disposed = true;
-        foreach (var process in _processes.Values)
+        foreach (var process in _activeProcesses.Values)
         {
             process.Dispose();
         }
 
-        _processes.Clear();
+        _activeProcesses.Clear();
     }
 
     /// <summary>
@@ -109,7 +110,7 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
         var analysis = _analysisBuilder.Create(
             analyzerServiceOptions.Name,
             analyzerServiceOptions.StubFactory);
-        CreateProcess(analyzerServiceOptions, analysis);
+        CreateProcess(analyzerServiceOptions, analysis, cancellationToken);
         return analysis;
     }
 
@@ -139,7 +140,9 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
         var latency = TimeSpan.FromMilliseconds(endpointOptions.LatencyMs);
         await Task.Delay(latency, cancellationToken);
 
-        return _processes[id].Analysis.State.Status;
+        return _activeProcesses.TryGetValue(id, out var process)
+            ? process.Analysis.State.Status
+            : _finalizedAnalyses[id].State.Status;
     }
 
     /// <summary>
@@ -168,7 +171,12 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
         var latency = TimeSpan.FromMilliseconds(endpointOptions.LatencyMs);
         await Task.Delay(latency, cancellationToken);
 
-        return _processes[id].Analysis;
+        if (!_finalizedAnalyses.TryRemove(id, out TAnalysis? analysis))
+        {
+            return Error.NotFound();
+        }
+
+        return analysis;
     }
 
     /// <summary>
@@ -224,29 +232,52 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// <summary>
     /// Creates a new analysis process for the given analysis and starts tracking it.
     /// </summary>
-    /// <param name="analyzerServiceOptions">The serviceOptions that configure the analyzer behavior.</param>
+    /// <param name="analyzerServiceOptions">The service options that configure the analyzer behavior.</param>
     /// <param name="analysis">The analysis for which to create a process.</param>
-    /// <remarks>
-    /// The created process is added to the <see cref="_processes"/> dictionary using the analysis ID as the key.
-    /// The process is started with the configured analysis duration and will use the stub factory to create
-    /// a finished analysis when complete.
-    /// </remarks>
+    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     private void CreateProcess(
         AnalysisServiceOptions<TStubFactoryOptions> analyzerServiceOptions,
-        TAnalysis analysis)
+        TAnalysis analysis,
+        CancellationToken cancellationToken)
     {
         var processLogger = _loggerFactory.CreateLogger<AnalysisProcess<TAnalysis>>();
-        var analysisProcess = new AnalysisProcess<TAnalysis>(processLogger, analysis, _timeProvider);
-        int secondsDuration =
-            CreateAnalysisDuration(analyzerServiceOptions.AnalysisSecondsDuration);
+        var analysisProcess = new AnalysisProcess<TAnalysis>(
+            processLogger,
+            analysis,
+            _timeProvider);
+        int secondsDuration = CreateAnalysisDuration(
+            analyzerServiceOptions.AnalysisSecondsDuration);
+        _activeProcesses.TryAdd(analysis.Id, analysisProcess);
+        analysisProcess.Finalized += OnProcessFinalized;
         analysisProcess.Start(
             processAnalysis => _analysisBuilder.Finalize(
                 processAnalysis,
                 analyzerServiceOptions.StubFactory),
-            secondsDuration);
-        _processes.TryAdd(analysis.Id, analysisProcess);
+            secondsDuration,
+            cancellationToken);
 
         LogCreatedProcess(analysisProcess, secondsDuration);
+    }
+
+    /// <summary>
+    /// Handles the finalization of an analysis process by removing it from the active processes,
+    /// disposing of it, and adding the finalized analysis to the finalized analyses collection.
+    /// </summary>
+    /// <param name="sender">The source of the event.</param>
+    /// <param name="analysisId">The unique identifier of the finalized analysis process.</param>
+    private void OnProcessFinalized(object? sender, ComposedAnalysisId analysisId)
+    {
+        if (!_activeProcesses.TryRemove(
+                analysisId,
+                out AnalysisProcess<TAnalysis>? process))
+        {
+            throw new InvalidOperationException($"Failed to remove analysis process with ID '{analysisId}' from active processes.");
+        }
+
+        TAnalysis analysis = process.Analysis;
+        process.Finalized -= OnProcessFinalized;
+        process.Dispose();
+        _finalizedAnalyses.TryAdd(analysis.Id, analysis);
     }
 
     /// <summary>

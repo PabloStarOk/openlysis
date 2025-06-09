@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.TestTools.ServicesSimulation.Common.Services.Analyzers;
 
@@ -20,12 +21,19 @@ internal sealed class AnalysisProcess<TAnalysis>
     /// </summary>
     internal TAnalysis Analysis { get; }
 
+    /// <summary>
+    /// Occurs when the analysis process has been finalized.
+    /// </summary>
+    internal event EventHandler<ComposedAnalysisId>? Finalized;
+
     private readonly ILogger<AnalysisProcess<TAnalysis>> _logger;
     private readonly Stopwatch _stopwatch = new ();
     private readonly ITimer _timer;
+    private CancellationTokenRegistration _cancellationTokenRegistration;
     private Action<TAnalysis>? _finalizeAnalysis;
     private bool _disposed;
     private bool _started;
+    private bool _finished;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalysisProcess{TAnalysis}"/> class.
@@ -57,7 +65,10 @@ internal sealed class AnalysisProcess<TAnalysis>
 
         _disposed = true;
         _timer.Dispose();
+        _cancellationTokenRegistration.Dispose();
         _finalizeAnalysis = null;
+        Finalized = null;
+        LogDispose();
     }
 
     /// <inheritdoc/>
@@ -70,7 +81,10 @@ internal sealed class AnalysisProcess<TAnalysis>
 
         _disposed = true;
         await _timer.DisposeAsync();
+        await _cancellationTokenRegistration.DisposeAsync();
         _finalizeAnalysis = null;
+        Finalized = null;
+        LogDispose();
     }
 
     /// <summary>
@@ -79,9 +93,11 @@ internal sealed class AnalysisProcess<TAnalysis>
     /// <param name="finalizeAnalysis">The action to execute when the process completes.</param>
     /// <param name="secondsDuration">The duration of the analysis in seconds.</param>
     /// <exception cref="InvalidOperationException">Thrown when the analysis process has already been started.</exception>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
     internal void Start(
         Action<TAnalysis> finalizeAnalysis,
-        int secondsDuration)
+        int secondsDuration,
+        CancellationToken cancellationToken)
     {
         if (_started)
         {
@@ -89,6 +105,7 @@ internal sealed class AnalysisProcess<TAnalysis>
         }
 
         _started = true;
+        _cancellationTokenRegistration = cancellationToken.Register(Cancel);
         Analysis.UpdateStatus(AnalysisStatus.InProgress);
         _finalizeAnalysis = finalizeAnalysis;
         _timer.Change(
@@ -104,6 +121,12 @@ internal sealed class AnalysisProcess<TAnalysis>
     /// <exception cref="InvalidOperationException">Thrown when the analysis process has not been started.</exception>
     private void Stop()
     {
+        if (_cancellationTokenRegistration.Token.IsCancellationRequested)
+        {
+            return;
+        }
+
+        _finished = true;
         _timer.Dispose();
 
         if (_finalizeAnalysis is null)
@@ -112,10 +135,47 @@ internal sealed class AnalysisProcess<TAnalysis>
         }
 
         _finalizeAnalysis.Invoke(Analysis);
+        Finalized?.Invoke(this, Analysis.Id);
+        StopAndLogDuration(action: "stopped");
+    }
 
+    /// <summary>
+    /// Cancels the analysis process, stops the timer and logs the cancellation event.
+    /// </summary>
+    private void Cancel()
+    {
+        if (_finished)
+        {
+            return;
+        }
+
+        _cancellationTokenRegistration.Unregister();
+        _timer.Dispose();
+        Finalized?.Invoke(this, Analysis.Id);
+        StopAndLogDuration(action: "canceled");
+    }
+
+    /// <summary>
+    /// Logs a debug message indicating that the analysis process has been disposed.
+    /// </summary>
+    private void LogDispose()
+    {
+        _logger.LogDebug(
+            "Disposing analysis process for {AnalysisType}.",
+            typeof(TAnalysis));
+    }
+
+    /// <summary>
+    /// Stops the stopwatch and logs the duration of the analysis process with the specified action.
+    /// </summary>
+    /// <param name="action">A string describing the action that ended the process (e.g., "stopped", "canceled").</param>
+    private void StopAndLogDuration(string action)
+    {
         _stopwatch.Stop();
         _logger.LogDebug(
-            "Analysis process stopped after {Duration} seconds.",
+            "Analysis process for {AnalysisType} was {Action} after {Duration} seconds.",
+            typeof(TAnalysis),
+            action,
             _stopwatch.Elapsed.TotalSeconds);
     }
 }

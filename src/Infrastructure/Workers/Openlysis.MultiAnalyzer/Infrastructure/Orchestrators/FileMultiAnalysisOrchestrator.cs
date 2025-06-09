@@ -75,7 +75,7 @@ internal sealed class FileMultiAnalysisOrchestrator
         await Parallel.ForEachAsync(
             _analyzers.Values,
             cancellationToken,
-            async (analyzer, ct) =>
+            async (analyzer, _) =>
             {
                 if (!analyzer.CanAnalyze)
                 {
@@ -83,7 +83,9 @@ internal sealed class FileMultiAnalysisOrchestrator
                     return;
                 }
 
-                var analyzeResult = await analyzer.AnalyzeAsync(analyzeRequest, ct);
+                var analyzeResult = await analyzer.AnalyzeAsync(
+                    analyzeRequest,
+                    cancellationToken);
                 if (analyzeResult.IsError)
                 {
                     Logger.LogError(
