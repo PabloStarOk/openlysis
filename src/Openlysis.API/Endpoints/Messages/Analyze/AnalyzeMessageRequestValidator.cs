@@ -89,7 +89,7 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
         IFormFileCollection? attachedFiles,
         IOptionsMonitor<FileUploadOptions> fileUploadOptions)
     {
-        return attachedFiles?.Count
+        return attachedFiles is null || attachedFiles.Count
             <= fileUploadOptions.CurrentValue.MaxFileUploadsLimit;
     }
 
