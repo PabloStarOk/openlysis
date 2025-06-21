@@ -57,4 +57,18 @@ public interface IUrlMultiAnalysisService
         int size,
         OrderType order,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paginated list of URL analyses performed by a specific user.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose analyses are to be retrieved.</param>
+    /// <param name="page">The page number of the results to retrieve.</param>
+    /// <param name="pageSize">The number of analyses per page.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>A read-only list of <see cref="UrlMultiAnalysis"/> objects for the specified user.</returns>
+    public Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByUserAsync(
+        UserId userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }

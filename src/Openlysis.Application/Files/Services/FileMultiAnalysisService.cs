@@ -145,4 +145,21 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
             };
         }
     }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByUserAsync(
+        UserId userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        // TODO: Duplicated logic with url and message services.
+        var analyses = await _repository.GetManyAsync(
+            page,
+            pageSize,
+            filter: a => a.UserId == userId,
+            cancellationToken: cancellationToken);
+
+        return analyses.ToList().AsReadOnly();
+    }
 }

@@ -188,6 +188,23 @@ internal class MessageAnalysisService : IMessageAnalysisService
         }
     }
 
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByUserAsync(
+        UserId userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        // TODO: Duplicated logic with url and file services.
+        var analyses = await _repository.GetManyAsync(
+            page,
+            pageSize,
+            filter: a => a.UserId == userId,
+            cancellationToken: cancellationToken);
+
+        return analyses.ToList().AsReadOnly();
+    }
+
     /// <summary>
     /// Extracts data from the provided subject and content using the specified extraction method.
     /// </summary>

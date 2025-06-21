@@ -67,4 +67,18 @@ public interface IFileMultiAnalysisService
         int pageSize,
         OrderType order,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paginated list of file multi analyses performed by a specific user.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose file multi analyses are to be retrieved.</param>
+    /// <param name="page">The page number of the results to retrieve.</param>
+    /// <param name="pageSize">The number of file multi analyses per page.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>A read-only list of <see cref="FileMultiAnalysis"/> objects for the specified user.</returns>
+    public Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByUserAsync(
+        UserId userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
 }
