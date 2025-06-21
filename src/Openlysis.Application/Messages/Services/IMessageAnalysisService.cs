@@ -59,7 +59,8 @@ public interface IMessageAnalysisService
     /// </summary>
     /// <param name="userId">The unique identifier of the user requesting the analyses.</param>
     /// <param name="hash">The hash value used to identify the message analyses.</param>
-    /// <param name="amount">The maximum number of analyses to retrieve.</param>
+    /// <param name="page">The page number for pagination (starting from 1).</param>
+    /// <param name="pageSize">The number of analyses to retrieve per page.</param>
     /// <param name="order">The order in which the analyses should be retrieved.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
@@ -68,7 +69,22 @@ public interface IMessageAnalysisService
     public Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByHashAsync(
         UserId userId,
         string hash,
-        int amount,
+        int page,
+        int pageSize,
         OrderType order,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paginated list of message analyses performed by a specific user.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose message analyses are to be retrieved.</param>
+    /// <param name="page">The page number of the results to retrieve.</param>
+    /// <param name="pageSize">The number of message analyses per page.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>A read-only list of <see cref="MessageAnalysis"/> objects for the specified user.</returns>
+    public Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByUserAsync(
+        UserId userId,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default);
 }

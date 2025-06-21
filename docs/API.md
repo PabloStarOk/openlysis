@@ -116,3 +116,17 @@ All endpoints require an API key in a header.
 - Full endpoint path: `https://[domain]/api/v1/messages/{hash}/analyses`
 - Endpoint path: `/messages/{hash}/analyses`
 - API Key required: Yes
+
+## Users
+
+### Get related analyses
+
+- HTTP method: `GET`
+- Full endpoint path: `https://[domain]/api/v1/users/me/analyses?type=<>&page=1&pageSize=10`
+- Endpoint path: `users/me/analyses?type=<>&page=1&size=10`
+- API Key required: Yes
+- Query params:
+
+  - `type`: `file` | `url` | `message`. **Required**.
+  - `page`: An integer representing the page. Defaults to 1.
+  - `pageSize`: An integer representing the number of items per page. Defaults to 10. Min 1. Max 100.

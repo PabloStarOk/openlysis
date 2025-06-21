@@ -56,7 +56,8 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<FileMultiAnalysis>> GetManyAsync(
-        int amount = 10,
+        int page,
+        int pageSize,
         Expression<Func<FileMultiAnalysis, bool>>? filter = null,
         Func<IQueryable<FileMultiAnalysis>, IOrderedQueryable<FileMultiAnalysis>>? orderBy = null,
         CancellationToken cancellationToken = default)
@@ -67,17 +68,19 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
 
         if (filter is not null)
         {
-            query = query
-                .Where(filter);
+            query = query.Where(filter);
         }
 
-        if (orderBy is not null)
-        {
-            query = orderBy(query)
-                .Take(amount);
-        }
+        query = orderBy is not null
+            ? orderBy(query)
+            : query.OrderByDescending(x => x.StartedDate);
 
-        return await query.ToListAsync(cancellationToken);
+        int skippablePages = Math.Max(0, page - 1);
+        int skippableEntities = skippablePages * pageSize;
+        return await query
+            .Skip(skippableEntities)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
     }
 
     /// <inheritdoc/>

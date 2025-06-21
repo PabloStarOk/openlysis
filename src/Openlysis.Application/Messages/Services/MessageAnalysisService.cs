@@ -158,12 +158,14 @@ internal class MessageAnalysisService : IMessageAnalysisService
     public async Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByHashAsync(
         UserId userId,
         string hash,
-        int amount,
+        int page,
+        int pageSize,
         OrderType order,
         CancellationToken cancellationToken = default)
     {
         var analyses = await _repository.GetManyAsync(
-            amount,
+            page,
+            pageSize,
             u => (u.Message.MessageHashValues.Sha256 == hash
                     || u.Message.MessageHashValues.Md5 == hash
                     || u.Message.MessageHashValues.Sha1 == hash
@@ -184,6 +186,23 @@ internal class MessageAnalysisService : IMessageAnalysisService
                 _ => throw new InvalidOperationException("StartedDateOrder has an invalid enum value.")
             };
         }
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByUserAsync(
+        UserId userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        // TODO: Duplicated logic with url and file services.
+        var analyses = await _repository.GetManyAsync(
+            page,
+            pageSize,
+            filter: a => a.UserId == userId,
+            cancellationToken: cancellationToken);
+
+        return analyses.ToList().AsReadOnly();
     }
 
     /// <summary>
@@ -268,7 +287,8 @@ internal class MessageAnalysisService : IMessageAnalysisService
             .GenerateHashAsync(cancellationToken);
 
         IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(
-            amount: 1,
+            page: 1,
+            pageSize: 1,
             filter: m => m.Message.MessageHashValues == messageHashValues,
             orderBy: q => q.OrderByDescending(m => m.StartedDate),
             cancellationToken);

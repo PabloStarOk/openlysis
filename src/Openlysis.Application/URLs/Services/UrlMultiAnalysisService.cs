@@ -67,7 +67,8 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         IReadOnlyList<UrlMultiAnalysis> lastExistingAnalyses = await GetAnalysesByHashAsync(
             userId,
             hash: urlHashValues.Sha256,
-            amount: 1,
+            pageSize: 1,
+            size: 1,
             order: OrderType.Dsc,
             cancellationToken);
         if (lastExistingAnalyses.Count > 0
@@ -117,12 +118,14 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     public async Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByHashAsync(
         UserId userId,
         string hash,
-        int amount,
+        int pageSize,
+        int size,
         OrderType order,
         CancellationToken cancellationToken = default)
     {
         var analyses = await _repository.GetManyAsync(
-            amount,
+            pageSize,
+            size,
             u => (u.DataHashValues.Sha256 == hash
                     || u.DataHashValues.Md5 == hash
                     || u.DataHashValues.Sha1 == hash
@@ -143,5 +146,22 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
                 _ => throw new InvalidOperationException("StartedDateOrder has an invalid enum value.")
             };
         }
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByUserAsync(
+        UserId userId,
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        // TODO: Duplicated logic with file and message services.
+        var analyses = await _repository.GetManyAsync(
+            page,
+            pageSize,
+            filter: a => a.UserId == userId,
+            cancellationToken: cancellationToken);
+
+        return analyses.ToList().AsReadOnly();
     }
 }

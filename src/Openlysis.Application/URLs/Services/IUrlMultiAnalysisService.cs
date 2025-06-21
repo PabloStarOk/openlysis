@@ -45,14 +45,30 @@ public interface IUrlMultiAnalysisService
     /// </summary>
     /// <param name="userId">The ID of the user requesting the analyses.</param>
     /// <param name="hash">The hash value of the analyses to retrieve.</param>
-    /// <param name="amount">The maximum number of analyses to retrieve.</param>
+    /// <param name="pageSize">The page number for pagination (starting from 1).</param>
+    /// <param name="size">The number of analyses to retrieve per page.</param>
     /// <param name="order">The order in which to retrieve the analyses.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of <see cref="UrlMultiAnalysis"/> objects.</returns>
     public Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByHashAsync(
         UserId userId,
         string hash,
-        int amount,
+        int pageSize,
+        int size,
         OrderType order,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a paginated list of URL analyses performed by a specific user.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose analyses are to be retrieved.</param>
+    /// <param name="page">The page number of the results to retrieve.</param>
+    /// <param name="pageSize">The number of analyses per page.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>A read-only list of <see cref="UrlMultiAnalysis"/> objects for the specified user.</returns>
+    public Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByUserAsync(
+        UserId userId,
+        int page,
+        int pageSize,
         CancellationToken cancellationToken = default);
 }

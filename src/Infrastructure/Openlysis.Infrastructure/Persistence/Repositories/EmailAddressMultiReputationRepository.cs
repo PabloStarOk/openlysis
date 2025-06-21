@@ -39,7 +39,8 @@ public class EmailAddressMultiReputationRepository
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<EmailAddressMultiReputation>> GetManyAsync(
-        int amount = 10,
+        int page,
+        int pageSize,
         Expression<Func<EmailAddressMultiReputation, bool>>? filter = null,
         Func<IQueryable<EmailAddressMultiReputation>, IOrderedQueryable<EmailAddressMultiReputation>>? orderBy = null,
         CancellationToken cancellationToken = default)
@@ -54,13 +55,15 @@ public class EmailAddressMultiReputationRepository
             query = query.Where(filter);
         }
 
-        if (orderBy is not null)
-        {
-            query = orderBy(query);
-        }
+        query = orderBy is not null
+            ? orderBy(query)
+            : query.OrderByDescending(x => x.ReputationEvaluationDate);
 
+        int skippablePages = Math.Max(0, page - 1);
+        int skippableEntities = skippablePages * pageSize;
         return await query
-            .Take(amount)
+            .Skip(skippableEntities)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
     }
 

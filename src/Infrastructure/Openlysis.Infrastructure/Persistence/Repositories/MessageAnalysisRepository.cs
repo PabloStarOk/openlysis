@@ -39,7 +39,8 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<MessageAnalysis>> GetManyAsync(
-        int amount = 10,
+        int page,
+        int pageSize,
         Expression<Func<MessageAnalysis, bool>>? filter = null,
         Func<IQueryable<MessageAnalysis>, IOrderedQueryable<MessageAnalysis>>? orderBy = null,
         CancellationToken cancellationToken = default)
@@ -53,13 +54,15 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
             query = query.Where(filter);
         }
 
-        if (orderBy is not null)
-        {
-            query = orderBy(query);
-        }
+        query = orderBy is not null
+            ? orderBy(query)
+            : query.OrderByDescending(x => x.StartedDate);
 
+        int skippablePages = Math.Max(0, page - 1);
+        int skippableEntities = skippablePages * pageSize;
         return await query
-            .Take(amount)
+            .Skip(skippableEntities)
+            .Take(pageSize)
             .ToListAsync(cancellationToken);
     }
 
