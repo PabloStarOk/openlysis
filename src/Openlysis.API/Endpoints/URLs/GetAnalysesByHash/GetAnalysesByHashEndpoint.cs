@@ -57,7 +57,8 @@ public class GetAnalysesByHashEndpoint
                 s.Summary = "Get several multi analyses of an URL by Hash";
                 s.Description = "Gets a collection of multi analyses by providing a MD5, SHA-1, SHA-256 or SHA-512 hash of a URL.";
                 s.RequestParam(r => r.Hash, "A SHA-256, MD5, SHA-1 or SHA-512 hash of the URL.");
-                s.RequestParam(r => r.Amount, "(Pagination) Amount of analyses to retrieve.");
+                s.RequestParam(r => r.Page, $"The page number for pagination (minimum is {GetAnalysesByHashRequestValidator.MinPage}).");
+                s.RequestParam(r => r.PageSize, $"The number of items per page for pagination (minimum is {GetAnalysesByHashRequestValidator.MinPageSize}, maximum is {GetAnalysesByHashRequestValidator.MaxPageSize}).");
                 s.RequestParam(r => r.StartedDateOrder, "Order of the collection by started date.");
             });
         DontThrowIfValidationFails();
@@ -79,7 +80,8 @@ public class GetAnalysesByHashEndpoint
             .GetAnalysesByHashAsync(
                 userId,
                 req.Hash,
-                req.Amount,
+                req.Page,
+                req.PageSize,
                 req.StartedDateOrder,
                 ct);
 

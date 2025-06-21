@@ -158,12 +158,14 @@ internal class MessageAnalysisService : IMessageAnalysisService
     public async Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByHashAsync(
         UserId userId,
         string hash,
-        int amount,
+        int page,
+        int pageSize,
         OrderType order,
         CancellationToken cancellationToken = default)
     {
         var analyses = await _repository.GetManyAsync(
-            amount,
+            page,
+            pageSize,
             u => (u.Message.MessageHashValues.Sha256 == hash
                     || u.Message.MessageHashValues.Md5 == hash
                     || u.Message.MessageHashValues.Sha1 == hash
@@ -268,7 +270,8 @@ internal class MessageAnalysisService : IMessageAnalysisService
             .GenerateHashAsync(cancellationToken);
 
         IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(
-            amount: 1,
+            page: 1,
+            pageSize: 1,
             filter: m => m.Message.MessageHashValues == messageHashValues,
             orderBy: q => q.OrderByDescending(m => m.StartedDate),
             cancellationToken);

@@ -20,15 +20,17 @@ public interface IRepository<TModel, in TModelId>
     public Task<TModel?> GetAsync(TModelId id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves multiple models based on a matching expression.
+    /// Retrieves multiple models based on a matching expression, with paging and optional ordering.
     /// </summary>
-    /// <param name="amount">The number of models to retrieve. Default is 10.</param>
-    /// <param name="filter">The expression to match models.</param>
+    /// <param name="page">The page number.</param>
+    /// <param name="pageSize">The number of models to retrieve per page.</param>
+    /// <param name="filter">An optional expression to filter models.</param>
     /// <param name="orderBy">An optional function to order the retrieved models.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A task representing the asynchronous operation, with a result of the models if found; otherwise, null.</returns>
+    /// <returns>A task representing the asynchronous operation, with a result of the retrieved models.</returns>
     public Task<IReadOnlyList<TModel>> GetManyAsync(
-        int amount = 10,
+        int page,
+        int pageSize,
         Expression<Func<TModel, bool>>? filter = null,
         Func<IQueryable<TModel>, IOrderedQueryable<TModel>>? orderBy = null,
         CancellationToken cancellationToken = default);

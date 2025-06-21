@@ -53,7 +53,8 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHashRequest, IEnu
                 s.Summary = "Gets several multi analyses of a file identified by a hash.";
                 s.Description = "Gets a collection of multi analyses by providing a MD5, SHA1, SHA256 or SHA512 hash of a file.";
                 s.RequestParam(r => r.Hash, "A SHA-256 (Preferred), MD5, SHA-1 or SHA-512 hash.");
-                s.RequestParam(r => r.Amount, "Amount of analyses to retrieve.");
+                s.RequestParam(r => r.Page, $"The page number for pagination (minimum is {GetAnalysesByHashRequestValidator.MinPage}).");
+                s.RequestParam(r => r.PageSize, $"The number of items per page for pagination (minimum is {GetAnalysesByHashRequestValidator.MinPageSize}, maximum is {GetAnalysesByHashRequestValidator.MaxPageSize}).");
                 s.RequestParam(r => r.StartedDateOrder, "Either 'asc' or 'dsc' specifying order to get the last or oldest started analyses.");
             });
     }
@@ -81,7 +82,8 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHashRequest, IEnu
             .GetAnalysesByHashAsync(
                 userId,
                 request.Hash,
-                request.Amount < 1 ? 10 : request.Amount,
+                request.Page,
+                request.PageSize,
                 request.StartedDateOrder,
                 ct);
 

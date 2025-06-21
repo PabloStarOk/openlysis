@@ -52,7 +52,8 @@ public interface IFileMultiAnalysisService
     /// </summary>
     /// <param name="userId">The unique identifier of the user requesting the analyses.</param>
     /// <param name="hash">The hash value used to filter the analyses.</param>
-    /// <param name="amount">The maximum number of analyses to retrieve.</param>
+    /// <param name="page">The page number for pagination (starting from 1).</param>
+    /// <param name="pageSize">The number of analyses to retrieve per page.</param>
     /// <param name="order">The order in which the analyses should be returned.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
@@ -62,7 +63,8 @@ public interface IFileMultiAnalysisService
     public Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByHashAsync(
         UserId userId,
         string hash,
-        int amount,
+        int page,
+        int pageSize,
         OrderType order,
         CancellationToken cancellationToken = default);
 }

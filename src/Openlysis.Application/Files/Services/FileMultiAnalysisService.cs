@@ -54,7 +54,8 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
 
         // Check if the file has already been analyzed.
         var existingAnalyses = await _repository.GetManyAsync(
-            1,
+            page: 1,
+            pageSize: 1,
             f => f.DataHashValues == hashSet,
             q => q.OrderByDescending(f => f.StartedDate),
             cancellationToken);
@@ -113,12 +114,14 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
     public async Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByHashAsync(
         UserId userId,
         string hash,
-        int amount,
+        int page,
+        int pageSize,
         OrderType order,
         CancellationToken cancellationToken = default)
     {
         var multiAnalyses = await _repository.GetManyAsync(
-            amount,
+            page,
+            pageSize,
             f => (f.DataHashValues.Sha256 == hash
                     || f.DataHashValues.Md5 == hash
                     || f.DataHashValues.Sha1 == hash
