@@ -119,14 +119,6 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    /// <inheritdoc/>
-    public async Task<bool> ExistsAsync(GlobalId id, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.UrlMultiAnalyses
-            .AsNoTracking()
-            .AnyAsync(u => u.Id == id, cancellationToken);
-    }
-
     /// <summary>
     /// References existing service analyses and updates their state if necessary.
     /// </summary>

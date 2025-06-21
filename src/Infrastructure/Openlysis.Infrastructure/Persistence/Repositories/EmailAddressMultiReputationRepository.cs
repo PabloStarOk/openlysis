@@ -103,8 +103,13 @@ public class EmailAddressMultiReputationRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    /// <inheritdoc/>
-    public async Task<bool> ExistsAsync(
+    /// <summary>
+    /// Checks if an <see cref="EmailAddressMultiReputation"/> entity with the specified <paramref name="id"/> exists in the database.
+    /// </summary>
+    /// <param name="id">The unique identifier of the entity to check for existence.</param>
+    /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
+    /// <returns><c>true</c> if the entity exists; otherwise, <c>false</c>.</returns>
+    private async Task<bool> ExistsAsync(
         GlobalId id,
         CancellationToken cancellationToken = default)
     {

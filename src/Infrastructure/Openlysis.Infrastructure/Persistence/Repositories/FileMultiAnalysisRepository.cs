@@ -114,14 +114,6 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    /// <inheritdoc/>
-    public async Task<bool> ExistsAsync(GlobalId id, CancellationToken cancellationToken = default)
-    {
-        return await _dbContext.FileMultiAnalyses
-            .AsNoTracking()
-            .AnyAsync(f => f.Id == id, cancellationToken);
-    }
-
     /// <summary>
     /// Synchronizes the service analyses of a given <see cref="FileMultiAnalysis"/> entity with the database.
     /// </summary>

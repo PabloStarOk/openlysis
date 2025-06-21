@@ -60,12 +60,4 @@ public interface IRepository<TModel, in TModelId>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public Task UpdateAsync(TModel model, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Checks if a model with the specified identifier exists in the repository.
-    /// </summary>
-    /// <param name="id">The identifier of the model.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>A <see cref="Task{TResult}"/> representing the asynchronous operation, with a result of <c>true</c> if the model exists; otherwise, <c>false</c>.</returns>
-    public Task<bool> ExistsAsync(TModelId id, CancellationToken cancellationToken = default);
 }

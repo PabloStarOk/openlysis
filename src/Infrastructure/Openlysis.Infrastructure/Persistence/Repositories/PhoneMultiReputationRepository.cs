@@ -96,8 +96,15 @@ public class PhoneMultiReputationRepository : IRepository<PhoneMultiReputation, 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    /// <inheritdoc/>
-    public async Task<bool> ExistsAsync(GlobalId globalId, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Checks if a <see cref="PhoneMultiReputation"/> entity with the specified <paramref name="globalId"/> exists in the database.
+    /// </summary>
+    /// <param name="globalId">The global identifier of the entity to check for existence.</param>
+    /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
+    /// <returns><c>true</c> if the entity exists; otherwise, <c>false</c>.</returns>
+    private async Task<bool> ExistsAsync(
+        GlobalId globalId,
+        CancellationToken cancellationToken = default)
     {
         return await _dbContext.PhoneMultiReputations
             .AsNoTracking()

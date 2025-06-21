@@ -116,14 +116,19 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    /// <inheritdoc/>
-    public Task<bool> ExistsAsync(
+    /// <summary>
+    /// Checks if a <see cref="MessageAnalysis"/> entity with the specified <paramref name="id"/> exists in the database.
+    /// </summary>
+    /// <param name="id">The unique identifier of the <see cref="MessageAnalysis"/> entity.</param>
+    /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
+    /// <returns><c>true</c> if the entity exists; otherwise, <c>false</c>.</returns>
+    private async Task<bool> ExistsAsync(
         GlobalId id,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(id);
 
-        return _dbContext.MessageAnalyses
+        return await _dbContext.MessageAnalyses
             .AsNoTracking()
             .AnyAsync(p => p.Id == id, cancellationToken);
     }
