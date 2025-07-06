@@ -5,6 +5,7 @@ using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages;
+using Openlysis.Domain.Messages.Enums;
 using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.Messages.Services;
@@ -78,12 +79,14 @@ public interface IMessageAnalysisService
     /// Retrieves a paginated list of message analyses performed by a specific user.
     /// </summary>
     /// <param name="userId">The ID of the user whose message analyses are to be retrieved.</param>
+    /// <param name="messageType">The type of message to filter the analyses by.</param>
     /// <param name="page">The page number of the results to retrieve.</param>
     /// <param name="pageSize">The number of message analyses per page.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of <see cref="MessageAnalysis"/> objects for the specified user.</returns>
     public Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByUserAsync(
         UserId userId,
+        MessageType messageType,
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);

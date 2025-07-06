@@ -9,6 +9,7 @@ using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.Files.Services;
 using Openlysis.Application.Messages.Services;
 using Openlysis.Application.URLs.Services;
+using Openlysis.Domain.Messages.Enums;
 using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Users.GetAnalyses;
@@ -91,7 +92,7 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
         {
             AnalysisType.Url => GetUrlMultiAnalysesAsync,
             AnalysisType.File => GetFileMultiAnalysesAsync,
-            AnalysisType.Message => GetMessageAnalysesAsync,
+            AnalysisType.Email or AnalysisType.Sms => GetMessageAnalysesAsync,
             _ => throw new ArgumentOutOfRangeException(nameof(req)),
         };
 
@@ -167,6 +168,7 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
         // TODO: Duplicated logic with GetMessageAnalysisById and GetMessageAnalysesByHash.
         var analyses = await _messageAnalysisService.GetAnalysesByUserAsync(
             userId,
+            request.Type is AnalysisType.Email ? MessageType.Email : MessageType.Sms,
             request.Page,
             request.PageSize,
             cancellationToken);

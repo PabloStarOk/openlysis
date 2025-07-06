@@ -127,6 +127,6 @@ All endpoints require an API key in a header.
 - API Key required: Yes
 - Query params:
 
-  - `type`: `file` | `url` | `message`. **Required**.
+  - `type`: `file` | `url` | `email` | `sms`. **Required**.
   - `page`: An integer representing the page. Defaults to 1.
   - `pageSize`: An integer representing the number of items per page. Defaults to 10. Min 1. Max 100.

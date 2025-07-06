@@ -191,6 +191,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// <inheritdoc/>
     public async Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByUserAsync(
         UserId userId,
+        MessageType messageType,
         int page,
         int pageSize,
         CancellationToken cancellationToken = default)
@@ -199,7 +200,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
         var analyses = await _repository.GetManyAsync(
             page,
             pageSize,
-            filter: a => a.UserId == userId,
+            filter: a => a.UserId == userId && a.Message.Type == messageType,
             cancellationToken: cancellationToken);
 
         return analyses.ToList().AsReadOnly();

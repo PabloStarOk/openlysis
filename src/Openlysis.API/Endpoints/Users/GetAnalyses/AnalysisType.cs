@@ -16,7 +16,12 @@ public enum AnalysisType
     File,
 
     /// <summary>
-    /// Analysis of a message.
+    /// Analysis of an email message.
     /// </summary>
-    Message,
+    Email,
+
+    /// <summary>
+    /// Analysis of an SMS message.
+    /// </summary>
+    Sms,
 }
