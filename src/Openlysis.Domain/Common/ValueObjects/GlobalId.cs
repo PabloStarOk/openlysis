@@ -1,3 +1,5 @@
+using Medo;
+
 namespace Openlysis.Domain.Common.ValueObjects;
 
 /// <summary>
@@ -25,7 +27,7 @@ public record GlobalId
     /// <returns>A new <see cref="GlobalId"/> instance with a unique identifier.</returns>
     public static GlobalId CreateUnique()
     {
-        return new GlobalId(Guid.NewGuid());
+        return new GlobalId(Uuid7.NewUuid7());
     }
 
     /// <summary>
