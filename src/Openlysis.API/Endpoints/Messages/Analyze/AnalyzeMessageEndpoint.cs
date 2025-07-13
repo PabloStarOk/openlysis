@@ -24,14 +24,19 @@ namespace Openlysis.API.Endpoints.Messages.Analyze;
 /// </remarks>
 public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMessageResponse>
 {
+    private readonly ILogger<AnalyzeMessageEndpoint> _logger;
     private readonly IMessageAnalysisService _messageAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeMessageEndpoint"/> class.
     /// </summary>
+    /// <param name="logger">The logger instance for debugging endpoint operations.</param>
     /// <param name="messageAnalysisService">The service responsible for providing the core functionality.</param>
-    public AnalyzeMessageEndpoint(IMessageAnalysisService messageAnalysisService)
+    public AnalyzeMessageEndpoint(
+        ILogger<AnalyzeMessageEndpoint> logger,
+        IMessageAnalysisService messageAnalysisService)
     {
+        _logger = logger;
         _messageAnalysisService = messageAnalysisService;
     }
 
@@ -91,6 +96,11 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
         MessageType messageType = (MessageType)req.MessageType!;
         var message = new Message(messageType, req.Sender, req.Subject, req.Content);
         FileData[] files = CreateFileDataArray(req);
+
+#if DEBUG
+        LogAttachedFiles(files);
+#endif
+
         ErrorOr<MessageAnalysis> analyzeResult = await _messageAnalysisService
             .AnalyzeAsync(
             userId: userId,
@@ -172,4 +182,19 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
             filePassword,
             attachedFile.OpenReadStream());
     }
+
+#if DEBUG
+    /// <summary>
+    /// Logs detailed information about the attached files for debugging purposes.
+    /// </summary>
+    /// <param name="files">A collection of <see cref="FileData"/> objects representing the attached files.</param>
+    private void LogAttachedFiles(IEnumerable<FileData> files)
+    {
+        var attachedFilesLog = files.Select(file =>
+            $"\n\n\tFilename: {file.Name}\n\tFile password: {file.Password}\n\tContent type: {file.ContentType}");
+        _logger.LogTrace(
+            "Message analysis requested with attached files: {AttachedFiles}",
+            attachedFilesLog);
+    }
+#endif
 }

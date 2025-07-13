@@ -16,6 +16,7 @@ namespace Openlysis.API.Endpoints.Files.Analyze;
 /// </summary>
 public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileResponse>
 {
+    private readonly ILogger<AnalyzeFileEndpoint> _logger;
     private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
@@ -26,9 +27,13 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileEndpoint"/> class.
     /// </summary>
+    /// <param name="logger">The logger instance for debugging endpoint operations.</param>
     /// <param name="multiAnalysisService">The service used for analyzing files.</param>
-    public AnalyzeFileEndpoint(IFileMultiAnalysisService multiAnalysisService)
+    public AnalyzeFileEndpoint(
+        ILogger<AnalyzeFileEndpoint> logger,
+        IFileMultiAnalysisService multiAnalysisService)
     {
+        _logger = logger;
         _multiAnalysisService = multiAnalysisService;
     }
 
@@ -82,6 +87,10 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
         Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
         var userId = UserId.Create(Guid.Parse(claim.Value));
 
+#if DEBUG
+        LogFileMetadata(request);
+#endif
+
         await using var stream = request.File!.OpenReadStream();
         var fileData = new FileData(
             request.File.FileName,
@@ -130,4 +139,22 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
             routeValues,
             Response));
     }
+
+#if DEBUG
+    /// <summary>
+    /// Logs metadata about the file for debugging purposes.
+    /// </summary>
+    /// <param name="request">The file analysis request containing file.</param>
+    private void LogFileMetadata(AnalyzeFileRequest request)
+    {
+        _logger.LogTrace(
+            "File analysis requested:"
+            + "\n\tFilename: {Filename}"
+            + "\n\tContent type: {ContentType}"
+            + "\n\tFile password: {Password}",
+            request.File?.FileName,
+            request.File?.ContentType,
+            request.Password);
+    }
+#endif
 }
