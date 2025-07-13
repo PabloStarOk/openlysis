@@ -48,6 +48,8 @@ services:
       context: ../
       dockerfile: "src/Infrastructure/Workers/Openlysis.MultiAnalyzer/Dockerfile"
       no_cache: true
+      args: 
+        - BUILD_CONFIGURATION=${WORKER_BUILD_CONFIGURATION}
     container_name: ${WORKER_CONTAINER_NAME}
     environment:
       DOTNET_ENVIRONMENT: ${APP_ENVIRONMENT}
@@ -69,6 +71,8 @@ services:
       context: ../
       dockerfile: "src/Openlysis.API/Dockerfile"
       no_cache: true
+      args:
+        - BUILD_CONFIGURATION=${API_BUILD_CONFIGURATION}
     container_name: ${API_CONTAINER_NAME}
     environment:
       ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT}
