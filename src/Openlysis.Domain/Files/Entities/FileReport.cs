@@ -2,15 +2,19 @@ using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Constants;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Domain.Files.Entities;
 
 /// <summary>
 /// Report of an analysis for a file.
 /// </summary>
-public class FileReport : Entity<ReportId>
+public class FileReport : Entity<GlobalId>
 {
+    /// <summary>
+    /// Gets the ID of the report given by an external analysis service.
+    /// </summary>
+    public string ExternalId { get;  }
+
     /// <summary>
     /// Gets the verdict of the scan.
     /// </summary>
@@ -30,16 +34,19 @@ public class FileReport : Entity<ReportId>
     /// Initializes a new instance of the <see cref="FileReport"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the report.</param>
+    /// <param name="externalId">The ID given by an external service.</param>
     /// <param name="verdict">The verdict of the scan.</param>
     /// <param name="threatZone">The threat zone of the scan.</param>
     /// <param name="threatScore">The threat score of the file.</param>
     private FileReport(
-        ReportId id,
+        GlobalId id,
+        string externalId,
         Verdict verdict,
         ThreatZone threatZone,
         ThreatScore threatScore)
         : base(id)
     {
+        ExternalId = externalId;
         Verdict = verdict;
         ThreatZone = threatZone;
         ThreatScore = threatScore;
@@ -57,19 +64,46 @@ public class FileReport : Entity<ReportId>
     /// <summary>
     /// Creates a new instance of the <see cref="FileReport"/> class.
     /// </summary>
-    /// <param name="id">The unique identifier for the report.</param>
+    /// <param name="externalId">The ID given by an external service.</param>
     /// <param name="verdict">The verdict of the scan.</param>
     /// <param name="threatZone">The threat zone of the scan.</param>
     /// <param name="threatScore">The threat score of the file.</param>
     /// <returns>A new instance of the <see cref="FileReport"/> class with a normalized threat score.</returns>
     public static FileReport Create(
-        string id,
+        string externalId,
         Verdict verdict,
         ThreatZone threatZone,
         ThreatScore? threatScore = null)
     {
         return new FileReport(
-            ReportId.Create(id),
+            GlobalId.CreateUnique(),
+            externalId,
+            verdict,
+            threatZone,
+            threatScore ?? ThreatScore.CreateNull());
+    }
+
+    /// <summary>
+    /// Creates a new instance of the <see cref="FileReport"/> class with a specified ID.
+    /// </summary>
+    /// <param name="id">The unique identifier for the report.</param>
+    /// <param name="externalId">The ID given by an external service.</param>
+    /// <param name="verdict">The verdict of the scan.</param>
+    /// <param name="threatZone">The threat zone of the scan.</param>
+    /// <param name="threatScore">The threat score of the file. If null, a default null threat score is used.</param>
+    /// <returns>A new instance of the <see cref="FileReport"/> class.</returns>
+    public static FileReport CreateWithId(
+        GlobalId id,
+        string externalId,
+        Verdict verdict,
+        ThreatZone threatZone,
+        ThreatScore? threatScore = null)
+    {
+        ArgumentNullException.ThrowIfNull(id);
+
+        return new FileReport(
+            id,
+            externalId,
             verdict,
             threatZone,
             threatScore ?? ThreatScore.CreateNull());
@@ -97,20 +131,5 @@ public class FileReport : Entity<ReportId>
     {
         ArgumentNullException.ThrowIfNull(threatScore);
         ThreatScore = threatScore;
-    }
-
-    /// <summary>
-    /// Compares the current report with another report to determine if they have the same state.
-    /// </summary>
-    /// <param name="other">The other report to compare with.</param>
-    /// <returns>
-    /// True if the current report and the other report have the same verdict, threat zone,
-    /// and threat score; otherwise, false.
-    /// </returns>
-    public bool HasSameStateTo(FileReport other)
-    {
-        return Verdict == other.Verdict
-            && ThreatZone == other.ThreatZone
-            && ThreatScore.Equals(other.ThreatScore);
     }
 }

@@ -24,7 +24,7 @@ public record FileReportDto(
     public static FileReportDto Parse(FileReport fileReport)
     {
         return new FileReportDto(
-            fileReport.Id.Value,
+            fileReport.ExternalId,
             fileReport.Verdict,
             fileReport.ThreatZone,
             fileReport.ThreatScore.NormalizedValue);

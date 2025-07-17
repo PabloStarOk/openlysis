@@ -36,8 +36,8 @@ public record FileAnalysisDto(
             .ToArray();
 
         return new FileAnalysisDto(
-            source.Id.Primary.Value,
-            source.Id.Job,
+            source.ExternalId.Primary,
+            source.ExternalId.Job,
             source.ServiceName,
             source.State.Status,
             source.State.Verdict,

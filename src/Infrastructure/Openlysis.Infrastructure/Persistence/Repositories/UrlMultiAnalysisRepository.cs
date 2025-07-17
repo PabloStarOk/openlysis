@@ -97,9 +97,7 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
             _dbContext.Attach(model.DataHashValues).State = EntityState.Unchanged;
         }
 
-        EntityEntry<UrlMultiAnalysis> multiAnalysisEntry = await _dbContext.AddAsync(model, cancellationToken);
-        await SyncServiceAnalysesAsync(multiAnalysisEntry, cancellationToken);
-
+        await _dbContext.AddAsync(model, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -118,38 +116,6 @@ public class UrlMultiAnalysisRepository : IRepository<UrlMultiAnalysis, GlobalId
 
         EntityEntry<UrlMultiAnalysis> multiAnalysisEntry = _dbContext.Entry(multiAnalysis);
         multiAnalysisEntry.CurrentValues.SetValues(model);
-        await SyncServiceAnalysesAsync(multiAnalysisEntry, cancellationToken);
-
         await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// References existing service analyses and updates their state if necessary.
-    /// </summary>
-    /// <param name="multiAnalysisEntry">The entity entry of the UrlMultiAnalysis.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    private async Task SyncServiceAnalysesAsync(
-        EntityEntry<UrlMultiAnalysis> multiAnalysisEntry,
-        CancellationToken cancellationToken = default)
-    {
-        var existingAnalyses = _dbContext.UrlAnalyses
-            .Where(u => multiAnalysisEntry.Entity.Analyses.Contains(u));
-
-        foreach (var incomingAnalysis in multiAnalysisEntry.Entity.Analyses)
-        {
-            var existingAnalysis = await existingAnalyses
-                .AsNoTracking()
-                .SingleOrDefaultAsync(e => e == incomingAnalysis, cancellationToken);
-
-            if (existingAnalysis is null)
-            {
-                continue;
-            }
-
-            _dbContext.Entry(incomingAnalysis).State =
-                incomingAnalysis.HasSameStateTo(existingAnalysis)
-                ? EntityState.Unchanged
-                : EntityState.Modified;
-        }
     }
 }

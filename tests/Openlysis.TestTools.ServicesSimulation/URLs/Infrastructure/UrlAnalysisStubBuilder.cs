@@ -68,12 +68,14 @@ internal sealed class UrlAnalysisStubBuilder
             "{TypeName} created:"
             + "\n\tService name: {ServiceName}"
             + "\n\tID: {Id}"
+            + "\n\tExternal ID: {ExternalId}"
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreat score: {ThreatScore}"
             + "\n\tStatus: {Status}",
             nameof(UrlAnalysis),
             analysis.ServiceName,
             analysis.Id,
+            analysis.ExternalId,
             analysis.State.Verdict,
             analysis.ThreatScore.ToString() ?? "null",
             analysis.State.Status);

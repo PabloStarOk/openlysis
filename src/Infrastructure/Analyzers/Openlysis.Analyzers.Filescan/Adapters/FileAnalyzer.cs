@@ -103,10 +103,10 @@ public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        var getScanRequest = new GetScanRequest(id.Primary.Value);
+        var getScanRequest = new GetScanRequest(id.Primary);
         ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(
             httpClient,
             getScanRequest,
@@ -124,10 +124,10 @@ public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        var getScanRequest = new GetScanRequest(id.Primary.Value);
+        var getScanRequest = new GetScanRequest(id.Primary);
         ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(
             httpClient,
             getScanRequest,

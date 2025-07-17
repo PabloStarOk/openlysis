@@ -105,10 +105,10 @@ internal sealed class FileMultiAnalysisOrchestrator
 
     /// <inheritdoc/>
     protected override async ValueTask UpdateAnalysisAsync(
-        FileAnalysis analysis,
+        FileAnalysis pendingAnalysis,
         CancellationToken cancellationToken)
     {
-        var analyzer = _analyzers[analysis.ServiceName];
+        var analyzer = _analyzers[pendingAnalysis.ServiceName];
         if (!analyzer.CanGetAnalysisStatus)
         {
             Logger.LogDebug("Trying to get analysis status when service is unavailable.");
@@ -117,12 +117,12 @@ internal sealed class FileMultiAnalysisOrchestrator
 
         // Get status
         ErrorOr<AnalysisStatus> getStatusResult =
-            await analyzer.GetStatusAsync(analysis.Id, cancellationToken);
+            await analyzer.GetStatusAsync(pendingAnalysis.ExternalId, cancellationToken);
         if (getStatusResult.IsError)
         {
-            analysis.UpdateStatus(AnalysisStatus.Failed);
-            PendingAnalyses.TryRemove(analysis.Id, out _);
-            UpdatableAnalyses.Add(analysis);
+            pendingAnalysis.UpdateStatus(AnalysisStatus.Failed);
+            PendingAnalyses.TryRemove(pendingAnalysis.Id, out _);
+            UpdatableAnalyses.Add(pendingAnalysis);
             return;
         }
 
@@ -141,16 +141,43 @@ internal sealed class FileMultiAnalysisOrchestrator
         }
 
         // Get full analysis
-        ErrorOr<FileAnalysis> getAnalysisResult
-            = await analyzer.GetAnalysisAsync(analysis.Id, cancellationToken);
+        ErrorOr<FileAnalysis> getAnalysisResult = await analyzer.GetAnalysisAsync(
+            pendingAnalysis.ExternalId,
+            cancellationToken);
         if (getAnalysisResult.IsError)
         {
             return;
         }
 
         FileAnalysis updatedAnalysis = getAnalysisResult.Value;
-        PendingAnalyses.TryRemove(updatedAnalysis.Id, out _);
-        UpdatableAnalyses.Add(updatedAnalysis);
+        UpdateAnalysisNewValues(pendingAnalysis, updatedAnalysis);
+        PendingAnalyses.TryRemove(pendingAnalysis.Id, out _);
+        UpdatableAnalyses.Add(pendingAnalysis);
+    }
+
+    /// <summary>
+    /// Updates the values of <paramref name="currentAnalysis"/> with those from <paramref name="newAnalysis"/>.
+    /// Copies verdict, threat score, status, and synchronizes reports.
+    /// </summary>
+    private static void UpdateAnalysisNewValues(
+        FileAnalysis currentAnalysis,
+        FileAnalysis newAnalysis)
+    {
+        currentAnalysis.UpdateVerdict(newAnalysis.State.Verdict);
+        currentAnalysis.UpdateThreatScore(newAnalysis.ThreatScore);
+        foreach (var report in newAnalysis.Reports)
+        {
+            if (currentAnalysis.Reports.Contains(report))
+            {
+                currentAnalysis.UpdateReport(report);
+            }
+            else
+            {
+                currentAnalysis.AddReport(report);
+            }
+        }
+
+        currentAnalysis.UpdateStatus(newAnalysis.State.Status);
     }
 
 #if DEBUG
@@ -172,11 +199,13 @@ internal sealed class FileMultiAnalysisOrchestrator
         Logger.LogTrace(
             "Sending updatable analysis:"
             + "\n\tID: {Id}"
+            + "\n\tExternal ID: {ExternalId}"
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreat score: {ThreatScore}"
             + "\n\tStatus: {Status}"
             + "\n\tReports count: {ReportsCount}",
             analysis.Id,
+            analysis.ExternalId,
             analysis.State.Verdict,
             analysis.ThreatScore,
             analysis.State.Status,
@@ -197,9 +226,11 @@ internal sealed class FileMultiAnalysisOrchestrator
         Logger.LogTrace(
             "Report:"
             + "\n\tID: {Id}"
+            + "\n\tExternal ID: {ExternalId}"
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreat score: {ThreatScore}",
             report.Id,
+            report.ExternalId,
             report.Verdict,
             report.ThreatScore);
     }

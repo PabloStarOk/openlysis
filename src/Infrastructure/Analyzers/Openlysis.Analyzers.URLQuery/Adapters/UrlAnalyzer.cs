@@ -118,7 +118,7 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id.Job);
@@ -146,10 +146,10 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        string formattedUrl = string.Format(Addresses.ReportEndpoint, id.Primary.Value);
+        string formattedUrl = string.Format(Addresses.ReportEndpoint, id.Primary);
         using HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, cancellationToken);
 
         if (!response.IsSuccessStatusCode)

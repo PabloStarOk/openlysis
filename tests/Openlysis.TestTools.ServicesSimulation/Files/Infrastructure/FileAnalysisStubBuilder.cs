@@ -40,7 +40,7 @@ internal sealed class FileAnalysisStubBuilder
             serviceName,
             AnalysisStatus.Queued,
             Verdict.Unknown,
-            jobId: GenerateJobId(options));
+            externalJobId: GenerateJobId(options));
     }
 
     /// <inheritdoc/>
@@ -76,14 +76,16 @@ internal sealed class FileAnalysisStubBuilder
         IEnumerable<string> reportAsStrings = analysis.Reports
             .Select(r => $"{{ "
                 + $"\n\tID: {r.Id}"
+                + $"\n\tExternal ID: {r.ExternalId}"
                 + $"\n\tVerdict: {r.Verdict}"
-                + $"\n\tThreat Score: {r.ThreatScore}}}");
+                + $"\n\tThreat Score: {r.ThreatScore}");
         string reportsLog = string.Join(Environment.NewLine, reportAsStrings);
 
         Logger.LogTrace(
             "{TypeName} created:"
             + "\n\tService name: {ServiceName}"
             + "\n\tID: {Id}"
+            + "\n\tExternal ID: {ExternalId}"
             + "\n\tVerdict: {Verdict}"
             + "\n\tStatus: {Status}"
             + "\n\tThreat score: {ThreatScore}"
@@ -92,6 +94,7 @@ internal sealed class FileAnalysisStubBuilder
             typeof(FileAnalysis),
             analysis.ServiceName,
             analysis.Id,
+            analysis.ExternalId,
             analysis.State.Verdict,
             analysis.State.Status,
             analysis.ThreatScore,

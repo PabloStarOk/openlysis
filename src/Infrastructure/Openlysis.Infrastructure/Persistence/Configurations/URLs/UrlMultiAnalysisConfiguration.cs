@@ -15,11 +15,13 @@ namespace Openlysis.Infrastructure.Persistence.Configurations.URLs;
 public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAnalysis>
 {
     private const string SmallintType = "smallint";
+    private const string VarcharType = "varchar";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<UrlMultiAnalysis> builder)
     {
         ConfigureMultiAnalysis(builder);
+        builder.OwnsMany(a => a.Analyses, ConfigureAnalyses);
     }
 
     /// <summary>
@@ -76,7 +78,7 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
 
         builder.Property(u => u.Url)
             .HasColumnName("url")
-            .HasColumnType("varchar")
+            .HasColumnType(VarcharType)
             .HasMaxLength(2083)
             .IsRequired()
             .HasConversion(
@@ -93,7 +95,7 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
 
         builder.Property(u => u.UserId)
             .HasColumnName("user_id")
-            .HasColumnType("varchar")
+            .HasColumnType(VarcharType)
             .HasMaxLength(450)
             .IsRequired()
             .HasConversion(
@@ -101,16 +103,73 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
                 dbValue => UserId.Create(dbValue));
 
         builder.HasIndex(u => u.UserId);
+    }
 
-        builder.HasMany(u => u.Analyses)
-            .WithMany()
-            .UsingEntity(
-                "url_multi_service_analysis_links",
-                r => r.HasOne(typeof(UrlAnalysis)).WithMany().HasForeignKey("url_analysis_id"),
-                l => l.HasOne(typeof(UrlMultiAnalysis)).WithMany().HasForeignKey("url_multi_analysis_id"),
-                joinEntity =>
-                {
-                    joinEntity.HasKey("url_multi_analysis_id", "url_analysis_id");
-                });
+    /// <summary>
+    /// Configures the owned collection of <see cref="UrlAnalysis"/> entities for a <see cref="UrlMultiAnalysis"/>.
+    /// </summary>
+    private static void ConfigureAnalyses(
+        OwnedNavigationBuilder<UrlMultiAnalysis, UrlAnalysis> builder)
+    {
+        builder.ToTable("url_analyses");
+
+        builder.WithOwner().HasForeignKey("url_multi_analysis_id");
+
+        builder.HasKey(u => u.Id);
+
+        builder.Property(u => u.Id)
+            .HasColumnName("url_analysis_id")
+            .HasColumnType("uuid")
+            .IsRequired()
+            .ValueGeneratedNever()
+            .HasConversion(
+                id => id.Value,
+                dbValue => GlobalId.Parse(dbValue.ToString()));
+
+        builder.Property(u => u.ExternalId)
+            .HasColumnName("external_id")
+            .HasColumnType(VarcharType)
+            .HasMaxLength(200)
+            .IsRequired()
+            .HasConversion(
+                id => id.ToString(),
+                id => ExternalAnalysisId.Parse(id));
+
+        builder.Property(u => u.ServiceName)
+            .HasColumnName("service_name")
+            .HasColumnType(VarcharType)
+            .HasMaxLength(30)
+            .IsRequired();
+
+        builder.OwnsOne(u => u.State, stateBuilder =>
+        {
+            stateBuilder.Property(s => s.Status)
+                .HasColumnName("status")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+
+            stateBuilder.Property(s => s.Verdict)
+                .HasColumnName("verdict")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+
+            stateBuilder.Property(s => s.ThreatZone)
+                .HasColumnName("threat_zone")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+        });
+
+        builder.OwnsOne(r => r.ThreatScore, tsBuilder =>
+        {
+            tsBuilder.Ignore(t => t.NormalizedValue);
+
+            tsBuilder.Property(t => t.RawValue)
+                .HasColumnName("raw_threat_score")
+                .HasColumnType("real");
+
+            tsBuilder.Property(t => t.MaxPossibleRawValue)
+                .HasColumnName("max_possible_threat_score")
+                .HasColumnType("real");
+        });
     }
 }

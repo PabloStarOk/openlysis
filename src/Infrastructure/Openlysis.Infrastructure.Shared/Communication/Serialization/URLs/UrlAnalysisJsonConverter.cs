@@ -13,10 +13,10 @@ namespace Openlysis.Infrastructure.Shared.Communication.Serialization.URLs;
 internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
 {
     private const string IdKey = "id";
+    private const string ExternalIdKey = "externalid";
     private const string ServiceNameKey = "servicename";
     private const string StatusKey = "status";
     private const string VerdictKey = "verdict";
-    private const string JobIdKey = "jobid";
     private const string ThreatScoreKey = "threatscore";
 
     /// <inheritdoc/>
@@ -26,10 +26,10 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
         JsonSerializerOptions options)
     {
         string id = string.Empty;
+        string externalId = string.Empty;
         string serviceName = string.Empty;
         AnalysisStatus status = 0;
         Verdict verdict = 0;
-        string? jobId = null;
         ThreatScore threatScore = ThreatScore.Create(null, null);
         while (reader.Read())
         {
@@ -46,6 +46,10 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
                     id = reader.GetString() ?? string.Empty;
                     break;
 
+                case ExternalIdKey:
+                    externalId = reader.GetString() ?? string.Empty;
+                    break;
+
                 case ServiceNameKey:
                     serviceName = reader.GetString() ?? string.Empty;
                     break;
@@ -58,22 +62,18 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
                     verdict = Enum.Parse<Verdict>(reader.GetString() ?? string.Empty, ignoreCase: true);
                     break;
 
-                case JobIdKey when reader.TokenType is JsonTokenType.String:
-                    jobId = reader.GetString();
-                    break;
-
                 case ThreatScoreKey when reader.TokenType is JsonTokenType.StartObject:
                     threatScore = ReadThreatScore(ref reader, options);
                     break;
             }
         }
 
-        return UrlAnalysis.Create(
-            id,
+        return UrlAnalysis.CreateWithId(
+            GlobalId.Parse(id),
+            ExternalAnalysisId.Parse(externalId),
             serviceName,
             status,
             verdict,
-            jobId,
             threatScore);
     }
 
@@ -84,21 +84,17 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
         JsonSerializerOptions options)
     {
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? IdKey;
-        string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? nameof(UrlAnalysis.ServiceName);
-        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? nameof(UrlAnalysis.State.Status);
-        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(UrlAnalysis.State.Verdict);
-        string jobIdKey = options.PropertyNamingPolicy?.ConvertName(JobIdKey) ?? JobIdKey;
+        string externalIdKey = options.PropertyNamingPolicy?.ConvertName(ExternalIdKey) ?? ExternalIdKey;
+        string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? ServiceNameKey;
+        string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? StatusKey;
+        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? VerdictKey;
 
         writer.WriteStartObject();
-        writer.WriteString(idKey, value.Id.Primary.Value);
+        writer.WriteString(idKey, value.Id.ToString());
+        writer.WriteString(externalIdKey, value.ExternalId.ToString());
         writer.WriteString(serviceNameKey, value.ServiceName);
         writer.WriteString(statusKey, value.State.Status.ToString());
         writer.WriteString(verdictKey, value.State.Verdict.ToString());
-
-        if (value.Id.Job is not null)
-        {
-            writer.WriteString(jobIdKey, value.Id.Job);
-        }
 
         var threatScoreConverter =
             (JsonConverter<ThreatScore>)options.GetConverter(typeof(ThreatScore));

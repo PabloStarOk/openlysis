@@ -65,15 +65,31 @@ internal sealed class SimulatedFileAnalyzer
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Request received to analyze a file.");
-        return await _behaviorSimulator.SimulateAnalyzeAsync(
+
+        var result = await _behaviorSimulator.SimulateAnalyzeAsync(
             _analyzerServiceOptions,
             cancellationToken);
+
+        if (result.IsError)
+        {
+            return result;
+        }
+
+        // Return a copy of the same object but different memory address direction, to avoid interfering with real libraries' functionality.
+        return FileAnalysis.CreateWithId(
+            result.Value.Id,
+            result.Value.ExternalId,
+            result.Value.ServiceName,
+            result.Value.State.Status,
+            result.Value.State.Verdict,
+            result.Value.Reports.ToList(),
+            result.Value.ThreatScore);
     }
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         _logger.LogDebug("Request received to get status a file analysis.");
@@ -86,7 +102,7 @@ internal sealed class SimulatedFileAnalyzer
     /// <inheritdoc/>
     protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateGetAnalysisAsync(

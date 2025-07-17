@@ -7,24 +7,23 @@ namespace Openlysis.Domain.URLs.Entities;
 /// <summary>
 /// An analysis for a URL performed by an external service.
 /// </summary>
-/// <remarks>
-/// This class inherits from the Entity class with a <see cref="AnalysisId"/> type parameter.
-/// </remarks>
 public sealed class UrlAnalysis : Analysis
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlAnalysis"/> class.
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
+    /// <param name="externalId">The identifiers assigned by the external analysis service.</param>
     /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
     private UrlAnalysis(
-        ComposedAnalysisId id,
+        GlobalId id,
+        ExternalAnalysisId externalId,
         string serviceName,
         AnalysisState state,
         ThreatScore threatScore)
-        : base(id, serviceName, state, threatScore)
+        : base(id, externalId, serviceName, state, threatScore)
     {
     }
 
@@ -40,44 +39,60 @@ public sealed class UrlAnalysis : Analysis
     /// <summary>
     /// Creates a new instance of <see cref="UrlAnalysis"/>.
     /// </summary>
-    /// <param name="id">The unique identifier for the analysis.</param>
+    /// <param name="externalPrimaryId">The primary identifier assigned by the external service.</param>
     /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="status">The current status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
-    /// <param name="jobId">The job identifier. Optional.</param>
+    /// <param name="externalJobId">An optional job identifier assigned by the external service.</param>
     /// <param name="threatScore">The threat score of the analysis. Optional.</param>
     /// <returns>A new instance of <see cref="UrlAnalysis"/>.</returns>
     public static UrlAnalysis Create(
-        string id,
+        string externalPrimaryId,
         string serviceName,
         AnalysisStatus status,
         Verdict verdict,
-        string? jobId = null,
+        string? externalJobId = null,
         ThreatScore? threatScore = null)
     {
-        var composedId = ComposedAnalysisId.Create(id, jobId);
         var state = AnalysisState.Initial()
             .WithVerdict(verdict)
             .WithStatus(status);
 
         return new UrlAnalysis(
-            composedId,
+            GlobalId.CreateUnique(),
+            ExternalAnalysisId.Create(externalPrimaryId, externalJobId),
             serviceName,
             state,
             threatScore ?? ThreatScore.CreateNull());
     }
 
     /// <summary>
-    /// Compares the current instance with another <see cref="UrlAnalysis"/> instance
-    /// to determine if they have the same state.
+    /// Creates a new instance of <see cref="UrlAnalysis"/> with a specified <see cref="GlobalId"/>.
     /// </summary>
-    /// <param name="other">The other <see cref="UrlAnalysis"/> instance to compare with.</param>
-    /// <returns>
-    /// <c>true</c> if the current instance and the other instance have the same verdict,
-    /// threat score, and status; otherwise, <c>false</c>.
-    /// </returns>
-    public bool HasSameStateTo(UrlAnalysis other)
+    /// <param name="id">The unique identifier for the analysis.</param>
+    /// <param name="externalId">The identifiers assigned by the external analysis service.</param>
+    /// <param name="serviceName">The name of the service that performed the analysis.</param>
+    /// <param name="status">The current status of the analysis.</param>
+    /// <param name="verdict">The verdict of the analysis.</param>
+    /// <param name="threatScore">The threat score of the analysis. Optional.</param>
+    /// <returns>A new instance of <see cref="UrlAnalysis"/>.</returns>
+    public static UrlAnalysis CreateWithId(
+        GlobalId id,
+        ExternalAnalysisId externalId,
+        string serviceName,
+        AnalysisStatus status,
+        Verdict verdict,
+        ThreatScore? threatScore = null)
     {
-        return State == other.State;
+        var state = AnalysisState.Initial()
+            .WithVerdict(verdict)
+            .WithStatus(status);
+
+        return new UrlAnalysis(
+            id,
+            externalId,
+            serviceName,
+            state,
+            threatScore ?? ThreatScore.CreateNull());
     }
 }

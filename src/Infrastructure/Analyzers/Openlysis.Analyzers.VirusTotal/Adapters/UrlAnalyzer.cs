@@ -79,12 +79,12 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
             httpClient,
-            id.Primary.Value,
+            id.Primary,
             cancellationToken);
 
         if (result.IsError)
@@ -98,12 +98,12 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
             httpClient,
-            id.Primary.Value,
+            id.Primary,
             cancellationToken);
 
         if (result.IsError)

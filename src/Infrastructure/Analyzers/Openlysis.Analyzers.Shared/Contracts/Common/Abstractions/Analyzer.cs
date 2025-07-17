@@ -146,14 +146,14 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <summary>
     /// Updates the status of an analysis.
     /// </summary>
-    /// <param name="id">A <see cref="ComposedAnalysisId"/>.</param>
+    /// <param name="id">A <see cref="ExternalAnalysisId"/>.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the updated analysis status or an error.</returns>
     public async Task<ErrorOr<AnalysisStatus>> GetStatusAsync(
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id.Primary.Value);
+        ArgumentException.ThrowIfNullOrWhiteSpace(id.Primary);
 
         if (!CanGetAnalysisStatus)
         {
@@ -186,14 +186,14 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <summary>
     /// Gets the analysis by its identifier asynchronously.
     /// </summary>
-    /// <param name="id">A <see cref="ComposedAnalysisId"/>.</param>
+    /// <param name="id">A <see cref="ExternalAnalysisId"/>.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis result or an error.</returns>
     public async Task<ErrorOr<TAnalysis>> GetAnalysisAsync(
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(id.Primary.Value);
+        ArgumentNullException.ThrowIfNull(id.Primary);
 
         if (!CanGetAnalysis)
         {
@@ -259,7 +259,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis status or an error.</returns>
     protected abstract Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -271,7 +271,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis result or an error.</returns>
     protected abstract Task<ErrorOr<TAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default);
 
     /// <summary>

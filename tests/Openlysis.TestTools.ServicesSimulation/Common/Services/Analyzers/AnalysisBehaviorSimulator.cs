@@ -26,8 +26,8 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
 {
     private readonly ILogger<AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>> _logger;
     private readonly ILoggerFactory _loggerFactory;
-    private readonly ConcurrentDictionary<ComposedAnalysisId, AnalysisProcess<TAnalysis>> _activeProcesses = [];
-    private readonly ConcurrentDictionary<ComposedAnalysisId, TAnalysis> _finalizedAnalyses = [];
+    private readonly ConcurrentDictionary<ExternalAnalysisId, AnalysisProcess<TAnalysis>> _activeProcesses = [];
+    private readonly ConcurrentDictionary<ExternalAnalysisId, TAnalysis> _finalizedAnalyses = [];
     private readonly TimeProvider _timeProvider;
     private readonly AnalysisStubBuilder<TStubFactoryOptions, TAnalysis> _analysisBuilder;
     private bool _disposed;
@@ -126,7 +126,7 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// </returns>
     internal async Task<ErrorOr<AnalysisStatus>> SimulateGetStatusAsync(
         AnalysisServiceOptions<TStubFactoryOptions> analyzerServiceOptions,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         LogRequestReceived(analyzerServiceOptions, nameof(SimulateGetStatusAsync));
@@ -157,7 +157,7 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// </returns>
     internal async Task<ErrorOr<TAnalysis>> SimulateGetAnalysisAsync(
         AnalysisServiceOptions<TStubFactoryOptions> analyzerServiceOptions,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         LogRequestReceived(analyzerServiceOptions, nameof(SimulateGetAnalysisAsync));
@@ -247,7 +247,7 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
             _timeProvider);
         int secondsDuration = CreateAnalysisDuration(
             analyzerServiceOptions.AnalysisSecondsDuration);
-        _activeProcesses.TryAdd(analysis.Id, analysisProcess);
+        _activeProcesses.TryAdd(analysis.ExternalId, analysisProcess);
         analysisProcess.Finalized += OnProcessFinalized;
         analysisProcess.Start(
             processAnalysis => _analysisBuilder.Finalize(
@@ -264,20 +264,20 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
     /// disposing of it, and adding the finalized analysis to the finalized analyses collection.
     /// </summary>
     /// <param name="sender">The source of the event.</param>
-    /// <param name="analysisId">The unique identifier of the finalized analysis process.</param>
-    private void OnProcessFinalized(object? sender, ComposedAnalysisId analysisId)
+    /// <param name="externalAnalysisId">The unique identifier of the finalized analysis process.</param>
+    private void OnProcessFinalized(object? sender, ExternalAnalysisId externalAnalysisId)
     {
         if (!_activeProcesses.TryRemove(
-                analysisId,
+                externalAnalysisId,
                 out AnalysisProcess<TAnalysis>? process))
         {
-            throw new InvalidOperationException($"Failed to remove analysis process with ID '{analysisId}' from active processes.");
+            throw new InvalidOperationException($"Failed to remove analysis process with ID '{externalAnalysisId}' from active processes.");
         }
 
         TAnalysis analysis = process.Analysis;
         process.Finalized -= OnProcessFinalized;
         process.Dispose();
-        _finalizedAnalyses.TryAdd(analysis.Id, analysis);
+        _finalizedAnalyses.TryAdd(analysis.ExternalId, analysis);
     }
 
     /// <summary>
@@ -308,9 +308,11 @@ internal sealed class AnalysisBehaviorSimulator<TAnalysis, TStubFactoryOptions>
             "Analysis process created:"
             + "\n\tAnalysis Type: {AnalysisType}"
             + "\n\tID: {Id}"
+            + "\n\tExternal ID: {ExternalId}"
             + "\n\tDuration: {Duration} seconds",
             process.Analysis.GetType(),
             process.Analysis.Id,
+            process.Analysis.ExternalId,
             secondsDuration);
     }
 }

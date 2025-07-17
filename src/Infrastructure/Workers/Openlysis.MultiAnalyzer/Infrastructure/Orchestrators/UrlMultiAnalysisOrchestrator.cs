@@ -84,10 +84,10 @@ internal sealed class UrlMultiAnalysisOrchestrator
 
     /// <inheritdoc/>
     protected override async ValueTask UpdateAnalysisAsync(
-        UrlAnalysis analysis,
+        UrlAnalysis pendingAnalysis,
         CancellationToken cancellationToken)
     {
-        var analyzer = _analyzers[analysis.ServiceName];
+        var analyzer = _analyzers[pendingAnalysis.ServiceName];
         if (!analyzer.CanGetAnalysisStatus)
         {
             Logger.LogDebug("Trying to get analysis status when service is unavailable.");
@@ -96,12 +96,12 @@ internal sealed class UrlMultiAnalysisOrchestrator
 
         // Get status
         ErrorOr<AnalysisStatus> getStatusResult =
-            await analyzer.GetStatusAsync(analysis.Id, cancellationToken);
+            await analyzer.GetStatusAsync(pendingAnalysis.ExternalId, cancellationToken);
         if (getStatusResult.IsError)
         {
-            analysis.UpdateStatus(AnalysisStatus.Failed);
-            PendingAnalyses.TryRemove(analysis.Id, out _);
-            UpdatableAnalyses.Add(analysis);
+            pendingAnalysis.UpdateStatus(AnalysisStatus.Failed);
+            PendingAnalyses.TryRemove(pendingAnalysis.Id, out _);
+            UpdatableAnalyses.Add(pendingAnalysis);
             return;
         }
 
@@ -120,16 +120,32 @@ internal sealed class UrlMultiAnalysisOrchestrator
         }
 
         // Get full analysis
-        ErrorOr<UrlAnalysis> getAnalysisResult
-            = await analyzer.GetAnalysisAsync(analysis.Id, cancellationToken);
+        ErrorOr<UrlAnalysis> getAnalysisResult = await analyzer.GetAnalysisAsync(
+            pendingAnalysis.ExternalId,
+            cancellationToken);
         if (getAnalysisResult.IsError)
         {
             return;
         }
 
         UrlAnalysis updatedAnalysis = getAnalysisResult.Value;
-        PendingAnalyses.TryRemove(updatedAnalysis.Id, out _);
-        UpdatableAnalyses.Add(updatedAnalysis);
+        UpdateAnalysisNewValues(pendingAnalysis, updatedAnalysis);
+        PendingAnalyses.TryRemove(pendingAnalysis.Id, out _);
+        UpdatableAnalyses.Add(pendingAnalysis);
+    }
+
+    /// <summary>
+    /// Updates the values of the current analysis with new values from another analysis instance.
+    /// </summary>
+    /// <param name="currentAnalysis">The analysis to be updated.</param>
+    /// <param name="newAnalysis">The analysis containing new values.</param>
+    private static void UpdateAnalysisNewValues(
+        UrlAnalysis currentAnalysis,
+        UrlAnalysis newAnalysis)
+    {
+        currentAnalysis.UpdateVerdict(newAnalysis.State.Verdict);
+        currentAnalysis.UpdateThreatScore(newAnalysis.ThreatScore);
+        currentAnalysis.UpdateStatus(newAnalysis.State.Status);
     }
 
 #if DEBUG
@@ -151,10 +167,12 @@ internal sealed class UrlMultiAnalysisOrchestrator
         Logger.LogTrace(
             "Sending updatable analysis:"
             + "\n\tID: {Id}"
+            + "\n\tExternal ID: {ExternalId}"
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreat score: {ThreatScore}"
             + "\n\tStatus: {Status}",
             analysis.Id,
+            analysis.ExternalId,
             analysis.State.Verdict,
             analysis.ThreatScore,
             analysis.State.Status);

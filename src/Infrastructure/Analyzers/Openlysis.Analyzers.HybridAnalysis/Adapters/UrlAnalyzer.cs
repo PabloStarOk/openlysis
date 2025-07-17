@@ -109,12 +109,12 @@ internal class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<Status> result = await _sandboxAnalyzer.GetReportStatusAsync(
             httpClient,
-            id.Primary.Value,
+            id.Primary,
             cancellationToken);
 
         if (result.IsError)
@@ -128,12 +128,12 @@ internal class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<SandboxReportSummary> result = await _sandboxAnalyzer.GetReportSummaryAsync(
             httpClient,
-            id.Primary.Value,
+            id.Primary,
             cancellationToken);
 
         if (result.IsError)

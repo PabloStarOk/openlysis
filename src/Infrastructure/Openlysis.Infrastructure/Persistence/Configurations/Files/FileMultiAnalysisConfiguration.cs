@@ -14,11 +14,14 @@ namespace Openlysis.Infrastructure.Persistence.Configurations.Files;
 public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMultiAnalysis>
 {
     private const string SmallintType = "smallint";
+    private const string VarcharType = "varchar";
+    private const string RealType = "real";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<FileMultiAnalysis> builder)
     {
         ConfigureFileMultiAnalysesTable(builder);
+        builder.OwnsMany(a => a.Analyses, ConfigureAnalyses);
     }
 
     /// <summary>
@@ -106,17 +109,6 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
             .HasForeignKey("sha256")
             .IsRequired();
 
-        builder.HasMany(u => u.Analyses)
-            .WithMany()
-            .UsingEntity(
-                "file_multi_service_analysis_links",
-                r => r.HasOne(typeof(FileAnalysis)).WithMany().HasForeignKey("file_analysis_id"),
-                l => l.HasOne(typeof(FileMultiAnalysis)).WithMany().HasForeignKey("file_multi_analysis_id"),
-                joinEntity =>
-                {
-                    joinEntity.HasKey("file_multi_analysis_id", "file_analysis_id");
-                });
-
         builder.Navigation(f => f.DataHashValues)
             .AutoInclude();
 
@@ -125,5 +117,126 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
 
         builder.Ignore(f => f.AllReports);
         builder.Ignore(f => f.ReportsAmount);
+    }
+
+    /// <summary>
+    /// Configures the owned collection of <see cref="FileAnalysis"/> entities for a <see cref="FileMultiAnalysis"/>.
+    /// </summary>
+    private static void ConfigureAnalyses(
+        OwnedNavigationBuilder<FileMultiAnalysis, FileAnalysis> builder)
+    {
+        builder.ToTable("file_analyses");
+
+        builder.WithOwner().HasForeignKey("file_multi_analysis_id");
+
+        builder.HasKey(s => s.Id);
+
+        builder.Property(s => s.Id)
+            .HasColumnName("file_analysis_id")
+            .HasColumnType("uuid")
+            .IsRequired()
+            .ValueGeneratedNever()
+            .HasConversion(
+                id => id.Value,
+                dbValue => GlobalId.Parse(dbValue.ToString()));
+
+        builder.Property(s => s.ExternalId)
+            .HasColumnName("external_id")
+            .HasColumnType(VarcharType)
+            .HasMaxLength(200)
+            .IsRequired()
+            .HasConversion(
+                id => id.ToString(),
+                dbValue => ExternalAnalysisId.Parse(dbValue));
+
+        builder.Property(s => s.ServiceName)
+            .HasColumnName("service_name")
+            .HasColumnType(VarcharType)
+            .HasMaxLength(30)
+            .IsRequired();
+
+        builder.OwnsOne(s => s.State, stateBuilder =>
+        {
+            stateBuilder.Property(s => s.Status)
+                .HasColumnName("status")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+
+            stateBuilder.Property(s => s.Verdict)
+                .HasColumnName("verdict")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+
+            stateBuilder.Property(s => s.ThreatZone)
+                .HasColumnName("threat_zone")
+                .HasColumnType(SmallintType)
+                .IsRequired();
+        });
+
+        builder.OwnsOne(s => s.ThreatScore, tsBuilder =>
+        {
+            tsBuilder.Ignore(t => t.NormalizedValue);
+
+            tsBuilder.Property(t => t.RawValue)
+                .HasColumnName("raw_threat_score")
+                .HasColumnType(RealType);
+
+            tsBuilder.Property(t => t.MaxPossibleRawValue)
+                .HasColumnName("max_possible_threat_score")
+                .HasColumnType(RealType);
+        });
+
+        builder.OwnsMany(s => s.Reports, ConfigureReports);
+    }
+
+    /// <summary>
+    /// Configures the owned collection of <see cref="FileReport"/> entities for a <see cref="FileAnalysis"/>.
+    /// </summary>
+    private static void ConfigureReports(
+        OwnedNavigationBuilder<FileAnalysis, FileReport> builder)
+    {
+        builder.ToTable("file_reports");
+
+        builder.WithOwner().HasForeignKey("file_analysis_id");
+
+        builder.HasKey(r => r.Id);
+
+        builder.Property(r => r.Id)
+            .HasColumnName("file_report_id")
+            .HasColumnType("uuid")
+            .IsRequired()
+            .ValueGeneratedNever()
+            .HasConversion(
+                id => id.Value,
+                dbValue => GlobalId.Parse(dbValue.ToString()));
+
+        builder.Property(r => r.ExternalId)
+            .HasColumnName("external_id")
+            .HasColumnType(VarcharType)
+            .HasMaxLength(200)
+            .IsRequired();
+
+        builder.Property(r => r.Verdict)
+            .HasColumnName("verdict")
+            .HasColumnType(SmallintType)
+            .IsRequired();
+
+        builder.Property(r => r.ThreatZone)
+            .HasColumnName("threat_zone")
+            .HasColumnType(SmallintType)
+            .IsRequired();
+
+        builder.OwnsOne(r => r.ThreatScore, tsBuilder =>
+        {
+            tsBuilder.Ignore(t => t.NormalizedValue);
+
+            tsBuilder.Property(t => t.RawValue)
+                .HasColumnName("raw_threat_score")
+                .HasColumnType(RealType);
+
+            tsBuilder.Property(t => t.MaxPossibleRawValue)
+                .HasColumnName("max_possible_threat_score")
+                .HasColumnType(RealType);
+        });
     }
 }

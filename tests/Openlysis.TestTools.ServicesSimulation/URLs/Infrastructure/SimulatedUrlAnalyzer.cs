@@ -63,15 +63,29 @@ internal sealed class SimulatedUrlAnalyzer
         AnalyzeUrlRequest request,
         CancellationToken cancellationToken = default)
     {
-        return await _behaviorSimulator.SimulateAnalyzeAsync(
+        var result = await _behaviorSimulator.SimulateAnalyzeAsync(
             _analyzerServiceOptions,
             cancellationToken);
+
+        if (result.IsError)
+        {
+            return result;
+        }
+
+        // Return a copy of the same object but different memory address direction, to avoid interfering with real libraries' functionality.
+        return UrlAnalysis.CreateWithId(
+            result.Value.Id,
+            result.Value.ExternalId,
+            result.Value.ServiceName,
+            result.Value.State.Status,
+            result.Value.State.Verdict,
+            result.Value.ThreatScore);
     }
 
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateGetStatusAsync(
@@ -83,7 +97,7 @@ internal sealed class SimulatedUrlAnalyzer
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateGetAnalysisAsync(

@@ -24,7 +24,7 @@ internal sealed class AnalysisProcess<TAnalysis>
     /// <summary>
     /// Occurs when the analysis process has been finalized.
     /// </summary>
-    internal event EventHandler<ComposedAnalysisId>? Finalized;
+    internal event EventHandler<ExternalAnalysisId>? Finalized;
 
     private readonly ILogger<AnalysisProcess<TAnalysis>> _logger;
     private readonly Stopwatch _stopwatch = new ();
@@ -135,7 +135,7 @@ internal sealed class AnalysisProcess<TAnalysis>
         }
 
         _finalizeAnalysis.Invoke(Analysis);
-        Finalized?.Invoke(this, Analysis.Id);
+        Finalized?.Invoke(this, Analysis.ExternalId);
         StopAndLogDuration(action: "stopped");
     }
 
@@ -151,7 +151,7 @@ internal sealed class AnalysisProcess<TAnalysis>
 
         _cancellationTokenRegistration.Unregister();
         _timer.Dispose();
-        Finalized?.Invoke(this, Analysis.Id);
+        Finalized?.Invoke(this, Analysis.ExternalId);
         StopAndLogDuration(action: "canceled");
     }
 

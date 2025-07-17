@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.Entities;
 
 namespace Openlysis.Infrastructure.Persistence.Repositories;
 
@@ -40,9 +39,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
             _dbContext.Attach(fileMultiAnalysis.DataHashValues).State = EntityState.Unchanged;
         }
 
-        EntityEntry<FileMultiAnalysis> multiAnalysisEntry = await _dbContext.AddAsync(fileMultiAnalysis, cancellationToken);
-        await SyncServiceAnalysesAsync(multiAnalysisEntry, cancellationToken);
-
+        await _dbContext.AddAsync(fileMultiAnalysis, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
@@ -112,67 +109,7 @@ public class FileMultiAnalysisRepository : IRepository<FileMultiAnalysis, Global
 
         EntityEntry<FileMultiAnalysis> multiAnalysisEntry = _dbContext.Entry(multiAnalysis);
         multiAnalysisEntry.CurrentValues.SetValues(model);
-        await SyncServiceAnalysesAsync(multiAnalysisEntry, cancellationToken);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-
-    /// <summary>
-    /// Synchronizes the service analyses of a given <see cref="FileMultiAnalysis"/> entity with the database.
-    /// </summary>
-    /// <param name="multiAnalysisEntry">The entity entry of the <see cref="FileMultiAnalysis"/> to synchronize.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    private async Task SyncServiceAnalysesAsync(
-        EntityEntry<FileMultiAnalysis> multiAnalysisEntry,
-        CancellationToken cancellationToken = default)
-    {
-        var existingAnalyses = _dbContext.FileAnalyses
-            .AsSplitQuery()
-            .Where(f => multiAnalysisEntry.Entity.Analyses.Contains(f));
-
-        foreach (var incomingAnalysis in multiAnalysisEntry.Entity.Analyses)
-        {
-            var existingAnalysis = await existingAnalyses
-                .AsNoTracking()
-                .SingleOrDefaultAsync(e => e == incomingAnalysis, cancellationToken);
-
-            if (existingAnalysis is null)
-            {
-                continue;
-            }
-
-            EntityEntry<FileAnalysis> incomingEntry = _dbContext.Entry(incomingAnalysis);
-            incomingEntry.State = incomingAnalysis.HasSameStateTo(existingAnalysis)
-                    ? EntityState.Unchanged
-                    : EntityState.Modified;
-
-            SyncReportsAsync(incomingEntry, existingAnalysis.Reports.ToArray());
-        }
-    }
-
-    /// <summary>
-    /// Synchronizes the reports of a given <see cref="FileAnalysis"/> entity with the database.
-    /// </summary>
-    /// <param name="serviceAnalysisEntry">The entity entry of the <see cref="FileAnalysis"/> to synchronize.</param>
-    /// <param name="existingReports">The array of existing reports in the database to compare against.</param>
-    private void SyncReportsAsync(
-        EntityEntry<FileAnalysis> serviceAnalysisEntry,
-        FileReport[] existingReports)
-    {
-        foreach (FileReport incomingReport in serviceAnalysisEntry.Entity.Reports)
-        {
-            var existingReport = existingReports.SingleOrDefault(
-                r => r == incomingReport);
-
-            if (existingReport is null)
-            {
-                continue;
-            }
-
-            _dbContext.Entry(incomingReport).State =
-                incomingReport.HasSameStateTo(existingReport)
-                ? EntityState.Unchanged
-                : EntityState.Modified;
-        }
     }
 }

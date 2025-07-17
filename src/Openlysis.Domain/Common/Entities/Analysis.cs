@@ -7,8 +7,13 @@ namespace Openlysis.Domain.Common.Entities;
 /// <summary>
 /// Defines a base entity to store an analysis from an external service.
 /// </summary>
-public abstract class Analysis : Entity<ComposedAnalysisId>
+public abstract class Analysis : Entity<GlobalId>
 {
+    /// <summary>
+    /// Gets the identifiers assigned by the external analysis service.
+    /// </summary>
+    public ExternalAnalysisId ExternalId { get; }
+
     /// <summary>
     /// Gets the name of the service.
     /// </summary>
@@ -27,17 +32,20 @@ public abstract class Analysis : Entity<ComposedAnalysisId>
     /// <summary>
     /// Initializes a new instance of the <see cref="Analysis"/> class.
     /// </summary>
-    /// <param name="id">The unique identifier for the service analysis.</param>
-    /// <param name="serviceName">The name of the service being analyzed.</param>
+    /// <param name="id">The unique identifier for the analysis entity.</param>
+    /// <param name="externalId">The identifiers assigned by the external analysis service.</param>
+    /// <param name="serviceName">The name of the external service providing the analysis.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
     protected Analysis(
-        ComposedAnalysisId id,
+        GlobalId id,
+        ExternalAnalysisId externalId,
         string serviceName,
         AnalysisState state,
         ThreatScore threatScore)
         : base(id)
     {
+        ExternalId = externalId;
         ServiceName = serviceName;
         State = state;
         ThreatScore = threatScore;

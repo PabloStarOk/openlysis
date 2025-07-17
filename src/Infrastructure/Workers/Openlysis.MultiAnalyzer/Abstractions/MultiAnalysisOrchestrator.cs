@@ -33,7 +33,7 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
     /// <summary>
     /// Gets the collection of analyses that are pending processing, keyed by their composed analysis ID.
     /// </summary>
-    protected ConcurrentDictionary<ComposedAnalysisId, TAnalysis> PendingAnalyses { get; } = [];
+    protected ConcurrentDictionary<GlobalId, TAnalysis> PendingAnalyses { get; } = [];
 
     /// <summary>
     /// Gets the collection of analyses that are ready to be updated.
@@ -94,11 +94,11 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
     /// <summary>
     /// Updates the given analysis instance asynchronously.
     /// </summary>
-    /// <param name="analysis">The analysis instance to update.</param>
+    /// <param name="pendingAnalysis">The analysis instance to update taken from <see cref="PendingAnalyses"/>.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A <see cref="ValueTask"/> representing the asynchronous update operation.</returns>
     protected abstract ValueTask UpdateAnalysisAsync(
-        TAnalysis analysis,
+        TAnalysis pendingAnalysis,
         CancellationToken cancellationToken);
 
 #if DEBUG

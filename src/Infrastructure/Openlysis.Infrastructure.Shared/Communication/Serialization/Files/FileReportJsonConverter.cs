@@ -13,6 +13,7 @@ namespace Openlysis.Infrastructure.Shared.Communication.Serialization.Files;
 internal class FileReportJsonConverter : JsonConverter<FileReport>
 {
     private const string IdKey = "id";
+    private const string ExternalIdKey = "externalid";
     private const string VerdictKey = "verdict";
     private const string ThreatZoneKey = "threatzone";
     private const string ThreatScoreKey = "threatscore";
@@ -24,6 +25,7 @@ internal class FileReportJsonConverter : JsonConverter<FileReport>
         JsonSerializerOptions options)
     {
         string id = string.Empty;
+        string externalId = string.Empty;
         Verdict verdict = 0;
         ThreatZone threatZone = 0;
         ThreatScore threatScore = ThreatScore.Create(null, null);
@@ -47,6 +49,10 @@ internal class FileReportJsonConverter : JsonConverter<FileReport>
                     id = reader.GetString() ?? string.Empty;
                     break;
 
+                case ExternalIdKey:
+                    externalId = reader.GetString() ?? string.Empty;
+                    break;
+
                 case VerdictKey:
                     verdict = Enum.Parse<Verdict>(reader.GetString() ?? string.Empty, ignoreCase: true);
                     break;
@@ -61,8 +67,9 @@ internal class FileReportJsonConverter : JsonConverter<FileReport>
             }
         }
 
-        return FileReport.Create(
-            id,
+        return FileReport.CreateWithId(
+            GlobalId.Parse(id),
+            externalId,
             verdict,
             threatZone,
             threatScore);
@@ -74,12 +81,14 @@ internal class FileReportJsonConverter : JsonConverter<FileReport>
         FileReport value,
         JsonSerializerOptions options)
     {
-        string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? nameof(FileReport.Id);
-        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? nameof(FileReport.Verdict);
-        string threatZoneKey = options.PropertyNamingPolicy?.ConvertName(ThreatZoneKey) ?? nameof(FileReport.ThreatZone);
+        string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? IdKey;
+        string externalIdKey = options.PropertyNamingPolicy?.ConvertName(ExternalIdKey) ?? ExternalIdKey;
+        string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? VerdictKey;
+        string threatZoneKey = options.PropertyNamingPolicy?.ConvertName(ThreatZoneKey) ?? ThreatZoneKey;
 
         writer.WriteStartObject();
-        writer.WriteString(idKey, value.Id.Value);
+        writer.WriteString(idKey, value.Id.ToString());
+        writer.WriteString(externalIdKey, value.ExternalId);
         writer.WriteString(verdictKey, value.Verdict.ToString());
         writer.WriteString(threatZoneKey, value.ThreatZone.ToString());
         var threatScoreConverter =

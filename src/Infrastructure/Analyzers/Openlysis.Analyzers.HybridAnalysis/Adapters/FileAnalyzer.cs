@@ -112,10 +112,10 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<AnalysisStatus>> OnGetStatusAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        var formattedId = FormattedAnalysisId.Parse(id.Primary.Value);
+        var formattedId = FormattedAnalysisId.Parse(id.Primary);
         bool analyzedWithSandbox = formattedId.AnalysisType is AnalysisType.Sandbox;
 
         return analyzedWithSandbox
@@ -132,10 +132,10 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
-        var formattedId = FormattedAnalysisId.Parse(id.Primary.Value);
+        var formattedId = FormattedAnalysisId.Parse(id.Primary);
         bool analyzedWithSandbox = formattedId.AnalysisType is AnalysisType.Sandbox;
 
         return analyzedWithSandbox
@@ -227,7 +227,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
 
         await Task.Delay(InitialSandboxAnalysisStatusCheckDelayMs, cancellationToken);
         ErrorOr<bool> analysisFailedResult = await HasSandboxAnalysisFailedAsync(
-            serviceAnalysis.Id,
+            serviceAnalysis.ExternalId,
             cancellationToken);
 
         if (analysisFailedResult.IsError)
@@ -316,7 +316,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="ErrorOr{T}"/> containing either a boolean indicating failure status (true if failed or timed out) or error details if the operation fails.</returns>
     private async Task<ErrorOr<bool>> HasSandboxAnalysisFailedAsync(
-        ComposedAnalysisId id,
+        ExternalAnalysisId id,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<AnalysisStatus> result = await GetStatusAsync(id, cancellationToken);

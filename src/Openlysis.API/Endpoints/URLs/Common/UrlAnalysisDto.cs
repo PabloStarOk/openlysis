@@ -30,8 +30,8 @@ public record UrlAnalysisDto(
     public static UrlAnalysisDto Parse(UrlAnalysis source)
     {
         return new UrlAnalysisDto(
-            source.Id.Primary.Value,
-            source.Id.Job,
+            source.ExternalId.Primary,
+            source.ExternalId.Job,
             source.ServiceName,
             source.State.Status,
             source.State.Verdict,
