@@ -37,7 +37,7 @@ public record UrlMultiAnalysisDto(
     public static UrlMultiAnalysisDto Parse(UrlMultiAnalysis source)
     {
         return new UrlMultiAnalysisDto(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.IsPrivate,
             source.StartedDate,
             source.State.Status,

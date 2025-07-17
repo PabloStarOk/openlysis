@@ -25,7 +25,7 @@ public record AnalyzeUrlResponse(
     public static AnalyzeUrlResponse Parse(UrlMultiAnalysis source)
     {
         return new AnalyzeUrlResponse(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.DataHashValues.Sha256,
             source.DataHashValues.Md5,
             source.DataHashValues.Sha1,

@@ -28,7 +28,7 @@ public record PhoneMultiReputationDto(
     public static PhoneMultiReputationDto Parse(PhoneMultiReputation reputation)
     {
         return new PhoneMultiReputationDto(
-            reputation.Id.Value.ToString(),
+            reputation.Id.ToString(),
             reputation.ReputationEvaluationDate,
             reputation.FinalVerdict,
             reputation.FinalThreatZone,

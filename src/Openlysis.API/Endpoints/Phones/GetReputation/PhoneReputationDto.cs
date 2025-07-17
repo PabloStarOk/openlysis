@@ -27,7 +27,7 @@ public record PhoneReputationDto(
     public static PhoneReputationDto Parse(PhoneReputation source)
     {
         return new PhoneReputationDto(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.ServiceName,
             source.Verdict,
             source.ThreatZone,

@@ -4,7 +4,7 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using Openlysis.API.Endpoints.Common.Responses;
+using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.API.Endpoints.Messages.Common.Responses;
@@ -85,7 +85,14 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
         string userIdString = User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier).Value;
         var userId = UserId.Create(Guid.Parse(userIdString));
 
-        GlobalId id = GlobalId.Parse(req.Id);
+        if (!GlobalId.TryParse(req.Id, out GlobalId? id))
+        {
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "Provided ID has an invalid format."));
+            return;
+        }
+
         ErrorOr<MessageAnalysis> result =
             await _messageAnalysisService.GetAnalysisByIdAsync(userId, id, ct);
 

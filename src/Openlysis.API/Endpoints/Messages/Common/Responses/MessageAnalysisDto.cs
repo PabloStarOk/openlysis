@@ -40,7 +40,7 @@ public record MessageAnalysisDto(
         var detectedData = DetectedData.CreateFromMessageAnalysis(source);
 
         return new MessageAnalysisDto(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.IsPrivate,
             source.StartedDate,
             source.Message,

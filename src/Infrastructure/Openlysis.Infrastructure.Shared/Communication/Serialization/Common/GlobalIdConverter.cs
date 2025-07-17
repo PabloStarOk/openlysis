@@ -27,8 +27,7 @@ internal class GlobalIdConverter : JsonConverter<GlobalId>
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
 
         // Create ID object.
-        Guid guid = Guid.Parse(id);
-        var globalId = GlobalId.Parse(guid);
+        var globalId = GlobalId.Parse(id);
 
         // Read end of object
         reader.Read();
@@ -44,7 +43,7 @@ internal class GlobalIdConverter : JsonConverter<GlobalId>
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? IdKey;
 
         writer.WriteStartObject();
-        writer.WriteString(idKey, value.Value);
+        writer.WriteString(idKey, value.ToString());
         writer.WriteEndObject();
     }
 }

@@ -29,7 +29,7 @@ public record EmailAddressMultiReputationDto(
         EmailAddressMultiReputation source)
     {
         return new EmailAddressMultiReputationDto(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.ReputationEvaluationDate,
             source.FinalVerdict,
             source.FinalThreatZone,

@@ -25,7 +25,7 @@ public record AnalyzeFileResponse(
     public static AnalyzeFileResponse Parse(FileMultiAnalysis source)
     {
         return new AnalyzeFileResponse(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.DataHashValues.Sha256,
             source.DataHashValues.Md5,
             source.DataHashValues.Sha1,

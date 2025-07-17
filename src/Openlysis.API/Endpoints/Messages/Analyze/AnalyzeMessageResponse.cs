@@ -25,7 +25,7 @@ public record AnalyzeMessageResponse(
     public static AnalyzeMessageResponse Parse(MessageAnalysis source)
     {
         return new AnalyzeMessageResponse(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.Message.MessageHashValues.Sha256,
             source.Message.MessageHashValues.Sha1,
             source.Message.MessageHashValues.Md5,

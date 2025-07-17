@@ -51,7 +51,7 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                dbValue => GlobalId.Parse(dbValue));
+                dbValue => GlobalId.Parse(dbValue.ToString()));
 
         builder.Property(m => m.IsPrivate)
             .HasColumnName("is_private")
@@ -167,7 +167,7 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                dbValue => GlobalId.Parse(dbValue));
+                dbValue => GlobalId.Parse(dbValue.ToString()));
 
         builder.Property(a => a.Type)
             .HasColumnName("data_type")
@@ -182,7 +182,7 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
             .IsRequired()
             .HasConversion(
                 id => id.Value,
-                dbValue => GlobalId.Parse(dbValue));
+                dbValue => GlobalId.Parse(dbValue.ToString()));
 
         builder.WithOwner()
             .HasForeignKey(MessageAnalysisIdColumnName);

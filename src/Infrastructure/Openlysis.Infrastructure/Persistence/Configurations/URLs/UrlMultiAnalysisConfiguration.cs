@@ -39,7 +39,7 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
             .ValueGeneratedNever()
             .HasConversion(
                 id => id.Value,
-                dbValue => GlobalId.Parse(dbValue));
+                dbValue => GlobalId.Parse(dbValue.ToString()));
 
         builder.Property(u => u.IsPrivate)
             .HasColumnName("is_private")

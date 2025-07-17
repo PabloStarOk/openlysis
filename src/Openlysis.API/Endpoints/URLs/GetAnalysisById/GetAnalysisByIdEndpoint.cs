@@ -5,7 +5,6 @@ using ErrorOr;
 using FastEndpoints;
 
 using Openlysis.API.Endpoints.Common.Requests;
-using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.Common.ValueObjects;
@@ -75,8 +74,16 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
         UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
 
+        if (!GlobalId.TryParse(req.Id, out GlobalId? id))
+        {
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "Provided ID has an invalid format."));
+            return;
+        }
+
         ErrorOr<UrlMultiAnalysis> result = await _multiAnalysisService
-            .GetAnalysisByIdAsync(userId, GlobalId.Parse(req.Id), ct);
+            .GetAnalysisByIdAsync(userId, id, ct);
         if (result.IsError)
         {
             if (result.Errors.Any(e => e.Type is ErrorType.NotFound))

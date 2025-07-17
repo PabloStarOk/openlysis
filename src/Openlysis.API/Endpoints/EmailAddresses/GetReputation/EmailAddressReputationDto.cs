@@ -29,7 +29,7 @@ public record EmailAddressReputationDto(
         EmailAddressReputation source)
     {
         return new EmailAddressReputationDto(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.ServiceName,
             source.Verdict,
             source.ThreatZone,

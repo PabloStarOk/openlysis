@@ -40,7 +40,7 @@ public record FileMultiAnalysisDto(
     public static FileMultiAnalysisDto Parse(FileMultiAnalysis source)
     {
         return new FileMultiAnalysisDto(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.IsPrivate,
             source.StartedDate,
             source.State.Status,

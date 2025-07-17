@@ -82,7 +82,7 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
         }
 
         // Invalid ID
-        if (!Guid.TryParse(id, out Guid guid))
+        if (!GlobalId.TryParse(id, out GlobalId? globalId))
         {
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
@@ -94,7 +94,7 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
         UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
 
         ErrorOr<FileMultiAnalysis> mediatorResult = await _multiAnalysisService
-            .GetAnalysisByIdAsync(userId, GlobalId.Parse(guid), ct);
+            .GetAnalysisByIdAsync(userId, globalId, ct);
 
         if (mediatorResult.IsError)
         {
