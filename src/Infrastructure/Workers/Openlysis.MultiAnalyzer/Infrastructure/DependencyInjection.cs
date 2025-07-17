@@ -1,3 +1,5 @@
+using System;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -5,7 +7,6 @@ using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Communication.Contracts;
 using Openlysis.MultiAnalyzer.Abstractions;
-using Openlysis.MultiAnalyzer.Communication;
 using Openlysis.MultiAnalyzer.Configuration;
 using Openlysis.MultiAnalyzer.Infrastructure.Communication;
 using Openlysis.MultiAnalyzer.Infrastructure.Orchestrators;
@@ -37,6 +38,7 @@ internal static class DependencyInjection
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddSingleton(TimeProvider.System);
         AddUrlTimeoutRequestFactory(services, configuration);
         AddFileTimeoutRequestFactory(services, configuration);
     }

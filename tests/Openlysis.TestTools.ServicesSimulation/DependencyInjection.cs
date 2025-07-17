@@ -30,12 +30,10 @@ public static class DependencyInjection
 
         using (var sp = services.BuildServiceProvider())
         {
-            if (sp.GetService<TimeProvider>() is not null)
+            if (sp.GetService<TimeProvider>() is null)
             {
-                return;
+                services.AddSingleton(TimeProvider.System);
             }
-
-            services.AddSingleton(TimeProvider.System);
         }
 
         ILogger logger = CreateLogger(services);
