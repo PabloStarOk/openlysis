@@ -57,7 +57,10 @@ internal sealed class MessageDataExtractor : IMessageDataExtractor
         DataType dataType,
         string input)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(input);
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return [];
+        }
 
         var detector = _dataDetectors
             .Single(d => d.DetectableData == dataType);

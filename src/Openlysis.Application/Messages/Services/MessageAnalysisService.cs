@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Mail;
 
 using ErrorOr;
@@ -83,6 +82,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
             return lastExistingAnalysis;
         }
 
+        string sender = message.Sender;
         string? subject = message.Subject;
         string content = message.Content;
 
@@ -91,17 +91,12 @@ internal class MessageAnalysisService : IMessageAnalysisService
             _dataExtractor.SetRequestCountryCode(requestCountryCode);
         }
 
-        IEnumerable<Uri> urls =
-            ExtractData(subject, content, _dataExtractor.ExtractUrls);
-        HashSet<MailAddress> emailAddresses =
-            ExtractData(subject, content, _dataExtractor.ExtractEmailAddresses)
-                .ToHashSet();
-        IEnumerable<string> phoneNumbers =
-            ExtractData(subject, content, _dataExtractor.ExtractPhoneNumbers);
-        if (TryCreateSenderEmail(message, out MailAddress? senderEmail))
-        {
-            emailAddresses.Add(senderEmail);
-        }
+        IEnumerable<Uri> urls = ExtractDataFromValidInputs(
+            _dataExtractor.ExtractUrls, subject, content);
+        IEnumerable<MailAddress> emailAddresses = ExtractDataFromValidInputs(
+            _dataExtractor.ExtractEmailAddresses, sender, subject, content);
+        IEnumerable<string> phoneNumbers = ExtractDataFromValidInputs(
+            _dataExtractor.ExtractPhoneNumbers, subject, content);
 
         IEnumerable<FileMultiAnalysis> fileMultiAnalyses = [];
         if (files is not null)
@@ -207,50 +202,26 @@ internal class MessageAnalysisService : IMessageAnalysisService
     }
 
     /// <summary>
-    /// Extracts data from the provided subject and content using the specified extraction method.
+    /// Extracts data from the provided input strings using the specified extraction method.
     /// </summary>
     /// <typeparam name="TData">The type of data to extract.</typeparam>
-    /// <param name="subject">The subject of the message, which may contain data to extract.</param>
-    /// <param name="content">The content of the message, which must contain data to extract.</param>
-    /// <param name="extractionMethod">The method used to extract data from the subject and content.</param>
-    /// <returns>An enumerable collection of extracted data.</returns>
-    private static IEnumerable<TData> ExtractData<TData>(
-        string? subject,
-        string content,
-        Func<string, IEnumerable<TData>> extractionMethod)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(content);
-
-        IEnumerable<TData> subjectUrls = [];
-        if (subject is not null)
-        {
-            subjectUrls = extractionMethod(subject);
-        }
-
-        IEnumerable<TData> contentUrls = extractionMethod(content);
-
-        return subjectUrls.Union(contentUrls);
-    }
-
-    /// <summary>
-    /// Attempts to create a <see cref="MailAddress"/> object from the sender information in the provided message.
-    /// </summary>
-    /// <param name="message">The message containing the sender information.</param>
-    /// <param name="senderEmail">
-    /// When this method returns, contains the <see cref="MailAddress"/> object created from the sender information,
-    /// if the sender is a valid email address; otherwise, null.
+    /// <param name="extractionMethod">
+    /// The function used to extract data from each input string.
+    /// </param>
+    /// <param name="inputs">
+    /// The input strings to extract data from.
     /// </param>
     /// <returns>
-    /// <c>true</c> if the sender information is a valid email address and a <see cref="MailAddress"/> object was created;
-    /// otherwise, <c>false</c>.
+    /// An enumerable collection containing all extracted data from the provided inputs.
     /// </returns>
-    private static bool TryCreateSenderEmail(
-        Message message,
-        [NotNullWhen(true)] out MailAddress? senderEmail)
+    private static IEnumerable<TData> ExtractDataFromValidInputs<TData>(
+        Func<string, IEnumerable<TData>> extractionMethod,
+        params string?[] inputs)
     {
-        senderEmail = null;
-        return message.Type is MessageType.Email
-            && MailAddress.TryCreate(message.Sender, out senderEmail);
+        return inputs
+            .Where(i => !string.IsNullOrWhiteSpace(i))
+            .SelectMany(extractionMethod!)
+            .ToHashSet();
     }
 
     /// <summary>
