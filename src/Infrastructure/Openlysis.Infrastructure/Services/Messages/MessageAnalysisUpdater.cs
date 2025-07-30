@@ -99,19 +99,20 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
         /// <summary>
         /// Initializes a new instance of the <see cref="UpdatableEntry"/> class.
         /// </summary>
-        /// <param name="messageAnalysis">The <see cref="MessageAnalysis"/> object associated with this instance.</param>
-        /// <param name="updatableAnalysesCount">
-        /// The initial capacity for the collection of terminal child analyses,
-        /// representing the maximum number of multi analyses that can be updated.
-        /// </param>
+        /// <param name="messageAnalysis">The <see cref="MessageAnalysis"/> object associated with this entry.</param>
+        /// <param name="cachedTerminalAnalysisIds">List of child analysis IDs that are in a terminal state.</param>
+        /// <param name="cachedTerminalAnalysisStates">List of terminal analysis states for child analyses.</param>
+        /// <param name="isUpdatable">Indicates whether the entry can be updated based on child analyses.</param>
         private UpdatableEntry(
             MessageAnalysis messageAnalysis,
-            int updatableAnalysesCount)
+            List<GlobalId> cachedTerminalAnalysisIds,
+            List<AnalysisState> cachedTerminalAnalysisStates,
+            bool isUpdatable)
         {
             MessageAnalysis = messageAnalysis;
-            _cachedTerminalAnalysisIds = new List<GlobalId>(updatableAnalysesCount);
-            _cachedTerminalAnalysisStates = new List<AnalysisState>(updatableAnalysesCount);
-            IsUpdatable = HasUpdatableChildAnalyses();
+            _cachedTerminalAnalysisIds = cachedTerminalAnalysisIds;
+            _cachedTerminalAnalysisStates = cachedTerminalAnalysisStates;
+            IsUpdatable = isUpdatable;
         }
 
         /// <summary>
@@ -121,11 +122,18 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
         /// <returns>A new <see cref="UpdatableEntry"/> instance initialized with the given <see cref="MessageAnalysis"/>.</returns>
         public static UpdatableEntry Create(MessageAnalysis messageAnalysis)
         {
-            int updatableAnalysesCount = messageAnalysis.AttachedFilesResults.Count
+            int updatableAnalysesCount =
+                messageAnalysis.AttachedFilesResults.Count
                 + messageAnalysis.DetectedUrlsResults.Count;
+
+            var isUpdatable = messageAnalysis.AttachedFilesResults.Count > 0 ||
+                messageAnalysis.DetectedUrlsResults.Count > 0;
+
             return new UpdatableEntry(
                 messageAnalysis,
-                updatableAnalysesCount);
+                new List<GlobalId>(updatableAnalysesCount),
+                new List<AnalysisState>(updatableAnalysesCount),
+                isUpdatable);
         }
 
         /// <summary>
@@ -172,22 +180,6 @@ internal sealed class MessageAnalysisUpdater : IMessageAnalysisUpdater
                 _cachedTerminalAnalysisIds.Add(multiAnalysis.Id);
                 _cachedTerminalAnalysisStates.Add(analysisState);
             }
-        }
-
-        /// <summary>
-        /// Determines whether the associated <see cref="MessageAnalysis"/> object has any child analyses
-        /// that can be updated, based on the presence of attached file results or detected URL results.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if there are updatable child analyses; otherwise, <c>false</c>.
-        /// </returns>
-        private bool HasUpdatableChildAnalyses()
-        {
-            return MessageAnalysis is
-            {
-                AttachedFilesResults.Count: > 0,
-                DetectedUrlsResults.Count: > 0
-            };
         }
     }
 
