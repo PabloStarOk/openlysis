@@ -38,7 +38,9 @@ internal sealed class PhoneReputationStubFactory
     {
         Verdict verdict = GenerateVerdict(options.VerdictSimulation);
 
-        PhoneInfo phoneInfo = options.PhoneInfoStub ?? GenerateRandomPhoneInfo();
+        PhoneInfo phoneInfo = options.PhoneInfoStub is not null ?
+            options.PhoneInfoStub with { } :
+            GenerateRandomPhoneInfo();
 
         return PhoneReputation.Create(
             serviceName,
