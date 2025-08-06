@@ -10,7 +10,7 @@ namespace Openlysis.Infrastructure.Persistence.Configurations.Common;
 /// </summary>
 public class ContentHashSetConfiguration : IEntityTypeConfiguration<HashValues>
 {
-    private const string CharType = "char";
+    private const string ByteArrayType = "bytea";
 
     /// <inheritdoc/>
     public void Configure(EntityTypeBuilder<HashValues> builder)
@@ -20,27 +20,35 @@ public class ContentHashSetConfiguration : IEntityTypeConfiguration<HashValues>
 
         builder.Property(h => h.Sha256)
             .HasColumnName("sha256")
-            .HasColumnType(CharType)
-            .HasMaxLength(64)
+            .HasColumnType(ByteArrayType)
             .IsRequired()
-            .ValueGeneratedNever();
+            .ValueGeneratedNever()
+            .HasConversion(
+                value => Convert.FromHexString(value),
+                dbValue => Convert.ToHexString(dbValue));
 
         builder.Property(h => h.Md5)
             .HasColumnName("md5")
-            .HasColumnType(CharType)
-            .HasMaxLength(32)
-            .IsRequired();
+            .HasColumnType(ByteArrayType)
+            .IsRequired()
+            .HasConversion(
+                value => Convert.FromHexString(value),
+                dbValue => Convert.ToHexString(dbValue));
 
         builder.Property(h => h.Sha1)
             .HasColumnName("sha1")
-            .HasColumnType(CharType)
-            .HasMaxLength(40)
-            .IsRequired();
+            .HasColumnType(ByteArrayType)
+            .IsRequired()
+            .HasConversion(
+                value => Convert.FromHexString(value),
+                dbValue => Convert.ToHexString(dbValue));
 
         builder.Property(h => h.Sha512)
             .HasColumnName("sha512")
-            .HasColumnType(CharType)
-            .HasMaxLength(128)
-            .IsRequired();
+            .HasColumnType(ByteArrayType)
+            .IsRequired()
+            .HasConversion(
+                value => Convert.FromHexString(value),
+                dbValue => Convert.ToHexString(dbValue));
     }
 }

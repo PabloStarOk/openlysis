@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS hash_values (
-    sha256 CHAR(64) PRIMARY KEY,
-    md5 CHAR(32) NOT NULL,
-    sha1 CHAR(40) NOT NULL,
-    sha512 CHAR(128) NOT NULL
+    sha256 bytea PRIMARY KEY,
+    md5 bytea NOT NULL,
+    sha1 bytea NOT NULL,
+    sha512 bytea NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS file_multi_analyses
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS file_multi_analyses
     size bigint NOT NULL,
     content_type text NOT NULL,
     user_id varchar(450) REFERENCES "AspNetUsers" ("Id"),
-    sha256 char(64) REFERENCES hash_values(sha256) ON DELETE CASCADE
+    sha256 bytea REFERENCES hash_values(sha256) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS file_analyses (
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS url_multi_analyses
     average_threat_score real,
     url varchar(2083) NOT NULl,
     user_id varchar(450) NOT NULL REFERENCES "AspNetUsers"("Id"),
-    sha256 char(64) NOT NULL REFERENCES hash_values(sha256)
+    sha256 bytea NOT NULL REFERENCES hash_values(sha256)
 );
 
 CREATE TABLE url_analyses (
@@ -121,7 +121,7 @@ CREATE TABLE IF NOT EXISTS message_analysis (
     verdict smallint NOT NULL,
     threat_zone smallint NOT NULL,
     user_id varchar(450) NOT NULL REFERENCES "AspNetUsers" ("Id"),
-    sha256 char(64) NOT NULL REFERENCES hash_values (sha256) ON DELETE RESTRICT
+    sha256 bytea NOT NULL REFERENCES hash_values (sha256) ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS attached_file_results (
