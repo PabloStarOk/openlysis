@@ -8,7 +8,7 @@ namespace Openlysis.Infrastructure.Persistence.Configurations.Common;
 /// <summary>
 /// Configuration class for the <see cref="HashValues"/> entity.
 /// </summary>
-public class ContentHashSetConfiguration : IEntityTypeConfiguration<HashValues>
+public class HashValuesConfiguration : IEntityTypeConfiguration<HashValues>
 {
     private const string ByteArrayType = "bytea";
 

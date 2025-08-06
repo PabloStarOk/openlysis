@@ -62,7 +62,7 @@ public class ApplicationDbContext : DbContext
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new ContentHashSetConfiguration());
+        modelBuilder.ApplyConfiguration(new HashValuesConfiguration());
         modelBuilder.ApplyConfiguration(new FileMultiAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new UrlMultiAnalysisConfiguration());
         modelBuilder.ApplyConfiguration(new PhoneMultiReputationConfiguration());
