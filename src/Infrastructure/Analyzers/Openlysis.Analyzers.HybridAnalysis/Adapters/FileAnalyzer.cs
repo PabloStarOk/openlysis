@@ -79,7 +79,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
             return ServiceErrors.FileTooLarge;
         }
 
-        Stream fileData = await request.StreamFactory.CreateStreamAsync();
+        Stream fileData = await request.StreamFactory.CreateStreamAsync(this);
         string mimeType = await _mimeTypeDetector.DetectAsync(
             fileData,
             request.FileContentType,
@@ -185,7 +185,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         var requestFactory = new FileSandboxRequestFactory(
             _analyzerOptions.CurrentValue,
             request,
-            await request.StreamFactory.CreateStreamAsync(),
+            await request.StreamFactory.CreateStreamAsync(this),
             osEnvironment,
             mimeType);
         ErrorOr<SandboxSubmitResponse> result = await _sandboxAnalyzer.AnalyzeAsync(
@@ -406,7 +406,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         QuickScanService bestQuickScanService = serviceResult.Value;
         var requestFactory = new FileQuickScanRequestFactory(
             request,
-            await request.StreamFactory.CreateStreamAsync(),
+            await request.StreamFactory.CreateStreamAsync(this),
             bestQuickScanService.Name,
             mimeType);
         ErrorOr<QuickScanResponse> scanResult = await _quickScanner.ScanAsync(

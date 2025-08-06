@@ -72,7 +72,7 @@ public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
             return ServiceErrors.FileTooLarge;
         }
 
-        Stream fileData = await request.StreamFactory.CreateStreamAsync();
+        Stream fileData = await request.StreamFactory.CreateStreamAsync(this);
         var options = ScanOptions.True;
         var scanRequest = new ScanRequest(
             request.FileName,

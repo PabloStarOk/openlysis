@@ -11,7 +11,7 @@ namespace Openlysis.Analyzers.Shared.Infrastructure.Files.Services;
 /// </summary>
 public sealed class FileStreamFactory : IStreamFactory, IDisposable, IAsyncDisposable
 {
-    private readonly ConcurrentBag<Stream> _createdStreams = [];
+    private readonly ConcurrentDictionary<object, Stream> _createdStreams = [];
     private readonly string _fileInstanceId;
     private readonly IFileStorageProvider _fileStorageProvider;
 
@@ -29,22 +29,24 @@ public sealed class FileStreamFactory : IStreamFactory, IDisposable, IAsyncDispo
     }
 
     /// <inheritdoc/>
-    public async ValueTask<Stream> CreateStreamAsync()
+    public async ValueTask<Stream> CreateStreamAsync(object key)
     {
-        if (TryGetCachedStream(out Stream? cachedStream))
+        if (TryGetCachedStream(key, out Stream? cachedStream))
         {
             return cachedStream;
         }
 
-        Stream stream = await _fileStorageProvider.DownloadAsync(_fileInstanceId);
-        _createdStreams.Add(stream);
+        Stream stream = await _fileStorageProvider
+            .DownloadAsync(_fileInstanceId)
+            .ConfigureAwait(false);
+        _createdStreams.TryAdd(key, stream);
         return stream;
     }
 
     /// <inheritdoc/>
     public void Dispose()
     {
-        foreach (var stream in _createdStreams)
+        foreach (var stream in _createdStreams.Values)
         {
             stream.Dispose();
         }
@@ -55,9 +57,9 @@ public sealed class FileStreamFactory : IStreamFactory, IDisposable, IAsyncDispo
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
-        foreach (var stream in _createdStreams)
+        foreach (var stream in _createdStreams.Values)
         {
-            await stream.DisposeAsync();
+            await stream.DisposeAsync().ConfigureAwait(false);
         }
 
         _createdStreams.Clear();
@@ -66,30 +68,34 @@ public sealed class FileStreamFactory : IStreamFactory, IDisposable, IAsyncDispo
     /// <summary>
     /// Attempts to retrieve a cached readable stream from the collection of created streams.
     /// </summary>
+    /// <param name="key">The key used to identify the cached stream.</param>
     /// <param name="cachedStream">
     /// When this method returns, contains the cached <see cref="Stream"/> if one is available and readable; otherwise, <c>null</c>.
     /// </param>
     /// <returns>
     /// <c>true</c> if a readable cached stream is found; otherwise, <c>false</c>.
     /// </returns>
-    private bool TryGetCachedStream([NotNullWhen(true)] out Stream? cachedStream)
+    private bool TryGetCachedStream(
+        object key,
+        [NotNullWhen(true)] out Stream? cachedStream)
     {
         cachedStream = null;
-        foreach (var stream in _createdStreams)
+        if (!_createdStreams.TryGetValue(key, out cachedStream))
         {
-            try
-            {
-                if (!stream.CanRead)
-                {
-                    continue;
-                }
-
-                stream.Position = 0;
-                cachedStream = stream;
-                return true;
-            }
-            catch (ObjectDisposedException) { }
+            return false;
         }
+
+        try
+        {
+            if (!cachedStream.CanRead)
+            {
+                return false;
+            }
+
+            cachedStream.Position = 0;
+            return true;
+        }
+        catch (ObjectDisposedException) { }
 
         return false;
     }
