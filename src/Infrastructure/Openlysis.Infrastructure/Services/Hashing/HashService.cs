@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Security.Cryptography;
 
 using Openlysis.Application.Common.Abstractions.Services;
@@ -6,45 +7,52 @@ using Openlysis.Domain.Common.Entities;
 namespace Openlysis.Infrastructure.Services.Hashing;
 
 /// <summary>
-/// Service to hash the data of a file.
+/// Service to calculate the <see cref="HashValues"/> of a <see cref="Stream"/>.
 /// </summary>
-public class HashService : IHashService
+internal class HashService : IHashService
 {
+    private const int BufferSize = 81_920;
+    private readonly ArrayPool<byte> _arrayPool;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="HashService"/> class.
+    /// </summary>
+    /// <param name="arrayPool">The array pool used for buffer management.</param>
+    public HashService(ArrayPool<byte> arrayPool)
+    {
+        _arrayPool = arrayPool;
+    }
+
     /// <inheritdoc/>
     public async Task<HashValues> HashDataAsync(Stream data, CancellationToken cancellationToken)
     {
-        byte[] md5HashBytes = await MD5.HashDataAsync(data, cancellationToken);
-        ResetStreamPosition(data);
+        using var md5 = IncrementalHash.CreateHash(HashAlgorithmName.MD5);
+        using var sha1 = IncrementalHash.CreateHash(HashAlgorithmName.SHA1);
+        using var sha256 = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        using var sha512 = IncrementalHash.CreateHash(HashAlgorithmName.SHA512);
 
-        byte[] sha1HashBytes = await SHA1.HashDataAsync(data, cancellationToken);
-        ResetStreamPosition(data);
+        data.Position = 0;
+        Memory<byte> buffer = _arrayPool.Rent(BufferSize);
+        int bytesRead;
+        while ((bytesRead = await data.ReadAsync(buffer, cancellationToken)) > 0)
+        {
+            md5.AppendData(buffer.Span[..bytesRead]);
+            sha1.AppendData(buffer.Span[..bytesRead]);
+            sha256.AppendData(buffer.Span[..bytesRead]);
+            sha512.AppendData(buffer.Span[..bytesRead]);
+        }
 
-        byte[] sha256HashBytes = await SHA256.HashDataAsync(data, cancellationToken);
-        ResetStreamPosition(data);
+        data.Position = 0;
 
-        byte[] sha512HashBytes = await SHA512.HashDataAsync(data, cancellationToken);
-
-        string md5HashString = Convert.ToHexString(md5HashBytes);
-        string sha1HashString = Convert.ToHexString(sha1HashBytes);
-        string sha256HashString = Convert.ToHexString(sha256HashBytes);
-        string sha512HashString = Convert.ToHexString(sha512HashBytes);
+        string hexMd5 = Convert.ToHexString(md5.GetHashAndReset());
+        string hexSha1 = Convert.ToHexString(sha1.GetHashAndReset());
+        string hexSha256 = Convert.ToHexString(sha256.GetHashAndReset());
+        string hexSha512 = Convert.ToHexString(sha512.GetHashAndReset());
 
         return HashValues.Create(
-            md5HashString,
-            sha1HashString,
-            sha256HashString,
-            sha512HashString);
-    }
-
-    /// <summary>
-    /// Resets the position of the stream to the beginning if the stream supports seeking.
-    /// </summary>
-    /// <param name="stream">The stream to reset.</param>
-    private static void ResetStreamPosition(Stream stream)
-    {
-        if (stream.CanSeek)
-        {
-            stream.Position = 0;
-        }
+            hexMd5,
+            hexSha1,
+            hexSha256,
+            hexSha512);
     }
 }

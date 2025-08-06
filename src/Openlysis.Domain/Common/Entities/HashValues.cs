@@ -1,7 +1,5 @@
 namespace Openlysis.Domain.Common.Entities;
 
-// TODO: Next commit: Improve efficiency in the creation of hash service. 
-
 /// <summary>
 /// Represents a set of hash values for a given entity.
 /// </summary>

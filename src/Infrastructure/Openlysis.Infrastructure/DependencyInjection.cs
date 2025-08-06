@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+using System.Buffers;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -74,11 +74,8 @@ public static class DependencyInjection
         services.AddScoped<IRepository<MessageAnalysis, GlobalId>, MessageAnalysisRepository>();
 
         // Add hash service.
-        services.AddTransient<MD5>(_ => MD5.Create());
-        services.AddTransient<SHA1>(_ => SHA1.Create());
-        services.AddTransient<SHA256>(_ => SHA256.Create());
-        services.AddTransient<SHA512>(_ => SHA512.Create());
-        services.AddScoped<IHashService, HashService>();
+        services.AddSingleton(ArrayPool<byte>.Shared);
+        services.AddTransient<IHashService, HashService>();
 
         // Add multi analyzers
         services.AddScoped<IFileMultiAnalyzer, FileMultiAnalyzer>();
