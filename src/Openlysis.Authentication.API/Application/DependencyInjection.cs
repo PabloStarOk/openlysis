@@ -1,3 +1,4 @@
+using Openlysis.Authentication.API.Application.SignIn;
 using Openlysis.Authentication.API.Application.SignUp;
 
 namespace Openlysis.Authentication.API.Application;
@@ -14,5 +15,6 @@ internal static class DependencyInjection
     public static void AddApplication(this IServiceCollection services)
     {
         services.AddTransient<ISignUpService, SignUpService>();
+        services.AddTransient<ITokenSignInService, TokenSignInService>();
     }
 }

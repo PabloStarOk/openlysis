@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Authentication.API.Application.Common.Abstractions.Services;
 using Openlysis.Authentication.API.Infrastructure.Configuration;
+using Openlysis.Domain.Users.Entities;
 
 namespace Openlysis.Authentication.API.Infrastructure.Services;
 
@@ -30,6 +31,15 @@ internal sealed class PasswordHasher : IPasswordHasher
     public byte[] GenerateSalt()
     {
         return RandomNumberGenerator.GetBytes(_options.Value.SaltSizeBytes);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> VerifyPasswordAsync(User user, string providedPassword)
+    {
+        var providedPasswordHash = await HashAsync(
+            providedPassword,
+            user.PasswordHashSalt);
+        return user.PasswordHash.SequenceEqual(providedPasswordHash);
     }
 
     /// <inheritdoc/>

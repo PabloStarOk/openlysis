@@ -16,6 +16,16 @@ internal interface IUserRepository
     public Task AddAsync(User user);
 
     /// <summary>
+    /// Retrieves a user entity by the specified email address.
+    /// </summary>
+    /// <param name="emailAddress">The email address of the user to retrieve.</param>
+    /// <returns>
+    /// A <see cref="Task{User}"/> representing the asynchronous operation,
+    /// containing the user entity if found; otherwise, null.
+    /// </returns>
+    public Task<User> GetByEmailAsync(EmailAddress emailAddress);
+
+    /// <summary>
     /// Asynchronously checks if a user exists with the specified email address.
     /// </summary>
     /// <param name="emailAddress">The email address to check for existence.</param>

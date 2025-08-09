@@ -1,3 +1,5 @@
+using Openlysis.Domain.Users.Entities;
+
 namespace Openlysis.Authentication.API.Application.Common.Abstractions.Services;
 
 /// <summary>
@@ -18,4 +20,12 @@ internal interface IPasswordHasher
     /// <param name="salt">The salt to use in the hashing process.</param>
     /// <returns>The hashed password as a byte array.</returns>
     public Task<byte[]> HashAsync(string password, byte[] salt);
+
+    /// <summary>
+    /// Verifies whether the provided password matches the stored password for the specified user.
+    /// </summary>
+    /// <param name="user">The user whose password is being verified.</param>
+    /// <param name="providedPassword">The password provided for verification.</param>
+    /// <returns>True if the password is correct; otherwise, false.</returns>
+    public Task<bool> VerifyPasswordAsync(User user, string providedPassword);
 }

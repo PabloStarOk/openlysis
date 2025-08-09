@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+
 using Microsoft.Extensions.Options;
 
 using Openlysis.Authentication.API.Application.Common.Abstractions.Persistence;
@@ -27,6 +29,7 @@ internal static class DependencyInjection
     {
         AddRepository(services, configuration);
         AddPasswordHasher(services, configuration);
+        AddTokenGenerator(services, configuration);
     }
 
     private static void AddRepository(
@@ -56,5 +59,44 @@ internal static class DependencyInjection
             .ValidateOnStart();
 
         services.AddTransient<IPasswordHasher, PasswordHasher>();
+    }
+
+    private static void AddTokenGenerator(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var certificateOptions = configuration
+            .GetRequiredSection(CertificateOptions.SectionName)
+            .Get<CertificateOptions>();
+        ArgumentNullException.ThrowIfNull(certificateOptions);
+
+        if (string.IsNullOrWhiteSpace(certificateOptions.FilePath))
+        {
+            throw new ArgumentException($"{nameof(certificateOptions.FilePath)} is required.");
+        }
+
+        if (string.IsNullOrWhiteSpace(certificateOptions.FilePassword))
+        {
+            throw new ArgumentException($"{nameof(certificateOptions.FilePassword)} is required.");
+        }
+
+        var certBytes = File.ReadAllBytes(certificateOptions.FilePath);
+        var certificate =
+            new X509Certificate2(certBytes, certificateOptions.FilePassword);
+
+        var optionsSection = configuration
+            .GetRequiredSection(JwtGeneratorOptions.SectionName);
+
+        services.AddSingleton(certificate);
+
+        services.AddSingleton<
+            IValidateOptions<JwtGeneratorOptions>,
+            JwtGeneratorOptionsValidator>();
+
+        services.AddOptions<JwtGeneratorOptions>()
+            .Bind(optionsSection)
+            .ValidateOnStart();
+
+        services.AddTransient<ITokenGenerator, JwtGenerator>();
     }
 }

@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 
 using FastEndpoints;
 
+using Openlysis.Authentication.API.Endpoints.SignIn;
 using Openlysis.Authentication.API.Endpoints.SignUp;
 
 using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
@@ -14,6 +15,8 @@ namespace Openlysis.Authentication.API.Endpoints;
 /// </summary>
 [JsonSerializable(typeof(SignUpRequest))]
 [JsonSerializable(typeof(ErrorResponse))]
+[JsonSerializable(typeof(SignInRequest))]
+[JsonSerializable(typeof(SignInResponse))]
 [JsonSerializable(typeof(ProblemDetails))]
 internal partial class ApiJsonSerializerContext : JsonSerializerContext
 {

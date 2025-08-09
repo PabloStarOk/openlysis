@@ -1,6 +1,7 @@
 using Dapper;
 
 using Openlysis.Authentication.API.Application.Common.Abstractions.Persistence;
+using Openlysis.Authentication.API.Infrastructure.Persistence.Entities;
 using Openlysis.Domain.Users.Entities;
 using Openlysis.Domain.Users.ValueObjects;
 
@@ -16,6 +17,13 @@ internal sealed class UserRepository : IUserRepository
         """
         INSERT INTO users(user_id, email_address, password_hash, password_hash_salt)
         VALUES (@user_id, @email_address, @password_hash, @password_hash_salt)
+        """;
+
+    private const string GetByEmailSqlQuery =
+        """
+        SELECT user_id, email_address, password_hash, password_hash_salt
+        FROM users
+        WHERE email_address = @email_address
         """;
 
     private const string ExistsSqlQuery =
@@ -43,6 +51,17 @@ internal sealed class UserRepository : IUserRepository
             password_hash = user.PasswordHash,
             password_hash_salt = user.PasswordHashSalt,
         });
+    }
+
+    /// <inheritdoc/>
+    public async Task<User> GetByEmailAsync(EmailAddress emailAddress)
+    {
+        using var dbConnection = _dbContext.CreateConnection();
+        var dbEntity = await dbConnection.QuerySingleAsync<DbUser>(
+            GetByEmailSqlQuery,
+            new { email_address = emailAddress.Value });
+
+        return dbEntity.ToDomainUser();
     }
 
     /// <inheritdoc/>
