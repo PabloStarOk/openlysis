@@ -1,6 +1,8 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
+using FluentValidation.Results;
+
 using Scalar.AspNetCore;
 
 namespace Openlysis.Authentication.API.Endpoints;
@@ -37,6 +39,8 @@ internal static class AppConfiguration
             o.Versioning.DefaultVersion = EndpointDefaultVersion;
             o.Versioning.Prefix = VersioningPrefix;
             o.Versioning.PrependToRoute = true;
+
+            o.Errors.ResponseBuilder = BuildValidationFailureResponse;
         });
 
         if (app.Environment.IsDevelopment())
@@ -51,5 +55,22 @@ internal static class AppConfiguration
                 o.AddDocument(DependencyInjection.V1DocumentName);
             });
         }
+    }
+
+    private static object BuildValidationFailureResponse(
+        List<ValidationFailure> failures,
+        HttpContext context,
+        int statusCode)
+    {
+        var errors = failures
+            .GroupBy(f => f.PropertyName)
+            .ToDictionary(
+                f => f.Key,
+                f => f.Select(g => g.ErrorMessage).ToArray());
+
+        var validationProblem = TypedResults.ValidationProblem(
+            detail: "Your request could not be processed due to one or more validation errors. Please review the errors and update your request accordingly.",
+            errors: errors);
+        return validationProblem.ProblemDetails;
     }
 }
