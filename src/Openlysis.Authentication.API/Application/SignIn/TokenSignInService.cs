@@ -43,14 +43,11 @@ internal sealed class TokenSignInService : ITokenSignInService
         EmailAddress email,
         string password)
     {
-        bool userExists = await _userRepository.ExistsAsync(email);
-
-        if (!userExists)
+        User? user = await _userRepository.GetByEmailAsync(email);
+        if (user is null)
         {
             return Error.Unauthorized();
         }
-
-        User user = await _userRepository.GetByEmailAsync(email);
 
         var passwordsMatch =
             await _passwordHasher.VerifyPasswordAsync(user, password);

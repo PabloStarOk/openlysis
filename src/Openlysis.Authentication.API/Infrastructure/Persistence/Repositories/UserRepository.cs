@@ -73,14 +73,14 @@ internal sealed class UserRepository : IUserRepository
     }
 
     /// <inheritdoc/>
-    public async Task<User> GetByEmailAsync(EmailAddress emailAddress)
+    public async Task<User?> GetByEmailAsync(EmailAddress emailAddress)
     {
         using var dbConnection = _dbContext.CreateConnection();
-        var dbEntity = await dbConnection.QuerySingleAsync<DbUser>(
+        var dbEntity = await dbConnection.QuerySingleOrDefaultAsync<DbUser>(
             GetByEmailSqlQuery,
             new { email_address = emailAddress.Value });
 
-        return dbEntity.ToDomainUser();
+        return dbEntity?.ToDomainUser();
     }
 
     /// <inheritdoc/>

@@ -34,7 +34,7 @@ internal interface IUserRepository
     /// A <see cref="Task{User}"/> representing the asynchronous operation,
     /// containing the user entity if found; otherwise, null.
     /// </returns>
-    public Task<User> GetByEmailAsync(EmailAddress emailAddress);
+    public Task<User?> GetByEmailAsync(EmailAddress emailAddress);
 
     /// <summary>
     /// Asynchronously checks if a user exists with the specified email address.
