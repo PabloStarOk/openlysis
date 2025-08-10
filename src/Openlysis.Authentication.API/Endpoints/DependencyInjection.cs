@@ -13,7 +13,14 @@ namespace Openlysis.Authentication.API.Endpoints;
 /// </summary>
 internal static class DependencyInjection
 {
+    /// <summary>
+    /// The name of the Swagger document for API version 1.
+    /// </summary>
+    public const string V1DocumentName = "Version 1";
+
     private const string DocumentsTitle = "Openlysis Authentication API";
+    private const string ApiDescription = "Authentication API for Openlysis.";
+    private const string V1DocumentVersion = "v1";
 
     /// <summary>
     /// Adds API-related services and configuration to the service collection.
@@ -38,8 +45,10 @@ internal static class DependencyInjection
             {
                 o.DocumentSettings = settings =>
                 {
+                    settings.DocumentName = V1DocumentName;
+                    settings.Version = V1DocumentVersion;
                     settings.Title = DocumentsTitle;
-                    settings.Description = "Authentication API for Openlysis.";
+                    settings.Description = ApiDescription;
                 };
                 o.ShortSchemaNames = true;
                 o.EnableJWTBearerAuth = false;

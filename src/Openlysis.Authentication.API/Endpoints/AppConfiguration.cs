@@ -13,7 +13,10 @@ internal static class AppConfiguration
     private const string DocumentationGenerationPath = "/openapi/{documentName}.json";
     private const string ApiDocumentationPath = "api-docs";
     private const string WebPageTitle = "Openlysis Authentication API";
-    private const string EndpointSuffix = "Endpoint";
+    private const string EndpointNameSuffix = "Endpoint";
+    private const string EndpointPathPrefix = "api";
+    private const string VersioningPrefix = "v";
+    private const int EndpointDefaultVersion = 1;
 
     /// <summary>
     /// Configures FastEndpoints for the given <see cref="WebApplication"/> instance.
@@ -25,10 +28,15 @@ internal static class AppConfiguration
         {
             o.Serializer.Options.TypeInfoResolver =
                 ApiJsonSerializerContext.Default;
-            o.Endpoints.ShortNames = true;
 
+            o.Endpoints.ShortNames = true;
             o.Endpoints.NameGenerator = context
-                => context.EndpointType.Name.TrimEnd(EndpointSuffix.ToCharArray());
+                => context.EndpointType.Name.TrimEnd(EndpointNameSuffix.ToCharArray());
+            o.Endpoints.RoutePrefix = EndpointPathPrefix;
+
+            o.Versioning.DefaultVersion = EndpointDefaultVersion;
+            o.Versioning.Prefix = VersioningPrefix;
+            o.Versioning.PrependToRoute = true;
         });
 
         if (app.Environment.IsDevelopment())
@@ -39,6 +47,8 @@ internal static class AppConfiguration
             {
                 o.WithTitle(WebPageTitle);
                 o.HiddenClients = true;
+
+                o.AddDocument(DependencyInjection.V1DocumentName);
             });
         }
     }

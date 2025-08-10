@@ -28,6 +28,7 @@ internal sealed class SignInEndpoint : Endpoint<SignInRequest, AuthTokens>
     public override void Configure()
     {
         Post("sign-in");
+        Version(1).StartingRelease(1);
         AllowAnonymous();
         Description(
             builder =>

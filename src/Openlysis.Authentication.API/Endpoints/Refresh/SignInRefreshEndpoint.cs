@@ -30,6 +30,7 @@ internal sealed class SignInRefreshEndpoint : Endpoint<SignInRefreshRequest, Aut
     public override void Configure()
     {
         Post("sign-in-refresh");
+        Version(1).StartingRelease(1);
         AllowAnonymous();
         Description(
             builder =>

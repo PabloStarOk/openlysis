@@ -26,6 +26,7 @@ internal sealed class SignUpEndpoint : Endpoint<SignUpRequest>
     public override void Configure()
     {
         Post("/sign-up");
+        Version(1).StartingRelease(1);
         AllowAnonymous();
         Description(
             builder =>
