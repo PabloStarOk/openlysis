@@ -55,6 +55,8 @@ internal static class AppConfiguration
                 o.AddDocument(DependencyInjection.V1DocumentName);
             });
         }
+
+        app.UseExceptionHandler();
     }
 
     private static object BuildValidationFailureResponse(

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Authentication.API.Endpoints.Configuration;
+using Openlysis.Authentication.API.Endpoints.Middlewares;
 
 namespace Openlysis.Authentication.API.Endpoints;
 
@@ -55,6 +56,9 @@ internal static class DependencyInjection
                 o.ReleaseVersion = 1;
                 o.RemoveEmptyRequestSchema = true;
             });
+
+        services.AddProblemDetails();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
     }
 
     private static void AddPasswordRequirements(
