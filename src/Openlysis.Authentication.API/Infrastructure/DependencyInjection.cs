@@ -83,14 +83,16 @@ internal static class DependencyInjection
             throw new ArgumentException($"{nameof(certificateOptions.FilePassword)} is required.");
         }
 
-        var certBytes = File.ReadAllBytes(certificateOptions.FilePath);
-        var certificate =
-            new X509Certificate2(certBytes, certificateOptions.FilePassword);
-
         var optionsSection = configuration
             .GetRequiredSection(JwtGeneratorOptions.SectionName);
 
-        services.AddSingleton(certificate);
+        services.AddSingleton<X509Certificate2>(_ =>
+            {
+                var certBytes = File.ReadAllBytes(certificateOptions.FilePath);
+                return new X509Certificate2(
+                    certBytes,
+                    certificateOptions.FilePassword);
+            });
 
         services.AddSingleton<
             IValidateOptions<JwtGeneratorOptions>,
