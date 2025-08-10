@@ -30,7 +30,7 @@ internal sealed class SignUpEndpointSummary : EndpointSummary<SignUpRequest>
                 { "Password", ["Password is required."] },
             });
 
-        Responses[200] = "User account created successfully.";
+        Responses[204] = "User account created successfully.";
         Responses[400] = "Validation error in the request. Returned when the email or password is missing or invalid.";
     }
 }

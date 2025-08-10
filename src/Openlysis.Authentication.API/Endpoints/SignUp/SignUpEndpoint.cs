@@ -31,7 +31,7 @@ internal sealed class SignUpEndpoint : Endpoint<SignUpRequest>
             builder =>
             {
                 builder.Accepts<SignUpRequest>("application/json");
-                builder.Produces(statusCode: 200);
+                builder.Produces(statusCode: 204);
                 builder.Produces(statusCode: 400, typeof(ProblemDetails));
                 builder.ProducesValidationProblem();
             },
@@ -47,7 +47,7 @@ internal sealed class SignUpEndpoint : Endpoint<SignUpRequest>
 
         if (!result.IsError)
         {
-            await Send.OkAsync(CancellationToken.None);
+            await Send.NoContentAsync(CancellationToken.None);
             return;
         }
 
