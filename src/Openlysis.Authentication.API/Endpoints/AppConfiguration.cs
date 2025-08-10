@@ -1,4 +1,7 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
+
+using Scalar.AspNetCore;
 
 namespace Openlysis.Authentication.API.Endpoints;
 
@@ -7,6 +10,11 @@ namespace Openlysis.Authentication.API.Endpoints;
 /// </summary>
 internal static class AppConfiguration
 {
+    private const string DocumentationGenerationPath = "/openapi/{documentName}.json";
+    private const string ApiDocumentationPath = "api-docs";
+    private const string WebPageTitle = "Openlysis Authentication API";
+    private const string EndpointSuffix = "Endpoint";
+
     /// <summary>
     /// Configures FastEndpoints for the given <see cref="WebApplication"/> instance.
     /// </summary>
@@ -15,7 +23,23 @@ internal static class AppConfiguration
     {
         app.UseFastEndpoints(o =>
         {
-            o.Serializer.Options.TypeInfoResolver = ApiJsonSerializerContext.Default;
+            o.Serializer.Options.TypeInfoResolver =
+                ApiJsonSerializerContext.Default;
+            o.Endpoints.ShortNames = true;
+
+            o.Endpoints.NameGenerator = context
+                => context.EndpointType.Name.TrimEnd(EndpointSuffix.ToCharArray());
         });
+
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwaggerGen(o => o.Path = DocumentationGenerationPath);
+
+            app.MapScalarApiReference(ApiDocumentationPath, o =>
+            {
+                o.WithTitle(WebPageTitle);
+                o.HiddenClients = true;
+            });
+        }
     }
 }

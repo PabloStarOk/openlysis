@@ -34,20 +34,13 @@ internal sealed class SignInRefreshEndpoint : Endpoint<SignInRefreshRequest, Aut
         Description(
             builder =>
             {
-                builder.WithName("SignInRefresh");
-                builder.WithDisplayName("SignInRefresh");
                 builder.Accepts<SignInRefreshRequest>("application/json");
                 builder.Produces<AuthTokens>(statusCode: 200);
                 builder.Produces(statusCode: 401);
                 builder.ProducesValidationProblem();
             },
             clearDefaults: true);
-        Summary(s =>
-        {
-            s.Summary = "Refreshes authentication tokens using a valid refresh token.";
-            s.Description = "Accepts a refresh token and returns new authentication tokens if the refresh token is valid.";
-            s.RequestParam(r => r.RefreshToken, "The refresh token to exchange for new authentication tokens.");
-        });
+        Summary(new SignInRefreshEndpointSummary());
     }
 
     /// <inheritdoc/>

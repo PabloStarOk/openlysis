@@ -1,7 +1,6 @@
 using ErrorOr;
 
 using FastEndpoints;
-
 using Openlysis.Authentication.API.Application.SignUp;
 using Openlysis.Domain.Users.ValueObjects;
 
@@ -31,21 +30,13 @@ internal sealed class SignUpEndpoint : Endpoint<SignUpRequest>
         Description(
             builder =>
             {
-                builder.WithName("SignUp");
-                builder.WithDisplayName("SignUp");
                 builder.Accepts<SignUpRequest>("application/json");
                 builder.Produces(statusCode: 200);
-                builder.Produces(statusCode: 400);
+                builder.Produces(statusCode: 400, typeof(ProblemDetails));
                 builder.ProducesValidationProblem();
             },
             clearDefaults: true);
-        Summary(s =>
-        {
-            s.Summary = "Register a new user account.";
-            s.Description = "Creates a new user account with the provided email and password.";
-            s.RequestParam(r => r.Email, "The email address for the new user.");
-            s.RequestParam(r => r.Password, "The password for the new user.");
-        });
+        Summary(new SignUpEndpointSummary());
     }
 
     /// <inheritdoc/>

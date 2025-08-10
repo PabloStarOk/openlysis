@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
@@ -12,6 +13,8 @@ namespace Openlysis.Authentication.API.Endpoints;
 /// </summary>
 internal static class DependencyInjection
 {
+    private const string DocumentsTitle = "Openlysis Authentication API";
+
     /// <summary>
     /// Adds API-related services and configuration to the service collection.
     /// </summary>
@@ -30,6 +33,19 @@ internal static class DependencyInjection
 
         services.AddFastEndpoints(o =>
             o.SourceGeneratorDiscoveredTypes = DiscoveredTypes.All);
+
+        services.SwaggerDocument(o =>
+            {
+                o.DocumentSettings = settings =>
+                {
+                    settings.Title = DocumentsTitle;
+                    settings.Description = "Authentication API for Openlysis.";
+                };
+                o.ShortSchemaNames = true;
+                o.EnableJWTBearerAuth = false;
+                o.ReleaseVersion = 1;
+                o.RemoveEmptyRequestSchema = true;
+            });
     }
 
     private static void AddPasswordRequirements(

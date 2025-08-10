@@ -32,21 +32,13 @@ internal sealed class SignInEndpoint : Endpoint<SignInRequest, AuthTokens>
         Description(
             builder =>
             {
-                builder.WithName("SignIn");
-                builder.WithDisplayName("SignIn");
                 builder.Accepts<SignInRequest>("application/json");
                 builder.Produces<AuthTokens>(statusCode: 200);
                 builder.Produces(statusCode: 401);
                 builder.ProducesValidationProblem();
             },
             clearDefaults: true);
-        Summary(s =>
-        {
-            s.Summary = "Authenticates a user and return authentication tokens.";
-            s.Description = "Authenticates a user with the provided email and password, returning an access and refresh token if successful.";
-            s.RequestParam(r => r.Email, "The email address of the user.");
-            s.RequestParam(r => r.Password, "The password of the user.");
-        });
+        Summary(new SignInEndpointSummary());
     }
 
     /// <inheritdoc/>
