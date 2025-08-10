@@ -51,7 +51,7 @@ internal sealed class UserRepository : IUserRepository
     /// <inheritdoc/>
     public async Task AddAsync(User user)
     {
-        using var dbConnection = _dbContext.CreateConnection();
+        await using var dbConnection = await _dbContext.OpenConnectionAsync();
         await dbConnection.ExecuteAsync(AddSqlQuery, new
         {
             user_id = user.Id.Value,
@@ -64,7 +64,7 @@ internal sealed class UserRepository : IUserRepository
     /// <inheritdoc/>
     public async Task<User> GetByIdAsync(GlobalId id)
     {
-        using var dbConnection = _dbContext.CreateConnection();
+        await using var dbConnection = await _dbContext.OpenConnectionAsync();
         var dbEntity = await dbConnection.QuerySingleAsync<DbUser>(
             GetByIdSqlQuery,
             new { id = id.Value });
@@ -75,7 +75,7 @@ internal sealed class UserRepository : IUserRepository
     /// <inheritdoc/>
     public async Task<User?> GetByEmailAsync(EmailAddress emailAddress)
     {
-        using var dbConnection = _dbContext.CreateConnection();
+        await using var dbConnection = await _dbContext.OpenConnectionAsync();
         var dbEntity = await dbConnection.QuerySingleOrDefaultAsync<DbUser>(
             GetByEmailSqlQuery,
             new { email_address = emailAddress.Value });
@@ -86,7 +86,7 @@ internal sealed class UserRepository : IUserRepository
     /// <inheritdoc/>
     public async Task<bool> ExistsAsync(EmailAddress emailAddress)
     {
-        using var dbConnection = _dbContext.CreateConnection();
+        await using var dbConnection = await _dbContext.OpenConnectionAsync();
         return await dbConnection.QuerySingleAsync<bool>(ExistsSqlQuery, new
         {
             email_address = emailAddress.Value,

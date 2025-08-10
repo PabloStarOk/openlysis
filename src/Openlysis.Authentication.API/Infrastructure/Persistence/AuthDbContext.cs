@@ -1,6 +1,5 @@
 using System.Data;
-
-using Npgsql;
+using System.Data.Common;
 
 namespace Openlysis.Authentication.API.Infrastructure.Persistence;
 
@@ -9,23 +8,23 @@ namespace Openlysis.Authentication.API.Infrastructure.Persistence;
 /// </summary>
 internal sealed class AuthDbContext
 {
-    private readonly string _connectionString;
+    private readonly DbDataSource _dbDataSource;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AuthDbContext"/> class with the specified connection string.
+    /// Initializes a new instance of the <see cref="AuthDbContext"/> class with the specified data source.
     /// </summary>
-    /// <param name="connectionString">The connection string to the database.</param>
-    public AuthDbContext(string connectionString)
+    /// <param name="dbDataSource">The database data source to use for connections.</param>
+    public AuthDbContext(DbDataSource dbDataSource)
     {
-        _connectionString = connectionString;
+        _dbDataSource = dbDataSource;
     }
 
     /// <summary>
-    /// Creates and returns a new <see cref="IDbConnection"/> to the database.
+    /// Asynchronously creates and opens a new database connection.
     /// </summary>
-    /// <returns>An <see cref="IDbConnection"/> instance.</returns>
-    public IDbConnection CreateConnection()
+    /// <returns>An open <see cref="IDbConnection"/> instance.</returns>
+    public async Task<DbConnection> OpenConnectionAsync()
     {
-        return new NpgsqlConnection(_connectionString);
+        return await _dbDataSource.OpenConnectionAsync();
     }
 }

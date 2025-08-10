@@ -48,7 +48,7 @@ internal sealed class RefreshTokenRepository : IRefreshTokenRepository
     /// <inheritdoc/>
     public async Task AddAsync(RefreshToken token)
     {
-        using var dbConnection = _dbContext.CreateConnection();
+        await using var dbConnection = await _dbContext.OpenConnectionAsync();
         await dbConnection.ExecuteAsync(AddSqlQuery, new
         {
             token_hash = token.TokenHash,
@@ -62,7 +62,7 @@ internal sealed class RefreshTokenRepository : IRefreshTokenRepository
     /// <inheritdoc/>
     public async Task<RefreshToken?> GetByHashAsync(byte[] hash)
     {
-        using var dbConnection = _dbContext.CreateConnection();
+        await using var dbConnection = await _dbContext.OpenConnectionAsync();
         var refreshToken = await dbConnection.QuerySingleOrDefaultAsync<DbRefreshToken>(
             GetByHashSqlQuery,
             new { token_hash = hash });
@@ -74,9 +74,8 @@ internal sealed class RefreshTokenRepository : IRefreshTokenRepository
         RefreshToken revokedToken,
         RefreshToken newToken)
     {
-        using var dbConnection = _dbContext.CreateConnection();
-        dbConnection.Open();
-        using var transaction = dbConnection.BeginTransaction();
+        await using var dbConnection = await _dbContext.OpenConnectionAsync();
+        await using var transaction = await dbConnection.BeginTransactionAsync();
         await dbConnection.ExecuteAsync(
             UpdateSqlQuery,
             new
@@ -100,12 +99,12 @@ internal sealed class RefreshTokenRepository : IRefreshTokenRepository
 
         try
         {
-            transaction.Commit();
+            await transaction.CommitAsync();
             return Result.Success;
         }
         catch
         {
-            transaction.Rollback();
+            await transaction.RollbackAsync();
             throw;
         }
     }
@@ -113,7 +112,7 @@ internal sealed class RefreshTokenRepository : IRefreshTokenRepository
     /// <inheritdoc/>
     public async Task RevokeAllForUserAsync(GlobalId userId)
     {
-        using var dbConnection = _dbContext.CreateConnection();
+        await using var dbConnection = await _dbContext.OpenConnectionAsync();
         await dbConnection.ExecuteAsync(
             RevokeAllForUserSqlQuery,
             new { user_id = userId.Value });

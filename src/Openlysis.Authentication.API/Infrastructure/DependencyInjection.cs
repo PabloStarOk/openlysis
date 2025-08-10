@@ -1,7 +1,10 @@
+using System.Data.Common;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Extensions.Options;
+
+using Npgsql;
 
 using Openlysis.Authentication.API.Application.Common.Abstractions.Persistence;
 using Openlysis.Authentication.API.Application.Common.Abstractions.Services;
@@ -38,10 +41,17 @@ internal static class DependencyInjection
         IServiceCollection services,
         IConfiguration configuration)
     {
-        string? connectionString = configuration.GetConnectionString(AuthConnectionString);
-        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
-        services.AddSingleton(new AuthDbContext(connectionString));
-
+        services.AddSingleton<DbDataSource>(
+            sp =>
+            {
+                string? connectionString = configuration.GetConnectionString(AuthConnectionString);
+                ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+                var loggerFactory = sp.GetService<ILoggerFactory>();
+                return new NpgsqlSlimDataSourceBuilder(connectionString)
+                    .UseLoggerFactory(loggerFactory)
+                    .Build();
+            });
+        services.AddSingleton<AuthDbContext>();
         services.AddTransient<IUserRepository, UserRepository>();
         services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>();
     }
