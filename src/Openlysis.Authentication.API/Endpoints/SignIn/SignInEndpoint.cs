@@ -2,6 +2,7 @@ using ErrorOr;
 
 using FastEndpoints;
 
+using Openlysis.Authentication.API.Application.Common.Models;
 using Openlysis.Authentication.API.Application.SignIn;
 using Openlysis.Domain.Users.ValueObjects;
 
@@ -10,7 +11,7 @@ namespace Openlysis.Authentication.API.Endpoints.SignIn;
 /// <summary>
 /// Endpoint for handling user sign-in requests.
 /// </summary>
-internal sealed class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
+internal sealed class SignInEndpoint : Endpoint<SignInRequest, AuthTokens>
 {
     private readonly ITokenSignInService _tokenSignInService;
 
@@ -34,15 +35,15 @@ internal sealed class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
                 builder.WithName("SignIn");
                 builder.WithDisplayName("SignIn");
                 builder.Accepts<SignInRequest>("application/json");
-                builder.Produces<SignInResponse>(statusCode: 200);
+                builder.Produces<AuthTokens>(statusCode: 200);
                 builder.Produces(statusCode: 401);
                 builder.ProducesValidationProblem();
             },
             clearDefaults: true);
         Summary(s =>
         {
-            s.Summary = "Authenticates a user and return an access token.";
-            s.Description = "Authenticates a user with the provided email and password, returning an access token if successful.";
+            s.Summary = "Authenticates a user and return authentication tokens.";
+            s.Description = "Authenticates a user with the provided email and password, returning an access and refresh token if successful.";
             s.RequestParam(r => r.Email, "The email address of the user.");
             s.RequestParam(r => r.Password, "The password of the user.");
         });
@@ -52,7 +53,7 @@ internal sealed class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
     public override async Task HandleAsync(SignInRequest req, CancellationToken ct)
     {
         var email = new EmailAddress(req.Email);
-        ErrorOr<string> result =
+        ErrorOr<AuthTokens> result =
             await _tokenSignInService.SignInAsync(email, req.Password);
 
         if (result.IsError)
@@ -61,7 +62,7 @@ internal sealed class SignInEndpoint : Endpoint<SignInRequest, SignInResponse>
             return;
         }
 
-        var response = new SignInResponse(AccessToken: result.Value);
-        await Send.OkAsync(response, CancellationToken.None);
+        AuthTokens authTokens = result.Value;
+        await Send.OkAsync(authTokens, CancellationToken.None);
     }
 }

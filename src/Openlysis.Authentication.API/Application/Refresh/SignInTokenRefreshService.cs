@@ -5,63 +5,59 @@ using Openlysis.Authentication.API.Application.Common.Abstractions.Services;
 using Openlysis.Authentication.API.Application.Common.Models;
 using Openlysis.Authentication.API.Application.Common.Services;
 using Openlysis.Domain.Users.Entities;
-using Openlysis.Domain.Users.ValueObjects;
 
-namespace Openlysis.Authentication.API.Application.SignIn;
+namespace Openlysis.Authentication.API.Application.Refresh;
 
 /// <summary>
-/// Service responsible for handling user sign-in using tokens.
+/// Service responsible for refreshing sign-in tokens.
 /// </summary>
-internal sealed class TokenSignInService : ITokenSignInService
+internal sealed class SignInTokenRefreshService : ISignInTokenRefreshService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenGenerator _tokenGenerator;
     private readonly RefreshTokenStore _refreshTokenStore;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="TokenSignInService"/> class.
+    /// Initializes a new instance of the <see cref="SignInTokenRefreshService"/> class.
     /// </summary>
     /// <param name="userRepository">Repository for user data access.</param>
-    /// <param name="passwordHasher">Service for password hashing and verification.</param>
     /// <param name="tokenGenerator">Service for generating authentication tokens.</param>
     /// <param name="refreshTokenStore">Store for managing refresh tokens.</param>
-    public TokenSignInService(
+    public SignInTokenRefreshService(
         IUserRepository userRepository,
-        IPasswordHasher passwordHasher,
         ITokenGenerator tokenGenerator,
         RefreshTokenStore refreshTokenStore)
     {
         _userRepository = userRepository;
-        _passwordHasher = passwordHasher;
         _tokenGenerator = tokenGenerator;
         _refreshTokenStore = refreshTokenStore;
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<AuthTokens>> SignInAsync(
-        EmailAddress email,
-        string password)
+    public async Task<ErrorOr<AuthTokens>> RefreshAsync(string refreshToken)
     {
-        bool userExists = await _userRepository.ExistsAsync(email);
-
-        if (!userExists)
+        RefreshToken? oldRefreshToken =
+            await _refreshTokenStore.GetAsync(refreshToken);
+        if (oldRefreshToken is null ||
+            DateTimeOffset.UtcNow >= oldRefreshToken.ExpiresAt)
         {
             return Error.Unauthorized();
         }
 
-        User user = await _userRepository.GetByEmailAsync(email);
+        User user = await _userRepository.GetByIdAsync(oldRefreshToken.UserId);
 
-        var passwordsMatch =
-            await _passwordHasher.VerifyPasswordAsync(user, password);
-
-        if (!passwordsMatch)
+        if (oldRefreshToken.RevokedAt is not null)
         {
+            await _refreshTokenStore.RevokeAllForUserAsync(user.Id);
             return Error.Unauthorized();
         }
 
-        AuthTokens authTokens = _tokenGenerator.Generate(user);
-        await _refreshTokenStore.AddAsync(user.Id, authTokens.RefreshToken);
-        return authTokens;
+        AuthTokens newTokens = _tokenGenerator.Generate(user);
+        await _refreshTokenStore.RotateAsync(
+            user.Id,
+            oldRefreshToken,
+            newTokens.RefreshToken);
+
+        return newTokens;
     }
 }

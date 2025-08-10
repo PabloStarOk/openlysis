@@ -4,7 +4,7 @@ using Openlysis.Authentication.API.Infrastructure;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApplication();
+builder.Services.AddApplication(builder.Configuration);
 builder.Services.AddApi(builder.Configuration);
 var app = builder.Build();
 app.ConfigureApi();

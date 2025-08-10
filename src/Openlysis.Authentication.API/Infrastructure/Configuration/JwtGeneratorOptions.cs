@@ -24,4 +24,9 @@ internal sealed record JwtGeneratorOptions
     /// Gets or sets the expiration time in seconds for the JWT.
     /// </summary>
     required public int ExpirationSeconds { get; set; }
+
+    /// <summary>
+    /// Gets or sets the size in bytes to use for generating refresh tokens.
+    /// </summary>
+    required public int RefreshTokenSizeBytes { get; set; }
 }

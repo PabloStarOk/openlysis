@@ -27,6 +27,11 @@ internal sealed class JwtGeneratorOptionsValidator : IValidateOptions<JwtGenerat
             errors.Add($"{nameof(options.Audience)} is required.");
         }
 
+        if (options.RefreshTokenSizeBytes < 16)
+        {
+            errors.Add($"{nameof(options.RefreshTokenSizeBytes)} must be at least 16.");
+        }
+
         return errors.Count > 0
             ? ValidateOptionsResult.Fail(string.Join(" ", errors))
             : ValidateOptionsResult.Success;

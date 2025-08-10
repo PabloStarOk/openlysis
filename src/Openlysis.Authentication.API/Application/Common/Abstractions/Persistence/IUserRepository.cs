@@ -1,3 +1,4 @@
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Users.Entities;
 using Openlysis.Domain.Users.ValueObjects;
 
@@ -14,6 +15,16 @@ internal interface IUserRepository
     /// <param name="user">The user entity to add.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public Task AddAsync(User user);
+
+    /// <summary>
+    /// Retrieves a user entity by the specified ID.
+    /// </summary>
+    /// <param name="id">The global identifier of the user to retrieve.</param>
+    /// <returns>
+    /// A <see cref="Task{User}"/> representing the asynchronous operation,
+    /// containing the user entity if found; otherwise, null.
+    /// </returns>
+    public Task<User> GetByIdAsync(GlobalId id);
 
     /// <summary>
     /// Retrieves a user entity by the specified email address.

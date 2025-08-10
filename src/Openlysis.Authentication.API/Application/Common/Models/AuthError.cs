@@ -1,6 +1,6 @@
 using ErrorOr;
 
-namespace Openlysis.Authentication.API.Application.Common.Errors;
+namespace Openlysis.Authentication.API.Application.Common.Models;
 
 /// <summary>
 /// Contains authentication-related error definitions.

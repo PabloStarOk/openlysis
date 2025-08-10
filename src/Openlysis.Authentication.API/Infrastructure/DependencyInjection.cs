@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Extensions.Options;
@@ -27,12 +28,13 @@ internal static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        AddRepository(services, configuration);
+        AddRepositories(services, configuration);
         AddPasswordHasher(services, configuration);
         AddTokenGenerator(services, configuration);
+        AddTokenHasher(services);
     }
 
-    private static void AddRepository(
+    private static void AddRepositories(
         IServiceCollection services,
         IConfiguration configuration)
     {
@@ -41,6 +43,7 @@ internal static class DependencyInjection
         services.AddSingleton(new AuthDbContext(connectionString));
 
         services.AddTransient<IUserRepository, UserRepository>();
+        services.AddTransient<IRefreshTokenRepository, RefreshTokenRepository>();
     }
 
     private static void AddPasswordHasher(
@@ -98,5 +101,11 @@ internal static class DependencyInjection
             .ValidateOnStart();
 
         services.AddTransient<ITokenGenerator, JwtGenerator>();
+    }
+
+    private static void AddTokenHasher(IServiceCollection services)
+    {
+        services.AddSingleton<HashAlgorithm>(_ => SHA256.Create());
+        services.AddTransient<ITokenHasher, TokenHasher>();
     }
 }

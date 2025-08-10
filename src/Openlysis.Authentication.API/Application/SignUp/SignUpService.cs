@@ -2,7 +2,7 @@ using ErrorOr;
 
 using Openlysis.Authentication.API.Application.Common.Abstractions.Persistence;
 using Openlysis.Authentication.API.Application.Common.Abstractions.Services;
-using Openlysis.Authentication.API.Application.Common.Errors;
+using Openlysis.Authentication.API.Application.Common.Models;
 using Openlysis.Domain.Users.Entities;
 using Openlysis.Domain.Users.ValueObjects;
 

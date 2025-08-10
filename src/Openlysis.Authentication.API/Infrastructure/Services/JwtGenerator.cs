@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 using JWT.Algorithms;
@@ -7,6 +8,7 @@ using JWT.Serializers;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Authentication.API.Application.Common.Abstractions.Services;
+using Openlysis.Authentication.API.Application.Common.Models;
 using Openlysis.Authentication.API.Infrastructure.Configuration;
 using Openlysis.Domain.Users.Entities;
 
@@ -34,10 +36,16 @@ internal sealed class JwtGenerator : ITokenGenerator
     }
 
     /// <inheritdoc/>
-    public string GenerateAccessToken(User user)
+    public AuthTokens Generate(User user)
     {
         ArgumentNullException.ThrowIfNull(user);
+        string accessToken = GenerateAccessToken(user);
+        string refreshToken = GenerateRefreshToken();
+        return new AuthTokens(accessToken, refreshToken);
+    }
 
+    private string GenerateAccessToken(User user)
+    {
         var algorithm = new ES256Algorithm(_certificate);
         var now = DateTimeOffset.UtcNow;
         long nowUnixMilliseconds = now.ToUnixTimeMilliseconds();
@@ -59,5 +67,12 @@ internal sealed class JwtGenerator : ITokenGenerator
             .Encode();
 
         return token;
+    }
+
+    private string GenerateRefreshToken()
+    {
+        int tokenSizeBytes = _options.Value.RefreshTokenSizeBytes;
+        byte[] refreshToken = RandomNumberGenerator.GetBytes(tokenSizeBytes);
+        return Convert.ToBase64String(refreshToken);
     }
 }
