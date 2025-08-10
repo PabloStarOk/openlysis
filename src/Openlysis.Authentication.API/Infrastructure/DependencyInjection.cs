@@ -49,6 +49,7 @@ internal static class DependencyInjection
                 var loggerFactory = sp.GetService<ILoggerFactory>();
                 return new NpgsqlSlimDataSourceBuilder(connectionString)
                     .UseLoggerFactory(loggerFactory)
+                    .UseNodaTime()
                     .Build();
             });
         services.AddSingleton<AuthDbContext>();

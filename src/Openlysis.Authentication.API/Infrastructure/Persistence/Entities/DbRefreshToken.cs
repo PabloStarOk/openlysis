@@ -1,3 +1,5 @@
+using NodaTime;
+
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Users.Entities;
 
@@ -26,17 +28,17 @@ internal sealed record DbRefreshToken
     /// <summary>
     /// Gets the creation date and time of the refresh token.
     /// </summary>
-    required public DateTime CreatedAt { get; init; }
+    required public Instant CreatedAt { get; init; }
 
     /// <summary>
     /// Gets the expiration date and time of the refresh token.
     /// </summary>
-    required public DateTime ExpiresAt { get; init; }
+    required public Instant ExpiresAt { get; init; }
 
     /// <summary>
     /// Gets the date and time when the refresh token was revoked, if applicable.
     /// </summary>
-    required public DateTime? RevokedAt { get; init; }
+    required public Instant? RevokedAt { get; init; }
 
     /// <summary>
     /// Converts this database entity to its corresponding domain model.
@@ -49,8 +51,8 @@ internal sealed record DbRefreshToken
             TokenId,
             TokenHash,
             userId,
-            CreatedAt,
-            ExpiresAt,
-            RevokedAt);
+            CreatedAt.ToDateTimeOffset(),
+            ExpiresAt.ToDateTimeOffset(),
+            RevokedAt?.ToDateTimeOffset());
     }
 }
