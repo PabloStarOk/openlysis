@@ -4,7 +4,6 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.Application.EmailAddresses.Services;
 using Openlysis.Domain.EmailAddresses;
 
@@ -57,18 +56,11 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, EmailAddress
                 endpointSummary.ExampleRequest = new GetReputationRequest("jhon.doe@example.com");
                 endpointSummary.RequestParam(r => r.EmailAddress, "An email address.");
             });
-        DontThrowIfValidationFails();
     }
 
     /// <inheritdoc/>
     public override async Task HandleAsync(GetReputationRequest req, CancellationToken ct)
     {
-        if (ValidationFailed)
-        {
-            await SendResultAsync(ValidationFailures.AsValidationProblem());
-            return;
-        }
-
         if (!_reputationService.IsAvailable)
         {
             IResult result = Results.Problem(

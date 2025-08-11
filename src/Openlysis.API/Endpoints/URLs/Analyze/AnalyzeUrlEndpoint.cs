@@ -5,7 +5,6 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.API.Endpoints.URLs.GetAnalysisById;
 using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.URLs;
@@ -69,18 +68,11 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
                 s.RequestParam(r => r.Reanalyze, "Indicates whether the URL should be reanalyzed even if an existing analysis is available. Default is false.");
                 s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who uploads the URL. Default is false");
             });
-        DontThrowIfValidationFails();
     }
 
     /// <inheritdoc/>
     public override async Task HandleAsync(AnalyzeUrlRequest req, CancellationToken ct)
     {
-        if (ValidationFailed)
-        {
-            await SendResultAsync(ValidationFailures.AsValidationProblem());
-            return;
-        }
-
         Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
         var userId = UserId.Create(Guid.Parse(claim.Value));
 

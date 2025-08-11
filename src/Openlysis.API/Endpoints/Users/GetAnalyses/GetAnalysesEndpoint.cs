@@ -1,6 +1,5 @@
 using FastEndpoints;
 
-using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.API.Endpoints.Messages.Common.Responses;
@@ -73,18 +72,11 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
                     r => r.Analyses,
                     $"A paginated collection containing analyses of type {nameof(UrlMultiAnalysisDto)}, {nameof(FileMultiAnalysisDto)}, or {nameof(MessageAnalysisDto)}. Refer to the schemas for detailed structure.");
             });
-        DontThrowIfValidationFails();
     }
 
     /// <inheritdoc/>
     public override async Task HandleAsync(GetAnalysesRequest req, CancellationToken ct)
     {
-        if (ValidationFailed)
-        {
-            await SendResultAsync(ValidationFailures.AsValidationProblem());
-            return;
-        }
-
         UserId userId = UserId.Create(Guid.Parse(req.UserId));
 
         Func<UserId, GetAnalysesRequest, CancellationToken, Task<IReadOnlyList<object>>>

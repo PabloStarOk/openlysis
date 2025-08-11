@@ -7,7 +7,7 @@ namespace Openlysis.API.Authentication.API.Extensions;
 /// <summary>
 /// Provides extension methods for the <see cref="IdentityResult"/> class.
 /// </summary>
-public static class IdentityResultExtensions
+internal static class IdentityResultExtensions
 {
     /// <summary>
     /// Creates a <see cref="ValidationProblem"/> from an <see cref="IdentityResult"/>.

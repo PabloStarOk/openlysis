@@ -8,7 +8,7 @@ namespace Openlysis.API.Authentication.API.Extensions;
 /// <summary>
 /// Provides extension methods for handling validation failures.
 /// </summary>
-public static class ValidationFailureExtensions
+internal static class ValidationFailureExtensions
 {
     /// <summary>
     /// Creates a <see cref="ValidationProblem"/> from a list of <see cref="ValidationFailure"/>.

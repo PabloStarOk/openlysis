@@ -2,7 +2,6 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.Application.Phones.Services;
 using Openlysis.Domain.Phones;
 
@@ -55,7 +54,6 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, PhoneMultiRe
                 endpointSummary.ExampleRequest = new GetReputationRequest("+1 555 123 4567");
                 endpointSummary.RequestParam(r => r.PhoneNumber, "A phone number in E.164 format.");
             });
-        DontThrowIfValidationFails();
     }
 
     /// <inheritdoc/>
@@ -63,12 +61,6 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, PhoneMultiRe
         GetReputationRequest req,
         CancellationToken ct)
     {
-        if (ValidationFailed)
-        {
-            await SendResultAsync(ValidationFailures.AsValidationProblem());
-            return;
-        }
-
         if (!_reputationService.IsAvailable)
         {
             IResult result = Results.Problem(

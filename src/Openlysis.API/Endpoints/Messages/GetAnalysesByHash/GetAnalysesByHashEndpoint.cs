@@ -2,7 +2,6 @@ using System.Security.Claims;
 
 using FastEndpoints;
 
-using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 using Openlysis.API.Endpoints.Files.Common.Responses;
@@ -74,18 +73,11 @@ public class GetAnalysesByHashEndpoint
                 s.RequestParam(r => r.PageSize, $"The number of items per page for pagination (minimum is {GetAnalysesByHashRequestValidator.MinPageSize}, maximum is {GetAnalysesByHashRequestValidator.MaxPageSize}).");
                 s.RequestParam(r => r.StartedDateOrder, "Order of the collection by started date.");
             });
-        DontThrowIfValidationFails();
     }
 
     /// <inheritdoc/>
     public override async Task HandleAsync(GetAnalysesByHashRequest req, CancellationToken ct)
     {
-        if (ValidationFailed)
-        {
-            await SendResultAsync(ValidationFailures.AsValidationProblem());
-            return;
-        }
-
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
         UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
 

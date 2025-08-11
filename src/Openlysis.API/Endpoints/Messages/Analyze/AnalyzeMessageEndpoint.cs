@@ -4,7 +4,6 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.API.Endpoints.Messages.GetAnalysisById;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Messages.Contracts.Requests;
@@ -71,18 +70,11 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
                 s.RequestParam(r => r.Reanalyze, "If the extracted data and the message should be reanalyzed even if there are existing analyses for theme. Default is false.");
                 s.RequestParam(r => r.CountryCode, "A code of the country where detected phone numbers can be associated to, it must be in ISO 3166-1 alpha-2 format (e.g. 'US').");
             });
-        DontThrowIfValidationFails();
     }
 
     /// <inheritdoc/>
     public override async Task HandleAsync(AnalyzeMessageRequest req, CancellationToken ct)
     {
-        if (ValidationFailed)
-        {
-            await SendResultAsync(ValidationFailures.AsValidationProblem());
-            return;
-        }
-
         if (!_messageAnalysisService.AnalyzeIsAvailable)
         {
             IResult result = Results.Problem(

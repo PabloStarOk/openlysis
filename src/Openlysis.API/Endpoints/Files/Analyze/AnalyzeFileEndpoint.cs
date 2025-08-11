@@ -4,7 +4,6 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using Openlysis.API.Authentication.API.Extensions;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Files.Services;
 using Openlysis.Domain.Users.ValueObjects;
@@ -67,7 +66,6 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
                 s.RequestParam(r => r.IsPrivate, "If the file analysis is private. True is the default. (Optional)");
                 s.RequestParam(r => r.Reanalyze, "If the file must analyzed again, instead of returning the last analysis. False is the default. (Optional).");
             });
-        DontThrowIfValidationFails();
     }
 
     /// <summary>
@@ -78,12 +76,6 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
     /// <returns>A task representing the asynchronous operation.</returns>
     public override async Task HandleAsync(AnalyzeFileRequest request, CancellationToken ct)
     {
-        if (ValidationFailed)
-        {
-            await SendResultAsync(ValidationFailures.AsValidationProblem());
-            return;
-        }
-
         Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
         var userId = UserId.Create(Guid.Parse(claim.Value));
 
