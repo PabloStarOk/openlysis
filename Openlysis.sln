@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Evaluators.Ipqs",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.TestTools.ServicesSimulation", "tests\Openlysis.TestTools.ServicesSimulation\Openlysis.TestTools.ServicesSimulation.csproj", "{E5D607ED-DAE3-4286-9B5A-214D1919645D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Authentication.API", "src\Openlysis.Authentication.API\Openlysis.Authentication.API.csproj", "{7968152C-2017-4A43-98E8-E994353E8E92}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -100,6 +102,10 @@ Global
 		{E5D607ED-DAE3-4286-9B5A-214D1919645D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5D607ED-DAE3-4286-9B5A-214D1919645D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5D607ED-DAE3-4286-9B5A-214D1919645D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7968152C-2017-4A43-98E8-E994353E8E92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7968152C-2017-4A43-98E8-E994353E8E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7968152C-2017-4A43-98E8-E994353E8E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7968152C-2017-4A43-98E8-E994353E8E92}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
