@@ -58,7 +58,11 @@ internal sealed class TokenSignInService : ITokenSignInService
         }
 
         AuthTokens authTokens = _tokenGenerator.Generate(user);
-        await _refreshTokenStore.AddAsync(user.Id, authTokens.RefreshToken);
+        await _refreshTokenStore.AddAsync(
+            user.Id,
+            authTokens.RefreshToken,
+            authTokens.RefreshTokenExpiration);
+
         return authTokens;
     }
 }

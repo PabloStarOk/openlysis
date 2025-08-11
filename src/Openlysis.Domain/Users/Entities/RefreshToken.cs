@@ -63,16 +63,23 @@ public sealed class RefreshToken : Entity<long>
     /// </summary>
     /// <param name="tokenHash">The hashed value of the refresh token.</param>
     /// <param name="userId">The unique identifier of the user associated with this refresh token.</param>
-    /// <param name="expirationDays">The number of days until the token expires.</param>
+    /// <param name="expiresAt">The timestamp when the refresh token expires.</param>
     /// <returns>A new <see cref="RefreshToken"/> instance.</returns>
     public static RefreshToken Create(
         byte[] tokenHash,
         GlobalId userId,
-        int expirationDays)
+        DateTimeOffset expiresAt)
     {
         long randomId = Random.Shared.NextInt64();
         DateTimeOffset now = DateTimeOffset.UtcNow;
-        DateTimeOffset expiresAt = now.AddDays(expirationDays);
+
+        if (expiresAt <= now)
+        {
+            throw new ArgumentException(
+                "expiresAt must be later than the current time.",
+                nameof(expiresAt));
+        }
+
         return new RefreshToken(
             randomId,
             tokenHash,

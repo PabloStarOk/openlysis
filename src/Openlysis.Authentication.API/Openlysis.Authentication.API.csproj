@@ -22,6 +22,7 @@
       <PackageReference Include="FastEndpoints.Swagger" Version="7.0.1" />
       <PackageReference Include="JWT" Version="11.0.0" />
       <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.1" />
+      <PackageReference Include="NodaTime.Serialization.SystemTextJson" Version="1.3.0" />
       <PackageReference Include="Npgsql" Version="9.0.3" />
       <PackageReference Include="Npgsql.NodaTime" Version="9.0.3" />
       <PackageReference Include="Scalar.AspNetCore" Version="2.6.8" />
@@ -33,6 +34,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Openlysis.Domain\Openlysis.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Endpoints\Common\" />
     </ItemGroup>
 
 </Project>

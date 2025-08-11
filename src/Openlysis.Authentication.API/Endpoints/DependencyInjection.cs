@@ -4,6 +4,9 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Extensions.Options;
 
+using NodaTime;
+using NodaTime.Serialization.SystemTextJson;
+
 using Openlysis.Authentication.API.Endpoints.Configuration;
 using Openlysis.Authentication.API.Endpoints.Middlewares;
 using Openlysis.Authentication.API.Infrastructure;
@@ -38,6 +41,7 @@ internal static class DependencyInjection
         services.Configure<JsonOptions>(o =>
         {
             o.SerializerOptions.TypeInfoResolver = ApiJsonSerializerContext.Default;
+            o.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
         });
 
         services.AddFastEndpoints(o =>

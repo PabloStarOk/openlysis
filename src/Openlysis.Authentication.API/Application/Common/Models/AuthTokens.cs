@@ -1,3 +1,5 @@
+using NodaTime;
+
 namespace Openlysis.Authentication.API.Application.Common.Models;
 
 /// <summary>
@@ -5,4 +7,8 @@ namespace Openlysis.Authentication.API.Application.Common.Models;
 /// </summary>
 /// <param name="AccessToken">The access token.</param>
 /// <param name="RefreshToken">The refresh token used to obtain new access tokens.</param>
-internal sealed record AuthTokens(string AccessToken, string RefreshToken);
+/// <param name="RefreshTokenExpiration"> The expiration timestamp (in UTC) for the refresh token.</param>
+internal sealed record AuthTokens(
+    string AccessToken,
+    string RefreshToken,
+    Instant RefreshTokenExpiration);

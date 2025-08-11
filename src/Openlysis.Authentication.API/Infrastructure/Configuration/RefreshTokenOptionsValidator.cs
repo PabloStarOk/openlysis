@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace Openlysis.Authentication.API.Application.Common.Configuration;
+namespace Openlysis.Authentication.API.Infrastructure.Configuration;
 
 /// <summary>
 /// Validates <see cref="RefreshTokenOptions"/> to ensure all required properties are set and valid.

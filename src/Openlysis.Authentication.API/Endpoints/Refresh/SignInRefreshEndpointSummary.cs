@@ -1,5 +1,7 @@
 using FastEndpoints;
 
+using NodaTime;
+
 using Openlysis.Authentication.API.Application.Common.Models;
 
 namespace Openlysis.Authentication.API.Endpoints.Refresh;
@@ -25,7 +27,8 @@ internal sealed class SignInRefreshEndpointSummary
 
         ResponseExamples[200] = new AuthTokens(
             AccessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-            RefreshToken: "dGhpc0lzQVRlc3RSZWZyZXNoVG9rZW5FeGFtcGxlMTIzNDU2Nzg5MA==");
+            RefreshToken: "dGhpc0lzQVRlc3RSZWZyZXNoVG9rZW5FeGFtcGxlMTIzNDU2Nzg5MA==",
+            RefreshTokenExpiration: SystemClock.Instance.GetCurrentInstant());
 
         ResponseExamples[400] = Results.ValidationProblem(
             detail: "Validation failed. One or more errors occurred!",

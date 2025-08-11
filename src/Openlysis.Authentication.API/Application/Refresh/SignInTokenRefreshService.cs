@@ -56,7 +56,8 @@ internal sealed class SignInTokenRefreshService : ISignInTokenRefreshService
         await _refreshTokenStore.RotateAsync(
             user.Id,
             oldRefreshToken,
-            newTokens.RefreshToken);
+            newTokens.RefreshToken,
+            newTokens.RefreshTokenExpiration);
 
         return newTokens;
     }

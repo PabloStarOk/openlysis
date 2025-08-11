@@ -4,6 +4,8 @@ using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Extensions.Options;
 
+using NodaTime;
+
 using Npgsql;
 
 using Openlysis.Authentication.API.Application.Common.Abstractions.Persistence;
@@ -108,8 +110,11 @@ internal static class DependencyInjection
             throw new ArgumentException($"{nameof(certificateOptions.FilePassword)} is required.");
         }
 
-        var optionsSection = configuration
+        var jwtOptionsSection = configuration
             .GetRequiredSection(JwtGeneratorOptions.SectionName);
+
+        var refreshTokenOptionsSection = configuration
+            .GetRequiredSection(RefreshTokenOptions.SectionName);
 
         services.AddSingleton<X509Certificate2>(_ =>
             {
@@ -124,9 +129,18 @@ internal static class DependencyInjection
             JwtGeneratorOptionsValidator>();
 
         services.AddOptions<JwtGeneratorOptions>()
-            .Bind(optionsSection)
+            .Bind(jwtOptionsSection)
             .ValidateOnStart();
 
+        services.AddSingleton<
+            IValidateOptions<RefreshTokenOptions>,
+            RefreshTokenOptionsValidator>();
+
+        services.AddOptions<RefreshTokenOptions>()
+            .Bind(refreshTokenOptionsSection)
+            .ValidateOnStart();
+
+        services.AddSingleton<IClock>(SystemClock.Instance);
         services.AddTransient<ITokenGenerator, JwtGenerator>();
     }
 

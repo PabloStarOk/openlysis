@@ -1,4 +1,4 @@
-namespace Openlysis.Authentication.API.Application.Common.Configuration;
+namespace Openlysis.Authentication.API.Infrastructure.Configuration;
 
 /// <summary>
 /// Options for configuring refresh token behavior.
