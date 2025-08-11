@@ -10,8 +10,8 @@ internal static class AuthError
     /// <summary>
     /// Gets the error indicating that a user with the provided email address already exists.
     /// </summary>
-    public static Error EmailAlreadyExists { get; } = Error.Custom(
+    public static Error EmailUnavailable { get; } = Error.Custom(
         (int)ErrorType.Conflict,
-        "User.EmailAlreadyExists",
-        "An user with the provided email address already exists.");
+        "User.EmailUnavailable",
+        "The provided email address is unavailable.");
 }

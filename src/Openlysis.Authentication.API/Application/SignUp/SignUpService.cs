@@ -34,7 +34,7 @@ internal sealed class SignUpService : ISignUpService
     {
         if (await _userRepository.ExistsAsync(email))
         {
-            return AuthError.EmailAlreadyExists;
+            return AuthError.EmailUnavailable;
         }
 
         byte[] passwordHashSalt = _passwordHasher.GenerateSalt();
