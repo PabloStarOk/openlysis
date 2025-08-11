@@ -19,6 +19,7 @@ internal static class AppConfiguration
     private const string EndpointPathPrefix = "api";
     private const string VersioningPrefix = "v";
     private const int EndpointDefaultVersion = 1;
+    private const string HealthCheckEndpointPath = "health";
 
     /// <summary>
     /// Configures FastEndpoints for the given <see cref="WebApplication"/> instance.
@@ -57,6 +58,7 @@ internal static class AppConfiguration
         }
 
         app.UseExceptionHandler();
+        app.MapHealthChecks(HealthCheckEndpointPath);
     }
 
     private static object BuildValidationFailureResponse(

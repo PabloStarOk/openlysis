@@ -37,6 +37,20 @@ internal static class DependencyInjection
         AddTokenHasher(services);
     }
 
+    /// <summary>
+    /// Registers health checks for infrastructure dependencies.
+    /// </summary>
+    /// <param name="builder">The health checks builder to add checks to.</param>
+    /// <param name="configuration">The application configuration instance.</param>
+    public static void AddInfrastructureHealthChecks(
+        this IHealthChecksBuilder builder,
+        IConfiguration configuration)
+    {
+        string? connectionString = configuration.GetConnectionString(AuthConnectionString);
+        ArgumentException.ThrowIfNullOrWhiteSpace(connectionString);
+        builder.AddNpgSql(connectionString);
+    }
+
     private static void AddRepositories(
         IServiceCollection services,
         IConfiguration configuration)

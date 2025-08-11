@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Authentication.API.Endpoints.Configuration;
 using Openlysis.Authentication.API.Endpoints.Middlewares;
+using Openlysis.Authentication.API.Infrastructure;
 
 namespace Openlysis.Authentication.API.Endpoints;
 
@@ -59,6 +60,8 @@ internal static class DependencyInjection
 
         services.AddProblemDetails();
         services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddHealthChecks()
+            .AddInfrastructureHealthChecks(configuration);
     }
 
     private static void AddPasswordRequirements(
