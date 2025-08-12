@@ -58,11 +58,13 @@ internal sealed class JwtGenerator : ITokenGenerator
     private string GenerateAccessToken(User user)
     {
         var algorithm = new ES256Algorithm(_certificate);
-        var now = DateTimeOffset.UtcNow;
-        long nowUnixMilliseconds = now.ToUnixTimeMilliseconds();
-        long expirationDateEpoch = now
-            .AddSeconds(_jwtOptions.Value.ExpirationSeconds)
-            .ToUnixTimeMilliseconds();
+        Instant now = _clock.GetCurrentInstant();
+
+        Instant expirationDate =
+            now + Duration.FromSeconds(_jwtOptions.Value.ExpirationSeconds);
+
+        long nowUnixSeconds = now.ToUnixTimeSeconds();
+        long expirationUnixSeconds = expirationDate.ToUnixTimeSeconds();
 
         var token = JwtBuilder
             .Create()
@@ -71,9 +73,9 @@ internal sealed class JwtGenerator : ITokenGenerator
             .Issuer(_jwtOptions.Value.Issuer)
             .Subject(user.Id.ToString())
             .Audience(_jwtOptions.Value.Audience)
-            .ExpirationTime(expirationDateEpoch)
-            .NotBefore(nowUnixMilliseconds)
-            .IssuedAt(nowUnixMilliseconds)
+            .ExpirationTime(expirationUnixSeconds)
+            .NotBefore(nowUnixSeconds)
+            .IssuedAt(nowUnixSeconds)
             .Id(Guid.NewGuid())
             .Encode();
 
