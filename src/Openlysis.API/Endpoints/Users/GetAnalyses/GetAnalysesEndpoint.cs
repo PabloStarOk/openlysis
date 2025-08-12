@@ -8,8 +8,8 @@ using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.Files.Services;
 using Openlysis.Application.Messages.Services;
 using Openlysis.Application.URLs.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages.Enums;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Users.GetAnalyses;
 
@@ -77,9 +77,9 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
     /// <inheritdoc/>
     public override async Task HandleAsync(GetAnalysesRequest req, CancellationToken ct)
     {
-        UserId userId = UserId.Create(Guid.Parse(req.UserId));
+        var userId = GlobalId.Parse(req.UserId);
 
-        Func<UserId, GetAnalysesRequest, CancellationToken, Task<IReadOnlyList<object>>>
+        Func<GlobalId, GetAnalysesRequest, CancellationToken, Task<IReadOnlyList<object>>>
             getAnalyses = req.Type switch
         {
             AnalysisType.Url => GetUrlMultiAnalysesAsync,
@@ -104,7 +104,7 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of parsed URL analysis DTOs.</returns>
     private async Task<IReadOnlyList<object>> GetUrlMultiAnalysesAsync(
-        UserId userId,
+        GlobalId userId,
         GetAnalysesRequest request,
         CancellationToken cancellationToken)
     {
@@ -128,7 +128,7 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of parsed file analysis DTOs.</returns>
     private async Task<IReadOnlyList<object>> GetFileMultiAnalysesAsync(
-        UserId userId,
+        GlobalId userId,
         GetAnalysesRequest request,
         CancellationToken cancellationToken)
     {
@@ -153,7 +153,7 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of parsed message analysis DTOs.</returns>
     private async Task<IReadOnlyList<object>> GetMessageAnalysesAsync(
-        UserId userId,
+        GlobalId userId,
         GetAnalysesRequest request,
         CancellationToken cancellationToken)
     {

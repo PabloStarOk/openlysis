@@ -11,7 +11,6 @@ using Openlysis.Application.URLs.Contracts.Abstractions;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.URLs.Services;
 
@@ -51,7 +50,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<UrlMultiAnalysis>> AnalyzeAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         Uri url,
         bool reanalyze,
@@ -95,7 +94,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<UrlMultiAnalysis>> GetAnalysisByIdAsync(
-        UserId userId,
+        GlobalId userId,
         GlobalId id,
         CancellationToken cancellationToken = default)
     {
@@ -116,7 +115,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByHashAsync(
-        UserId userId,
+        GlobalId userId,
         string hash,
         int pageSize,
         int size,
@@ -150,7 +149,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByUserAsync(
-        UserId userId,
+        GlobalId userId,
         int page,
         int pageSize,
         CancellationToken cancellationToken = default)

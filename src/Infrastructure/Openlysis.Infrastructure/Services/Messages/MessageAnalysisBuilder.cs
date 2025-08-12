@@ -9,6 +9,7 @@ using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.ValueObjects;
@@ -18,7 +19,6 @@ using Openlysis.Domain.Messages.Enums;
 using Openlysis.Domain.Messages.ValueObjects;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Infrastructure.Services.Messages;
 
@@ -56,7 +56,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
 
     /// <inheritdoc/>
     public IMessageAnalysisBuilder WithUserContext(
-        UserId userId, bool isPrivate)
+        GlobalId userId, bool isPrivate)
     {
         _buildState = _buildState with
         {
@@ -232,7 +232,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// message details, and analysis results for files, URLs, email addresses, and phone numbers.
     /// </remarks>
     private sealed record BuildState(
-        UserId? UserId = null,
+        GlobalId? UserId = null,
         bool? IsPrivate = null,
         Message? Message = null,
         Stream[]? FilesData = null,

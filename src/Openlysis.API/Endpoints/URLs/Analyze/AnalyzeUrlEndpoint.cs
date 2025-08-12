@@ -7,8 +7,8 @@ using FastEndpoints;
 
 using Openlysis.API.Endpoints.URLs.GetAnalysisById;
 using Openlysis.Application.URLs.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.URLs.Analyze;
 
@@ -73,8 +73,8 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
     /// <inheritdoc/>
     public override async Task HandleAsync(AnalyzeUrlRequest req, CancellationToken ct)
     {
-        Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = UserId.Create(Guid.Parse(claim.Value));
+        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
+        var userId = GlobalId.Parse(userIdClaim.Value);
 
         if (!TryCreateUri(req.Url, out Uri? url))
         {

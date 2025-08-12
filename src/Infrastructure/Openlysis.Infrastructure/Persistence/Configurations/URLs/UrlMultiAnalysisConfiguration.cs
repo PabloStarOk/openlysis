@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations.URLs;
 
@@ -100,7 +99,7 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
             .IsRequired()
             .HasConversion(
                 id => id.Value,
-                dbValue => UserId.Create(dbValue));
+                dbValue => GlobalId.Parse(dbValue.ToString()));
 
         builder.HasIndex(u => u.UserId);
     }

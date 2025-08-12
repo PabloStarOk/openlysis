@@ -13,7 +13,6 @@ using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.Messages.Services;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Messages.GetAnalysisById;
 
@@ -82,8 +81,8 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
         GetAnalysisByIdRequest req,
         CancellationToken ct)
     {
-        string userIdString = User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier).Value;
-        var userId = UserId.Create(Guid.Parse(userIdString));
+        Claim userIdClaim = User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
+        var userId = GlobalId.Parse(userIdClaim.Value);
 
         if (!GlobalId.TryParse(req.Id, out GlobalId? id))
         {

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.Entities;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations.Files;
 
@@ -102,7 +101,7 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
             .IsRequired()
             .HasConversion(
                 id => id.Value,
-                dbValue => UserId.Create(dbValue));
+                dbValue => GlobalId.Parse(dbValue.ToString()));
 
         builder.HasOne(f => f.DataHashValues)
             .WithMany()

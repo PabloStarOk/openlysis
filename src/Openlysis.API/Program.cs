@@ -8,7 +8,7 @@ var builder = WebApplication.CreateSlimBuilder();
 builder.Configuration.UseConfigLoader();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
-builder.Services.AddApi(builder.Configuration, builder.Environment);
+builder.Services.AddApi(builder.Configuration);
 
 var app = builder.Build();
 

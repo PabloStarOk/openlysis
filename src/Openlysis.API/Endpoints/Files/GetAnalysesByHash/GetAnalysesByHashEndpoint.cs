@@ -5,8 +5,8 @@ using FastEndpoints;
 using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.Application.Files.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 
@@ -76,7 +76,7 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHashRequest, IEnu
         }
 
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
+        var userId = GlobalId.Parse(userIdClaim.Value);
 
         IReadOnlyList<FileMultiAnalysis> multiAnalyses = await _multiAnalysisService
             .GetAnalysesByHashAsync(

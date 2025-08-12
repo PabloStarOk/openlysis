@@ -15,7 +15,6 @@ using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Enums;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.Messages.Services;
 
@@ -57,7 +56,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<MessageAnalysis>> AnalyzeAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         Message message,
         FileData[]? files,
@@ -130,7 +129,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<MessageAnalysis>> GetAnalysisByIdAsync(
-        UserId userId,
+        GlobalId userId,
         GlobalId id,
         CancellationToken cancellationToken = default)
     {
@@ -151,7 +150,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByHashAsync(
-        UserId userId,
+        GlobalId userId,
         string hash,
         int page,
         int pageSize,
@@ -185,7 +184,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByUserAsync(
-        UserId userId,
+        GlobalId userId,
         MessageType messageType,
         int page,
         int pageSize,

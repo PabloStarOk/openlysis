@@ -2,7 +2,6 @@ using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Domain.Common.Aggregates;
 
@@ -22,7 +21,7 @@ public abstract class MultiAnalysis<TAnalysis>
     /// <summary>
     /// Gets the identifier of the user associated with the analysis.
     /// </summary>
-    public UserId UserId { get; }
+    public GlobalId UserId { get; }
 
     /// <summary>
     /// Gets a value indicating whether the analysis is private.
@@ -65,7 +64,7 @@ public abstract class MultiAnalysis<TAnalysis>
     /// <param name="dataHashValues">The set of data hashes associated with the analysis.</param>
     protected MultiAnalysis(
         GlobalId id,
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         DateTime startedDate,
         AnalysisState state,

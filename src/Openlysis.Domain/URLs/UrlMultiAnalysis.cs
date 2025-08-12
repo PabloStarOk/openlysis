@@ -2,7 +2,6 @@ using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs.Entities;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Domain.URLs;
 
@@ -28,7 +27,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlAnalysis>
     /// <param name="url">The URL being analyzed.</param>
     private UrlMultiAnalysis(
         GlobalId id,
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         DateTime startedDate,
         AnalysisState state,
@@ -64,7 +63,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlAnalysis>
     /// <param name="urlHashValues">The hash set of the URL content.</param>
     /// <returns>A new instance of the <see cref="UrlMultiAnalysis"/> class.</returns>
     public static UrlMultiAnalysis Create(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         DateTime startedDate,
         Uri url,

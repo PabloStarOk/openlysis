@@ -6,7 +6,6 @@ using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Enums;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.Messages.Services;
 
@@ -32,7 +31,7 @@ public interface IMessageAnalysisService
     /// <param name="cancellationToken">A token to monitor for cancellation requests during the operation.</param>
     /// <returns>A task representing the asynchronous operation, containing the result of the message analysis.</returns>
     public Task<ErrorOr<MessageAnalysis>> AnalyzeAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         Message message,
         FileData[]? files,
@@ -51,7 +50,7 @@ public interface IMessageAnalysisService
     /// with the result of the message analysis or an error.
     /// </returns>
     public Task<ErrorOr<MessageAnalysis>> GetAnalysisByIdAsync(
-        UserId userId,
+        GlobalId userId,
         GlobalId id,
         CancellationToken cancellationToken = default);
 
@@ -68,7 +67,7 @@ public interface IMessageAnalysisService
     /// A task that represents the asynchronous operation, containing a read-only list of <see cref="MessageAnalysis"/>.
     /// </returns>
     public Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByHashAsync(
-        UserId userId,
+        GlobalId userId,
         string hash,
         int page,
         int pageSize,
@@ -85,7 +84,7 @@ public interface IMessageAnalysisService
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of <see cref="MessageAnalysis"/> objects for the specified user.</returns>
     public Task<IReadOnlyList<MessageAnalysis>> GetAnalysesByUserAsync(
-        UserId userId,
+        GlobalId userId,
         MessageType messageType,
         int page,
         int pageSize,

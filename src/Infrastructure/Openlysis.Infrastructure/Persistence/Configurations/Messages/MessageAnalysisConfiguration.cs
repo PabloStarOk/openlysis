@@ -7,7 +7,6 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Entities;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations.Messages;
 
@@ -126,7 +125,7 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
             .IsRequired()
             .HasConversion(
                 id => id.Value,
-                dbValue => UserId.Create(dbValue));
+                dbValue => GlobalId.Parse(dbValue.ToString()));
 
         builder.Navigation(m => m.Message)
             .AutoInclude();

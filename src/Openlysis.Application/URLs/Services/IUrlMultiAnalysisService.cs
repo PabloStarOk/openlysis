@@ -3,7 +3,6 @@ using ErrorOr;
 using Openlysis.Application.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.URLs.Services;
 
@@ -22,7 +21,7 @@ public interface IUrlMultiAnalysisService
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="ErrorOr{T}"/> containing the analysis result or an error.</returns>
     public Task<ErrorOr<UrlMultiAnalysis>> AnalyzeAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         Uri url,
         bool reanalyze,
@@ -36,7 +35,7 @@ public interface IUrlMultiAnalysisService
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>An <see cref="ErrorOr{T}"/> containing the analysis result or an error.</returns>
     public Task<ErrorOr<UrlMultiAnalysis>> GetAnalysisByIdAsync(
-        UserId userId,
+        GlobalId userId,
         GlobalId id,
         CancellationToken cancellationToken = default);
 
@@ -51,7 +50,7 @@ public interface IUrlMultiAnalysisService
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of <see cref="UrlMultiAnalysis"/> objects.</returns>
     public Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByHashAsync(
-        UserId userId,
+        GlobalId userId,
         string hash,
         int pageSize,
         int size,
@@ -67,7 +66,7 @@ public interface IUrlMultiAnalysisService
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of <see cref="UrlMultiAnalysis"/> objects for the specified user.</returns>
     public Task<IReadOnlyList<UrlMultiAnalysis>> GetAnalysesByUserAsync(
-        UserId userId,
+        GlobalId userId,
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);
