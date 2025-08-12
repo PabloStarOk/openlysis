@@ -94,8 +94,7 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
 
         builder.Property(u => u.UserId)
             .HasColumnName("user_id")
-            .HasColumnType(VarcharType)
-            .HasMaxLength(450)
+            .HasColumnType("uuid")
             .IsRequired()
             .HasConversion(
                 id => id.Value,

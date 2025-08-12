@@ -96,8 +96,7 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
 
         builder.Property(u => u.UserId)
             .HasColumnName("user_id")
-            .HasColumnType("varchar")
-            .HasMaxLength(450)
+            .HasColumnType("uuid")
             .IsRequired()
             .HasConversion(
                 id => id.Value,

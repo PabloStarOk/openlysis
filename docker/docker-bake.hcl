@@ -1,5 +1,5 @@
 group "default" {
-  targets = [ "database", "analyzer-worker", "api" ]
+  targets = [ "database", "auth", "analyzer-worker", "api" ]
 }
 
 target "database" {
@@ -8,6 +8,14 @@ target "database" {
     tags = [ "openlysis-db:latest" ]
     no-cache = true
     description = "Database of Openlysis."
+}
+
+target "auth" {
+    context = "../"
+    dockerfile = "src/Openlysis.Authentication.API/Dockerfile"
+    tags = [ "openlysis-auth:latest" ]
+    no-cache = true
+    description = "Authentication API for managing user identities and access."
 }
 
 target "analyzer-worker" {

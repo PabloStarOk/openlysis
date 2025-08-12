@@ -1,3 +1,22 @@
+BEGIN TRANSACTION;
+CREATE TABLE IF NOT EXISTS users(
+    user_id uuid PRIMARY KEY,
+    email_address text NOT NULL UNIQUE,
+    password_hash bytea NOT NULL,
+    password_hash_salt bytea NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens(
+    token_id bigserial PRIMARY KEY,
+    token_hash bytea NOT NULL UNIQUE,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    expires_at timestamptz NOT NULL,
+    revoked_at timestamptz,
+    user_id uuid NOT NULL REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS refresh_token_hash_index ON refresh_tokens(token_hash);
+
 CREATE TABLE IF NOT EXISTS hash_values (
     sha256 bytea PRIMARY KEY,
     md5 bytea NOT NULL,
@@ -17,7 +36,7 @@ CREATE TABLE IF NOT EXISTS file_multi_analyses
     file_name varchar(100) NOT NULL,
     size bigint NOT NULL,
     content_type text NOT NULL,
-    user_id varchar(450) REFERENCES "AspNetUsers" ("Id"),
+    user_id uuid REFERENCES users (user_id),
     sha256 bytea REFERENCES hash_values(sha256) ON DELETE CASCADE
 );
 
@@ -53,7 +72,7 @@ CREATE TABLE IF NOT EXISTS url_multi_analyses
     threat_zone smallint NOT NULL,
     average_threat_score real,
     url varchar(2083) NOT NULl,
-    user_id varchar(450) NOT NULL REFERENCES "AspNetUsers"("Id"),
+    user_id uuid NOT NULL REFERENCES users(user_id),
     sha256 bytea NOT NULL REFERENCES hash_values(sha256)
 );
 
@@ -120,7 +139,7 @@ CREATE TABLE IF NOT EXISTS message_analysis (
     status smallint NOT NULL,
     verdict smallint NOT NULL,
     threat_zone smallint NOT NULL,
-    user_id varchar(450) NOT NULL REFERENCES "AspNetUsers" ("Id"),
+    user_id uuid NOT NULL REFERENCES users (user_id),
     sha256 bytea NOT NULL REFERENCES hash_values (sha256) ON DELETE RESTRICT
 );
 
@@ -157,3 +176,4 @@ CREATE TABLE IF NOT EXISTS detected_phone_number_results (
     message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
     phone_multi_reputation_id uuid NOT NULL REFERENCES phone_multi_reputations (phone_multi_reputation_id) ON DELETE RESTRICT
 );
+COMMIT TRANSACTION;
