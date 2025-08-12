@@ -9,6 +9,7 @@ using NodaTime.Serialization.SystemTextJson;
 
 using Openlysis.Authentication.API.Endpoints.Configuration;
 using Openlysis.Authentication.API.Endpoints.Middlewares;
+using Openlysis.Authentication.API.Endpoints.OpenID;
 using Openlysis.Authentication.API.Infrastructure;
 
 namespace Openlysis.Authentication.API.Endpoints;
@@ -37,6 +38,7 @@ internal static class DependencyInjection
         IConfiguration configuration)
     {
         AddPasswordRequirements(services, configuration);
+        AddOpenIdConfigurationOptions(services, configuration);
 
         services.Configure<JsonOptions>(o =>
         {
@@ -80,6 +82,22 @@ internal static class DependencyInjection
             PasswordRequirementsValidator>();
 
         services.AddOptions<PasswordRequirements>()
+            .Bind(optionsSection)
+            .ValidateOnStart();
+    }
+
+    private static void AddOpenIdConfigurationOptions(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var optionsSection = configuration
+            .GetRequiredSection(OpenIdConfiguration.SectionName);
+
+        services.AddSingleton<
+            IValidateOptions<OpenIdConfiguration>,
+            OpenIdConfigurationValidator>();
+
+        services.AddOptions<OpenIdConfiguration>()
             .Bind(optionsSection)
             .ValidateOnStart();
     }
