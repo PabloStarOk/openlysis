@@ -6,7 +6,7 @@ using FastEndpoints;
 
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Files.Services;
-using Openlysis.Domain.Users.ValueObjects;
+using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
@@ -76,8 +76,8 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
     /// <returns>A task representing the asynchronous operation.</returns>
     public override async Task HandleAsync(AnalyzeFileRequest request, CancellationToken ct)
     {
-        Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = UserId.Create(Guid.Parse(claim.Value));
+        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
+        var userId = GlobalId.Parse(userIdClaim.Value);
 
 #if DEBUG
         LogFileMetadata(request);

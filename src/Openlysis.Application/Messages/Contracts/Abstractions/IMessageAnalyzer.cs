@@ -2,11 +2,11 @@ using System.Net.Mail;
 
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Messages.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.Messages.Contracts.Abstractions;
 
@@ -33,7 +33,7 @@ public interface IMessageAnalyzer
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of file analysis results.</returns>
     public Task<IEnumerable<FileMultiAnalysis>> AnalyzeFilesAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         bool reanalyze,
         FileData[] files,
@@ -49,7 +49,7 @@ public interface IMessageAnalyzer
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of URL analysis results.</returns>
     public Task<IEnumerable<UrlMultiAnalysis>> AnalyzeUrlsAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         IEnumerable<Uri> urls,
         bool reanalyze,

@@ -10,11 +10,11 @@ using Openlysis.Application.Files.Services;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.Phones.Services;
 using Openlysis.Application.URLs.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Infrastructure.Services.Messages;
 
@@ -60,7 +60,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
 
     /// <inheritdoc/>
     public async Task<IEnumerable<FileMultiAnalysis>> AnalyzeFilesAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         bool reanalyze,
         FileData[] files,
@@ -101,7 +101,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
 
     /// <inheritdoc/>
     public async Task<IEnumerable<UrlMultiAnalysis>> AnalyzeUrlsAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         IEnumerable<Uri> urls,
         bool reanalyze,

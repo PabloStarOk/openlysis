@@ -8,7 +8,6 @@ using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.Application.Files.Services;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.GetAnalysisById;
 
@@ -91,7 +90,7 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
         }
 
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
+        var userId = GlobalId.Parse(userIdClaim.Value);
 
         ErrorOr<FileMultiAnalysis> mediatorResult = await _multiAnalysisService
             .GetAnalysisByIdAsync(userId, globalId, ct);

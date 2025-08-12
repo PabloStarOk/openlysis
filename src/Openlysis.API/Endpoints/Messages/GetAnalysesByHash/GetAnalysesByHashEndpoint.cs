@@ -9,8 +9,8 @@ using Openlysis.API.Endpoints.Messages.Common.Responses;
 using Openlysis.API.Endpoints.Phones.GetReputation;
 using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.Messages.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Messages.GetAnalysesByHash;
 
@@ -79,7 +79,7 @@ public class GetAnalysesByHashEndpoint
     public override async Task HandleAsync(GetAnalysesByHashRequest req, CancellationToken ct)
     {
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
+        var userId = GlobalId.Parse(userIdClaim.Value);
 
         IReadOnlyList<MessageAnalysis> messageAnalyses = await _messageAnalysisService
             .GetAnalysesByHashAsync(

@@ -9,7 +9,6 @@ using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.URLs.GetAnalysisById;
 
@@ -72,7 +71,7 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
     public override async Task HandleAsync(GetAnalysisByIdRequest req, CancellationToken ct)
     {
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
+        var userId = GlobalId.Parse(userIdClaim.Value);
 
         if (!GlobalId.TryParse(req.Id, out GlobalId? id))
         {

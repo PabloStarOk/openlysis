@@ -12,7 +12,6 @@ COPY ["tests/Openlysis.TestTools.ServicesSimulation/", "Openlysis.TestTools.Serv
 WORKDIR /src
 # Copy .csproj files.
 COPY ["src/Openlysis.API/Openlysis.API.csproj", "Openlysis.API/"]
-COPY ["src/Openlysis.API.Authentication/Openlysis.API.Authentication.csproj", "Openlysis.API.Authentication/"]
 COPY ["src/Openlysis.Domain/Openlysis.Domain.csproj", "Openlysis.Domain/"]
 COPY ["src/Openlysis.Application/Openlysis.Application.csproj", "Openlysis.Application/"]
 COPY ["src/Infrastructure/Openlysis.Infrastructure.Shared/Openlysis.Infrastructure.Shared.csproj", "Infrastructure/Openlysis.Infrastructure.Shared/"]
@@ -23,7 +22,6 @@ COPY ["src/Infrastructure/Analyzers/Openlysis.Analyzers.Shared/Openlysis.Analyze
 RUN dotnet restore "Openlysis.API/Openlysis.API.csproj"
 # Copy project files.
 COPY ["src/Openlysis.API/", "Openlysis.API/"]
-COPY ["src/Openlysis.API.Authentication/", "Openlysis.API.Authentication/"]
 COPY ["src/Openlysis.Domain/", "Openlysis.Domain/"]
 COPY ["src/Openlysis.Application/", "Openlysis.Application/"]
 COPY ["src/Infrastructure/Openlysis.Infrastructure.Shared/", "Infrastructure/Openlysis.Infrastructure.Shared/"]

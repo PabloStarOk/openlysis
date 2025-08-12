@@ -7,7 +7,6 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Entities;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Infrastructure.Persistence.Configurations.Messages;
 
@@ -121,12 +120,11 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
 
         builder.Property(u => u.UserId)
             .HasColumnName("user_id")
-            .HasColumnType("varchar")
-            .HasMaxLength(450)
+            .HasColumnType("uuid")
             .IsRequired()
             .HasConversion(
                 id => id.Value,
-                dbValue => UserId.Create(dbValue));
+                dbValue => GlobalId.Parse(dbValue.ToString()));
 
         builder.Navigation(m => m.Message)
             .AutoInclude();

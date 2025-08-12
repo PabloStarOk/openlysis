@@ -5,8 +5,8 @@ using FastEndpoints;
 using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.URLs.Common;
 using Openlysis.Application.URLs.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.URLs.GetAnalysesByHash;
 
@@ -66,7 +66,7 @@ public class GetAnalysesByHashEndpoint
     public override async Task HandleAsync(GetAnalysesByHashRequest req, CancellationToken ct)
     {
         Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
+        var userId = GlobalId.Parse(userIdClaim.Value);
 
         IReadOnlyList<UrlMultiAnalysis> analyses = await _multiAnalysisService
             .GetAnalysesByHashAsync(

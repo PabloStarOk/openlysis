@@ -6,7 +6,6 @@ using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Messages.Entities;
 using Openlysis.Domain.Messages.ValueObjects;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Domain.Messages;
 
@@ -19,7 +18,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <summary>
     /// Gets the unique identifier of the user associated with the message analysis.
     /// </summary>
-    public UserId UserId { get; }
+    public GlobalId UserId { get; }
 
     /// <summary>
     /// Gets a value indicating whether the message is private.
@@ -76,7 +75,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <param name="detectedPhoneNumbersResults">An array of reputation results for the detected phone numbers in the message.</param>
     protected MessageAnalysis(
         GlobalId id,
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         DateTime startedDate,
         MessageInformation message,
@@ -133,7 +132,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// </remarks>
     public static MessageAnalysis Create(
         DateTime startedDate,
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         MessageInformation message,
         Verdict verdict,

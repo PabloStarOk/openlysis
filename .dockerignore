@@ -275,3 +275,5 @@ docs
 todo
 LICENSE
 README.md
+**/appsettings.json
+**/appsettings.*.json

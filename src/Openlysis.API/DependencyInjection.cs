@@ -1,18 +1,19 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.IdentityModel.Tokens;
 
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
 using NSwag;
 
-using Openlysis.API.Authentication;
-using Openlysis.API.Authentication.API;
 using Openlysis.API.Configuration.Options;
 using Openlysis.API.Middlewares.Exceptions;
 
@@ -28,11 +29,9 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">Collection of services.</param>
     /// <param name="configuration">Configuration settings.</param>
-    /// <param name="environment">Hosting environment information.</param>
     public static void AddApi(
         this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+        IConfiguration configuration)
     {
         // Get options
         var serverOptions = configuration
@@ -66,8 +65,8 @@ public static class DependencyInjection
                 options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
             });
 
-        // Add authentication and authorization
-        services.AddApiAuthentication(configuration, environment);
+        AddJwtAuthentication(services, configuration);
+        services.AddAuthorization();
 
         services.AddProblemDetails(
             opt =>
@@ -83,14 +82,12 @@ public static class DependencyInjection
             {
                 opt.DisableAutoDiscovery = true;
                 opt.SourceGeneratorDiscoveredTypes.AddRange(typeof(Program).Assembly.DefinedTypes);
-                opt.MapAuthenticationEndpoints();
             });
 
         services.SwaggerDocument(
             opt =>
             {
                 opt.ReleaseVersion = 1;
-                opt.EnableJWTBearerAuth = false;
                 opt.DocumentSettings = s =>
                 {
                     s.DocumentName = "Version 1";
@@ -108,14 +105,6 @@ public static class DependencyInjection
                             },
                         };
                     };
-
-                    s.AddAuth("API Key", new OpenApiSecurityScheme
-                        {
-                            Name = "X-Api-Key",
-                            In = OpenApiSecurityApiKeyLocation.Header,
-                            Type = OpenApiSecuritySchemeType.ApiKey,
-                            Description = "API Key authentication.",
-                        });
                 };
 
                 opt.SerializerSettings = s =>
@@ -133,5 +122,28 @@ public static class DependencyInjection
             });
 
         services.AddExceptionHandlers();
+    }
+
+    private static void AddJwtAuthentication(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var keyOptions = configuration
+            .GetRequiredSection(AuthSigningKeyOptions.SectionName)
+            .Get<AuthSigningKeyOptions>();
+        ArgumentNullException.ThrowIfNull(keyOptions);
+
+        var validationParams = configuration
+            .GetRequiredSection(nameof(TokenValidationParameters))
+            .Get<TokenValidationParameters>();
+        ArgumentNullException.ThrowIfNull(validationParams);
+
+        var ecdsa = ECDsa.Create();
+        ecdsa.ImportFromPem(keyOptions.SigningKeyPem);
+        validationParams.IssuerSigningKey = new ECDsaSecurityKey(ecdsa);
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+                options.TokenValidationParameters = validationParams);
     }
 }

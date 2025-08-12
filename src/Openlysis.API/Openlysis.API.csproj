@@ -14,7 +14,9 @@
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="FastEndpoints.Swagger" Version="5.34.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.19" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,7 +26,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Infrastructure\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj" />
-      <ProjectReference Include="..\Openlysis.API.Authentication\Openlysis.API.Authentication.csproj" />
     </ItemGroup>
 
 </Project>

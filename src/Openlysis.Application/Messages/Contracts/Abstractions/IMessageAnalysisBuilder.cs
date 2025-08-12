@@ -1,11 +1,11 @@
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.Messages.Contracts.Abstractions;
 
@@ -21,7 +21,7 @@ public interface IMessageAnalysisBuilder
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <returns>The current instance of <see cref="IMessageAnalysisBuilder"/>.</returns>
     public IMessageAnalysisBuilder WithUserContext(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate);
 
     /// <summary>

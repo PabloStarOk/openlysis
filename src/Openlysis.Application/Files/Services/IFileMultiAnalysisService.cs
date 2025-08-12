@@ -4,7 +4,6 @@ using Openlysis.Application.Common.Enums;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.Files.Services;
 
@@ -26,7 +25,7 @@ public interface IFileMultiAnalysisService
     /// The task result contains an <see cref="ErrorOr{T}"/> object with the file analysis result.
     /// </returns>
     public Task<ErrorOr<FileMultiAnalysis>> AnalyzeAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         bool reanalyze,
         FileData fileData,
@@ -43,7 +42,7 @@ public interface IFileMultiAnalysisService
     /// The task result contains an <see cref="ErrorOr{T}"/> object with the file analysis.
     /// </returns>
     public Task<ErrorOr<FileMultiAnalysis>> GetAnalysisByIdAsync(
-        UserId userId,
+        GlobalId userId,
         GlobalId id,
         CancellationToken cancellationToken = default);
 
@@ -61,7 +60,7 @@ public interface IFileMultiAnalysisService
     /// The task result contains an <see cref="ErrorOr{T}"/> object with a read-only list of file analyses.
     /// </returns>
     public Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByHashAsync(
-        UserId userId,
+        GlobalId userId,
         string hash,
         int page,
         int pageSize,
@@ -77,7 +76,7 @@ public interface IFileMultiAnalysisService
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A read-only list of <see cref="FileMultiAnalysis"/> objects for the specified user.</returns>
     public Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByUserAsync(
-        UserId userId,
+        GlobalId userId,
         int page,
         int pageSize,
         CancellationToken cancellationToken = default);

@@ -8,7 +8,6 @@ using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.ValueObjects;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Application.Files.Services;
 
@@ -44,7 +43,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<FileMultiAnalysis>> AnalyzeAsync(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         bool reanalyze,
         FileData fileData,
@@ -90,7 +89,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<ErrorOr<FileMultiAnalysis>> GetAnalysisByIdAsync(
-        UserId userId,
+        GlobalId userId,
         GlobalId id,
         CancellationToken cancellationToken = default)
     {
@@ -112,7 +111,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByHashAsync(
-        UserId userId,
+        GlobalId userId,
         string hash,
         int page,
         int pageSize,
@@ -148,7 +147,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<FileMultiAnalysis>> GetAnalysesByUserAsync(
-        UserId userId,
+        GlobalId userId,
         int page,
         int pageSize,
         CancellationToken cancellationToken = default)

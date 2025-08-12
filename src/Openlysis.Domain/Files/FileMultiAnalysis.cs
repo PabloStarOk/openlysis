@@ -3,7 +3,6 @@ using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.Files.ValueObjects;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.Domain.Files;
 
@@ -40,7 +39,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileAnalysis>
     /// <param name="fileMetadata">The metadata of the file being analyzed.</param>
     private FileMultiAnalysis(
         GlobalId id,
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         DateTime startedDate,
         AnalysisState state,
@@ -76,7 +75,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileAnalysis>
     /// <param name="fileMetadata">The metadata of the file being analyzed.</param>
     /// <returns>A new instance of the <see cref="FileMultiAnalysis"/> class.</returns>
     public static FileMultiAnalysis Create(
-        UserId userId,
+        GlobalId userId,
         bool isPrivate,
         DateTime startedDate,
         HashValues dataHashValues,

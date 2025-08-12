@@ -8,9 +8,9 @@ using Openlysis.API.Endpoints.Messages.GetAnalysisById;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Application.Messages.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Enums;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Messages.Analyze;
 
@@ -84,7 +84,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
         }
 
         Claim userIdClaim = User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier);
-        UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
+        var userId = GlobalId.Parse(userIdClaim.Value);
         MessageType messageType = (MessageType)req.MessageType!;
         var message = new Message(messageType, req.Sender, req.Subject, req.Content);
         FileData[] files = CreateFileDataArray(req);
