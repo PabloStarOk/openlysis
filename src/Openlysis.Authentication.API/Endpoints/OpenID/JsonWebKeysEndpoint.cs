@@ -22,9 +22,8 @@ internal static class JsonWebKeysEndpoint
         IServiceProvider serviceProvider)
     {
         var options = serviceProvider.GetRequiredService<IOptions<OpenIdConfiguration>>();
-        var route = options.Value.JwksUri.Segments
-            .Last()
-            .Trim(Uri.SchemeDelimiter.ToCharArray());
+        var route = options.Value.JwksUri.Segments[^1]
+                .Trim(Uri.SchemeDelimiter.ToCharArray());
 
         builder.MapGet(route, Handle)
             .AllowAnonymous()
