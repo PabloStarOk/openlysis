@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text.Json;
 
 using FastEndpoints;
@@ -7,7 +6,6 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.IdentityModel.Tokens;
 
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -29,9 +27,11 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">Collection of services.</param>
     /// <param name="configuration">Configuration settings.</param>
+    /// <param name="environment">Hosting environment information.</param>
     public static void AddApi(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         // Get options
         var serverOptions = configuration
@@ -65,7 +65,7 @@ public static class DependencyInjection
                 options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
             });
 
-        AddJwtAuthentication(services, configuration);
+        AddJwtAuthentication(services, configuration, environment);
         services.AddAuthorization();
 
         services.AddProblemDetails(
@@ -126,24 +126,22 @@ public static class DependencyInjection
 
     private static void AddJwtAuthentication(
         IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
-        var keyOptions = configuration
-            .GetRequiredSection(AuthSigningKeyOptions.SectionName)
-            .Get<AuthSigningKeyOptions>();
-        ArgumentNullException.ThrowIfNull(keyOptions);
-
-        var validationParams = configuration
-            .GetRequiredSection(nameof(TokenValidationParameters))
-            .Get<TokenValidationParameters>();
-        ArgumentNullException.ThrowIfNull(validationParams);
-
-        var ecdsa = ECDsa.Create();
-        ecdsa.ImportFromPem(keyOptions.SigningKeyPem);
-        validationParams.IssuerSigningKey = new ECDsaSecurityKey(ecdsa);
+        var jwtBearerOptions = configuration
+            .GetRequiredSection(nameof(JwtBearerOptions))
+            .Get<JwtBearerOptions>();
+        ArgumentNullException.ThrowIfNull(jwtBearerOptions);
 
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
-                options.TokenValidationParameters = validationParams);
+                {
+                    options.RequireHttpsMetadata = environment.IsProduction() || jwtBearerOptions.RequireHttpsMetadata;
+
+                    options.Authority = jwtBearerOptions.Authority;
+                    options.MetadataAddress = jwtBearerOptions.MetadataAddress;
+                    options.TokenValidationParameters = jwtBearerOptions.TokenValidationParameters;
+                });
     }
 }
