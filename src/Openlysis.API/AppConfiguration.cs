@@ -2,12 +2,15 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using FastEndpoints;
+using FastEndpoints.Swagger;
 
 using FluentValidation.Results;
 
 using Openlysis.Application.Common.Enums;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Messages.Enums;
+
+using Scalar.AspNetCore;
 
 namespace Openlysis.API;
 
@@ -16,6 +19,14 @@ namespace Openlysis.API;
 /// </summary>
 public static class AppConfiguration
 {
+    private const string DocumentationGenerationPath = "/openapi/{documentName}.json";
+    private const string ApiDocumentationPath = "api-docs";
+    private const string WebPageTitle = "Openlysis Authentication API";
+    private const string EndpointNameSuffix = "Endpoint";
+    private const string EndpointPathPrefix = "api";
+    private const string VersioningPrefix = "v";
+    private const int EndpointDefaultVersion = 1;
+
     /// <summary>
     /// Configures the API for the web application.
     /// </summary>
@@ -26,19 +37,27 @@ public static class AppConfiguration
 
         if (app.Environment.IsDevelopment())
         {
-            app.UseOpenApi();
-            app.UseSwaggerUi(c => c.DocExpansion = "list");
+            app.UseSwaggerGen(o => o.Path = DocumentationGenerationPath);
+
+            app.MapScalarApiReference(ApiDocumentationPath, o =>
+            {
+                o.WithTitle(WebPageTitle);
+                o.AddDocument(DependencyInjection.V1DocumentName);
+            });
         }
 
         app.UseAuthentication().UseAuthorization();
         app.UseFastEndpoints(
             c =>
             {
-                c.Endpoints.RoutePrefix = "api";
+                c.Endpoints.RoutePrefix = EndpointPathPrefix;
+                c.Endpoints.NameGenerator = context
+                    => context.EndpointType.Name.TrimEnd(EndpointNameSuffix.ToCharArray());
 
-                c.Versioning.Prefix = "v";
-                c.Versioning.DefaultVersion = 1;
+                c.Versioning.Prefix = VersioningPrefix;
+                c.Versioning.DefaultVersion = EndpointDefaultVersion;
                 c.Versioning.PrependToRoute = true;
+
                 c.Serializer.Options.Converters.Add(new JsonStringEnumConverter<AnalysisStatus>(JsonNamingPolicy.CamelCase));
                 c.Serializer.Options.Converters.Add(new JsonStringEnumConverter<Verdict>(JsonNamingPolicy.CamelCase));
                 c.Serializer.Options.Converters.Add(new JsonStringEnumConverter<ThreatZone>(JsonNamingPolicy.CamelCase));

@@ -23,6 +23,15 @@ namespace Openlysis.API;
 public static class DependencyInjection
 {
     /// <summary>
+    /// The name of the Swagger document for API version 1.
+    /// </summary>
+    public const string V1DocumentName = "Version 1";
+
+    private const string DocumentsTitle = "Openlysis Authentication API";
+    private const string ApiDescription = "Authentication API for Openlysis.";
+    private const string V1DocumentVersion = "v1";
+
+    /// <summary>
     /// Adds all services needed for the API.
     /// </summary>
     /// <param name="services">Collection of services.</param>
@@ -90,10 +99,10 @@ public static class DependencyInjection
                 opt.ReleaseVersion = 1;
                 opt.DocumentSettings = s =>
                 {
-                    s.DocumentName = "Version 1";
-                    s.Title = "Openlysis API";
-                    s.Description = "API of openlysis.";
-                    s.Version = "v1";
+                    s.DocumentName = V1DocumentName;
+                    s.Title = DocumentsTitle;
+                    s.Description = ApiDescription;
+                    s.Version = V1DocumentVersion;
                     s.PostProcess = document =>
                     {
                         document.Info = new OpenApiInfo
