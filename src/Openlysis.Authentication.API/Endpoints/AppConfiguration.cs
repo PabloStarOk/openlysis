@@ -62,6 +62,7 @@ internal static class AppConfiguration
         app.UseExceptionHandler();
         app.MapHealthChecks(HealthCheckEndpointPath);
         app.MapOpenIdConfigurationEndpoint();
+        app.MapJsonWebKeysEndpoint(app.Services);
     }
 
     private static object BuildValidationFailureResponse(

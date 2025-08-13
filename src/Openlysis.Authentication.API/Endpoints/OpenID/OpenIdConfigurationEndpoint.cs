@@ -7,7 +7,6 @@ namespace Openlysis.Authentication.API.Endpoints.OpenID;
 /// </summary>
 internal static class OpenIdConfigurationEndpoint
 {
-    private const string Tag = "OpenID";
     private const string Route = "openid-configuration";
     private const string Name = "GetOpenIdConfiguration";
 
@@ -21,7 +20,7 @@ internal static class OpenIdConfigurationEndpoint
         builder.MapGet(Route, Handle)
             .AllowAnonymous()
             .Produces<OpenIdConfiguration>()
-            .WithTags(Tag)
+            .WithTags(OpenIdEndpointsConstants.Tag)
             .WithName(Name);
     }
 
