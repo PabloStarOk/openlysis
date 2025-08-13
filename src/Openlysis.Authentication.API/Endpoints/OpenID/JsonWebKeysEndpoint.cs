@@ -28,13 +28,13 @@ internal static class JsonWebKeysEndpoint
 
         builder.MapGet(route, Handle)
             .AllowAnonymous()
-            .Produces<IEnumerable<JsonWebKey>>()
+            .Produces<JsonWebKeySet>()
             .WithTags(OpenIdEndpointsConstants.Tag)
             .WithName(Name);
     }
 
-    private static IEnumerable<JsonWebKey> Handle(IJwkProvider keyProvider)
+    private static JsonWebKeySet Handle(IJwkProvider keyProvider)
     {
-        return keyProvider.GetPublicKeys();
+        return keyProvider.GetJsonWebKeySet();
     }
 }

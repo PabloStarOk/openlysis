@@ -42,10 +42,14 @@ internal sealed class LocalSigningKeyManager : IJwkProvider, IAlgorithmFactory
     }
 
     /// <inheritdoc/>
-    public IEnumerable<JsonWebKey> GetPublicKeys()
+    public JsonWebKeySet GetJsonWebKeySet()
     {
         _jsonWebKey ??= CreateJsonWebKey();
-        return [_jsonWebKey];
+        var jwks = new JsonWebKeySet
+        {
+            Keys = { _jsonWebKey },
+        };
+        return jwks;
     }
 
     /// <inheritdoc/>

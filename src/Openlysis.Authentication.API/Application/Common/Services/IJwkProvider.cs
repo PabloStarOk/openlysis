@@ -14,8 +14,8 @@ internal interface IJwkProvider
     public JsonWebKey GetCurrentSigningKey();
 
     /// <summary>
-    /// Retrieves the collection of public keys in JSON Web Key (JWK) format.
+    /// Retrieves the set of public JSON Web Keys (JWKs) for token validation.
     /// </summary>
-    /// <returns>An <see cref="IEnumerable{JsonWebKey}"/> containing public keys.</returns>
-    public IEnumerable<JsonWebKey> GetPublicKeys();
+    /// <returns>A <see cref="JsonWebKeySet"/> containing the public keys.</returns>
+    public JsonWebKeySet GetJsonWebKeySet();
 }

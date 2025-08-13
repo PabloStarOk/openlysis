@@ -26,7 +26,7 @@ namespace Openlysis.Authentication.API.Endpoints;
 [JsonSerializable(typeof(ProblemDetails))]
 [JsonSerializable(typeof(HttpValidationProblemDetails))]
 [JsonSerializable(typeof(OpenIdConfiguration))]
-[JsonSerializable(typeof(IEnumerable<JsonWebKey>))]
+[JsonSerializable(typeof(JsonWebKeySet))]
 internal partial class ApiJsonSerializerContext : JsonSerializerContext
 {
 }
