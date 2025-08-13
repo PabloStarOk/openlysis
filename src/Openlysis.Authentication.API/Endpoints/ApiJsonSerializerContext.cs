@@ -2,7 +2,10 @@ using System.Text.Json.Serialization;
 
 using FastEndpoints;
 
+using Microsoft.IdentityModel.Tokens;
+
 using Openlysis.Authentication.API.Application.Common.Models;
+using Openlysis.Authentication.API.Endpoints.OpenID;
 using Openlysis.Authentication.API.Endpoints.Refresh;
 using Openlysis.Authentication.API.Endpoints.SignIn;
 using Openlysis.Authentication.API.Endpoints.SignUp;
@@ -22,6 +25,8 @@ namespace Openlysis.Authentication.API.Endpoints;
 [JsonSerializable(typeof(SignInRefreshRequest))]
 [JsonSerializable(typeof(ProblemDetails))]
 [JsonSerializable(typeof(HttpValidationProblemDetails))]
+[JsonSerializable(typeof(OpenIdConfiguration))]
+[JsonSerializable(typeof(JsonWebKeySet))]
 internal partial class ApiJsonSerializerContext : JsonSerializerContext
 {
 }

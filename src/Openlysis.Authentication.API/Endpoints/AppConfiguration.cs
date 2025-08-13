@@ -3,6 +3,8 @@ using FastEndpoints.Swagger;
 
 using FluentValidation.Results;
 
+using Openlysis.Authentication.API.Endpoints.OpenID;
+
 using Scalar.AspNetCore;
 
 namespace Openlysis.Authentication.API.Endpoints;
@@ -59,6 +61,8 @@ internal static class AppConfiguration
 
         app.UseExceptionHandler();
         app.MapHealthChecks(HealthCheckEndpointPath);
+        app.MapOpenIdConfigurationEndpoint();
+        app.MapJsonWebKeysEndpoint(app.Services);
     }
 
     private static object BuildValidationFailureResponse(

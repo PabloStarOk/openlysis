@@ -1,16 +1,17 @@
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 
 using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Serializers;
 
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 using NodaTime;
 
 using Openlysis.Authentication.API.Application.Common.Abstractions.Services;
 using Openlysis.Authentication.API.Application.Common.Models;
+using Openlysis.Authentication.API.Application.Common.Services;
 using Openlysis.Authentication.API.Infrastructure.Configuration;
 using Openlysis.Domain.Users.Entities;
 
@@ -23,26 +24,30 @@ internal sealed class JwtGenerator : ITokenGenerator
 {
     private readonly IOptions<JwtGeneratorOptions> _jwtOptions;
     private readonly IOptions<RefreshTokenOptions> _refreshTokenOptions;
-    private readonly X509Certificate2 _certificate;
     private readonly IClock _clock;
+    private readonly IJwkProvider _jwkProvider;
+    private readonly IAlgorithmFactory _algorithmFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="JwtGenerator"/> class.
     /// </summary>
     /// <param name="jwtOptions">The JWT generator options.</param>
     /// <param name="refreshTokenOptions">The refresh token options.</param>
-    /// <param name="certificate">The X509 certificate used for signing tokens.</param>
     /// <param name="clock">The clock used for time operations.</param>
+    /// <param name="jwkProvider">The provider for the signing key.</param>
+    /// <param name="algorithmFactory">The factory for JWT algorithms.</param>
     public JwtGenerator(
         IOptions<JwtGeneratorOptions> jwtOptions,
         IOptions<RefreshTokenOptions> refreshTokenOptions,
-        X509Certificate2 certificate,
-        IClock clock)
+        IClock clock,
+        IJwkProvider jwkProvider,
+        IAlgorithmFactory algorithmFactory)
     {
         _jwtOptions = jwtOptions;
         _refreshTokenOptions = refreshTokenOptions;
-        _certificate = certificate;
         _clock = clock;
+        _jwkProvider = jwkProvider;
+        _algorithmFactory = algorithmFactory;
     }
 
     /// <inheritdoc/>
@@ -57,7 +62,7 @@ internal sealed class JwtGenerator : ITokenGenerator
 
     private string GenerateAccessToken(User user)
     {
-        var algorithm = new ES256Algorithm(_certificate);
+        JsonWebKey signingKey = _jwkProvider.GetCurrentSigningKey();
         Instant now = _clock.GetCurrentInstant();
 
         Instant expirationDate =
@@ -68,7 +73,7 @@ internal sealed class JwtGenerator : ITokenGenerator
 
         var token = JwtBuilder
             .Create()
-            .WithAlgorithm(algorithm)
+            .WithAlgorithmFactory(_algorithmFactory)
             .WithJsonSerializer(new JsonNetSerializer())
             .Issuer(_jwtOptions.Value.Issuer)
             .Subject(user.Id.ToString())
@@ -77,6 +82,7 @@ internal sealed class JwtGenerator : ITokenGenerator
             .NotBefore(nowUnixSeconds)
             .IssuedAt(nowUnixSeconds)
             .Id(Guid.NewGuid())
+            .AddHeader(HeaderName.KeyId, signingKey.Kid)
             .Encode();
 
         return token;
