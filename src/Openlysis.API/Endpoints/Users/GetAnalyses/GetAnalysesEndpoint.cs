@@ -16,7 +16,7 @@ namespace Openlysis.API.Endpoints.Users.GetAnalyses;
 /// <summary>
 /// Endpoint for retrieving a paginated collection of analyses (message, URL, or file) of a user.
 /// </summary>
-public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
+public class GetAnalyses : Endpoint<GetAnalysesRequest, PaginatedAnalysisCollection>
 {
     private const string Name = "GetAnalysesByUser";
 
@@ -55,7 +55,7 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
                 builder.WithName(Name);
                 builder.WithDisplayName(Name);
                 builder.Accepts<GetAnalysesRequest>();
-                builder.Produces<GetAnalysesResponse>();
+                builder.Produces<PaginatedAnalysisCollection>();
                 builder.ProducesValidationProblem();
                 builder.ProducesProblem(StatusCodes.Status500InternalServerError);
             },
@@ -68,7 +68,7 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
                 s.RequestParam(r => r.Type, "The type of analysis to retrieve.");
                 s.RequestParam(r => r.Page, $"The page number for pagination (minimum is {GetAnalysesRequestValidator.MinPage}).");
                 s.RequestParam(r => r.PageSize, $"The number of items per page (minimum is {GetAnalysesRequestValidator.MinPageSize}, maximum is {GetAnalysesRequestValidator.MaxPageSize}).");
-                s.ResponseParam<GetAnalysesResponse>(
+                s.ResponseParam<PaginatedAnalysisCollection>(
                     r => r.Analyses,
                     $"A paginated collection containing analyses of type {nameof(UrlMultiAnalysisDto)}, {nameof(FileMultiAnalysisDto)}, or {nameof(MessageAnalysisDto)}. Refer to the schemas for detailed structure.");
             });
@@ -89,7 +89,7 @@ public class GetAnalyses : Endpoint<GetAnalysesRequest, GetAnalysesResponse>
         };
 
         IReadOnlyList<object> analyses = await getAnalyses(userId, req, ct);
-        Response = new GetAnalysesResponse(
+        Response = new PaginatedAnalysisCollection(
             req.Page,
             req.PageSize,
             Total: analyses.Count,

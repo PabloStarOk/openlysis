@@ -7,7 +7,7 @@ namespace Openlysis.API.Endpoints.Users.GetAnalyses;
 /// <param name="PageSize">The number of items per page.</param>
 /// <param name="Total">The total number of analyses available.</param>
 /// <param name="Analyses">The collection of analysis objects.</param>
-public record GetAnalysesResponse(
+public record PaginatedAnalysisCollection(
     int Page,
     int PageSize,
     int Total,
