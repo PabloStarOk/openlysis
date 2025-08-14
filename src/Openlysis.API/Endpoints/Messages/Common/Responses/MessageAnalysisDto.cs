@@ -14,7 +14,7 @@ namespace Openlysis.API.Endpoints.Messages.Common.Responses;
 /// <param name="Status">The current status of the analysis.</param>
 /// <param name="Verdict">The verdict of the analysis.</param>
 /// <param name="ThreatZone">The threat zone classification of the analysis.</param>
-/// <param name="DetectedData">The data detected during the analysis, such as URLs, email addresses, and phone numbers.</param>
+/// <param name="MessageDetectedData">The data detected during the analysis, such as URLs, email addresses, and phone numbers.</param>
 /// <param name="Results">The results of the message analysis, including file, URL, email, and phone analyses.</param>
 public record MessageAnalysisDto(
     string Id,
@@ -24,7 +24,7 @@ public record MessageAnalysisDto(
     AnalysisStatus Status,
     Verdict Verdict,
     ThreatZone ThreatZone,
-    DetectedData DetectedData,
+    MessageDetectedData MessageDetectedData,
     MessageAnalysisResults Results)
 {
     /// <summary>
@@ -37,7 +37,7 @@ public record MessageAnalysisDto(
         MessageAnalysis source,
         MessageAnalysisResults results)
     {
-        var detectedData = DetectedData.CreateFromMessageAnalysis(source);
+        var detectedData = MessageDetectedData.CreateFromMessageAnalysis(source);
 
         return new MessageAnalysisDto(
             source.Id.ToString(),
