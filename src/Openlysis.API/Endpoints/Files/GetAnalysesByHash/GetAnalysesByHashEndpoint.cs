@@ -15,12 +15,9 @@ namespace Openlysis.API.Endpoints.Files.GetAnalysesByHash;
 /// </summary>
 public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHashRequest, IEnumerable<FileMultiAnalysisDto>>
 {
-    private readonly IFileMultiAnalysisService _multiAnalysisService;
+    private const string Name = "GetMultiAnalysesByHash";
 
-    /// <summary>
-    /// Gets the name of the endpoint.
-    /// </summary>
-    public static string Name { get; } = "GetMultiAnalysesByHash";
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAnalysesByHashEndpoint"/> class.

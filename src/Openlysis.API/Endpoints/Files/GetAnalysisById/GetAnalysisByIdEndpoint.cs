@@ -16,12 +16,12 @@ namespace Openlysis.API.Endpoints.Files.GetAnalysisById;
 /// </summary>
 public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
 {
-    private readonly IFileMultiAnalysisService _multiAnalysisService;
-
     /// <summary>
-    /// Gets the name of the endpoint.
+    /// The name identifier for the GetAnalysisById endpoint.
     /// </summary>
-    public static string Name { get; } = "GetFileAnalysisById";
+    public const string Name = "GetFileAnalysisById";
+
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAnalysisByIdEndpoint"/> class.

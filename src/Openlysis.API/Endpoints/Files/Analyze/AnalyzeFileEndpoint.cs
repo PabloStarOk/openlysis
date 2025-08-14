@@ -16,13 +16,10 @@ namespace Openlysis.API.Endpoints.Files.Analyze;
 /// </summary>
 public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifiers>
 {
+    private const string Name = "AnalyzeFile";
+
     private readonly ILogger<AnalyzeFileEndpoint> _logger;
     private readonly IFileMultiAnalysisService _multiAnalysisService;
-
-    /// <summary>
-    /// Gets the name of the endpoint.
-    /// </summary>
-    public static string Name { get; } = "AnalyzeFile";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileEndpoint"/> class.

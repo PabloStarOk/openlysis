@@ -18,6 +18,7 @@ namespace Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 /// </remarks>
 public class GetReputationEndpoint : Endpoint<GetReputationRequest, EmailAddressMultiReputationDto>
 {
+    private const string Name = "GetEmailAddressReputation";
     private readonly IEmailAddressReputationService _reputationService;
 
     /// <summary>
@@ -39,8 +40,8 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, EmailAddress
         Description(
             builder =>
             {
-                builder.WithName("GetEmailAddressReputation");
-                builder.WithDisplayName("GetEmailAddressReputation");
+                builder.WithName(Name);
+                builder.WithDisplayName(Name);
                 builder.Accepts<GetReputationRequest>();
                 builder.Produces<EmailAddressMultiReputationDto>();
                 builder.ProducesValidationProblem();

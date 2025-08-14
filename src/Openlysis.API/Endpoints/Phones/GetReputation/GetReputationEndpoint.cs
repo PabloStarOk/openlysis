@@ -16,6 +16,7 @@ namespace Openlysis.API.Endpoints.Phones.GetReputation;
 /// </remarks>
 public class GetReputationEndpoint : Endpoint<GetReputationRequest, PhoneMultiReputationDto>
 {
+    private const string Name = "GetPhoneNumberReputation";
     private readonly IPhoneReputationService _reputationService;
 
     /// <summary>
@@ -37,8 +38,8 @@ public class GetReputationEndpoint : Endpoint<GetReputationRequest, PhoneMultiRe
         Description(
             builder =>
             {
-                builder.WithName("GetPhoneNumberReputation");
-                builder.WithDisplayName("GetPhoneNumberReputation");
+                builder.WithName(Name);
+                builder.WithDisplayName(Name);
                 builder.Accepts<GetReputationRequest>();
                 builder.Produces<PhoneMultiReputationDto>();
                 builder.ProducesValidationProblem();

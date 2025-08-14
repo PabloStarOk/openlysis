@@ -24,6 +24,8 @@ namespace Openlysis.API.Endpoints.Messages.Analyze;
 /// </remarks>
 public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisIdentifiers>
 {
+    private const string Name = "AnalyzeMessage";
+
     private readonly ILogger<AnalyzeMessageEndpoint> _logger;
     private readonly IMessageAnalysisService _messageAnalysisService;
 
@@ -49,8 +51,8 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
         Description(
             builder =>
             {
-                builder.WithName("AnalyzeMessage");
-                builder.WithDisplayName("AnalyzeMessage");
+                builder.WithName(Name);
+                builder.WithDisplayName(Name);
                 builder.Accepts<AnalyzeMessageRequest>("multipart/form-data");
                 builder.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
                 builder.ProducesValidationProblem();
