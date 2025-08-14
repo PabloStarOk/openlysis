@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Claims;
 
 using ErrorOr;
 
@@ -64,7 +63,9 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalysisIdentifier
             {
                 s.Summary = "Uploads a URL";
                 s.Description = "Uploads a URL to be analyzed by multiple services.";
-                s.ExampleRequest = new AnalyzeUrlRequest("https://example-site.com");
+                s.ExampleRequest = new AnalyzeUrlRequest(
+                    Guid.NewGuid().ToString(),
+                    "https://example-site.com");
                 s.RequestParam(r => r.Url, "URL to be analyzed.");
                 s.RequestParam(r => r.Reanalyze, "Indicates whether the URL should be reanalyzed even if an existing analysis is available. Default is false.");
                 s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who uploads the URL. Default is false");
@@ -74,8 +75,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalysisIdentifier
     /// <inheritdoc/>
     public override async Task HandleAsync(AnalyzeUrlRequest req, CancellationToken ct)
     {
-        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = GlobalId.Parse(userIdClaim.Value);
+        var userId = GlobalId.Parse(req.UserId);
 
         if (!TryCreateUri(req.Url, out Uri? url))
         {

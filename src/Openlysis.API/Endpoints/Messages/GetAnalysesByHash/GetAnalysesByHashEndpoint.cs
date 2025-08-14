@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 using FastEndpoints;
 
 using Openlysis.API.Endpoints.Common.Requests;
@@ -77,8 +75,7 @@ public class GetAnalysesByHashEndpoint
     /// <inheritdoc/>
     public override async Task HandleAsync(GetAnalysesByHashRequest req, CancellationToken ct)
     {
-        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = GlobalId.Parse(userIdClaim.Value);
+        var userId = GlobalId.Parse(req.UserId);
 
         IReadOnlyList<MessageAnalysis> messageAnalyses = await _messageAnalysisService
             .GetAnalysesByHashAsync(

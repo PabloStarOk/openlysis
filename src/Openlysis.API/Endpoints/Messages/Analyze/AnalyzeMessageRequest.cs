@@ -1,3 +1,7 @@
+using System.Security.Claims;
+
+using FastEndpoints;
+
 using Openlysis.Domain.Messages.Enums;
 
 namespace Openlysis.API.Endpoints.Messages.Analyze;
@@ -15,6 +19,10 @@ namespace Openlysis.API.Endpoints.Messages.Analyze;
 /// <param name="Reanalyze">Specifies whether to reanalyze the message even if there is an existing analysis available to retrieve.</param>
 /// <param name="CountryCode">The optional country code to improve data detection in the message.</param>
 public record AnalyzeMessageRequest(
+    [property: FromClaim(
+        ClaimType = ClaimTypes.NameIdentifier,
+        RemoveFromSchema = true)]
+    string UserId,
     MessageType? MessageType,
     string Sender,
     string Content,

@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 using ErrorOr;
 
 using FastEndpoints;
@@ -70,8 +68,7 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
     /// <inheritdoc/>
     public override async Task HandleAsync(GetAnalysisByIdRequest req, CancellationToken ct)
     {
-        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = GlobalId.Parse(userIdClaim.Value);
+        var userId = GlobalId.Parse(req.UserId);
 
         if (!GlobalId.TryParse(req.Id, out GlobalId? id))
         {

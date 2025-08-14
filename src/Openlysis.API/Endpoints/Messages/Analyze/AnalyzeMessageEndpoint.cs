@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 using ErrorOr;
 
 using FastEndpoints;
@@ -86,8 +84,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
             await SendResultAsync(result);
         }
 
-        Claim userIdClaim = User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier);
-        var userId = GlobalId.Parse(userIdClaim.Value);
+        var userId = GlobalId.Parse(req.UserId);
         MessageType messageType = (MessageType)req.MessageType!;
         var message = new Message(messageType, req.Sender, req.Subject, req.Content);
         FileData[] files = CreateFileDataArray(req);

@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 using ErrorOr;
 
 using FastEndpoints;
@@ -74,8 +72,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
     /// <returns>A task representing the asynchronous operation.</returns>
     public override async Task HandleAsync(AnalyzeFileRequest request, CancellationToken ct)
     {
-        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = GlobalId.Parse(userIdClaim.Value);
+        var userId = GlobalId.Parse(request.UserId);
 
 #if DEBUG
         LogFileMetadata(request);

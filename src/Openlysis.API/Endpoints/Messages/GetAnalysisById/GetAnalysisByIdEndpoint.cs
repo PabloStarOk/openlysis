@@ -1,5 +1,3 @@
-using System.Security.Claims;
-
 using ErrorOr;
 
 using FastEndpoints;
@@ -81,8 +79,7 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
         GetAnalysisByIdRequest req,
         CancellationToken ct)
     {
-        Claim userIdClaim = User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = GlobalId.Parse(userIdClaim.Value);
+        var userId = GlobalId.Parse(req.UserId);
 
         if (!GlobalId.TryParse(req.Id, out GlobalId? id))
         {
