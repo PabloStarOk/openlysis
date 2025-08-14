@@ -26,6 +26,7 @@ public static class AppConfiguration
     private const string EndpointPathPrefix = "api";
     private const string VersioningPrefix = "v";
     private const int EndpointDefaultVersion = 1;
+    private static readonly IEnumerable<string> PreferredAuthSchemes = ["JWTBearerAuth"];
 
     /// <summary>
     /// Configures the API for the web application.
@@ -44,6 +45,7 @@ public static class AppConfiguration
                 o.WithTitle(WebPageTitle);
                 o.AddDocument(DependencyInjection.V1DocumentName);
                 o.HiddenClients = true;
+                o.AddPreferredSecuritySchemes(PreferredAuthSchemes);
             });
         }
 
