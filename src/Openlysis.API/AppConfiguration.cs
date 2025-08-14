@@ -43,6 +43,7 @@ public static class AppConfiguration
             {
                 o.WithTitle(WebPageTitle);
                 o.AddDocument(DependencyInjection.V1DocumentName);
+                o.HiddenClients = true;
             });
         }
 
