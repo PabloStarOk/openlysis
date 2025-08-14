@@ -42,7 +42,6 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHashRequest, IEnu
                 b.WithDisplayName(Name);
                 b.Produces<IEnumerable<FileMultiAnalysisDto>>();
                 b.ProducesProblem(StatusCodes.Status400BadRequest);
-                b.ProducesProblem(StatusCodes.Status404NotFound);
             });
         Summary(
             s =>
@@ -84,16 +83,6 @@ public class GetAnalysesByHashEndpoint : Endpoint<GetAnalysesByHashRequest, IEnu
                 request.StartedDateOrder,
                 ct);
 
-        if (multiAnalyses.Count < 1)
-        {
-            await SendResultAsync(
-                Results.Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    detail: "There are no analyses to retrieve."));
-            return;
-        }
-
         Response = multiAnalyses.Select(FileMultiAnalysisDto.Parse);
-        await SendOkAsync(Response, ct);
     }
 }

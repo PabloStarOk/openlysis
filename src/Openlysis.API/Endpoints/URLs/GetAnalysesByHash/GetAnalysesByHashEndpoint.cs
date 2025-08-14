@@ -47,7 +47,6 @@ public class GetAnalysesByHashEndpoint
                 builder.Accepts<GetAnalysesByHashRequest>();
                 builder.Produces<IReadOnlyList<UrlMultiAnalysisDto>>();
                 builder.ProducesValidationProblem();
-                builder.ProducesProblem(StatusCodes.Status404NotFound);
             },
             clearDefaults: true);
         Summary(
@@ -76,15 +75,6 @@ public class GetAnalysesByHashEndpoint
                 req.PageSize,
                 req.StartedDateOrder,
                 ct);
-
-        if (analyses.Count is 0)
-        {
-            IResult notFoundResult = Results.Problem(
-                statusCode: StatusCodes.Status404NotFound,
-                detail: "There are no analyses for the given hash.");
-            await SendResultAsync(notFoundResult);
-            return;
-        }
 
         Response = analyses.Select(UrlMultiAnalysisDto.Parse);
     }

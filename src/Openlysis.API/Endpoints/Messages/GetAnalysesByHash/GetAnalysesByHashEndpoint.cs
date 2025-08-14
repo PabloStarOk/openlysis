@@ -60,7 +60,6 @@ public class GetAnalysesByHashEndpoint
                 builder.Accepts<GetAnalysesByHashRequest>();
                 builder.Produces<IEnumerable<MessageAnalysisDto>>();
                 builder.ProducesValidationProblem();
-                builder.ProducesProblem(StatusCodes.Status404NotFound);
             },
             clearDefaults: true);
         Summary(
@@ -89,14 +88,6 @@ public class GetAnalysesByHashEndpoint
                 req.PageSize,
                 req.StartedDateOrder,
                 ct);
-
-        if (messageAnalyses.Count is 0)
-        {
-            IResult notFoundResult = Results.Problem(
-                statusCode: StatusCodes.Status404NotFound,
-                detail: "There are no analyses for the given hash.");
-            await SendResultAsync(notFoundResult);
-        }
 
         List<MessageAnalysisDto> messageAnalysisDtos = [];
         foreach (var analysis in messageAnalyses)
