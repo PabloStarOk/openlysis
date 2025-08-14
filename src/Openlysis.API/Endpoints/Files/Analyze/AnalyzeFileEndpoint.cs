@@ -4,6 +4,7 @@ using ErrorOr;
 
 using FastEndpoints;
 
+using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Files.Services;
 using Openlysis.Domain.Common.ValueObjects;
@@ -13,7 +14,7 @@ namespace Openlysis.API.Endpoints.Files.Analyze;
 /// <summary>
 /// Endpoint to analyze a file.
 /// </summary>
-public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileResponse>
+public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifiers>
 {
     private readonly ILogger<AnalyzeFileEndpoint> _logger;
     private readonly IFileMultiAnalysisService _multiAnalysisService;
@@ -51,7 +52,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
                 b.WithName(Name);
                 b.WithDisplayName(Name);
                 b.Accepts<AnalyzeFileRequest>(contentType: "multipart/form-data");
-                b.Produces<AnalyzeFileResponse>(StatusCodes.Status202Accepted);
+                b.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
                 b.ProducesProblem(StatusCodes.Status400BadRequest);
                 b.ProducesProblem(StatusCodes.Status500InternalServerError);
             },
@@ -119,7 +120,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
             return;
         }
 
-        Response = AnalyzeFileResponse.Parse(result.Value);
+        Response = AnalysisIdentifiers.Parse(result.Value);
 
         var routeValues = new Dictionary<string, string>
         {

@@ -5,6 +5,7 @@ using ErrorOr;
 
 using FastEndpoints;
 
+using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.URLs.GetAnalysisById;
 using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.Common.ValueObjects;
@@ -20,7 +21,7 @@ namespace Openlysis.API.Endpoints.URLs.Analyze;
 /// retrieving the user ID, creating and sending the analysis command,
 /// and finally creating the response.
 /// </remarks>
-public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse>
+public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalysisIdentifiers>
 {
     private const string Name = "AnalyzeUrl";
 
@@ -53,7 +54,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
                 builder.WithName(Name);
                 builder.WithDisplayName(Name);
                 builder.Accepts<AnalyzeUrlRequest>("application/x-www-form-urlencoded");
-                builder.Produces<AnalyzeUrlResponse>();
+                builder.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
                 builder.ProducesValidationProblem();
                 builder.ProducesProblem(StatusCodes.Status500InternalServerError);
             },
@@ -101,7 +102,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
             return;
         }
 
-        Response = AnalyzeUrlResponse.Parse(result.Value);
+        Response = AnalysisIdentifiers.Parse(result.Value);
 
         var routeValues = new RouteValueDictionary
         {

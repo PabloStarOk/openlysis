@@ -4,6 +4,7 @@ using ErrorOr;
 
 using FastEndpoints;
 
+using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.Messages.GetAnalysisById;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Messages.Contracts.Requests;
@@ -21,7 +22,7 @@ namespace Openlysis.API.Endpoints.Messages.Analyze;
 /// This endpoint handles requests to analyze messages by processing the input
 /// and returning the ID and hash of a <see cref="MessageAnalysis"/>.
 /// </remarks>
-public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMessageResponse>
+public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisIdentifiers>
 {
     private readonly ILogger<AnalyzeMessageEndpoint> _logger;
     private readonly IMessageAnalysisService _messageAnalysisService;
@@ -51,7 +52,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
                 builder.WithName("AnalyzeMessage");
                 builder.WithDisplayName("AnalyzeMessage");
                 builder.Accepts<AnalyzeMessageRequest>("multipart/form-data");
-                builder.Produces<AnalyzeMessageResponse>(statusCode: 202);
+                builder.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
                 builder.ProducesValidationProblem();
             },
             clearDefaults: true);
@@ -117,7 +118,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalyzeMes
         }
 
         MessageAnalysis messageAnalysis = analyzeResult.Value;
-        Response = AnalyzeMessageResponse.Parse(messageAnalysis);
+        Response = AnalysisIdentifiers.Parse(messageAnalysis);
 
         var routeValues = new RouteValueDictionary
             {
