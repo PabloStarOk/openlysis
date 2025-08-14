@@ -21,7 +21,6 @@ public class UsersGroup : Group
                 {
                     b.WithGroupName("Users");
                     b.WithDisplayName("Users");
-                    b.WithTags("Users");
                 });
         });
     }

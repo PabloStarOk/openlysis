@@ -54,7 +54,7 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
                 builder.WithDisplayName(Name);
                 builder.Accepts<GetAnalysisByIdRequest>();
                 builder.Produces<UrlMultiAnalysisDto>();
-                builder.Produces(StatusCodes.Status404NotFound);
+                builder.ProducesProblem(StatusCodes.Status404NotFound);
                 builder.ProducesProblem(StatusCodes.Status500InternalServerError);
             },
             clearDefaults: true);

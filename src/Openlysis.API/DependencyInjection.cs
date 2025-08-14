@@ -13,6 +13,7 @@ using Newtonsoft.Json.Serialization;
 using NSwag;
 
 using Openlysis.API.Configuration.Options;
+using Openlysis.API.Documentation;
 using Openlysis.API.Middlewares.Exceptions;
 
 namespace Openlysis.API;
@@ -37,7 +38,7 @@ public static class DependencyInjection
     /// <param name="services">Collection of services.</param>
     /// <param name="configuration">Configuration settings.</param>
     /// <param name="environment">Hosting environment information.</param>
-    public static void AddApi(
+    internal static void AddApi(
         this IServiceCollection services,
         IConfiguration configuration,
         IHostEnvironment environment)
@@ -114,6 +115,7 @@ public static class DependencyInjection
                             },
                         };
                     };
+                    s.SchemaSettings.SchemaNameGenerator = new SchemaNameGenerator();
                 };
 
                 opt.SerializerSettings = s =>

@@ -52,8 +52,8 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
                 b.WithDisplayName(Name);
                 b.Accepts<AnalyzeFileRequest>(contentType: "multipart/form-data");
                 b.Produces<AnalyzeFileResponse>(StatusCodes.Status202Accepted);
-                b.ProducesProblemDetails();
-                b.ProducesProblemDetails(StatusCodes.Status500InternalServerError);
+                b.ProducesProblem(StatusCodes.Status400BadRequest);
+                b.ProducesProblem(StatusCodes.Status500InternalServerError);
             },
             clearDefaults: true);
         Summary(

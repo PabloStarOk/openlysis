@@ -20,7 +20,6 @@ public sealed class MessageAnalysesGroup : Group
                 {
                     b.WithGroupName("Messages");
                     b.WithDisplayName("Messages");
-                    b.WithTags("Messages");
                 });
         });
     }
