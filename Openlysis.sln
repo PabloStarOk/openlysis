@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.TestTools.Service
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Authentication.API", "src\Openlysis.Authentication.API\Openlysis.Authentication.API.csproj", "{7968152C-2017-4A43-98E8-E994353E8E92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doppler.NET", "src\Shared\Doppler.NET\Doppler.NET.csproj", "{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}"
+EndProject
 
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -100,6 +102,10 @@ Global
 		{7968152C-2017-4A43-98E8-E994353E8E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7968152C-2017-4A43-98E8-E994353E8E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7968152C-2017-4A43-98E8-E994353E8E92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
