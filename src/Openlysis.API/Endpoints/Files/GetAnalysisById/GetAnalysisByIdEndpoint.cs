@@ -1,9 +1,8 @@
-using System.Security.Claims;
-
 using ErrorOr;
 
 using FastEndpoints;
 
+using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.Files.Common.Responses;
 using Openlysis.Application.Files.Services;
 using Openlysis.Domain.Common.ValueObjects;
@@ -14,7 +13,7 @@ namespace Openlysis.API.Endpoints.Files.GetAnalysisById;
 /// <summary>
 /// Endpoint for retrieving file analysis by hash.
 /// </summary>
-public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
+public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, FileMultiAnalysisDto>
 {
     /// <summary>
     /// The name identifier for the GetAnalysisById endpoint.
@@ -55,33 +54,16 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
             {
                 s.Summary = "Get a file analysis by ID.";
                 s.Description = "Get a file analysis by its ID.";
-                s.Params = new Dictionary<string, string>
-                {
-                    { "id", "ID of the analysis to retrieve." },
-                };
+                s.RequestParam(r => r.Id, "ID of the analysis to get.");
             });
     }
 
-    /// <summary>
-    /// Handles the request to get a file analysis by its hash.
-    /// </summary>
-    /// <param name="ct">A <see cref="CancellationToken"/> to cancel the operation.</param>
-    /// <returns>The result of the file analysis.</returns>
-    public override async Task HandleAsync(CancellationToken ct)
+    /// <inheritdoc/>
+    public override async Task HandleAsync(GetAnalysisByIdRequest req, CancellationToken ct)
     {
-        string id = Route<string>("id") ?? string.Empty;
+        GlobalId userId = GlobalId.Parse(req.UserId);
 
-        // ID is null or empty
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            await SendResultAsync(Results.Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: "ID is required."));
-            return;
-        }
-
-        // Invalid ID
-        if (!GlobalId.TryParse(id, out GlobalId? globalId))
+        if (!GlobalId.TryParse(req.Id, out GlobalId? globalId))
         {
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
@@ -89,16 +71,12 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
             return;
         }
 
-        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = GlobalId.Parse(userIdClaim.Value);
-
-        ErrorOr<FileMultiAnalysis> mediatorResult = await _multiAnalysisService
+        ErrorOr<FileMultiAnalysis> result = await _multiAnalysisService
             .GetAnalysisByIdAsync(userId, globalId, ct);
 
-        if (mediatorResult.IsError)
+        if (result.IsError)
         {
-            // Not found
-            if (mediatorResult.Errors.Any(e => e.Type is ErrorType.NotFound))
+            if (result.Errors.Any(e => e.Type is ErrorType.NotFound))
             {
                 await SendResultAsync(Results.Problem(
                     statusCode: StatusCodes.Status404NotFound,
@@ -106,11 +84,10 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
                 return;
             }
 
-            // Other errors
             var extensions = new Dictionary<string, object?>
             {
                 {
-                    "errors", mediatorResult.Errors
+                    "errors", result.Errors
                 },
             };
             await SendResultAsync(Results.Problem(
@@ -120,7 +97,6 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
             return;
         }
 
-        Response = FileMultiAnalysisDto.Parse(mediatorResult.Value);
-        await SendOkAsync(Response, ct);
+        Response = FileMultiAnalysisDto.Parse(result.Value);
     }
 }
