@@ -96,7 +96,9 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, MessageA
         {
             if (result.Errors.Any(e => e.Type is ErrorType.NotFound))
             {
-                await SendNotFoundAsync(ct);
+                await SendResultAsync(Results.Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    detail: "File analysis with the specified ID does not exist."));
                 return;
             }
 
