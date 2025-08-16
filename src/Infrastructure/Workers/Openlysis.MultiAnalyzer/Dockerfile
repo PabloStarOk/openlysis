@@ -19,6 +19,7 @@ COPY ["src/Infrastructure/Analyzers/Openlysis.Analyzers.URLQuery/Openlysis.Analy
 COPY ["src/Infrastructure/Analyzers/Openlysis.Analyzers.HybridAnalysis/Openlysis.Analyzers.HybridAnalysis.csproj", "Infrastructure/Analyzers/Openlysis.Analyzers.HybridAnalysis/"]
 COPY ["src/Infrastructure/Analyzers/Openlysis.Analyzers.Filescan/Openlysis.Analyzers.Filescan.csproj", "Infrastructure/Analyzers/Openlysis.Analyzers.Filescan/"]
 COPY ["src/Infrastructure/Evaluators/Openlysis.Evaluators.Shared/Openlysis.Evaluators.Shared.csproj", "Infrastructure/Evaluators/Openlysis.Evaluators.Shared/"]
+COPY ["src/Shared/Doppler.NET/Doppler.NET.csproj", "Shared/Doppler.NET/"]
 RUN dotnet restore "Infrastructure/Workers/Openlysis.MultiAnalyzer/Openlysis.MultiAnalyzer.csproj"
 # Copy project files.
 COPY ["src/Openlysis.Domain/", "Openlysis.Domain/"]
@@ -27,6 +28,7 @@ COPY ["src/Infrastructure/Openlysis.Infrastructure.Shared", "Infrastructure/Open
 COPY ["src/Infrastructure/Workers/", "Infrastructure/Workers/"]
 COPY ["src/Infrastructure/Analyzers/", "Infrastructure/Analyzers/"]
 COPY ["src/Infrastructure/Evaluators/Openlysis.Evaluators.Shared/", "Infrastructure/Evaluators/Openlysis.Evaluators.Shared/"]
+COPY ["src/Shared/Doppler.NET/", "Shared/Doppler.NET/"]
 WORKDIR /src/Infrastructure/Workers/Openlysis.MultiAnalyzer
 RUN dotnet build "Openlysis.MultiAnalyzer.csproj" -c $BUILD_CONFIGURATION -o /app/build
 

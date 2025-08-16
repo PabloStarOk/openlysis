@@ -32,19 +32,17 @@ namespace Openlysis.Analyzers.HybridAnalysis;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds the required services for the Hybrid Analysis analyzers.
+    /// Registers Hybrid Analysis analyzer services and related dependencies with the specified <see cref="IServiceCollection"/>.
     /// </summary>
-    /// <param name="services">The IServiceCollection to add the services to.</param>
-    /// <param name="configuration">The IConfiguration instance to retrieve configuration settings from.</param>
+    /// <param name="services">The service collection to add the analyzer services to.</param>
+    /// <param name="apiKeySecretName">The name of the secret containing the API key.</param>
+    /// <param name="configuration">The application configuration instance.</param>
     public static void AddHybridAnalyzer(
         this IServiceCollection services,
+        string apiKeySecretName,
         IConfiguration configuration)
     {
         // Get options
-        var secretOptions = configuration
-            .GetRequiredSection(HybridSecretOptions.SectionName)
-            .Get<HybridSecretOptions>();
-
         var analyzerOptionsSection = configuration
             .GetRequiredSection(HybridAnalyzerOptions.SectionName);
         var analyzerOptions = analyzerOptionsSection.Get<HybridAnalyzerOptions>();
@@ -52,7 +50,6 @@ public static class DependencyInjection
         var sandboxAnalyzerOptions =
             configuration.GetRequiredSection(SandboxAnalyzerOptions.SectionName);
 
-        ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
 
         // Add options
@@ -99,7 +96,10 @@ public static class DependencyInjection
             });
 
         // Add http client
-        services.ConfigureHttpClient(secretOptions, analyzerOptions, client =>
+        services.ConfigureHttpClient(
+            apiKeySecretName,
+            analyzerOptions,
+            client =>
             {
                 client.DefaultRequestHeaders.UserAgent.ParseAdd(analyzerOptions.UserAgent);
             });

@@ -24,6 +24,7 @@ namespace Openlysis.TestTools.ServicesSimulation.URLs;
 internal static class DependencyInjection
 {
     private const string SectionName = $"{ConfigurationSectionNames.Base}:UrlAnalysisServices";
+    private const string KeyedServicesStubKey = "SimulatedServices";
 
     /// <summary>
     /// Registers simulated URL analyzers with the dependency injection container.
@@ -84,13 +85,10 @@ internal static class DependencyInjection
         string optionsName,
         string serviceName)
     {
-        var secretsOptions = DependencyInjectionExtensions
-            .GenerateSecretStubOptions(serviceName);
-
         var analyzerOptionsStub = DependencyInjectionExtensions
             .GenerateAnalyzerOptionsStub(serviceName);
 
-        services.ConfigureHttpClient(secretsOptions, analyzerOptionsStub);
+        services.ConfigureHttpClient(KeyedServicesStubKey, analyzerOptionsStub);
 
         var analyzerOptionsStubMonitor =
             new SimulatedOptionsMonitor<AnalyzerOptions>(analyzerOptionsStub);

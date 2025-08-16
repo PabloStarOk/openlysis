@@ -25,6 +25,7 @@ namespace Openlysis.TestTools.ServicesSimulation.Files;
 internal static class DependencyInjection
 {
     private const string SectionName = $"{ConfigurationSectionNames.Base}:FileAnalysisServices";
+    private const string KeyedServicesStubKey = "SimulatedServices";
 
     /// <summary>
     /// Registers simulated file analyzer services into the dependency injection container.
@@ -89,13 +90,10 @@ internal static class DependencyInjection
         string optionsName,
         string serviceName)
     {
-        var secretsOptions = DependencyInjectionExtensions
-            .GenerateSecretStubOptions(serviceName);
-
         var analyzerOptionsStub = DependencyInjectionExtensions
             .GenerateAnalyzerOptionsStub(serviceName);
 
-        services.ConfigureHttpClient(secretsOptions, analyzerOptionsStub);
+        services.ConfigureHttpClient(KeyedServicesStubKey, analyzerOptionsStub);
 
         var analyzerOptionsStubMonitor =
             new SimulatedOptionsMonitor<AnalyzerOptions>(analyzerOptionsStub);

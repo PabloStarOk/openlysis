@@ -3,7 +3,7 @@ using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
-using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
+using Openlysis.Infrastructure.Shared.Infrastructure.Secrets;
 
 namespace Openlysis.Analyzers.Shared.Infrastructure.Client;
 
@@ -13,45 +13,28 @@ namespace Openlysis.Analyzers.Shared.Infrastructure.Client;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds an <see cref="HttpClient"/> singleton instance to the <see cref="IServiceCollection"/> with the specified options.
+    /// Configures and registers an <see cref="HttpClient"/> for the specified analyzer service.
     /// </summary>
-    /// <param name="services">The service collection to add the <see cref="HttpClient"/> to.</param>
-    /// <param name="secretOptions">The secret options containing the API key.</param>
-    /// <param name="analyzerOptions">The analyzer options containing the base address and timeout settings.</param>
+    /// <param name="services">The service collection to add the HTTP client to.</param>
+    /// <param name="apiKeySecretName">The name of the secret containing the API key.</param>
+    /// <param name="analyzerOptions">Options for configuring the analyzer client.</param>
+    /// <param name="configure">Optional action to further configure the <see cref="HttpClient"/>.</param>
     public static void ConfigureHttpClient(
         this IServiceCollection services,
-        SecretOptions secretOptions,
-        AnalyzerOptions analyzerOptions)
-    {
-        services.AddHttpClient(analyzerOptions.ServiceName, httpClient =>
-        {
-            httpClient.BaseAddress = analyzerOptions.BaseAddress;
-            httpClient.Timeout = TimeSpan.FromMilliseconds(analyzerOptions.RequestsTimeoutMs);
-            httpClient.DefaultRequestHeaders.Add(analyzerOptions.ApiKeyHeaderName, secretOptions.ApiKey);
-            httpClient.DefaultRequestVersion = HttpVersion.Version30;
-        });
-    }
-
-    /// <summary>
-    /// Adds an <see cref="HttpClient"/> singleton instance to the <see cref="IServiceCollection"/> with the specified options and configuration action.
-    /// </summary>
-    /// <param name="services">The service collection to add the <see cref="HttpClient"/> to.</param>
-    /// <param name="secretOptions">The secret options containing the API key.</param>
-    /// <param name="analyzerOptions">The analyzer options containing the base address and timeout settings.</param>
-    /// <param name="configureClient">An action to configure the <see cref="HttpClient"/>.</param>
-    public static void ConfigureHttpClient(
-        this IServiceCollection services,
-        SecretOptions secretOptions,
+        string apiKeySecretName,
         AnalyzerOptions analyzerOptions,
-        Action<HttpClient> configureClient)
+        Action<HttpClient>? configure = null)
     {
-        services.AddHttpClient(analyzerOptions.ServiceName, httpClient =>
+        services.AddHttpClient(analyzerOptions.ServiceName, (sp, httpClient) =>
         {
+            var apiKeyProvider = sp.GetRequiredService<IApiKeyProvider>();
+            var apiKey = apiKeyProvider.GetApiKey(apiKeySecretName);
+
             httpClient.BaseAddress = analyzerOptions.BaseAddress;
             httpClient.Timeout = TimeSpan.FromMilliseconds(analyzerOptions.RequestsTimeoutMs);
-            httpClient.DefaultRequestHeaders.Add(analyzerOptions.ApiKeyHeaderName, secretOptions.ApiKey);
+            httpClient.DefaultRequestHeaders.Add(analyzerOptions.ApiKeyHeaderName, apiKey);
             httpClient.DefaultRequestVersion = HttpVersion.Version30;
-            configureClient(httpClient);
+            configure?.Invoke(httpClient);
         });
     }
 }
