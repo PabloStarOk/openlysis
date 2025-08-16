@@ -20,12 +20,15 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">The service collection to add the Doppler client to.</param>
     /// <param name="serviceToken">The service token used for authentication with Doppler project.</param>
+    /// <param name="configure">An action to configure DopplerClientOptions.</param>
     public static void AddDopplerClient(
         this IServiceCollection services,
-        string serviceToken)
+        string serviceToken,
+        Action<DopplerClientOptions> configure)
     {
         services.AddOptions<DopplerClientOptions>().Configure(options =>
         {
+            configure(options);
             options.ServiceToken = serviceToken;
         });
 
@@ -40,8 +43,8 @@ public static class DependencyInjection
             client.DefaultRequestHeaders.Authorization = authorizationHeaderValue;
 
             return new DopplerClient(
-                client,
-                options.Value.SerializerOptions);
+                options,
+                client);
         });
     }
 }

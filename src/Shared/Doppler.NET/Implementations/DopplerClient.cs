@@ -1,8 +1,11 @@
 using System.Text.Json;
 
 using Doppler.NET.Abstractions;
+using Doppler.NET.Configuration;
 using Doppler.NET.Constants;
 using Doppler.NET.Models;
+
+using Microsoft.Extensions.Options;
 
 namespace Doppler.NET.Implementations;
 
@@ -11,29 +14,29 @@ namespace Doppler.NET.Implementations;
 /// </summary>
 internal sealed class DopplerClient : IDopplerClient
 {
+    private readonly IOptions<DopplerClientOptions> _options;
     private readonly HttpClient _httpClient;
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DopplerClient"/> class.
     /// </summary>
+    /// <param name="options">The Doppler client options.</param>
     /// <param name="httpClient">The HTTP client used for API requests.</param>
-    /// <param name="serializerOptions">Options for JSON serialization.</param>
     internal DopplerClient(
-        HttpClient httpClient,
-        JsonSerializerOptions serializerOptions)
+        IOptions<DopplerClientOptions> options,
+        HttpClient httpClient)
     {
+        _options = options;
         _httpClient = httpClient;
-        _jsonSerializerOptions = serializerOptions;
     }
 
     /// <inheritdoc/>
-    public async Task<DopplerSecret?> GetSecretAsync(string project, string config, string secret)
+    public async Task<DopplerSecret?> GetSecretAsync(string secret)
     {
         var formattedUri = string.Format(
             DopplerApi.V3.Secrets.RetrievePath,
-            project,
-            config,
+            _options.Value.ProjectName,
+            _options.Value.ConfigName,
             secret);
         HttpResponseMessage response = await _httpClient.GetAsync(formattedUri).ConfigureAwait(false);
 
@@ -43,6 +46,6 @@ internal sealed class DopplerClient : IDopplerClient
         }
 
         string bodyString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        return JsonSerializer.Deserialize<DopplerSecret>(bodyString, _jsonSerializerOptions);
+        return JsonSerializer.Deserialize<DopplerSecret>(bodyString, _options.Value.SerializerOptions);
     }
 }

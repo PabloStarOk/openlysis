@@ -113,15 +113,19 @@ internal static class DependencyInjection
             IValidateOptions<DopplerCertificateOptions>,
             DopplerCertificateOptionsValidator>();
 
-        string? serviceToken;
         using (ServiceProvider sp = services.BuildServiceProvider())
         {
-            var options = sp.GetRequiredService<IOptions<DopplerCertificateOptions>>();
-            serviceToken = Environment.GetEnvironmentVariable(options.Value.ServiceTokenEnvVariable);
+            var certOptions = sp.GetRequiredService<IOptions<DopplerCertificateOptions>>();
+            string? serviceToken = Environment.GetEnvironmentVariable(certOptions.Value.ServiceTokenEnvVariable);
             ArgumentException.ThrowIfNullOrWhiteSpace(serviceToken);
+
+            services.AddDopplerClient(serviceToken, options =>
+            {
+                options.ProjectName = certOptions.Value.ProjectName;
+                options.ConfigName = certOptions.Value.ConfigName;
+            });
         }
 
-        services.AddDopplerClient(serviceToken);
         services.AddSingleton<DopplerCertificateProvider>();
         services.AddHostedService(sp => sp.GetRequiredService<DopplerCertificateProvider>());
         services.AddSingleton<ICertificateProvider>(sp => sp.GetRequiredService<DopplerCertificateProvider>());

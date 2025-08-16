@@ -8,14 +8,9 @@ namespace Doppler.NET.Abstractions;
 public interface IDopplerClient
 {
     /// <summary>
-    /// Asynchronously retrieves a Doppler secret for the specified project, config, and secret name.
+    /// Asynchronously retrieves a Doppler secret by the specified secret name.
     /// </summary>
-    /// <param name="project">The Doppler project name.</param>
-    /// <param name="config">The Doppler configuration name.</param>
     /// <param name="secret">The name of the secret to retrieve.</param>
     /// <returns>A <see cref="DopplerSecret"/> if found; otherwise, <c>null</c>.</returns>
-    Task<DopplerSecret?> GetSecretAsync(
-        string project,
-        string config,
-        string secret);
+    Task<DopplerSecret?> GetSecretAsync(string secret);
 }

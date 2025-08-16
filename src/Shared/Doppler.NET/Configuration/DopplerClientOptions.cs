@@ -13,6 +13,16 @@ public record DopplerClientOptions
     required public string ServiceToken { get; set; }
 
     /// <summary>
+    /// Gets or sets the Doppler project name.
+    /// </summary>
+    required public string ProjectName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Doppler configuration name.
+    /// </summary>
+    required public string ConfigName { get; set; }
+
+    /// <summary>
     /// Gets or sets the <see cref="JsonSerializerOptions"/> used for serializing and deserializing JSON data.
     /// </summary>
     public JsonSerializerOptions SerializerOptions { get; set; } = new ()
