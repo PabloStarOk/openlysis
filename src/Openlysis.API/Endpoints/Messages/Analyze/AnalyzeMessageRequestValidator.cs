@@ -41,6 +41,8 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
             .WithMessage("Country code must be in ISO 1366 alpha-2 format.");
 
         RuleFor(x => x.AttachedFiles)
+            .Must(AttachedFilesWithUniqueNames)
+            .WithMessage("All attached files must have unique names.")
             .Must(NotAttachedFilesZeroWithLength)
             .WithMessage("All files must have length at least higher than zero.")
             .Must(a => AttachedFilesNotExceedLimit(a, fileUploadOptions))
@@ -94,6 +96,16 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
     }
 
     /// <summary>
+    /// Checks if all attached files have unique names.
+    /// Returns true if the collection is null or all file names are unique; otherwise, false.
+    /// </summary>
+    private static bool AttachedFilesWithUniqueNames(IFormFileCollection? attachedFiles)
+    {
+        return attachedFiles is null ||
+            attachedFiles.Select(f => f.FileName).Distinct().Count() == attachedFiles.Count;
+    }
+
+    /// <summary>
     /// Validates that all passwords in the provided dictionary are non-empty.
     /// If the dictionary is null, the validation passes.
     /// </summary>
@@ -122,14 +134,17 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
         AnalyzeMessageRequest request,
         Dictionary<string, string>? passwords)
     {
-        if (request.AttachedFiles is null
-            || passwords is null)
+        if (request.AttachedFiles is null || passwords is null)
         {
             return true;
         }
 
+        IFormFile[] distinctAttachedFiles = request.AttachedFiles
+            .DistinctBy(r => r.FileName)
+            .ToArray();
+
         return passwords.Keys
-            .All(k => request.AttachedFiles
+            .All(k => distinctAttachedFiles
                 .SingleOrDefault(f => f.FileName == k) is not null);
     }
 }
