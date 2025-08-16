@@ -32,19 +32,17 @@ namespace Openlysis.Analyzers.VirusTotal;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds the VirusTotal analyzers and related services to the specified service collection.
+    /// Registers VirusTotal analyzer services and related dependencies into the provided <see cref="IServiceCollection"/>.
     /// </summary>
-    /// <param name="services">The service collection to add the services to.</param>
-    /// <param name="configuration">The configuration to use for setting up the services.</param>
+    /// <param name="services">The service collection to add dependencies to.</param>
+    /// <param name="apiKeySecretName">The name of the secret containing the VirusTotal API key.</param>
+    /// <param name="configuration">The application configuration instance.</param>
     public static void AddVirusTotalAnalyzers(
         this IServiceCollection services,
+        string apiKeySecretName,
         IConfiguration configuration)
     {
         // Get options.
-        var secretOptions = configuration
-            .GetRequiredSection(VirusTotalSecretOptions.SectionName)
-            .Get<VirusTotalSecretOptions>();
-
         var analyzerOptionsSection = configuration
             .GetRequiredSection(VirusTotalAnalyzerOptions.SectionName);
         var analyzerOptions = analyzerOptionsSection.Get<VirusTotalAnalyzerOptions>();
@@ -52,7 +50,6 @@ public static class DependencyInjection
         var verdictCalculationOptionSection = configuration
             .GetRequiredSection(VerdictCalculationOptions.SectionName);
 
-        ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
 
         // Add options.
@@ -93,7 +90,7 @@ public static class DependencyInjection
             });
 
         // Add http client.
-        services.ConfigureHttpClient(secretOptions, analyzerOptions);
+        services.ConfigureHttpClient(apiKeySecretName, analyzerOptions);
 
         // Add limit tracker
         services.AddRateQuotaService<AnalysisEndpointType>(

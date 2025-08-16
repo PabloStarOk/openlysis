@@ -25,12 +25,14 @@ namespace Openlysis.Analyzers.URLQuery;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds the URL query analyzer services to the dependency injection container.
+    /// Registers URL query analyzer services and configuration in the dependency injection container.
     /// </summary>
-    /// <param name="services">The service collection to add the services to.</param>
-    /// <param name="configuration">The configuration to use for the services.</param>
+    /// <param name="services">The service collection to add services to.</param>
+    /// <param name="apiKeySecretName">The name of the secret containing the API key.</param>
+    /// <param name="configuration">The application configuration.</param>
     public static void AddUrlQueryAnalyzer(
         this IServiceCollection services,
+        string apiKeySecretName,
         IConfiguration configuration)
     {
         // Add options
@@ -38,15 +40,10 @@ public static class DependencyInjection
             .GetRequiredSection(UrlQueryAnalyzerOptions.SectionName);
         var analyzerOptions = analyzerOptionsSection.Get<UrlQueryAnalyzerOptions>();
 
-        var secretOptions = configuration
-            .GetRequiredSection(UrlQuerySecretOptions.SectionName)
-            .Get<UrlQuerySecretOptions>();
-
         var verdictCalculationOptionsSection = configuration
             .GetRequiredSection(VerdictCalculationOptions.SectionName);
 
         ArgumentNullException.ThrowIfNull(analyzerOptions);
-        ArgumentNullException.ThrowIfNull(secretOptions);
 
         services.AddOptions<UrlQueryAnalyzerOptions>()
             .Bind(analyzerOptionsSection)
@@ -77,7 +74,7 @@ public static class DependencyInjection
             });
 
         // Add http client
-        services.ConfigureHttpClient(secretOptions, analyzerOptions);
+        services.ConfigureHttpClient(apiKeySecretName, analyzerOptions);
 
         // Add URL analyzer
         services.AddSingleton<IVerdictCalculator, VerdictCalculator>();

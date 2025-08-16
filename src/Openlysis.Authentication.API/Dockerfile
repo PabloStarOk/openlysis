@@ -8,9 +8,11 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/Openlysis.Authentication.API/Openlysis.Authentication.API.csproj", "Openlysis.Authentication.API/"]
 COPY ["src/Openlysis.Domain/Openlysis.Domain.csproj", "Openlysis.Domain/"]
+COPY ["src/Shared/Doppler.NET/Doppler.NET.csproj", "Shared/Doppler.NET/"]
 RUN dotnet restore -r linux-musl-x64 "Openlysis.Authentication.API/Openlysis.Authentication.API.csproj"
 COPY ["src/Openlysis.Authentication.API/", "Openlysis.Authentication.API/"]
 COPY ["src/Openlysis.Domain/", "Openlysis.Domain/"]
+COPY ["src/Shared/Doppler.NET/", "Shared/Doppler.NET/"]
 WORKDIR "/src/Openlysis.Authentication.API"
 RUN dotnet build "Openlysis.Authentication.API.csproj" \
     --no-restore -c $BUILD_CONFIGURATION -r linux-musl-x64 \

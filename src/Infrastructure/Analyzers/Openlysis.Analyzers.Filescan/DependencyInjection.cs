@@ -29,22 +29,21 @@ namespace Openlysis.Analyzers.Filescan;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Adds the Filescan.IO analyzer services to the specified <see cref="IServiceCollection"/>.
+    /// Registers Filescan.IO analyzer services and related dependencies into the provided <see cref="IServiceCollection"/>.
     /// </summary>
     /// <param name="services">The service collection to add the services to.</param>
-    /// <param name="configuration">The configuration to retrieve settings from.</param>
-    public static void AddFilescanIoAnalyzers(this IServiceCollection services, IConfiguration configuration)
+    /// <param name="apiKeySecretName">The name of the secret containing the API key.</param>
+    /// <param name="configuration">The application configuration instance.</param>
+    public static void AddFilescanIoAnalyzers(
+        this IServiceCollection services,
+        string apiKeySecretName,
+        IConfiguration configuration)
     {
         // Get options
-        var secretOptions = configuration
-            .GetRequiredSection(FilescanSecretOptions.SectionName)
-            .Get<FilescanSecretOptions>();
-
         var analyzerOptionsSection = configuration
             .GetRequiredSection(FilescanAnalyzerOptions.SectionName);
         var analyzerOptions = analyzerOptionsSection.Get<FilescanAnalyzerOptions>();
 
-        ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(analyzerOptions);
 
         // Add options
@@ -64,7 +63,7 @@ public static class DependencyInjection
         // Add analyzer deserializer.
         services.AddServiceDeserializer<FilescanAnalyzerOptions>(
             KeyedServices.GlobalKey,
-            () => new JsonSerializerOptions()
+            () => new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
                 Converters =
@@ -75,7 +74,7 @@ public static class DependencyInjection
             });
 
         // Add HTTP Client
-        services.ConfigureHttpClient(secretOptions, analyzerOptions);
+        services.ConfigureHttpClient(apiKeySecretName, analyzerOptions);
 
         // Add request limit tracker
         services.AddRateQuotaService<AnalysisEndpointType>(

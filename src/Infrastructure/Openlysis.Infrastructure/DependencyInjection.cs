@@ -1,5 +1,7 @@
 using System.Buffers;
 
+using Doppler.NET.Configuration;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +30,7 @@ using Openlysis.Infrastructure.Services.Messages;
 using Openlysis.Infrastructure.Services.URLs;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
+using Openlysis.Infrastructure.Shared.Infrastructure.Secrets;
 using Openlysis.TestTools.ServicesSimulation;
 
 using PhoneNumbers;
@@ -131,6 +134,7 @@ public static class DependencyInjection
         if (servicesRegistrationOptions.RegisterRealServices)
         {
             logger.LogInformation("Real analysis services registered.");
+            AddDopplerServices(services, configuration);
             services.AddIpqsReputationEvaluators(configuration);
         }
 
@@ -141,5 +145,25 @@ public static class DependencyInjection
 
         logger.LogInformation("Simulated analysis services registered.");
         services.AddSimulatedReputationServices(configuration);
+    }
+
+    private static void AddDopplerServices(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var dopplerOptions = configuration
+            .GetRequiredSection(DopplerClientOptions.SectionName)
+            .Get<DopplerClientOptions>();
+        ArgumentNullException.ThrowIfNull(dopplerOptions);
+
+        var serviceSecretOptions = configuration
+            .GetRequiredSection(ServiceSecretOptions.SectionName)
+            .Get<ServiceSecretOptions>();
+        ArgumentNullException.ThrowIfNull(serviceSecretOptions);
+
+        services.AddDopplerApiKeyProvider(dopplerOptions, options =>
+        {
+            options.ApiKeySecretNames = [serviceSecretOptions.IpqsApiKeySecretName];
+        });
     }
 }

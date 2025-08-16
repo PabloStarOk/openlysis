@@ -62,15 +62,13 @@ services:
       - ${AUTH_PORT_2}:8081
     environment:
       ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT}
+      DOPPLER_SERVICE_TOKEN: ${DOPPLER_AUTH_SERVICE_TOKEN}
     depends_on:
       database:
         condition: service_healthy
     configs:
       - source: auth-config
         target: ${AUTH_CONFIG_TARGET_FILEPATH}
-    secrets:
-      - source: auth-signing-certificate
-        target: ${AUTH_SIGNING_CERTIFICATE_TARGET_FILEPATH}
     networks:
       - api-network
 
@@ -84,6 +82,7 @@ services:
     container_name: ${WORKER_CONTAINER_NAME}
     environment:
       DOTNET_ENVIRONMENT: ${APP_ENVIRONMENT}
+      DOPPLER_SERVICE_TOKEN: ${DOPPLER_WORKER_SERVICE_TOKEN}
     depends_on:
       broker:
         condition: service_healthy
@@ -107,6 +106,7 @@ services:
     container_name: ${API_CONTAINER_NAME}
     environment:
       ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT}
+      DOPPLER_SERVICE_TOKEN: ${DOPPLER_API_SERVICE_TOKEN}
     ports:
       - ${API_PORT}:8080
       - ${API_PORT_2}:8081
@@ -144,8 +144,3 @@ configs:
     file: ${WORKER_CONFIG_SOURCE_FILEPATH}
   api-config:
     file: ${API_CONFIG_SOURCE_FILEPATH}
-  
-
-secrets:
-  auth-signing-certificate:
-    file: ${AUTH_SIGNING_CERTIFICATE_SOURCE_FILEPATH}
