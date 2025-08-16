@@ -11,11 +11,6 @@ internal sealed record ServiceSecretOptions
     public const string SectionName = "ApiKeys";
 
     /// <summary>
-    /// Gets or sets the environment variable name for the Doppler service token.
-    /// </summary>
-    public string DopplerServiceTokenEnvVariable { get; set; }
-
-    /// <summary>
     /// Gets or sets the secret name for the Filescan API key.
     /// </summary>
     public string FilescanApiKeySecretName { get; set; }
