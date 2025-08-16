@@ -8,19 +8,24 @@ namespace Doppler.NET.Configuration;
 public record DopplerClientOptions
 {
     /// <summary>
-    /// Gets or sets the service token used for authentication with Doppler.
+    /// The configuration section name for Doppler client options.
     /// </summary>
-    required public string ServiceToken { get; set; }
+    public const string SectionName = "DopplerClient";
+
+    /// <summary>
+    /// Gets or sets the name of the environment variable containing the Doppler service token.
+    /// </summary>
+    public string ServiceTokenEnvVariable { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the Doppler project name.
     /// </summary>
-    required public string ProjectName { get; set; }
+    public string ProjectName { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the Doppler configuration name.
     /// </summary>
-    required public string ConfigName { get; set; }
+    public string ConfigName { get; set; } = string.Empty;
 
     /// <summary>
     /// Gets or sets the <see cref="JsonSerializerOptions"/> used for serializing and deserializing JSON data.

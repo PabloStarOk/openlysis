@@ -19,32 +19,30 @@ public static class DependencyInjection
     /// Registers the Doppler client and its configuration in the service collection.
     /// </summary>
     /// <param name="services">The service collection to add the Doppler client to.</param>
-    /// <param name="serviceToken">The service token used for authentication with Doppler project.</param>
     /// <param name="configure">An action to configure DopplerClientOptions.</param>
     public static void AddDopplerClient(
         this IServiceCollection services,
-        string serviceToken,
         Action<DopplerClientOptions> configure)
     {
-        services.AddOptions<DopplerClientOptions>().Configure(options =>
-        {
-            configure(options);
-            options.ServiceToken = serviceToken;
-        });
-
+        services.AddSingleton<IValidateOptions<DopplerClientOptions>, DopplerClientOptionsValidator>();
+        services.AddOptions<DopplerClientOptions>().Configure(configure).ValidateOnStart();
         services.AddHttpClient<IDopplerClient, DopplerClient>((client, sp) =>
         {
             var options = sp.GetRequiredService<IOptions<DopplerClientOptions>>();
+            string? serviceToken = Environment.GetEnvironmentVariable(options.Value.ServiceTokenEnvVariable);
+            if (string.IsNullOrWhiteSpace(serviceToken))
+            {
+                throw new InvalidOperationException($"Service token is missing. Ensure the environment variable '{options.Value.ServiceTokenEnvVariable}' is set.");
+            }
+
             var authorizationHeaderValue = new AuthenticationHeaderValue(
                 DopplerApi.AuthScheme,
-                options.Value.ServiceToken);
+                serviceToken);
 
             client.BaseAddress = new Uri(DopplerApi.V3.BaseUrl);
             client.DefaultRequestHeaders.Authorization = authorizationHeaderValue;
 
-            return new DopplerClient(
-                options,
-                client);
+            return new DopplerClient(options, client);
         });
     }
 }

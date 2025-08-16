@@ -2,6 +2,7 @@ using System.Data.Common;
 using System.Security.Cryptography;
 
 using Doppler.NET;
+using Doppler.NET.Configuration;
 
 using JWT.Algorithms;
 
@@ -113,18 +114,17 @@ internal static class DependencyInjection
             IValidateOptions<DopplerCertificateOptions>,
             DopplerCertificateOptionsValidator>();
 
-        using (ServiceProvider sp = services.BuildServiceProvider())
-        {
-            var certOptions = sp.GetRequiredService<IOptions<DopplerCertificateOptions>>();
-            string? serviceToken = Environment.GetEnvironmentVariable(certOptions.Value.ServiceTokenEnvVariable);
-            ArgumentException.ThrowIfNullOrWhiteSpace(serviceToken);
+        var dopplerOptions = configuration
+            .GetRequiredSection(DopplerClientOptions.SectionName)
+            .Get<DopplerClientOptions>();
+        ArgumentNullException.ThrowIfNull(dopplerOptions);
 
-            services.AddDopplerClient(serviceToken, options =>
-            {
-                options.ProjectName = certOptions.Value.ProjectName;
-                options.ConfigName = certOptions.Value.ConfigName;
-            });
-        }
+        services.AddDopplerClient(options =>
+        {
+            options.ServiceTokenEnvVariable = dopplerOptions.ServiceTokenEnvVariable;
+            options.ProjectName = dopplerOptions.ProjectName;
+            options.ConfigName = dopplerOptions.ConfigName;
+        });
 
         services.AddSingleton<DopplerCertificateProvider>();
         services.AddHostedService(sp => sp.GetRequiredService<DopplerCertificateProvider>());
