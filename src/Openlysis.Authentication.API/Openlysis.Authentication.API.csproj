@@ -36,6 +36,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Openlysis.Domain\Openlysis.Domain.csproj" />
+      <ProjectReference Include="..\Shared\Doppler.NET\Doppler.NET.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
+
+using Doppler.NET;
 
 using JWT.Algorithms;
 
@@ -38,7 +39,8 @@ internal static class DependencyInjection
     {
         AddRepositories(services, configuration);
         AddPasswordHasher(services, configuration);
-        AddLocalKeyManager(services, configuration);
+        AddCertificateProvider(services, configuration);
+        AddSigningCertificateManager(services);
         AddTokenGenerator(services, configuration);
         AddTokenHasher(services);
         AddSigningKeyProvider(services);
@@ -96,35 +98,39 @@ internal static class DependencyInjection
         services.AddTransient<IPasswordHasher, PasswordHasher>();
     }
 
-    private static void AddLocalKeyManager(
+    private static void AddCertificateProvider(
         IServiceCollection services,
         IConfiguration configuration)
     {
-        var certificateOptions = configuration
-            .GetRequiredSection(CertificateOptions.SectionName)
-            .Get<CertificateOptions>();
-        ArgumentNullException.ThrowIfNull(certificateOptions);
+        var certificateOptionsSection = configuration
+            .GetRequiredSection(DopplerCertificateOptions.SectionName);
 
-        if (string.IsNullOrWhiteSpace(certificateOptions.FilePath))
+        services.AddOptions<DopplerCertificateOptions>()
+            .Bind(certificateOptionsSection)
+            .ValidateOnStart();
+
+        services.AddSingleton<
+            IValidateOptions<DopplerCertificateOptions>,
+            DopplerCertificateOptionsValidator>();
+
+        string? serviceToken;
+        using (ServiceProvider sp = services.BuildServiceProvider())
         {
-            throw new ArgumentException($"{nameof(certificateOptions.FilePath)} is required.");
+            var options = sp.GetRequiredService<IOptions<DopplerCertificateOptions>>();
+            serviceToken = Environment.GetEnvironmentVariable(options.Value.ServiceTokenEnvVariable);
+            ArgumentException.ThrowIfNullOrWhiteSpace(serviceToken);
         }
 
-        if (string.IsNullOrWhiteSpace(certificateOptions.FilePassword))
-        {
-            throw new ArgumentException($"{nameof(certificateOptions.FilePassword)} is required.");
-        }
+        services.AddDopplerClient(serviceToken);
+        services.AddSingleton<DopplerCertificateProvider>();
+        services.AddHostedService(sp => sp.GetRequiredService<DopplerCertificateProvider>());
+        services.AddSingleton<ICertificateProvider>(sp => sp.GetRequiredService<DopplerCertificateProvider>());
+    }
 
-        services.AddSingleton<X509Certificate2>(_ =>
-        {
-            var certBytes = File.ReadAllBytes(certificateOptions.FilePath);
-            return new X509Certificate2(
-                certBytes,
-                certificateOptions.FilePassword);
-        });
-
+    private static void AddSigningCertificateManager(IServiceCollection services)
+    {
         services.AddSingleton<IJwkGenerator, EcdsaJwkGenerator>();
-        services.AddSingleton<LocalSigningKeyManager>();
+        services.AddSingleton<SigningCertificateManager>();
     }
 
     private static void AddTokenGenerator(
@@ -155,7 +161,7 @@ internal static class DependencyInjection
 
         services.AddSingleton<IClock>(SystemClock.Instance);
         services.AddSingleton<IAlgorithmFactory>(sp =>
-            sp.GetRequiredService<LocalSigningKeyManager>());
+            sp.GetRequiredService<SigningCertificateManager>());
         services.AddTransient<ITokenGenerator, JwtGenerator>();
     }
 
@@ -168,6 +174,6 @@ internal static class DependencyInjection
     private static void AddSigningKeyProvider(IServiceCollection services)
     {
         services.AddSingleton<IJwkProvider>(sp =>
-            sp.GetRequiredService<LocalSigningKeyManager>());
+            sp.GetRequiredService<SigningCertificateManager>());
     }
 }
