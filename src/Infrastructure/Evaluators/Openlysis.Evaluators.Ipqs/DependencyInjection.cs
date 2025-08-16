@@ -26,17 +26,11 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // Get options
-        var secretOptionsSection = configuration
-            .GetRequiredSection(IpqsSecretOptions.SectionName);
-        var secretOptions = secretOptionsSection
-            .Get<IpqsSecretOptions>();
-
         var evaluatorOptionsSection = configuration
             .GetRequiredSection(IpqsEvaluatorOptions.SectionName);
         var evaluatorOptions = evaluatorOptionsSection
             .Get<IpqsEvaluatorOptions>();
 
-        ArgumentNullException.ThrowIfNull(secretOptions);
         ArgumentNullException.ThrowIfNull(evaluatorOptions);
 
         // Add rate quota service
@@ -44,12 +38,6 @@ public static class DependencyInjection
             configuration,
             KeyedServices.GlobalKey,
             evaluatorOptions.ServiceName);
-
-        // Add options
-        services.AddOptions<IpqsSecretOptions>()
-            .Bind(secretOptionsSection)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
 
         services.AddOptionsWithValidateOnStart<IpqsEvaluatorOptions>()
             .Bind(evaluatorOptionsSection)

@@ -6,6 +6,7 @@ using Openlysis.Evaluators.Ipqs.Core.Configuration.Common;
 using Openlysis.Evaluators.Ipqs.Core.Configuration.EmailAddresses;
 using Openlysis.Evaluators.Ipqs.Core.Constants;
 using Openlysis.Evaluators.Shared.Contracts.Abstractions;
+using Openlysis.Infrastructure.Shared.Infrastructure.Secrets;
 
 namespace Openlysis.Evaluators.Ipqs.Adapters.Common;
 
@@ -17,30 +18,30 @@ internal class EndpointAddressFactory
     : IEndpointAddressFactory<MailAddress>,
       IEndpointAddressFactory<string>
 {
-    private readonly IOptionsSnapshot<IpqsSecretOptions> _secretOptions;
     private readonly IOptionsSnapshot<IpqsEvaluatorOptions> _evaluatorOptions;
     private readonly IOptionsSnapshot<EmailAddressVerificationOptions> _emailOptions;
+    private readonly IApiKeyProvider _apiKeyProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EndpointAddressFactory"/> class.
     /// </summary>
-    /// <param name="secretOptions">
-    /// The options snapshot containing the API key and other secret configurations for IPQS.
-    /// </param>
     /// <param name="evaluatorOptions">
     /// The options snapshot containing the base address and other evaluator configurations for IPQS.
     /// </param>
     /// <param name="emailOptions">
     /// The options snapshot containing email verification-specific configurations, such as timeout settings.
     /// </param>
+    /// <param name="apiKeyProvider">
+    /// The API key provider instance. Add new params here, e\.g\. <c>string apiVersion</c>, <c>bool useCache</c>.
+    /// </param>
     public EndpointAddressFactory(
-        IOptionsSnapshot<IpqsSecretOptions> secretOptions,
         IOptionsSnapshot<IpqsEvaluatorOptions> evaluatorOptions,
-        IOptionsSnapshot<EmailAddressVerificationOptions> emailOptions)
+        IOptionsSnapshot<EmailAddressVerificationOptions> emailOptions,
+        IApiKeyProvider apiKeyProvider)
     {
-        _secretOptions = secretOptions;
         _evaluatorOptions = evaluatorOptions;
         _emailOptions = emailOptions;
+        _apiKeyProvider = apiKeyProvider;
     }
 
     /// <inheritdoc/>
@@ -79,7 +80,7 @@ internal class EndpointAddressFactory
     {
         string formattedUrl = string.Format(
             address,
-            _secretOptions.Value.ApiKey,
+            _apiKeyProvider.GetApiKey(_evaluatorOptions.Value.ApiKeySecretName),
             value);
 
         return new Uri(

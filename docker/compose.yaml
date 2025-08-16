@@ -106,6 +106,7 @@ services:
     container_name: ${API_CONTAINER_NAME}
     environment:
       ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT}
+      DOPPLER_SERVICE_TOKEN: ${DOPPLER_API_SERVICE_TOKEN}
     ports:
       - ${API_PORT}:8080
       - ${API_PORT_2}:8081

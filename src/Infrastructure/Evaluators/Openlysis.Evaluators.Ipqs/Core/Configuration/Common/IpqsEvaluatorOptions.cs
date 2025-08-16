@@ -11,4 +11,9 @@ public record IpqsEvaluatorOptions : ServiceOptions
     /// The section name in the configuration file.
     /// </summary>
     public const string SectionName = "Ipqs:Evaluator";
+
+    /// <summary>
+    /// Gets the name of the secret storing the API key for IPQualityScore.
+    /// </summary>
+    required public string ApiKeySecretName { get; init; }
 }

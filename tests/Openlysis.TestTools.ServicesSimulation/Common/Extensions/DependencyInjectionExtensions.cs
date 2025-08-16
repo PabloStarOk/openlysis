@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
-using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Configuration;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota.Services;
 using Openlysis.TestTools.ServicesSimulation.Common.Configuration;
@@ -18,19 +17,6 @@ namespace Openlysis.TestTools.ServicesSimulation.Common.Extensions;
 /// </summary>
 internal static class DependencyInjectionExtensions
 {
-    /// <summary>
-    /// Generates stub options for secret configuration with a predefined API key format.
-    /// </summary>
-    /// <param name="serviceName">The name of the service to generate API key for.</param>
-    /// <returns>A <see cref="SecretOptions"/> instance with the generated API key.</returns>
-    internal static SecretOptions GenerateSecretStubOptions(string serviceName)
-    {
-        return new SecretOptionsStub
-        {
-            ApiKey = $"{serviceName}:ApiKey",
-        };
-    }
-
     /// <summary>
     /// Generates stub options for analyzer configuration with predefined values.
     /// </summary>
