@@ -50,10 +50,10 @@ internal sealed class DopplerCertificateProvider : ICertificateProvider, IHosted
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         var certificateSecretFetchTask = _dopplerClient.GetSecretAsync(
-            _certificateOptions.Value.CertificateSecretName);
+            _certificateOptions.Value.CertificateSecretName, cancellationToken);
 
         var passwdSecretFetchTask = _dopplerClient.GetSecretAsync(
-            _certificateOptions.Value.PasswordSecretName);
+            _certificateOptions.Value.PasswordSecretName, cancellationToken);
 
         DopplerSecret? certSecret = await certificateSecretFetchTask;
         DopplerSecret? passwdSecret = await passwdSecretFetchTask;

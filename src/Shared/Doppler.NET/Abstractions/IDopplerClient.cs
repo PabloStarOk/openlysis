@@ -11,6 +11,9 @@ public interface IDopplerClient
     /// Asynchronously retrieves a Doppler secret by the specified secret name.
     /// </summary>
     /// <param name="secret">The name of the secret to retrieve.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A <see cref="DopplerSecret"/> if found; otherwise, <c>null</c>.</returns>
-    Task<DopplerSecret?> GetSecretAsync(string secret);
+    Task<DopplerSecret?> GetSecretAsync(
+        string secret,
+        CancellationToken cancellationToken = default);
 }

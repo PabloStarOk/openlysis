@@ -28,7 +28,6 @@ internal sealed class DopplerApiKeyProvider : IApiKeyProvider, IHostedService
         _dopplerClient = dopplerClient;
     }
 
-
     /// <inheritdoc/>
     public async Task StartAsync(CancellationToken cancellationToken)
     {
@@ -55,7 +54,7 @@ internal sealed class DopplerApiKeyProvider : IApiKeyProvider, IHostedService
         CancellationToken cancellationToken)
     {
         DopplerSecret? apiKeySecret = await _dopplerClient
-            .GetSecretAsync(apiKeySecretName)
+            .GetSecretAsync(apiKeySecretName, cancellationToken)
             .ConfigureAwait(false);
 
         if (apiKeySecret is null)

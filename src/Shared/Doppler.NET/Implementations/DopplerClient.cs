@@ -31,21 +31,25 @@ internal sealed class DopplerClient : IDopplerClient
     }
 
     /// <inheritdoc/>
-    public async Task<DopplerSecret?> GetSecretAsync(string secret)
+    public async Task<DopplerSecret?> GetSecretAsync(
+        string secret,
+        CancellationToken cancellationToken = default)
     {
         var formattedUri = string.Format(
             DopplerApi.V3.Secrets.RetrievePath,
             _options.Value.ProjectName,
             _options.Value.ConfigName,
             secret);
-        HttpResponseMessage response = await _httpClient.GetAsync(formattedUri).ConfigureAwait(false);
+        HttpResponseMessage response = await _httpClient
+            .GetAsync(formattedUri, cancellationToken).ConfigureAwait(false);
 
         if (!response.IsSuccessStatusCode)
         {
             return null;
         }
 
-        string bodyString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        string bodyString = await response.Content
+            .ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
         return JsonSerializer.Deserialize<DopplerSecret>(bodyString, _options.Value.SerializerOptions);
     }
 }
