@@ -58,6 +58,7 @@ internal static partial class RegularExpressions
             Currency(),
             Date(),
             Uuid(),
+            DataSize(),
         ];
         return regexes.Where(r => r != regex);
     }
@@ -137,4 +138,10 @@ internal static partial class RegularExpressions
         @"^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89ABab][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
         RegexOptions.IgnoreCase)]
     private static partial Regex Uuid();
+
+    /// <summary>
+    /// Matches data size strings such as "10 MB", "1.5 GiB", "100 Bytes", etc.
+    /// </summary>
+    [GeneratedRegex(@"\b\d+(\.\d+)?\s*(B|Bytes?|KB|KiB|MB|MiB|GB|GiB|TB|TiB|PB|PiB|EB|EiB|ZB|ZiB|YB|YiB)\b", RegexOptions.IgnoreCase)]
+    private static partial Regex DataSize();
 }
