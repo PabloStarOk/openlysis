@@ -12,7 +12,6 @@ using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Entities;
 using Openlysis.Domain.Messages.Enums;
@@ -84,7 +83,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     public IMessageAnalysisBuilder WithFileMultiAnalyses(
         IEnumerable<FileMultiAnalysis> multiAnalyses)
     {
-        DataAssessmentResult<FileMetadata>[] attachedFileResults =
+        DataAssessmentResult<string>[] attachedFileResults =
             CreateAttachedFilesResults(multiAnalyses);
 
         _buildState = _buildState with
@@ -237,7 +236,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         Message? Message = null,
         Stream[]? FilesData = null,
         HashValues? HashValues = null,
-        DataAssessmentResult<FileMetadata>[]? FileResults = null,
+        DataAssessmentResult<string>[]? FileResults = null,
         DataAssessmentResult<Uri>[]? UrlResults = null,
         DataAssessmentResult<MailAddress>[]? EmailResults = null,
         DataAssessmentResult<string>[]? PhoneResults = null);
@@ -252,14 +251,14 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <returns>
     /// An array of <see cref="DataAssessmentResult{FileMetadata}"/> representing the assessment results for the files.
     /// </returns>
-    private static DataAssessmentResult<FileMetadata>[] CreateAttachedFilesResults(
+    private static DataAssessmentResult<string>[] CreateAttachedFilesResults(
         IEnumerable<FileMultiAnalysis> multiAnalyses)
     {
         return multiAnalyses
             .Select(
-                f => DataAssessmentResult<FileMetadata>.Create(
+                f => DataAssessmentResult<string>.Create(
                     DataType.File,
-                    f.FileMetadata,
+                    f.FileMetadata.Name,
                     f.Id))
             .ToArray();
     }

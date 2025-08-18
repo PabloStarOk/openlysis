@@ -3,7 +3,6 @@ using System.Net.Mail;
 using Openlysis.Domain.Common.Abstractions;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Messages.Entities;
 using Openlysis.Domain.Messages.ValueObjects;
 
@@ -43,7 +42,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <summary>
     /// Gets the results of the analyses for the attached files in the message.
     /// </summary>
-    public IReadOnlyList<DataAssessmentResult<FileMetadata>> AttachedFilesResults { get; }
+    public IReadOnlyList<DataAssessmentResult<string>> AttachedFilesResults { get; }
 
     /// <summary>
     /// Gets the detected URL results from the analysis.
@@ -80,7 +79,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         DateTime startedDate,
         MessageInformation message,
         AnalysisState state,
-        DataAssessmentResult<FileMetadata>[] attachedFilesResults,
+        DataAssessmentResult<string>[] attachedFilesResults,
         DataAssessmentResult<Uri>[] detectedUrlsResults,
         DataAssessmentResult<MailAddress>[] detectedEmailAddressesResults,
         DataAssessmentResult<string>[] detectedPhoneNumbersResults)
@@ -136,7 +135,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         bool isPrivate,
         MessageInformation message,
         Verdict verdict,
-        DataAssessmentResult<FileMetadata>[] attachedFilesResults,
+        DataAssessmentResult<string>[] attachedFilesResults,
         DataAssessmentResult<Uri>[] detectedUrlsResults,
         DataAssessmentResult<MailAddress>[] detectedEmailAddressesResults,
         DataAssessmentResult<string>[] detectedPhoneNumbersResults)

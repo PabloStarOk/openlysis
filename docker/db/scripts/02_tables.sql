@@ -146,9 +146,7 @@ CREATE TABLE IF NOT EXISTS message_analysis (
 CREATE TABLE IF NOT EXISTS attached_file_results (
     attached_file_result_id uuid PRIMARY KEY,
     data_type smallint NOT NULL,
-    file_name varchar(100) NOT NULL,
-    size bigint NOT NULL,
-    content_type text NOT NULL,
+    file_name text NOT NULL,
     message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
     file_multi_analysis_id uuid NOT NULL REFERENCES file_multi_analyses (file_multi_analysis_id) ON DELETE RESTRICT
 );

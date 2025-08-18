@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Domain.Files.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Entities;
 
@@ -193,33 +192,17 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
     /// The <see cref="OwnedNavigationBuilder{TEntity,TRelatedEntity}"/> used to configure the owned navigation property.
     /// </param>
     private static void ConfigureFileAttachedResults(
-        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<FileMetadata>> builder)
+        OwnedNavigationBuilder<MessageAnalysis, DataAssessmentResult<string>> builder)
     {
         ConfigureDetectedDataResult(
             builder,
             tableName: "attached_file_results",
             idColumnName: "attached_file_result_id",
             resultIdColumnName: "file_multi_analysis_id",
-            valueBuilder =>
-                valueBuilder.OwnsOne(
-                    a => a.Value, metadataBuilder =>
-                    {
-                        metadataBuilder.Property(m => m.Name)
-                            .HasColumnName("file_name")
-                            .HasColumnType(VarcharType)
-                            .HasMaxLength(100)
-                            .IsRequired();
-
-                        metadataBuilder.Property(m => m.Size)
-                            .HasColumnName("size")
-                            .HasColumnType("bigint")
-                            .IsRequired();
-
-                        metadataBuilder.Property(m => m.ContentType)
-                            .HasColumnName("content_type")
-                            .HasColumnType("text")
-                            .IsRequired();
-                    }));
+            valueBuilder => valueBuilder.Property(u => u.Value)
+                .HasColumnName("file_name")
+                .HasColumnType("text")
+                .IsRequired());
     }
 
     /// <summary>
