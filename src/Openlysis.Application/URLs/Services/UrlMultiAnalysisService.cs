@@ -83,12 +83,12 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             url,
             urlHashValues);
 
+        await _repository.AddAsync(multiAnalysis, cancellationToken);
         await _urlMultiAnalyzer.StartAnalysisAsync(
             multiAnalysis.Id,
             url,
             cancellationToken);
 
-        await _repository.AddAsync(multiAnalysis, cancellationToken);
         return multiAnalysis;
     }
 
