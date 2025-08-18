@@ -21,7 +21,7 @@ public static class AppConfiguration
 {
     private const string DocumentationGenerationPath = "/openapi/{documentName}.json";
     private const string ApiDocumentationPath = "api-docs";
-    private const string WebPageTitle = "Openlysis Authentication API";
+    private const string WebPageTitle = "Openlysis Analysis API";
     private const string EndpointNameSuffix = "Endpoint";
     private const string EndpointPathPrefix = "api";
     private const string VersioningPrefix = "v";

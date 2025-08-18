@@ -28,8 +28,8 @@ public static class DependencyInjection
     /// </summary>
     public const string V1DocumentName = "Version 1";
 
-    private const string DocumentsTitle = "Openlysis Authentication API";
-    private const string ApiDescription = "Authentication API for Openlysis.";
+    private const string DocumentsTitle = "Openlysis Analysis API";
+    private const string ApiDescription = "Analysis API of Openlysis.";
     private const string V1DocumentVersion = "v1";
 
     /// <summary>
