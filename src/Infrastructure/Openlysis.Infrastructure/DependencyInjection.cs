@@ -77,7 +77,7 @@ public static class DependencyInjection
         services.AddScoped<IRepository<MessageAnalysis, GlobalId>, MessageAnalysisRepository>();
 
         // Add hash service.
-        services.AddSingleton(ArrayPool<byte>.Shared);
+        services.AddSingleton(_ => MemoryPool<byte>.Shared);
         services.AddTransient<IHashService, HashService>();
 
         // Add multi analyzers

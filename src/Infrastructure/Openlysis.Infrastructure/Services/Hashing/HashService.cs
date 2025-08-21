@@ -12,15 +12,15 @@ namespace Openlysis.Infrastructure.Services.Hashing;
 internal class HashService : IHashService
 {
     private const int BufferSize = 81_920;
-    private readonly ArrayPool<byte> _arrayPool;
+    private readonly MemoryPool<byte> _memoryPool;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HashService"/> class.
     /// </summary>
-    /// <param name="arrayPool">The array pool used for buffer management.</param>
-    public HashService(ArrayPool<byte> arrayPool)
+    /// <param name="memoryPool">The memory pool used for buffer management.</param>
+    public HashService(MemoryPool<byte> memoryPool)
     {
-        _arrayPool = arrayPool;
+        _memoryPool = memoryPool;
     }
 
     /// <inheritdoc/>
@@ -32,7 +32,9 @@ internal class HashService : IHashService
         using var sha512 = IncrementalHash.CreateHash(HashAlgorithmName.SHA512);
 
         data.Position = 0;
-        Memory<byte> buffer = _arrayPool.Rent(BufferSize);
+        using IMemoryOwner<byte> memoryOwner = _memoryPool.Rent(BufferSize);
+        var buffer = memoryOwner.Memory;
+
         int bytesRead;
         while ((bytesRead = await data.ReadAsync(buffer, cancellationToken)) > 0)
         {
