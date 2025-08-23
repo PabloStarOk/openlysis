@@ -4,6 +4,8 @@ using ErrorOr;
 
 using Microsoft.Extensions.Logging;
 
+using Openlysis.Application.Common.Abstractions.Services;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.EmailAddresses.Services;
 using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Files.Services;
@@ -35,6 +37,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     private readonly IUrlMultiAnalysisService _urlAnalysisService;
     private readonly IPhoneReputationService _phoneReputationService;
     private readonly IEmailAddressReputationService _emailAddressReputationService;
+    private readonly IFileStorageContext _fileStorageContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageAnalyzer"/> class.
@@ -44,18 +47,21 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     /// <param name="urlAnalysisService">Service for analyzing URLs.</param>
     /// <param name="phoneReputationService">Service for assessing phone reputations.</param>
     /// <param name="emailAddressReputationService">Service for assessing email address reputations.</param>
+    /// <param name="fileStorageContext">Context for file storage operations.</param>
     public MessageAnalyzer(
         ILogger<MessageAnalyzer> logger,
         IFileMultiAnalysisService fileAnalysisService,
         IUrlMultiAnalysisService urlAnalysisService,
         IPhoneReputationService phoneReputationService,
-        IEmailAddressReputationService emailAddressReputationService)
+        IEmailAddressReputationService emailAddressReputationService,
+        IFileStorageContext fileStorageContext)
     {
         _logger = logger;
         _fileAnalysisService = fileAnalysisService;
         _urlAnalysisService = urlAnalysisService;
         _phoneReputationService = phoneReputationService;
         _emailAddressReputationService = emailAddressReputationService;
+        _fileStorageContext = fileStorageContext;
     }
 
     /// <inheritdoc/>
@@ -71,11 +77,16 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         List<FileMultiAnalysis> fileMultiAnalyses = [];
         foreach (var file in files)
         {
+            file.Stream.Position = 0;
+            ProcessedFile processedFile = await _fileStorageContext
+                .ProcessAsync(file.Name, file.ContentType, file.Stream, cancellationToken);
+
             ErrorOr<FileMultiAnalysis> result = await _fileAnalysisService.AnalyzeAsync(
                 userId,
+                processedFile,
+                file.Password,
                 isPrivate,
                 reanalyze,
-                file,
                 cancellationToken);
 
             if (result.IsError)

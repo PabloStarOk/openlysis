@@ -29,6 +29,7 @@ using Openlysis.Infrastructure.Services.Hashing;
 using Openlysis.Infrastructure.Services.Messages;
 using Openlysis.Infrastructure.Services.URLs;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
+using Openlysis.Infrastructure.Shared.Infrastructure.PipePool;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 using Openlysis.Infrastructure.Shared.Infrastructure.Secrets;
 using Openlysis.TestTools.ServicesSimulation;
@@ -76,8 +77,9 @@ public static class DependencyInjection
         services.AddScoped<IRepository<EmailAddressMultiReputation, GlobalId>, EmailAddressMultiReputationRepository>();
         services.AddScoped<IRepository<MessageAnalysis, GlobalId>, MessageAnalysisRepository>();
 
-        // Add hash service.
         services.AddSingleton(_ => MemoryPool<byte>.Shared);
+
+        // Add hash service.
         services.AddTransient<IHashService, HashService>();
 
         // Add multi analyzers
@@ -98,6 +100,9 @@ public static class DependencyInjection
         services.AddRateQuotaRestorerJobs(
             schedulerId: "InfrastructureSchedulerId",
             schedulerName: "InfrastructureScheduler");
+
+        // Add file processor
+        AddFileStorageContext(services, configuration);
 
         // Add data detectors
         services.AddSingleton(PhoneNumberUtil.GetInstance());
@@ -165,5 +170,20 @@ public static class DependencyInjection
         {
             options.ApiKeySecretNames = [serviceSecretOptions.IpqsApiKeySecretName];
         });
+    }
+
+    private static void AddFileStorageContext(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var optionsSection = configuration.GetRequiredSection(FileStorageContextOptions.SectionName);
+
+        services.AddOptions<FileStorageContextOptions>()
+            .Bind(optionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddPipePool();
+        services.AddScoped<IFileStorageContext, FileStorageContext>();
     }
 }

@@ -3,11 +3,10 @@ using ErrorOr;
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Enums;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.Files.Contracts.Abstractions;
-using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
-using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.Application.Files.Services;
 
@@ -19,68 +18,63 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
 {
     private readonly IRepository<FileMultiAnalysis, GlobalId> _repository;
     private readonly TimeProvider _timeProvider;
-    private readonly IHashService _hashService;
     private readonly IFileMultiAnalyzer _multiAnalyzer;
+    private readonly IFileStorageContext _fileStorageContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMultiAnalysisService"/> class.
     /// </summary>
-    /// <param name="repository">The repository for managing <see cref="FileMultiAnalysis"/> entities.</param>
-    /// <param name="multiAnalyzer">The service responsible for performing multi-file analysis.</param>
-    /// <param name="timeProvider">The provider for retrieving the current time.</param>
-    /// <param name="hashService">The service for generating and managing data hashes.</param>
+    /// <param name="repository">Repository for <see cref="FileMultiAnalysis"/> entities.</param>
+    /// <param name="multiAnalyzer">Service for performing multiple file analyses.</param>
+    /// <param name="timeProvider">Provides the current time.</param>
+    /// <param name="fileStorageContext">Context for file storage operations.</param>
     public FileMultiAnalysisService(
         IRepository<FileMultiAnalysis, GlobalId> repository,
         IFileMultiAnalyzer multiAnalyzer,
         TimeProvider timeProvider,
-        IHashService hashService)
+        IFileStorageContext fileStorageContext)
     {
         _repository = repository;
         _timeProvider = timeProvider;
-        _hashService = hashService;
         _multiAnalyzer = multiAnalyzer;
+        _fileStorageContext = fileStorageContext;
     }
 
     /// <inheritdoc/>
     public async Task<ErrorOr<FileMultiAnalysis>> AnalyzeAsync(
         GlobalId userId,
+        ProcessedFile processedFile,
+        string filePassword,
         bool isPrivate,
         bool reanalyze,
-        FileData fileData,
         CancellationToken cancellationToken = default)
     {
-        var hashSet = await _hashService.HashDataAsync(fileData.Stream, cancellationToken);
-
         // Check if the file has already been analyzed.
         var existingAnalyses = await _repository.GetManyAsync(
             page: 1,
             pageSize: 1,
-            f => f.DataHashValues == hashSet,
+            f => f.DataHashValues == processedFile.HashValues,
             q => q.OrderByDescending(f => f.StartedDate),
             cancellationToken);
 
         if (existingAnalyses.Count > 0 && !reanalyze)
         {
+            await _fileStorageContext.RemoveAsync(processedFile);
             return existingAnalyses[0];
         }
-
-        var fileMetadata = new FileMetadata(
-            fileData.Name,
-            fileData.ContentType,
-            fileData.Stream.Length);
 
         var multiAnalysis = FileMultiAnalysis.Create(
             userId,
             isPrivate,
             _timeProvider.GetUtcNow().UtcDateTime,
-            hashSet,
-            fileMetadata);
+            processedFile.HashValues,
+            processedFile.Metadata);
 
         await _repository.AddAsync(multiAnalysis, cancellationToken);
         await _multiAnalyzer.StartAnalysisAsync(
-            multiAnalysis,
-            fileData.Stream,
-            fileData.Password,
+            multiAnalysis.Id,
+            processedFile,
+            filePassword,
             isPrivate,
             cancellationToken);
 

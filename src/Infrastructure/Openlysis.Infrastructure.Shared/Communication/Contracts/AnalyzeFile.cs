@@ -1,5 +1,4 @@
 using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Infrastructure.Shared.Communication.Abstractions;
 
 namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 
@@ -13,7 +12,7 @@ namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 /// <param name="FileSha256">The SHA-256 hash of the file content.</param>
 /// <param name="FilePassword">The password for the file, if it is protected.</param>
 /// <param name="IsPrivateFile">Indicates whether the file is private.</param>
-/// <param name="FileInstanceId">The unique identifier for this file to use with <see cref="IFileStorageProvider"/>.</param>
+/// <param name="StorageFileName">The name for this file in the storage.</param>
 public sealed record AnalyzeFile(
     GlobalId MultiAnalysisId,
     string Filename,
@@ -22,4 +21,4 @@ public sealed record AnalyzeFile(
     string FileSha256,
     string FilePassword,
     bool IsPrivateFile,
-    string FileInstanceId);
+    string StorageFileName);

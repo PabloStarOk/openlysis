@@ -14,7 +14,11 @@ using NSwag;
 
 using Openlysis.API.Configuration.Options;
 using Openlysis.API.Documentation;
+using Openlysis.API.Endpoints.Files.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
+using Openlysis.API.Middlewares.Files;
+using Openlysis.API.Services.Abstractions;
+using Openlysis.API.Services.Implementations;
 
 namespace Openlysis.API;
 
@@ -67,13 +71,8 @@ public static class DependencyInjection
                 options.Limits.MaxRequestBodySize = serverOptions.MaxRequestBodySize;
             });
 
-        // Request options
-        services.Configure<FormOptions>(
-            options =>
-            {
-                options.MultipartBodyLengthLimit = fileUploadOptions.MaxFileSize;
-                options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
-            });
+        AddFileMultipartParsers(services, configuration);
+        AddValidators(services);
 
         AddJwtAuthentication(services, configuration, environment);
         services.AddAuthorization();
@@ -133,6 +132,7 @@ public static class DependencyInjection
             });
 
         services.AddExceptionHandlers();
+        services.AddScoped<FileStorageCleanupMiddleware>();
     }
 
     private static void AddJwtAuthentication(
@@ -154,5 +154,23 @@ public static class DependencyInjection
                     options.MetadataAddress = jwtBearerOptions.MetadataAddress;
                     options.TokenValidationParameters = jwtBearerOptions.TokenValidationParameters;
                 });
+    }
+
+    private static void AddFileMultipartParsers(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var formOptionsSection = configuration.GetRequiredSection(nameof(FormOptions));
+
+        services.AddOptions<FormOptions>()
+            .Bind(formOptionsSection)
+            .ValidateOnStart();
+
+        services.AddTransient<MultipartRequestParser<AnalyzeFileRequest>, AnalyzeFileMultipartRequestParser>();
+    }
+
+    private static void AddValidators(IServiceCollection services)
+    {
+        services.AddSingleton<Validator<AnalyzeFileRequest>, AnalyzeFileRequestValidator>();
     }
 }

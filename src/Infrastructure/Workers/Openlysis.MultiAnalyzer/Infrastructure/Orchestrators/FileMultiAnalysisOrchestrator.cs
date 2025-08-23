@@ -59,7 +59,7 @@ internal sealed class FileMultiAnalysisOrchestrator
         MultiAnalysisId = message.MultiAnalysisId;
 
         await using var fileStreamFactory = new FileStreamFactory(
-            message.FileInstanceId,
+            message.StorageFileName,
             _fileStorageProvider);
 
         var analyzeRequest = new AnalyzeFileRequest(
@@ -98,7 +98,7 @@ internal sealed class FileMultiAnalysisOrchestrator
             });
 
         await _fileStorageProvider.DeleteAsync(
-            message.FileInstanceId,
+            message.StorageFileName,
             cancellationToken);
         return analyses;
     }

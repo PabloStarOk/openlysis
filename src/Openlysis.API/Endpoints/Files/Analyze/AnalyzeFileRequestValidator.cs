@@ -2,6 +2,9 @@ using FastEndpoints;
 
 using FluentValidation;
 
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
+
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
 /// <summary>
@@ -12,14 +15,15 @@ public class AnalyzeFileRequestValidator : Validator<AnalyzeFileRequest>
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileRequestValidator"/> class.
-    /// Configures validation rules for the <see cref="AnalyzeFileRequest"/>.
     /// </summary>
-    public AnalyzeFileRequestValidator()
+    /// <param name="formOptions">Injected form options containing multipart body length limit.</param>
+    public AnalyzeFileRequestValidator(IOptions<FormOptions> formOptions)
     {
         RuleFor(x => x.File)
+            .Cascade(CascadeMode.Stop)
             .NotNull()
-            .WithMessage("Provide a file to be analyzed.")
-            .Must(f => f?.Length > 0)
-            .WithMessage("Must provide a file to be analyzed with a minimum length of 1 byte.");
+            .WithMessage("Provide a file to be analyzed, ensure the file has a minimum length of 1 byte.")
+            .Must(x => x.Metadata.Size < formOptions.Value.MultipartBodyLengthLimit)
+            .WithMessage($"File size must not exceed {formOptions.Value.MultipartBodyLengthLimit} bytes.");
     }
 }
