@@ -15,6 +15,7 @@ using NSwag;
 using Openlysis.API.Configuration.Options;
 using Openlysis.API.Documentation;
 using Openlysis.API.Endpoints.Files.Analyze;
+using Openlysis.API.Endpoints.Messages.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
 using Openlysis.API.Middlewares.Files;
 using Openlysis.API.Services.Implementations;
@@ -51,17 +52,17 @@ public static class DependencyInjection
             .GetRequiredSection(ServerOptions.SectionName)
             .Get<ServerOptions>();
 
-        var fileUploadOptionsSection = configuration
-            .GetRequiredSection(FileUploadOptions.SectionName);
-        var fileUploadOptions = fileUploadOptionsSection
-            .Get<FileUploadOptions>();
+        var messageAnalysisOptionsSection = configuration
+            .GetRequiredSection(MessageAnalysisOptions.SectionName);
+        var fileUploadOptions = messageAnalysisOptionsSection
+            .Get<MessageAnalysisOptions>();
 
         ArgumentNullException.ThrowIfNull(serverOptions);
-        ArgumentNullException.ThrowIfNull(fileUploadOptionsSection);
+        ArgumentNullException.ThrowIfNull(messageAnalysisOptionsSection);
         ArgumentNullException.ThrowIfNull(fileUploadOptions);
 
         // Add options
-        services.Configure<FileUploadOptions>(fileUploadOptionsSection);
+        services.Configure<MessageAnalysisOptions>(messageAnalysisOptionsSection);
 
         // Server options
         services.Configure<KestrelServerOptions>(
@@ -71,7 +72,6 @@ public static class DependencyInjection
             });
 
         AddMultipartRequestBinders(services, configuration);
-        AddValidators(services);
 
         AddJwtAuthentication(services, configuration, environment);
         services.AddAuthorization();
@@ -166,10 +166,6 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         services.AddSingleton<IRequestBinder<AnalyzeFileRequest>, AnalyzeFileMultipartRequestBinder>();
-    }
-
-    private static void AddValidators(IServiceCollection services)
-    {
-        services.AddSingleton<Validator<AnalyzeFileRequest>, AnalyzeFileRequestValidator>();
+        services.AddSingleton<IRequestBinder<AnalyzeMessageRequest>, AnalyzeMessageMultipartRequestBinder>();
     }
 }

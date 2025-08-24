@@ -4,7 +4,7 @@ using ErrorOr;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Enums;
-using Openlysis.Application.Files.Contracts.Models;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Domain.Common.Entities;
@@ -59,7 +59,8 @@ internal class MessageAnalysisService : IMessageAnalysisService
         GlobalId userId,
         bool isPrivate,
         Message message,
-        FileData[]? files,
+        ProcessedFile[] files,
+        Dictionary<ProcessedFile, string> filePasswords,
         bool reanalyze,
         string? requestCountryCode,
         CancellationToken cancellationToken = default)
@@ -69,10 +70,9 @@ internal class MessageAnalysisService : IMessageAnalysisService
             return Error.Failure("Service is not available");
         }
 
-        Stream[] filesData = GetFileDataStreams(files);
         MessageAnalysis? lastExistingAnalysis = await FetchLastAnalysisAsync(
                 message,
-                filesData,
+                files,
                 cancellationToken);
 
         if (lastExistingAnalysis is not null
@@ -98,10 +98,10 @@ internal class MessageAnalysisService : IMessageAnalysisService
             _dataExtractor.ExtractPhoneNumbers, subject, content);
 
         IEnumerable<FileMultiAnalysis> fileMultiAnalyses = [];
-        if (files is not null)
+        if (files.Length > 0)
         {
             fileMultiAnalyses = await _messageAnalyzer
-                .AnalyzeFilesAsync(userId, isPrivate, reanalyze, files, cancellationToken);
+                .AnalyzeFilesAsync(userId, isPrivate, reanalyze, files, filePasswords, cancellationToken);
         }
 
         IEnumerable<UrlMultiAnalysis> urlMultiAnalyses =
@@ -113,7 +113,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
         MessageAnalysis messageAnalysis = await _messageAnalysisBuilder
             .WithUserContext(userId, isPrivate)
-            .WithMessageInformation(message, filesData)
+            .WithMessageInformation(message, files)
             .WithFileMultiAnalyses(fileMultiAnalyses)
             .WithUrlMultiAnalyses(urlMultiAnalyses)
             .WithEmailAddressMultiReputations(emailAddressesReputations)
@@ -224,25 +224,10 @@ internal class MessageAnalysisService : IMessageAnalysisService
     }
 
     /// <summary>
-    /// Converts an array of `FileData` objects into an array of their associated `Stream` objects.
-    /// </summary>
-    /// <param name="files">An optional array of `FileData` objects containing file streams.</param>
-    /// <returns>
-    /// An array of `Stream` objects extracted from the provided `FileData` objects.
-    /// Returns an empty array if `files` is null.
-    /// </returns>
-    private static Stream[] GetFileDataStreams(FileData[]? files)
-    {
-        return files is null
-            ? []
-            : files.Select(f => f.Stream).ToArray();
-    }
-
-    /// <summary>
     /// Fetches the most recent analysis for the given message, if it exists.
     /// </summary>
     /// <param name="message">The message for which to fetch the last analysis.</param>
-    /// <param name="filesData">An array of streams representing the file data associated with the message.</param>
+    /// <param name="files">An array of <see cref="ProcessedFile"/> representing the files attached to the message.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation. The task result contains the most recent
@@ -250,11 +235,11 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// </returns>
     private async Task<MessageAnalysis?> FetchLastAnalysisAsync(
         Message message,
-        Stream[] filesData,
+        ProcessedFile[] files,
         CancellationToken cancellationToken)
     {
         HashValues messageHashValues = await _messageAnalysisBuilder
-            .WithMessageInformation(message, filesData)
+            .WithMessageInformation(message, files)
             .GenerateHashAsync(cancellationToken);
 
         IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(

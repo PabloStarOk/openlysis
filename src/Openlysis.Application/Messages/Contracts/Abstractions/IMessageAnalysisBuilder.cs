@@ -1,3 +1,4 @@
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.ValueObjects;
@@ -28,11 +29,11 @@ public interface IMessageAnalysisBuilder
     /// Adds message information and associated file data to the analysis.
     /// </summary>
     /// <param name="message">The message to be analyzed.</param>
-    /// <param name="filesData">An array of streams representing the file data.</param>
+    /// <param name="files">An array of <see cref="ProcessedFile"/> representing the files attached to the message.</param>
     /// <returns>The current instance of <see cref="IMessageAnalysisBuilder"/>.</returns>
     public IMessageAnalysisBuilder WithMessageInformation(
         Message message,
-        Stream[] filesData);
+        ProcessedFile[] files);
 
     /// <summary>
     /// Adds file multi-analyses to the message analysis.

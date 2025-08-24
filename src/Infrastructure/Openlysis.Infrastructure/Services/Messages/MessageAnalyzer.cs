@@ -4,10 +4,8 @@ using ErrorOr;
 
 using Microsoft.Extensions.Logging;
 
-using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Models;
 using Openlysis.Application.EmailAddresses.Services;
-using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Files.Services;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.Phones.Services;
@@ -37,7 +35,6 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     private readonly IUrlMultiAnalysisService _urlAnalysisService;
     private readonly IPhoneReputationService _phoneReputationService;
     private readonly IEmailAddressReputationService _emailAddressReputationService;
-    private readonly IFileStorageContext _fileStorageContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageAnalyzer"/> class.
@@ -47,21 +44,18 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     /// <param name="urlAnalysisService">Service for analyzing URLs.</param>
     /// <param name="phoneReputationService">Service for assessing phone reputations.</param>
     /// <param name="emailAddressReputationService">Service for assessing email address reputations.</param>
-    /// <param name="fileStorageContext">Context for file storage operations.</param>
     public MessageAnalyzer(
         ILogger<MessageAnalyzer> logger,
         IFileMultiAnalysisService fileAnalysisService,
         IUrlMultiAnalysisService urlAnalysisService,
         IPhoneReputationService phoneReputationService,
-        IEmailAddressReputationService emailAddressReputationService,
-        IFileStorageContext fileStorageContext)
+        IEmailAddressReputationService emailAddressReputationService)
     {
         _logger = logger;
         _fileAnalysisService = fileAnalysisService;
         _urlAnalysisService = urlAnalysisService;
         _phoneReputationService = phoneReputationService;
         _emailAddressReputationService = emailAddressReputationService;
-        _fileStorageContext = fileStorageContext;
     }
 
     /// <inheritdoc/>
@@ -69,7 +63,8 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         GlobalId userId,
         bool isPrivate,
         bool reanalyze,
-        FileData[] files,
+        ProcessedFile[] files,
+        Dictionary<ProcessedFile, string> filePasswords,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(files);
@@ -77,14 +72,11 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         List<FileMultiAnalysis> fileMultiAnalyses = [];
         foreach (var file in files)
         {
-            file.Stream.Position = 0;
-            ProcessedFile processedFile = await _fileStorageContext
-                .ProcessAsync(file.Name, file.ContentType, file.Stream, cancellationToken);
-
+            filePasswords.TryGetValue(file, out string? password);
             ErrorOr<FileMultiAnalysis> result = await _fileAnalysisService.AnalyzeAsync(
                 userId,
-                processedFile,
-                file.Password,
+                file,
+                password ?? string.Empty,
                 isPrivate,
                 reanalyze,
                 cancellationToken);
@@ -97,9 +89,9 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                     + "\n\tFile Content Type: {FileContentType}"
                     + "\n\tFile Size: {FileSize}"
                     + "\n\tErrors: {Errors}",
-                    file.Name,
-                    file.ContentType,
-                    file.Stream.Length,
+                    file.Metadata.Name,
+                    file.Metadata.ContentType,
+                    file.Metadata.Size,
                     result.Errors);
                 continue;
             }

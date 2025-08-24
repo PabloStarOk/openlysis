@@ -4,10 +4,9 @@ using FastEndpoints;
 
 using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.Messages.GetAnalysisById;
-using Openlysis.Application.Files.Contracts.Models;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Application.Messages.Services;
-using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Enums;
 
@@ -45,6 +44,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
     {
         Post(string.Empty);
         Group<MessageAnalysesGroup>();
+        AllowFileUploads(dontAutoBindFormData: true);
         Version(1);
         Description(
             builder =>
@@ -61,7 +61,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
             {
                 s.Summary = "Analyze a message.";
                 s.Description = "Sends a message to be analyzed.";
-                s.RequestParam(r => r.MessageType, "Type of the message. Accepted values are 'SMS' or 'email'."); // TODO: Documentation is not displayed.
+                s.RequestParam(r => r.MessageType, "Type of the message. Accepted values are 'SMS' or 'email'.");
                 s.RequestParam(r => r.Sender, "Sender of the message.");
                 s.RequestParam(r => r.Content, "Content of the message.");
                 s.RequestParam(r => r.Subject, "Subject of the message, can be null or empty.");
@@ -84,21 +84,21 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
             await SendResultAsync(result);
         }
 
-        var userId = GlobalId.Parse(req.UserId);
         MessageType messageType = (MessageType)req.MessageType!;
         var message = new Message(messageType, req.Sender, req.Subject, req.Content);
-        FileData[] files = CreateFileDataArray(req);
+        Dictionary<ProcessedFile, string> filePasswords = MapFilePasswords(req);
 
 #if DEBUG
-        LogAttachedFiles(files);
+        LogAttachedFiles(req.AttachedFiles, filePasswords);
 #endif
 
         ErrorOr<MessageAnalysis> analyzeResult = await _messageAnalysisService
             .AnalyzeAsync(
-            userId: userId,
+            userId: req.UserId,
             isPrivate: req.IsPrivate,
             message: message,
-            files: files,
+            files: req.AttachedFiles,
+            filePasswords: filePasswords,
             reanalyze: req.Reanalyze,
             requestCountryCode: req.NormalizedCountryCode,
             cancellationToken: ct);
@@ -130,60 +130,38 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
         await SendResultAsync(acceptedResult);
     }
 
-    /// <summary>
-    /// Creates an array of <see cref="FileData"/> objects from the attached files in the request.
-    /// </summary>
-    /// <param name="request">The request containing the attached files and their corresponding passwords.</param>
-    /// <returns>An array of <see cref="FileData"/> objects representing the attached files.</returns>
-    private static FileData[] CreateFileDataArray(AnalyzeMessageRequest request)
+    private static Dictionary<ProcessedFile, string> MapFilePasswords(AnalyzeMessageRequest request)
     {
-        if (request.AttachedFiles is null)
+        if (request.AttachedFiles.Length is 0 || request.AttachedFilesPasswords.Count is 0)
         {
             return [];
         }
 
+        Dictionary<string, string> passwords = request.AttachedFilesPasswords;
         return request.AttachedFiles
-            .Select(f => CreateFileData(f, request.AttachedFilesPasswords))
-            .ToArray();
-    }
-
-    /// <summary>
-    /// Creates a <see cref="FileData"/> object from an attached file and its corresponding password.
-    /// </summary>
-    /// <param name="attachedFile">The file attached to the message.</param>
-    /// <param name="attachedFilePasswords">
-    /// A dictionary where the key is the file name and the value is the corresponding password, if required.
-    /// </param>
-    /// <returns>A <see cref="FileData"/> object representing the attached file.</returns>
-    private static FileData CreateFileData(
-        IFormFile attachedFile,
-        Dictionary<string, string>? attachedFilePasswords)
-    {
-        string fileName = attachedFile.FileName;
-        string filePassword = string.Empty;
-
-        if (attachedFilePasswords is not null
-            && attachedFilePasswords.TryGetValue(fileName, out string? providedPassword))
-        {
-            filePassword = providedPassword;
-        }
-
-        return new FileData(
-            fileName,
-            attachedFile.ContentType,
-            filePassword,
-            attachedFile.OpenReadStream());
+            .Where(f => passwords.ContainsKey(f.Metadata.Name))
+            .ToDictionary(
+                f => f,
+                f => passwords[f.Metadata.Name]);
     }
 
 #if DEBUG
     /// <summary>
     /// Logs detailed information about the attached files for debugging purposes.
     /// </summary>
-    /// <param name="files">A collection of <see cref="FileData"/> objects representing the attached files.</param>
-    private void LogAttachedFiles(IEnumerable<FileData> files)
+    /// <param name="files">A collection of <see cref="ProcessedFile"/> objects representing the attached files.</param>
+    /// <param name="passwords">A dictionary mapping each <see cref="ProcessedFile"/> to its password, if provided.</param>
+    private void LogAttachedFiles(ProcessedFile[] files, Dictionary<ProcessedFile, string> passwords)
     {
         var attachedFilesLog = files.Select(file =>
-            $"\n\n\tFilename: {file.Name}\n\tFile password: {file.Password}\n\tContent type: {file.ContentType}");
+        {
+            _ = passwords.TryGetValue(file, out string? password);
+
+            return $"\n\n\tFilename: {file.Metadata.Name}"
+                + $"\n\tFile password: {password}"
+                + $"\n\tContent type: {file.Metadata.ContentType}";
+        });
+
         _logger.LogTrace(
             "Message analysis requested with attached files: {AttachedFiles}",
             attachedFilesLog);

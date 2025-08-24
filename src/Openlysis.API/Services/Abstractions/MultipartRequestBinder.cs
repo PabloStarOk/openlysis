@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 using FastEndpoints;
 
@@ -34,6 +35,11 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
     protected IFileStorageContext FileStorageContext { get; private set; } = null!;
 
     /// <summary>
+    /// Gets the <see cref="JsonSerializerOptions"/> used for JSON serialization and deserialization in multipart requests.
+    /// </summary>
+    protected JsonSerializerOptions SerializerOptions { get; private set; } = null!;
+
+    /// <summary>
     /// Gets the user ID extracted from the current HTTP context.
     /// </summary>
     protected GlobalId UserId { get; private set; } = null!;
@@ -57,7 +63,7 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
     /// <inheritdoc/>
     public async ValueTask<TRequest> BindAsync(BinderContext ctx, CancellationToken ct)
     {
-        SetUpScope(ctx.HttpContext);
+        SetUpScope(ctx);
         await ParseRequestAsync(ctx.HttpContext, ct);
         TRequest request = CreateRequest();
         ResetState();
@@ -135,7 +141,7 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
     /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
     /// <returns>The decoded string value of the section, or throws if validation fails.</returns>
     /// <exception cref="InvalidDataException">Thrown when the section value exceeds allowed length.</exception>
-    private async Task<string> GetSectionValueAsync(
+    protected async Task<string> GetSectionValueAsync(
         FormMultipartSection formSection,
         CancellationToken cancellationToken)
     {
@@ -210,11 +216,12 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
         }
     }
 
-    private void SetUpScope(HttpContext httpContext)
+    private void SetUpScope(BinderContext binderContext)
     {
-        FileStorageContext = httpContext.RequestServices.GetRequiredService<IFileStorageContext>();
+        FileStorageContext = binderContext.HttpContext.RequestServices.GetRequiredService<IFileStorageContext>();
+        SerializerOptions = binderContext.SerializerOptions;
 
-        SetUserId(httpContext);
+        SetUserId(binderContext.HttpContext);
     }
 
     private void SetUserId(HttpContext httpContext)
