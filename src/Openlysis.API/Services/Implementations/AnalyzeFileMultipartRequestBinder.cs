@@ -6,7 +6,6 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.API.Endpoints.Files.Analyze;
 using Openlysis.API.Services.Abstractions;
-using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Models;
 
 namespace Openlysis.API.Services.Implementations;
@@ -14,25 +13,23 @@ namespace Openlysis.API.Services.Implementations;
 /// <summary>
 /// Parses multipart requests for analyzing files, extracting relevant fields and processing the uploaded file.
 /// </summary>
-internal sealed class AnalyzeFileMultipartRequestParser : MultipartRequestParser<AnalyzeFileRequest>
+internal sealed class AnalyzeFileMultipartRequestBinder : MultipartRequestBinder<AnalyzeFileRequest>
 {
-    private ProcessedFile? _processedFile;
+    private ProcessedFile _processedFile = null!;
     private bool _fileProcessed;
     private string _filePassword = string.Empty;
     private bool? _isPrivate;
     private bool? _reanalyze;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AnalyzeFileMultipartRequestParser"/> class.
+    /// Initializes a new instance of the <see cref="AnalyzeFileMultipartRequestBinder"/> class.
     /// </summary>
-    /// <param name="fileStorageContext">The file storage context used for processing files.</param>
-    /// <param name="memoryPool">The memory pool for efficient buffer management.</param>
-    /// <param name="formOptions">The form options for multipart parsing.</param>
-    public AnalyzeFileMultipartRequestParser(
-        IFileStorageContext fileStorageContext,
+    /// <param name="memoryPool">The memory pool used for buffer management.</param>
+    /// <param name="formOptions">The form options for multipart request limits and settings.</param>
+    public AnalyzeFileMultipartRequestBinder(
         MemoryPool<byte> memoryPool,
         IOptions<FormOptions> formOptions)
-        : base(fileStorageContext, memoryPool, formOptions)
+        : base(memoryPool, formOptions)
     {
     }
 
@@ -77,9 +74,20 @@ internal sealed class AnalyzeFileMultipartRequestParser : MultipartRequestParser
     protected override AnalyzeFileRequest CreateRequest()
     {
         return new AnalyzeFileRequest(
-            _processedFile!,
+            UserId,
+            _processedFile,
             _filePassword,
             _isPrivate ?? AnalyzeFileRequest.DefaultIsPrivate,
             _reanalyze ?? AnalyzeFileRequest.DefaultReanalyze);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnResetState()
+    {
+        _processedFile = null!;
+        _fileProcessed = false;
+        _filePassword = string.Empty;
+        _isPrivate = null;
+        _reanalyze = null;
     }
 }

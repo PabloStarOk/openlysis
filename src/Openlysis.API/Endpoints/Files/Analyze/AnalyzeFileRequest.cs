@@ -1,4 +1,8 @@
+using NJsonSchema;
+using NJsonSchema.Annotations;
+
 using Openlysis.Application.Common.Models;
+using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
@@ -10,7 +14,8 @@ namespace Openlysis.API.Endpoints.Files.Analyze;
 /// <param name="IsPrivate">Indicates whether the analysis is private. Defaults to <see cref="DefaultIsPrivate"/>.</param>
 /// <param name="Reanalyze">Indicates whether to reanalyze the file. Defaults to <see cref="DefaultReanalyze"/>.</param>
 public sealed record AnalyzeFileRequest(
-    ProcessedFile File,
+    [property: JsonSchemaIgnore] GlobalId UserId,
+    [property: JsonSchema(JsonObjectType.File)] ProcessedFile File,
     string Password,
     bool IsPrivate = true,
     bool Reanalyze = false)

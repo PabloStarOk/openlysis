@@ -17,7 +17,6 @@ using Openlysis.API.Documentation;
 using Openlysis.API.Endpoints.Files.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
 using Openlysis.API.Middlewares.Files;
-using Openlysis.API.Services.Abstractions;
 using Openlysis.API.Services.Implementations;
 
 namespace Openlysis.API;
@@ -71,7 +70,7 @@ public static class DependencyInjection
                 options.Limits.MaxRequestBodySize = serverOptions.MaxRequestBodySize;
             });
 
-        AddFileMultipartParsers(services, configuration);
+        AddMultipartRequestBinders(services, configuration);
         AddValidators(services);
 
         AddJwtAuthentication(services, configuration, environment);
@@ -156,7 +155,7 @@ public static class DependencyInjection
                 });
     }
 
-    private static void AddFileMultipartParsers(
+    private static void AddMultipartRequestBinders(
         IServiceCollection services,
         IConfiguration configuration)
     {
@@ -166,7 +165,7 @@ public static class DependencyInjection
             .Bind(formOptionsSection)
             .ValidateOnStart();
 
-        services.AddTransient<MultipartRequestParser<AnalyzeFileRequest>, AnalyzeFileMultipartRequestParser>();
+        services.AddSingleton<IRequestBinder<AnalyzeFileRequest>, AnalyzeFileMultipartRequestBinder>();
     }
 
     private static void AddValidators(IServiceCollection services)

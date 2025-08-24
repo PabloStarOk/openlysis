@@ -1,14 +1,20 @@
 using System.Buffers;
-using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 
+using FastEndpoints;
+
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 
 using Openlysis.Application.Common.Abstractions.Services;
+using Openlysis.Domain.Common.ValueObjects;
 
-using MultipartSection = FastEndpoints.MultipartSection;
+using MediaTypeHeaderValue = System.Net.Http.Headers.MediaTypeHeaderValue;
+using MultipartSection = Microsoft.AspNetCore.WebUtilities.MultipartSection;
 
 namespace Openlysis.API.Services.Abstractions;
 
@@ -16,7 +22,7 @@ namespace Openlysis.API.Services.Abstractions;
 /// Abstract base class for parsing multipart requests into a strongly-typed <typeparamref name="TRequest"/> allowing file streaming.
 /// </summary>
 /// <typeparam name="TRequest">The type of request to be created from multipart data.</typeparam>
-public abstract class MultipartRequestParser<TRequest>
+public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest>
     where TRequest : class
 {
     private const int SectionReadBufferSize = 16384;
@@ -25,59 +31,37 @@ public abstract class MultipartRequestParser<TRequest>
     /// <summary>
     /// Gets the file storage context used for handling file operations in multipart requests.
     /// </summary>
-    protected IFileStorageContext FileStorageContext { get; }
+    protected IFileStorageContext FileStorageContext { get; private set; } = null!;
+
+    /// <summary>
+    /// Gets the user ID extracted from the current HTTP context.
+    /// </summary>
+    protected GlobalId UserId { get; private set; } = null!;
 
     private readonly MemoryPool<byte> _memoryPool;
     private readonly IOptions<FormOptions> _formOptions;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MultipartRequestParser{TRequest}"/> class.
+    /// Initializes a new instance of the <see cref="MultipartRequestBinder{TRequest}"/> class.
     /// </summary>
-    /// <param name="fileStorageContext">The file storage context for handling file operations.</param>
     /// <param name="memoryPool">The memory pool used for buffer management.</param>
     /// <param name="formOptions">The form options for multipart request limits and settings.</param>
-    protected MultipartRequestParser(
-        IFileStorageContext fileStorageContext,
+    protected MultipartRequestBinder(
         MemoryPool<byte> memoryPool,
         IOptions<FormOptions> formOptions)
     {
         _memoryPool = memoryPool;
         _formOptions = formOptions;
-        FileStorageContext = fileStorageContext;
     }
 
-    /// <summary>
-    /// Parses the provided multipart sections asynchronously and constructs a strongly-typed <typeparamref name="TRequest"/>.
-    /// </summary>
-    /// <param name="sections">An async enumerable of multipart sections to parse.</param>
-    /// <param name="cancellationToken">A token to cancel the operation.</param>
-    /// <returns>The constructed <typeparamref name="TRequest"/> from the parsed sections.</returns>
-    public async Task<TRequest> ParseAsync(
-        IAsyncEnumerable<MultipartSection> sections,
-        CancellationToken cancellationToken)
+    /// <inheritdoc/>
+    public async ValueTask<TRequest> BindAsync(BinderContext ctx, CancellationToken ct)
     {
-        int sectionsRead = 0;
-
-        await foreach (var section in sections.WithCancellation(cancellationToken))
-        {
-            sectionsRead++;
-            if (sectionsRead > _formOptions.Value.ValueCountLimit)
-            {
-                throw new InvalidDataException("Form entries count limit exceeded.");
-            }
-
-            if (section.IsFormSection)
-            {
-                await ParseFormSectionAsync(section.FormSection, cancellationToken);
-            }
-
-            if (section.IsFileSection)
-            {
-                await ParseFileSectionAsync(section.FileSection, cancellationToken);
-            }
-        }
-
-        return CreateRequest();
+        SetUpScope(ctx.HttpContext);
+        await ParseRequestAsync(ctx.HttpContext, ct);
+        TRequest request = CreateRequest();
+        ResetState();
+        return request;
     }
 
     /// <summary>
@@ -139,6 +123,12 @@ public abstract class MultipartRequestParser<TRequest>
     }
 
     /// <summary>
+    /// Resets the internal state of the binder. Called after each request is processed.
+    /// Implementations should clear any temporary data or references.
+    /// </summary>
+    protected abstract void OnResetState();
+
+    /// <summary>
     /// Asynchronously reads the value of a form multipart section as a string, validating against <see cref="FormOptions"/> limits.
     /// </summary>
     /// <param name="formSection">The form multipart section to read from.</param>
@@ -153,7 +143,6 @@ public abstract class MultipartRequestParser<TRequest>
 
         _ = MediaTypeHeaderValue.TryParse(formSection.Section.ContentType, out var sectionMediaType);
 
-        Console.WriteLine(sectionMediaType?.CharSet);
         var streamEncoding = sectionMediaType?.CharSet is not null
             ? Encoding.GetEncoding(sectionMediaType.CharSet)
             : Encoding.UTF8;
@@ -183,5 +172,63 @@ public abstract class MultipartRequestParser<TRequest>
         }
 
         return stringBuilder.ToString();
+    }
+
+    private async Task ParseRequestAsync(HttpContext httpContext, CancellationToken cancellationToken)
+    {
+        var boundary = httpContext.Request.GetMultipartBoundary();
+        var multipartReader = new MultipartReader(boundary, httpContext.Request.Body);
+
+        int sectionsRead = 0;
+        while (await multipartReader.ReadNextSectionAsync(cancellationToken) is { } multipartSection)
+        {
+            sectionsRead++;
+            if (sectionsRead > _formOptions.Value.ValueCountLimit)
+            {
+                throw new InvalidDataException($"The number of form entries in the multipart request exceeded the limit of {_formOptions.Value.ValueCountLimit}.");
+            }
+
+            await ParseSectionAsync(multipartSection, cancellationToken);
+        }
+    }
+
+    private async Task ParseSectionAsync(
+        MultipartSection section,
+        CancellationToken cancellationToken)
+    {
+        var contentDisposition = section.GetContentDispositionHeader();
+        if (contentDisposition?.IsFileDisposition() is true)
+        {
+            var fileSection = new FileMultipartSection(section);
+            await ParseFileSectionAsync(fileSection, cancellationToken);
+        }
+
+        if (contentDisposition?.IsFormDisposition() is true)
+        {
+            var formSection = new FormMultipartSection(section);
+            await ParseFormSectionAsync(formSection, cancellationToken);
+        }
+    }
+
+    private void SetUpScope(HttpContext httpContext)
+    {
+        FileStorageContext = httpContext.RequestServices.GetRequiredService<IFileStorageContext>();
+
+        SetUserId(httpContext);
+    }
+
+    private void SetUserId(HttpContext httpContext)
+    {
+        var userIdClaim = httpContext.User.Claims
+            .Single(c => c.Type == ClaimTypes.NameIdentifier)
+            .Value;
+
+        UserId = GlobalId.Parse(userIdClaim);
+    }
+
+    private void ResetState()
+    {
+        FileStorageContext = null!;
+        OnResetState();
     }
 }

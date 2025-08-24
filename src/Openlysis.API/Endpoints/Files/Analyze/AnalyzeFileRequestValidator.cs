@@ -8,8 +8,8 @@ using Microsoft.Extensions.Options;
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
 /// <summary>
-/// Validator for the <see cref="AnalyzeFileRequest"/> class.
 /// Defines validation rules for analyzing file requests.
+/// Validator for the <see cref="AnalyzeFileRequest"/> class.
 /// </summary>
 public class AnalyzeFileRequestValidator : Validator<AnalyzeFileRequest>
 {
@@ -23,7 +23,7 @@ public class AnalyzeFileRequestValidator : Validator<AnalyzeFileRequest>
             .Cascade(CascadeMode.Stop)
             .NotNull()
             .WithMessage("Provide a file to be analyzed, ensure the file has a minimum length of 1 byte.")
-            .Must(x => x.Metadata.Size < formOptions.Value.MultipartBodyLengthLimit)
+            .Must(x => x.Metadata.Size <= formOptions.Value.MultipartBodyLengthLimit)
             .WithMessage($"File size must not exceed {formOptions.Value.MultipartBodyLengthLimit} bytes.");
     }
 }
