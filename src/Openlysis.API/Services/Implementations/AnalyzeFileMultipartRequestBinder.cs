@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.API.Endpoints.Files.Analyze;
 using Openlysis.API.Services.Abstractions;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Models;
 
 namespace Openlysis.API.Services.Implementations;
@@ -24,12 +25,14 @@ internal sealed class AnalyzeFileMultipartRequestBinder : MultipartRequestBinder
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileMultipartRequestBinder"/> class.
     /// </summary>
+    /// <param name="fileStorageContext">The file storage context for handling file operations.</param>
     /// <param name="memoryPool">The memory pool used for buffer management.</param>
     /// <param name="formOptions">The form options for multipart request limits and settings.</param>
     public AnalyzeFileMultipartRequestBinder(
+        IFileStorageContext fileStorageContext,
         MemoryPool<byte> memoryPool,
         IOptions<FormOptions> formOptions)
-        : base(memoryPool, formOptions)
+        : base(fileStorageContext, memoryPool, formOptions)
     {
     }
 
@@ -79,15 +82,5 @@ internal sealed class AnalyzeFileMultipartRequestBinder : MultipartRequestBinder
             _filePassword,
             _isPrivate ?? AnalyzeFileRequest.DefaultIsPrivate,
             _reanalyze ?? AnalyzeFileRequest.DefaultReanalyze);
-    }
-
-    /// <inheritdoc/>
-    protected override void OnResetState()
-    {
-        _processedFile = null!;
-        _fileProcessed = false;
-        _filePassword = string.Empty;
-        _isPrivate = null;
-        _reanalyze = null;
     }
 }

@@ -23,7 +23,7 @@ namespace Openlysis.API.Services.Abstractions;
 /// Abstract base class for parsing multipart requests into a strongly-typed <typeparamref name="TRequest"/> allowing file streaming.
 /// </summary>
 /// <typeparam name="TRequest">The type of request to be created from multipart data.</typeparam>
-public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest>
+public abstract class MultipartRequestBinder<TRequest>
     where TRequest : class
 {
     private const int SectionReadBufferSize = 16384;
@@ -32,7 +32,7 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
     /// <summary>
     /// Gets the file storage context used for handling file operations in multipart requests.
     /// </summary>
-    protected IFileStorageContext FileStorageContext { get; private set; } = null!;
+    protected IFileStorageContext FileStorageContext { get; }
 
     /// <summary>
     /// Gets the <see cref="JsonSerializerOptions"/> used for JSON serialization and deserialization in multipart requests.
@@ -50,23 +50,30 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
     /// <summary>
     /// Initializes a new instance of the <see cref="MultipartRequestBinder{TRequest}"/> class.
     /// </summary>
+    /// <param name="fileStorageContext">The file storage context for handling file operations.</param>
     /// <param name="memoryPool">The memory pool used for buffer management.</param>
     /// <param name="formOptions">The form options for multipart request limits and settings.</param>
     protected MultipartRequestBinder(
+        IFileStorageContext fileStorageContext,
         MemoryPool<byte> memoryPool,
         IOptions<FormOptions> formOptions)
     {
+        FileStorageContext = fileStorageContext;
         _memoryPool = memoryPool;
         _formOptions = formOptions;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Binds the multipart request to a strongly-typed <typeparamref name="TRequest"/> instance.
+    /// </summary>
+    /// <param name="ctx">The binder context containing HTTP context and serializer options.</param>
+    /// <param name="ct">A cancellation token to observe while waiting for the task to complete.</param>
+    /// <returns>The constructed <typeparamref name="TRequest"/> instance.</returns>
     public async ValueTask<TRequest> BindAsync(BinderContext ctx, CancellationToken ct)
     {
         SetUpScope(ctx);
         await ParseRequestAsync(ctx.HttpContext, ct);
         TRequest request = CreateRequest();
-        ResetState();
         return request;
     }
 
@@ -127,12 +134,6 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
     {
         return StringComparer.InvariantCultureIgnoreCase.Equals(section.Name, name);
     }
-
-    /// <summary>
-    /// Resets the internal state of the binder. Called after each request is processed.
-    /// Implementations should clear any temporary data or references.
-    /// </summary>
-    protected abstract void OnResetState();
 
     /// <summary>
     /// Asynchronously reads the value of a form multipart section as a string, validating against <see cref="FormOptions"/> limits.
@@ -218,7 +219,6 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
 
     private void SetUpScope(BinderContext binderContext)
     {
-        FileStorageContext = binderContext.HttpContext.RequestServices.GetRequiredService<IFileStorageContext>();
         SerializerOptions = binderContext.SerializerOptions;
 
         SetUserId(binderContext.HttpContext);
@@ -231,11 +231,5 @@ public abstract class MultipartRequestBinder<TRequest> : IRequestBinder<TRequest
             .Value;
 
         UserId = GlobalId.Parse(userIdClaim);
-    }
-
-    private void ResetState()
-    {
-        FileStorageContext = null!;
-        OnResetState();
     }
 }

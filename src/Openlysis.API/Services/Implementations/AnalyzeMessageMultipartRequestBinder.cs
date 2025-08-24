@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.API.Endpoints.Messages.Analyze;
 using Openlysis.API.Services.Abstractions;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Models;
 using Openlysis.Domain.Messages.Enums;
 
@@ -17,11 +18,11 @@ namespace Openlysis.API.Services.Implementations;
 /// </summary>
 internal sealed class AnalyzeMessageMultipartRequestBinder : MultipartRequestBinder<AnalyzeMessageRequest>
 {
+    private readonly List<ProcessedFile> _attachedFiles = [];
     private MessageType? _messageType;
     private string _sender = string.Empty;
     private string _content = string.Empty;
     private string? _subject;
-    private List<ProcessedFile> _attachedFiles = [];
     private Dictionary<string, string> _attachedFilesPasswords = [];
     private string? _countryCode;
     private bool _isPrivate = AnalyzeMessageRequest.DefaultIsPrivate;
@@ -30,12 +31,14 @@ internal sealed class AnalyzeMessageMultipartRequestBinder : MultipartRequestBin
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeMessageMultipartRequestBinder"/> class.
     /// </summary>
+    /// <param name="fileStorageContext">The file storage context for handling file operations.</param>
     /// <param name="memoryPool">The memory pool used for buffering multipart data.</param>
     /// <param name="formOptions">The form options for multipart parsing.</param>
     public AnalyzeMessageMultipartRequestBinder(
+        IFileStorageContext fileStorageContext,
         MemoryPool<byte> memoryPool,
         IOptions<FormOptions> formOptions)
-        : base(memoryPool, formOptions)
+        : base(fileStorageContext, memoryPool, formOptions)
     {
     }
 
@@ -125,19 +128,5 @@ internal sealed class AnalyzeMessageMultipartRequestBinder : MultipartRequestBin
             _countryCode,
             _isPrivate,
             _reanalyze);
-    }
-
-    /// <inheritdoc/>
-    protected override void OnResetState()
-    {
-        _messageType = null;
-        _sender = string.Empty;
-        _content = string.Empty;
-        _subject = null;
-        _attachedFiles = [];
-        _attachedFilesPasswords = [];
-        _countryCode = null;
-        _isPrivate = AnalyzeMessageRequest.DefaultIsPrivate;
-        _reanalyze = AnalyzeMessageRequest.DefaultReanalyze;
     }
 }

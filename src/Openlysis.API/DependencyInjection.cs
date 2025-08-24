@@ -18,6 +18,7 @@ using Openlysis.API.Endpoints.Files.Analyze;
 using Openlysis.API.Endpoints.Messages.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
 using Openlysis.API.Middlewares.Files;
+using Openlysis.API.Services.Abstractions;
 using Openlysis.API.Services.Implementations;
 
 namespace Openlysis.API;
@@ -165,7 +166,10 @@ public static class DependencyInjection
             .Bind(formOptionsSection)
             .ValidateOnStart();
 
-        services.AddSingleton<IRequestBinder<AnalyzeFileRequest>, AnalyzeFileMultipartRequestBinder>();
-        services.AddSingleton<IRequestBinder<AnalyzeMessageRequest>, AnalyzeMessageMultipartRequestBinder>();
+        services.AddSingleton<IRequestBinder<AnalyzeFileRequest>, MultipartRequestBinderFactory<AnalyzeFileRequest>>();
+        services.AddSingleton<IRequestBinder<AnalyzeMessageRequest>, MultipartRequestBinderFactory<AnalyzeMessageRequest>>();
+
+        services.AddScoped<MultipartRequestBinder<AnalyzeMessageRequest>, AnalyzeMessageMultipartRequestBinder>();
+        services.AddScoped<MultipartRequestBinder<AnalyzeFileRequest>, AnalyzeFileMultipartRequestBinder>();
     }
 }
