@@ -6,12 +6,11 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
 using Openlysis.API.Endpoints.Messages.Analyze;
-using Openlysis.API.Services.Abstractions;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Models;
 using Openlysis.Domain.Messages.Enums;
 
-namespace Openlysis.API.Services.Implementations;
+namespace Openlysis.API.Binders;
 
 /// <summary>
 /// Binds and parses multipart requests for <see cref="AnalyzeMessageRequest"/>.

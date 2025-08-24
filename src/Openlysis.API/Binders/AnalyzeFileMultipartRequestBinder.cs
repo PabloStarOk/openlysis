@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 
 using Openlysis.API.Endpoints.Files.Analyze;
-using Openlysis.API.Services.Abstractions;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Models;
 
-namespace Openlysis.API.Services.Implementations;
+namespace Openlysis.API.Binders;
 
 /// <summary>
 /// Parses multipart requests for analyzing files, extracting relevant fields and processing the uploaded file.

@@ -1,8 +1,6 @@
 using FastEndpoints;
 
-using Openlysis.API.Services.Abstractions;
-
-namespace Openlysis.API.Services.Implementations;
+namespace Openlysis.API.Binders;
 
 /// <summary>
 /// Factory for binding multipart requests to <typeparamref name="TRequest"/>.

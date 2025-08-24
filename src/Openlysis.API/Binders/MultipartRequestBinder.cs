@@ -17,7 +17,7 @@ using Openlysis.Domain.Common.ValueObjects;
 using MediaTypeHeaderValue = System.Net.Http.Headers.MediaTypeHeaderValue;
 using MultipartSection = Microsoft.AspNetCore.WebUtilities.MultipartSection;
 
-namespace Openlysis.API.Services.Abstractions;
+namespace Openlysis.API.Binders;
 
 /// <summary>
 /// Abstract base class for parsing multipart requests into a strongly-typed <typeparamref name="TRequest"/> allowing file streaming.
