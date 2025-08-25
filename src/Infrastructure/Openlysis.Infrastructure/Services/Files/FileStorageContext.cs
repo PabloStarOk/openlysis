@@ -80,6 +80,12 @@ internal sealed class FileStorageContext : IFileStorageContext
             _processedFiles.TryAdd(storageFileName, processedFile);
             return processedFile;
         }
+        catch (Exception exception)
+        {
+            await hashPipe.Reader.CompleteAsync(exception);
+            await uploadPipe.Reader.CompleteAsync(exception);
+            throw;
+        }
         finally
         {
             _pipePool.Return(hashPipe);
@@ -130,6 +136,11 @@ internal sealed class FileStorageContext : IFileStorageContext
             while ((bytesRead = await stream.ReadAsync(buffer, cancellationToken)) > 0)
             {
                 totalBytesRead += bytesRead;
+                if (totalBytesRead > _options.Value.MaxFileSizeBytes)
+                {
+                    throw new InvalidDataException($"File size must not exceed {_options.Value.MaxFileSizeBytes} bytes.");
+                }
+
                 var chunk = buffer[..bytesRead];
                 await hashPipeWriter.WriteAsync(chunk, cancellationToken);
                 await uploadPipeWriter.WriteAsync(chunk, cancellationToken);
@@ -142,6 +153,7 @@ internal sealed class FileStorageContext : IFileStorageContext
         {
             await hashPipeWriter.CompleteAsync(exception);
             await uploadPipeWriter.CompleteAsync(exception);
+            throw;
         }
 
         return totalBytesRead;

@@ -3,7 +3,7 @@ namespace Openlysis.Infrastructure.Configuration;
 /// <summary>
 /// Options for configuring file storage context.
 /// </summary>
-internal sealed record FileStorageContextOptions
+public sealed record FileStorageContextOptions
 {
     /// <summary>
     /// The configuration section name for file storage context.
@@ -22,4 +22,10 @@ internal sealed record FileStorageContextOptions
     /// Gets or sets the buffer size in bytes for streaming file data.
     /// </summary>
     required public int StreamingBufferSizeBytes { get; set; } = DefaultBufferSize;
+
+    /// <summary>
+    /// Gets or sets the maximum allowed file size in bytes.
+    /// </summary>
+    required public long MaxFileSizeBytes { get; set; }
+
 }

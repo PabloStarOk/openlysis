@@ -6,6 +6,7 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -19,6 +20,7 @@ using Openlysis.API.Endpoints.Files.Analyze;
 using Openlysis.API.Endpoints.Messages.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
 using Openlysis.API.Middlewares.Files;
+using Openlysis.Infrastructure.Configuration;
 
 namespace Openlysis.API;
 
@@ -70,6 +72,8 @@ public static class DependencyInjection
             {
                 options.Limits.MaxRequestBodySize = serverOptions.MaxRequestBodySize;
             });
+
+        ConfigureFileStorageContextOptions(services);
 
         AddMultipartRequestBinders(services, configuration);
 
@@ -170,5 +174,15 @@ public static class DependencyInjection
 
         services.AddScoped<MultipartRequestBinder<AnalyzeMessageRequest>, AnalyzeMessageMultipartRequestBinder>();
         services.AddScoped<MultipartRequestBinder<AnalyzeFileRequest>, AnalyzeFileMultipartRequestBinder>();
+    }
+
+    private static void ConfigureFileStorageContextOptions(IServiceCollection services)
+    {
+        services.Configure<FileStorageContextOptions>(options =>
+        {
+            using var serviceProvider = services.BuildServiceProvider();
+            var formOptions = serviceProvider.GetRequiredService<IOptions<FormOptions>>();
+            options.MaxFileSizeBytes = formOptions.Value.MultipartBodyLengthLimit;
+        });
     }
 }

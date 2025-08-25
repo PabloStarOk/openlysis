@@ -176,7 +176,7 @@ public static class DependencyInjection
         IServiceCollection services,
         IConfiguration configuration)
     {
-        var optionsSection = configuration.GetRequiredSection(FileStorageContextOptions.SectionName);
+        var optionsSection = configuration.GetSection(FileStorageContextOptions.SectionName);
 
         services.AddOptions<FileStorageContextOptions>()
             .Bind(optionsSection)
