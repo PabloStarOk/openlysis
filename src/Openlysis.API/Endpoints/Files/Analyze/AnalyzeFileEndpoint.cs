@@ -3,6 +3,7 @@ using ErrorOr;
 using FastEndpoints;
 
 using Openlysis.API.Endpoints.Common.Responses;
+using Openlysis.API.Middlewares.Files;
 using Openlysis.Application.Files.Services;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
@@ -36,6 +37,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
     public override void Configure()
     {
         Post(string.Empty);
+        PostProcessor<FileStorageCleanupPostProcessor<AnalyzeFileRequest, AnalysisIdentifiers>>();
         Group<FileAnalysesGroup>();
         AllowFileUploads(dontAutoBindFormData: true);
         Version(1);

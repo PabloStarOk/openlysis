@@ -4,6 +4,7 @@ using FastEndpoints;
 
 using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.Messages.GetAnalysisById;
+using Openlysis.API.Middlewares.Files;
 using Openlysis.Application.Common.Models;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Application.Messages.Services;
@@ -43,6 +44,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
     public override void Configure()
     {
         Post(string.Empty);
+        PostProcessor<FileStorageCleanupPostProcessor<AnalyzeMessageRequest, AnalysisIdentifiers>>();
         Group<MessageAnalysesGroup>();
         AllowFileUploads(dontAutoBindFormData: true);
         Version(1);

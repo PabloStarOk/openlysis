@@ -19,7 +19,6 @@ using Openlysis.API.Documentation;
 using Openlysis.API.Endpoints.Files.Analyze;
 using Openlysis.API.Endpoints.Messages.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
-using Openlysis.API.Middlewares.Files;
 using Openlysis.Infrastructure.Configuration;
 
 namespace Openlysis.API;
@@ -135,7 +134,6 @@ public static class DependencyInjection
             });
 
         services.AddExceptionHandlers();
-        services.AddScoped<FileStorageCleanupMiddleware>();
     }
 
     private static void AddJwtAuthentication(

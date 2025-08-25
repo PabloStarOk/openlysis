@@ -6,7 +6,6 @@ using FastEndpoints.Swagger;
 
 using FluentValidation.Results;
 
-using Openlysis.API.Middlewares.Files;
 using Openlysis.Application.Common.Enums;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Messages.Enums;
@@ -36,7 +35,6 @@ public static class AppConfiguration
     public static void ConfigureApi(this WebApplication app)
     {
         app.UseExceptionHandler();
-        app.UseMiddleware<FileStorageCleanupMiddleware>();
 
         if (app.Environment.IsDevelopment())
         {
