@@ -113,10 +113,13 @@ internal sealed class FileStorageContext : IFileStorageContext
             return;
         }
 
+        List<ProcessedFile> filesToRemove = _processedFiles.Values.ToList();
+        _processedFiles.Clear();
+
         await Parallel.ForEachAsync(
-            _processedFiles.Values,
+            filesToRemove,
             CancellationToken.None,
-            async (f, _) => await RemoveAsync(f));
+            async (f, ct) => await _fileStorageProvider.DeleteAsync(f.StorageFileName, ct));
     }
 
     private async Task<long> StreamToPipesAsync(
