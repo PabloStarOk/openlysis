@@ -33,6 +33,8 @@ public static class DependencyInjection
     /// </summary>
     public const string V1DocumentName = "Version 1";
 
+    private const long MiB = 1024 * 1024;
+    private const int AdditionalMultipartRequestSize = 5;
     private const string DocumentsTitle = "Openlysis Analysis API";
     private const string ApiDescription = "Analysis API of Openlysis.";
     private const string V1DocumentVersion = "v1";
@@ -49,16 +51,11 @@ public static class DependencyInjection
         IHostEnvironment environment)
     {
         // Get options
-        var serverOptions = configuration
-            .GetRequiredSection(ServerOptions.SectionName)
-            .Get<ServerOptions>();
-
         var messageAnalysisOptionsSection = configuration
             .GetRequiredSection(MessageAnalysisOptions.SectionName);
         var fileUploadOptions = messageAnalysisOptionsSection
             .Get<MessageAnalysisOptions>();
 
-        ArgumentNullException.ThrowIfNull(serverOptions);
         ArgumentNullException.ThrowIfNull(messageAnalysisOptionsSection);
         ArgumentNullException.ThrowIfNull(fileUploadOptions);
 
@@ -66,16 +63,9 @@ public static class DependencyInjection
         services.Configure<MessageAnalysisOptions>(messageAnalysisOptionsSection);
 
         // Server options
-        services.Configure<KestrelServerOptions>(
-            options =>
-            {
-                options.Limits.MaxRequestBodySize = serverOptions.MaxRequestBodySize;
-            });
-
+        ConfigureKestrelServerOptions(services, configuration);
         ConfigureFileStorageContextOptions(services);
-
         AddMultipartRequestBinders(services, configuration);
-
         AddJwtAuthentication(services, configuration, environment);
         services.AddAuthorization();
 
@@ -182,5 +172,27 @@ public static class DependencyInjection
             var formOptions = serviceProvider.GetRequiredService<IOptions<FormOptions>>();
             options.MaxFileSizeBytes = formOptions.Value.MultipartBodyLengthLimit;
         });
+    }
+
+    private static void ConfigureKestrelServerOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        var messageAnalysisOptions = configuration
+            .GetRequiredSection(MessageAnalysisOptions.SectionName)
+            .Get<MessageAnalysisOptions>();
+
+        var formOptions = configuration
+            .GetRequiredSection(nameof(FormOptions))
+            .Get<FormOptions>();
+
+        ArgumentNullException.ThrowIfNull(messageAnalysisOptions);
+        ArgumentNullException.ThrowIfNull(formOptions);
+
+        const long overheadBuffer = AdditionalMultipartRequestSize * MiB;
+        long maxRequestBodySize = messageAnalysisOptions.MaxAttachedFiles * formOptions.MultipartBodyLengthLimit;
+        services.Configure<KestrelServerOptions>(
+            options =>
+            {
+                options.Limits.MaxRequestBodySize = maxRequestBodySize + overheadBuffer;
+            });
     }
 }
