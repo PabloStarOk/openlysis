@@ -23,7 +23,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     private readonly IRepository<UrlMultiAnalysis, GlobalId> _repository;
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
-    private readonly IUrlMultiAnalyzer _urlMultiAnalyzer;
+    private readonly IUrlMultiAnalysisQueue _multiAnalysisQueue;
     private readonly RecyclableMemoryStreamManager _memoryStreamManager;
 
     /// <summary>
@@ -32,19 +32,19 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     /// <param name="repository">The repository for managing <see cref="UrlMultiAnalysis"/> entities.</param>
     /// <param name="timeProvider">The service for providing the current time.</param>
     /// <param name="hashService">The service for generating and managing hashes.</param>
-    /// <param name="urlMultiAnalyzer">The service for performing multi-analysis on URLs.</param>
+    /// <param name="multiAnalysisQueue">Queue for multi-analysis operations.</param>
     /// <param name="memoryStreamManager">The manager for recyclable <see cref="MemoryStream"/> used for storing URL string bytes.</param>
     public UrlMultiAnalysisService(
         IRepository<UrlMultiAnalysis, GlobalId> repository,
         TimeProvider timeProvider,
         IHashService hashService,
-        IUrlMultiAnalyzer urlMultiAnalyzer,
+        IUrlMultiAnalysisQueue multiAnalysisQueue,
         RecyclableMemoryStreamManager memoryStreamManager)
     {
         _repository = repository;
         _timeProvider = timeProvider;
         _hashService = hashService;
-        _urlMultiAnalyzer = urlMultiAnalyzer;
+        _multiAnalysisQueue = multiAnalysisQueue;
         _memoryStreamManager = memoryStreamManager;
     }
 
@@ -84,7 +84,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             urlHashValues);
 
         await _repository.AddAsync(multiAnalysis, cancellationToken);
-        await _urlMultiAnalyzer.StartAnalysisAsync(
+        await _multiAnalysisQueue.QueueAsync(
             multiAnalysis.Id,
             url,
             cancellationToken);

@@ -8,19 +8,19 @@ using Openlysis.Infrastructure.Shared.Communication.Contracts;
 namespace Openlysis.Infrastructure.Services.URLs;
 
 /// <summary>
-/// Represents a service for analyzing URLs using multiple analyzers.
+/// Provides functionality to queue URLs for multi-analysis processing.
 /// </summary>
-internal class UrlMultiAnalyzer : IUrlMultiAnalyzer
+internal class UrlMultiAnalysisQueue : IUrlMultiAnalysisQueue
 {
     private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly ISendEndpointProvider _sendEndpointProvider;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UrlMultiAnalyzer"/> class.
+    /// Initializes a new instance of the <see cref="UrlMultiAnalysisQueue"/> class.
     /// </summary>
     /// <param name="endpointUriProvider">The provider for endpoint URIs.</param>
     /// <param name="sendEndpointProvider">The provider for send endpoints.</param>
-    public UrlMultiAnalyzer(
+    public UrlMultiAnalysisQueue(
         IEndpointUriProvider endpointUriProvider,
         ISendEndpointProvider sendEndpointProvider)
     {
@@ -29,12 +29,12 @@ internal class UrlMultiAnalyzer : IUrlMultiAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task StartAnalysisAsync(
+    public async Task QueueAsync(
         GlobalId multiAnalysisId,
         Uri url,
         CancellationToken cancellationToken = default)
     {
-        var request = new AnalyzeUrl(multiAnalysisId, url);
+        var request = new AnalyzeUrlMessage(multiAnalysisId, url);
 
         ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(_endpointUriProvider.AnalyzeUrlUri);
         await sendEndpoint.Send(request, cancellationToken);

@@ -10,13 +10,13 @@ using Openlysis.Infrastructure.Shared.Communication.Contracts;
 namespace Openlysis.Infrastructure.Communication.Consumers.Common;
 
 /// <summary>
-/// MassTransit consumer that handles <see cref="UpdateMultiAnalysis{TAnalysis}"/> messages,
+/// MassTransit consumer that handles <see cref="UpdateMultiAnalysisMessage{TAnalysis}"/> messages,
 /// updating or adding analyses to a <typeparamref name="TMultiAnalysis"/> aggregate.
 /// </summary>
 /// <typeparam name="TMultiAnalysis">The multi-analysis aggregate type.</typeparam>
 /// <typeparam name="TAnalysis">The analysis entity type.</typeparam>
 internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
-    : IConsumer<UpdateMultiAnalysis<TAnalysis>>
+    : IConsumer<UpdateMultiAnalysisMessage<TAnalysis>>
     where TMultiAnalysis : MultiAnalysis<TAnalysis>
     where TAnalysis : Analysis
 {
@@ -38,9 +38,9 @@ internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
 
     /// <inheritdoc/>
     public async Task Consume(
-        ConsumeContext<UpdateMultiAnalysis<TAnalysis>> context)
+        ConsumeContext<UpdateMultiAnalysisMessage<TAnalysis>> context)
     {
-        UpdateMultiAnalysis<TAnalysis> message = context.Message;
+        UpdateMultiAnalysisMessage<TAnalysis> message = context.Message;
         TMultiAnalysis? multiAnalysis = await _repository.GetAsync(
             message.MultiAnalysisId,
             context.CancellationToken);

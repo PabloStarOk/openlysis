@@ -9,11 +9,11 @@ using Openlysis.MultiAnalyzer.Models;
 namespace Openlysis.MultiAnalyzer.Communication.Consumers.URLs;
 
 /// <summary>
-/// MassTransit consumer that handles <see cref="AnalyzeUrl"/> messages.
+/// MassTransit consumer that handles <see cref="AnalyzeUrlMessage"/> messages.
 /// </summary>
-internal sealed class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
+internal sealed class AnalyzeUrlConsumer : IConsumer<AnalyzeUrlMessage>
 {
-    private readonly TimeoutRequestFactory<AnalyzeUrl> _requestFactory;
+    private readonly TimeoutRequestFactory<AnalyzeUrlMessage> _requestFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeUrlConsumer"/> class.
@@ -21,15 +21,15 @@ internal sealed class AnalyzeUrlConsumer : IConsumer<AnalyzeUrl>
     /// <param name="requestFactory">
     /// The factory used to create <see cref="TimeoutRequest{AnalyzeUrl}"/> instances.
     /// </param>
-    public AnalyzeUrlConsumer(TimeoutRequestFactory<AnalyzeUrl> requestFactory)
+    public AnalyzeUrlConsumer(TimeoutRequestFactory<AnalyzeUrlMessage> requestFactory)
     {
         _requestFactory = requestFactory;
     }
 
     /// <inheritdoc/>
-    public async Task Consume(ConsumeContext<AnalyzeUrl> context)
+    public async Task Consume(ConsumeContext<AnalyzeUrlMessage> context)
     {
-        TimeoutRequest<AnalyzeUrl> timeoutRequest = _requestFactory.Create();
+        TimeoutRequest<AnalyzeUrlMessage> timeoutRequest = _requestFactory.Create();
         await timeoutRequest.ProcessAsync(context, context.CancellationToken);
         await _requestFactory.DisposeRequestAsync(timeoutRequest);
     }

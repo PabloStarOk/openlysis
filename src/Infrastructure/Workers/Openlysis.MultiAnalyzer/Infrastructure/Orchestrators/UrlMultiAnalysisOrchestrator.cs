@@ -24,7 +24,7 @@ namespace Openlysis.MultiAnalyzer.Infrastructure.Orchestrators;
 /// Inherits from <see cref="MultiAnalysisOrchestrator{TAnalysis, TAnalyzeMessage}"/>.
 /// </summary>
 internal sealed class UrlMultiAnalysisOrchestrator
-    : MultiAnalysisOrchestrator<UrlAnalysis, AnalyzeUrl>
+    : MultiAnalysisOrchestrator<UrlAnalysis, AnalyzeUrlMessage>
 {
     private readonly Dictionary<string, Analyzer<UrlAnalysis, AnalyzeUrlRequest>> _analyzers;
 
@@ -38,7 +38,7 @@ internal sealed class UrlMultiAnalysisOrchestrator
     public UrlMultiAnalysisOrchestrator(
         ILogger<UrlMultiAnalysisOrchestrator> logger,
         IOptions<OrchestrationOptions> options,
-        IUpdateMessageSender<UpdateMultiAnalysis<UrlAnalysis>> updateMessageSender,
+        IUpdateMessageSender<UpdateMultiAnalysisMessage<UrlAnalysis>> updateMessageSender,
         IEnumerable<Analyzer<UrlAnalysis, AnalyzeUrlRequest>> analyzers)
         : base(logger, options, updateMessageSender)
     {
@@ -47,7 +47,7 @@ internal sealed class UrlMultiAnalysisOrchestrator
 
     /// <inheritdoc/>
     protected override async Task<IEnumerable<UrlAnalysis>> HandleAnalyzeAsync(
-        AnalyzeUrl message,
+        AnalyzeUrlMessage message,
         CancellationToken cancellationToken)
     {
         MultiAnalysisId = message.MultiAnalysisId;
@@ -151,7 +151,7 @@ internal sealed class UrlMultiAnalysisOrchestrator
 #if DEBUG
     /// <inheritdoc/>
     protected override void LogUpdateMessage(
-        UpdateMultiAnalysis<UrlAnalysis> message)
+        UpdateMultiAnalysisMessage<UrlAnalysis> message)
     {
         Logger.LogTrace(
             "Sending update multi analysis message:"

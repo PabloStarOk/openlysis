@@ -17,8 +17,8 @@ namespace Openlysis.MultiAnalyzer.Infrastructure.Communication;
 /// Implements <see cref="IUpdateMessageSender{T}"/> twice to support both types.
 /// </summary>
 internal sealed class UpdateMultiAnalysisMessageSender
-    : IUpdateMessageSender<UpdateMultiAnalysis<UrlAnalysis>>,
-    IUpdateMessageSender<UpdateMultiAnalysis<FileAnalysis>>
+    : IUpdateMessageSender<UpdateMultiAnalysisMessage<UrlAnalysis>>,
+    IUpdateMessageSender<UpdateMultiAnalysisMessage<FileAnalysis>>
 {
     private readonly IEndpointUriProvider _brokerEpProvider;
 
@@ -36,7 +36,7 @@ internal sealed class UpdateMultiAnalysisMessageSender
     /// <inheritdoc/>
     public async Task SendAsync(
         ConsumeContext context,
-        UpdateMultiAnalysis<UrlAnalysis> message,
+        UpdateMultiAnalysisMessage<UrlAnalysis> message,
         CancellationToken cancellationToken = default)
     {
         Uri uri = _brokerEpProvider.UpdateUrlMultiAnalysisUri;
@@ -47,7 +47,7 @@ internal sealed class UpdateMultiAnalysisMessageSender
     /// <inheritdoc/>
     public async Task SendAsync(
         ConsumeContext context,
-        UpdateMultiAnalysis<FileAnalysis> message,
+        UpdateMultiAnalysisMessage<FileAnalysis> message,
         CancellationToken cancellationToken = default)
     {
         Uri uri = _brokerEpProvider.UpdateFileMultiAnalysisUri;

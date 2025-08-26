@@ -46,7 +46,7 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
     protected GlobalId MultiAnalysisId { get; set; }
 
     private readonly IOptions<OrchestrationOptions> _options;
-    private readonly IUpdateMessageSender<UpdateMultiAnalysis<TAnalysis>> _updateMessageSender;
+    private readonly IUpdateMessageSender<UpdateMultiAnalysisMessage<TAnalysis>> _updateMessageSender;
     private ConsumeContext<TRequest> _context;
 
     /// <summary>
@@ -58,7 +58,7 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
     protected MultiAnalysisOrchestrator(
         ILogger<MultiAnalysisOrchestrator<TAnalysis, TRequest>> logger,
         IOptions<OrchestrationOptions> options,
-        IUpdateMessageSender<UpdateMultiAnalysis<TAnalysis>> updateMessageSender)
+        IUpdateMessageSender<UpdateMultiAnalysisMessage<TAnalysis>> updateMessageSender)
     {
         Logger = logger;
         _options = options;
@@ -106,7 +106,7 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
     /// Logs the update message for debugging purposes.
     /// </summary>
     /// <param name="message">The update message to log.</param>
-    protected abstract void LogUpdateMessage(UpdateMultiAnalysis<TAnalysis> message);
+    protected abstract void LogUpdateMessage(UpdateMultiAnalysisMessage<TAnalysis> message);
 
     /// <summary>
     /// Logs the given updatable analysis instance for debugging purposes.
@@ -192,7 +192,7 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
         bool timeout,
         CancellationToken cancellationToken = default)
     {
-        var message = new UpdateMultiAnalysis<TAnalysis>(
+        var message = new UpdateMultiAnalysisMessage<TAnalysis>(
             MultiAnalysisId,
             timeout,
             UpdatableAnalyses);

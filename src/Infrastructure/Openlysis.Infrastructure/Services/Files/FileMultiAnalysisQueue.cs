@@ -9,19 +9,19 @@ using Openlysis.Infrastructure.Shared.Communication.Contracts;
 namespace Openlysis.Infrastructure.Services.Files;
 
 /// <summary>
-/// Service to analyze a file using multi services.
+/// Provides functionality to queue files for multi-analysis processing.
 /// </summary>
-internal class FileMultiAnalyzer : IFileMultiAnalyzer
+internal class FileMultiAnalysisQueue : IFileMultiAnalysisQueue
 {
     private readonly IEndpointUriProvider _endpointUriProvider;
     private readonly ISendEndpointProvider _sendEndpointProvider;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="FileMultiAnalyzer"/> class.
+    /// Initializes a new instance of the <see cref="FileMultiAnalysisQueue"/> class.
     /// </summary>
     /// <param name="endpointUriProvider">The provider for endpoint URIs.</param>
     /// <param name="sendEndpointProvider">The endpoint to send messages to.</param>
-    public FileMultiAnalyzer(
+    public FileMultiAnalysisQueue(
         IEndpointUriProvider endpointUriProvider,
         ISendEndpointProvider sendEndpointProvider)
     {
@@ -30,14 +30,14 @@ internal class FileMultiAnalyzer : IFileMultiAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task StartAnalysisAsync(
+    public async Task QueueAsync(
         GlobalId multiAnalysisId,
         ProcessedFile processedFile,
         string filePassword,
         bool isPrivateFile,
         CancellationToken cancellationToken)
     {
-        var analyzeFile = new AnalyzeFile(
+        var analyzeFile = new AnalyzeFileMessage(
             multiAnalysisId,
             processedFile.Metadata.Name,
             processedFile.Metadata.ContentType,

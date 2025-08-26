@@ -86,8 +86,8 @@ public static class DependencyInjection
         services.AddTransient<IHashService, HashService>();
 
         // Add multi analyzers
-        services.AddScoped<IFileMultiAnalyzer, FileMultiAnalyzer>();
-        services.AddScoped<IUrlMultiAnalyzer, UrlMultiAnalyzer>();
+        services.AddScoped<IFileMultiAnalysisQueue, FileMultiAnalysisQueue>();
+        services.AddScoped<IUrlMultiAnalysisQueue, UrlMultiAnalysisQueue>();
 
         AddDopplerServices(services, configuration);
 

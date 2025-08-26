@@ -26,7 +26,7 @@ namespace Openlysis.MultiAnalyzer.Infrastructure.Orchestrators;
 /// Inherits from <see cref="MultiAnalysisOrchestrator{FileAnalysis, AnalyzeFile}"/>.
 /// </summary>
 internal sealed class FileMultiAnalysisOrchestrator
-    : MultiAnalysisOrchestrator<FileAnalysis, AnalyzeFile>
+    : MultiAnalysisOrchestrator<FileAnalysis, AnalyzeFileMessage>
 {
     private readonly Dictionary<string, Analyzer<FileAnalysis, AnalyzeFileRequest>> _analyzers;
     private readonly IFileStorageProvider _fileStorageProvider;
@@ -43,7 +43,7 @@ internal sealed class FileMultiAnalysisOrchestrator
         ILogger<FileMultiAnalysisOrchestrator> logger,
         IOptions<OrchestrationOptions> options,
         IFileStorageProvider fileStorageProvider,
-        IUpdateMessageSender<UpdateMultiAnalysis<FileAnalysis>> updateMessageSender,
+        IUpdateMessageSender<UpdateMultiAnalysisMessage<FileAnalysis>> updateMessageSender,
         IEnumerable<Analyzer<FileAnalysis, AnalyzeFileRequest>> analyzers)
         : base(logger, options, updateMessageSender)
     {
@@ -53,7 +53,7 @@ internal sealed class FileMultiAnalysisOrchestrator
 
     /// <inheritdoc/>
     protected override async Task<IEnumerable<FileAnalysis>> HandleAnalyzeAsync(
-        AnalyzeFile message,
+        AnalyzeFileMessage message,
         CancellationToken cancellationToken)
     {
         MultiAnalysisId = message.MultiAnalysisId;
@@ -183,7 +183,7 @@ internal sealed class FileMultiAnalysisOrchestrator
 #if DEBUG
     /// <inheritdoc/>
     protected override void LogUpdateMessage(
-        UpdateMultiAnalysis<FileAnalysis> message)
+        UpdateMultiAnalysisMessage<FileAnalysis> message)
     {
         Logger.LogTrace(
             "Sending update multi analysis message:"

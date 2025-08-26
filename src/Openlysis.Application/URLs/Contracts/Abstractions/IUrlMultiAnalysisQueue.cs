@@ -3,18 +3,18 @@ using Openlysis.Domain.Common.ValueObjects;
 namespace Openlysis.Application.URLs.Contracts.Abstractions;
 
 /// <summary>
-/// Defines a service that uses various analysis services to analyze a URL.
+/// Defines a service to queue URLs for multi analysis.
 /// </summary>
-public interface IUrlMultiAnalyzer
+public interface IUrlMultiAnalysisQueue
 {
     /// <summary>
-    /// Starts the analysis of the given URL for the specified user.
+    /// Queues a URL to be analyzed.
     /// </summary>
     /// <param name="multiAnalysisId">The ID of the multi-analysis.</param>
     /// <param name="url">The URL to be analyzed.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task StartAnalysisAsync(
+    public Task QueueAsync(
         GlobalId multiAnalysisId,
         Uri url,
         CancellationToken cancellationToken = default);

@@ -18,25 +18,25 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
 {
     private readonly IRepository<FileMultiAnalysis, GlobalId> _repository;
     private readonly TimeProvider _timeProvider;
-    private readonly IFileMultiAnalyzer _multiAnalyzer;
+    private readonly IFileMultiAnalysisQueue _multiAnalysisQueue;
     private readonly IFileStorageContext _fileStorageContext;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMultiAnalysisService"/> class.
     /// </summary>
     /// <param name="repository">Repository for <see cref="FileMultiAnalysis"/> entities.</param>
-    /// <param name="multiAnalyzer">Service for performing multiple file analyses.</param>
+    /// <param name="multiAnalysisQueue">Queue for multi-analysis operations.</param>
     /// <param name="timeProvider">Provides the current time.</param>
     /// <param name="fileStorageContext">Context for file storage operations.</param>
     public FileMultiAnalysisService(
         IRepository<FileMultiAnalysis, GlobalId> repository,
-        IFileMultiAnalyzer multiAnalyzer,
+        IFileMultiAnalysisQueue multiAnalysisQueue,
         TimeProvider timeProvider,
         IFileStorageContext fileStorageContext)
     {
         _repository = repository;
         _timeProvider = timeProvider;
-        _multiAnalyzer = multiAnalyzer;
+        _multiAnalysisQueue = multiAnalysisQueue;
         _fileStorageContext = fileStorageContext;
     }
 
@@ -71,7 +71,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
             processedFile.Metadata);
 
         await _repository.AddAsync(multiAnalysis, cancellationToken);
-        await _multiAnalyzer.StartAnalysisAsync(
+        await _multiAnalysisQueue.QueueAsync(
             multiAnalysis.Id,
             processedFile,
             filePassword,

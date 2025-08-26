@@ -53,16 +53,16 @@ internal static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddTransient<
-            IUpdateMessageSender<UpdateMultiAnalysis<UrlAnalysis>>,
+            IUpdateMessageSender<UpdateMultiAnalysisMessage<UrlAnalysis>>,
             UpdateMultiAnalysisMessageSender>();
 
         services.AddTransient<
-            MultiAnalysisOrchestrator<UrlAnalysis, AnalyzeUrl>,
+            MultiAnalysisOrchestrator<UrlAnalysis, AnalyzeUrlMessage>,
             UrlMultiAnalysisOrchestrator>();
 
         services.AddTimeoutRequestFactory<
-            AnalyzeUrl,
-            TimeoutAnalysisRequestCoreFactory<UrlAnalysis, AnalyzeUrl>>(
+            AnalyzeUrlMessage,
+            TimeoutAnalysisRequestCoreFactory<UrlAnalysis, AnalyzeUrlMessage>>(
             configuration);
     }
 
@@ -76,16 +76,16 @@ internal static class DependencyInjection
         IConfiguration configuration)
     {
         services.AddTransient<
-            IUpdateMessageSender<UpdateMultiAnalysis<FileAnalysis>>,
+            IUpdateMessageSender<UpdateMultiAnalysisMessage<FileAnalysis>>,
             UpdateMultiAnalysisMessageSender>();
 
         services.AddTransient<
-            MultiAnalysisOrchestrator<FileAnalysis, AnalyzeFile>,
+            MultiAnalysisOrchestrator<FileAnalysis, AnalyzeFileMessage>,
             FileMultiAnalysisOrchestrator>();
 
         services.AddTimeoutRequestFactory<
-            AnalyzeFile,
-            TimeoutAnalysisRequestCoreFactory<FileAnalysis, AnalyzeFile>>(
+            AnalyzeFileMessage,
+            TimeoutAnalysisRequestCoreFactory<FileAnalysis, AnalyzeFileMessage>>(
             configuration);
     }
 }
