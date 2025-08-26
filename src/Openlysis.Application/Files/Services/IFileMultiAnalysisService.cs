@@ -1,7 +1,7 @@
 using ErrorOr;
 
 using Openlysis.Application.Common.Enums;
-using Openlysis.Application.Files.Contracts.Models;
+using Openlysis.Application.Common.Models;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Files;
 
@@ -16,19 +16,21 @@ public interface IFileMultiAnalysisService
     /// Analyzes a file based on the provided request.
     /// </summary>
     /// <param name="userId">The unique identifier of the user requesting the analysis.</param>
+    /// <param name="processedFile">The processed file data to be analyzed.</param>
+    /// <param name="filePassword">The password for the file, if required for analysis.</param>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="reanalyze">Specifies whether to reanalyze the file if it has been analyzed before.</param>
-    /// <param name="fileData">The file data to be analyzed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
     /// A task that represents the asynchronous operation.
-    /// The task result contains an <see cref="ErrorOr{T}"/> object with the file analysis result.
+    /// The task result contains an <see cref="ErrorOr{T}"/> object with the initial file multi analysis.
     /// </returns>
     public Task<ErrorOr<FileMultiAnalysis>> AnalyzeAsync(
         GlobalId userId,
+        ProcessedFile processedFile,
+        string filePassword,
         bool isPrivate,
         bool reanalyze,
-        FileData fileData,
         CancellationToken cancellationToken = default);
 
     /// <summary>

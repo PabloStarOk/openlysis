@@ -1,23 +1,32 @@
-using System.Security.Claims;
+using NJsonSchema;
+using NJsonSchema.Annotations;
 
-using FastEndpoints;
+using Openlysis.Application.Common.Models;
+using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
 /// <summary>
-/// Request to analyze a file.
+/// Represents a request to analyze a file, including the file data, password, privacy setting, and reanalysis flag.
 /// </summary>
-/// <param name="UserId">The unique identifier of the user making the request, extracted from the authentication claim.</param>
-/// <param name="File">File to analyze</param>
-/// <param name="Password">Password for the file if it is protected</param>
-/// <param name="IsPrivate">Indicates if the file multi analysis should be private.</param>
-/// <param name="Reanalyze">If file has already been analyzed by another user, reanalyze it again.</param>
-public record AnalyzeFileRequest(
-    [property: FromClaim(
-        ClaimType = ClaimTypes.NameIdentifier,
-        RemoveFromSchema = true)]
-    string UserId,
-    IFormFile? File,
-    string Password = "",
+/// <param name="File">The processed file to be analyzed.</param>
+/// <param name="Password">The password associated with the file.</param>
+/// <param name="IsPrivate">Indicates whether the analysis is private. Defaults to <see cref="DefaultIsPrivate"/>.</param>
+/// <param name="Reanalyze">Indicates whether to reanalyze the file. Defaults to <see cref="DefaultReanalyze"/>.</param>
+public sealed record AnalyzeFileRequest(
+    [property: JsonSchemaIgnore] GlobalId UserId,
+    [property: JsonSchema(JsonObjectType.File)] ProcessedFile File,
+    string Password,
     bool IsPrivate = true,
-    bool Reanalyze = false);
+    bool Reanalyze = false)
+{
+    /// <summary>
+    /// The default value indicating the analysis is private.
+    /// </summary>
+    public const bool DefaultIsPrivate = true;
+
+    /// <summary>
+    /// The default value indicating the file should not be reanalyzed.
+    /// </summary>
+    public const bool DefaultReanalyze = false;
+}

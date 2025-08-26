@@ -76,7 +76,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
 
         Stream fileData = await request.StreamFactory.CreateStreamAsync(this);
         string? fileUploadUrl = null;
-        if (fileData.Length > Files.SmallFilesMaxSizeInBytes)
+        if (request.FileSize > Files.SmallFilesMaxSizeInBytes)
         {
             ErrorOr<string> getUploadUrlResult =
                 await _largeFileUploadProvider.GetFileUploadUrlAsync(cancellationToken);

@@ -5,6 +5,7 @@ using Doppler.NET.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 
@@ -29,6 +30,7 @@ using Openlysis.Infrastructure.Services.Hashing;
 using Openlysis.Infrastructure.Services.Messages;
 using Openlysis.Infrastructure.Services.URLs;
 using Openlysis.Infrastructure.Shared.Contracts.Common.Configuration;
+using Openlysis.Infrastructure.Shared.Infrastructure.PipePool;
 using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
 using Openlysis.Infrastructure.Shared.Infrastructure.Secrets;
 using Openlysis.TestTools.ServicesSimulation;
@@ -47,9 +49,11 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">Collection of services.</param>
     /// <param name="configuration">Configuration of the application.</param>
+    /// <param name="environment">Host environment information.</param>
     public static void AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         // Get options
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -76,16 +80,19 @@ public static class DependencyInjection
         services.AddScoped<IRepository<EmailAddressMultiReputation, GlobalId>, EmailAddressMultiReputationRepository>();
         services.AddScoped<IRepository<MessageAnalysis, GlobalId>, MessageAnalysisRepository>();
 
-        // Add hash service.
         services.AddSingleton(_ => MemoryPool<byte>.Shared);
+
+        // Add hash service.
         services.AddTransient<IHashService, HashService>();
 
         // Add multi analyzers
         services.AddScoped<IFileMultiAnalyzer, FileMultiAnalyzer>();
         services.AddScoped<IUrlMultiAnalyzer, UrlMultiAnalyzer>();
 
+        AddDopplerServices(services, configuration);
+
         // Add message senders
-        services.AddUpdateAnalysisConsumers(configuration);
+        services.AddUpdateAnalysisConsumers(configuration, environment);
         using (var sp = services.BuildServiceProvider())
         {
             var logger = sp
@@ -98,6 +105,9 @@ public static class DependencyInjection
         services.AddRateQuotaRestorerJobs(
             schedulerId: "InfrastructureSchedulerId",
             schedulerName: "InfrastructureScheduler");
+
+        // Add file processor
+        AddFileStorageContext(services, configuration);
 
         // Add data detectors
         services.AddSingleton(PhoneNumberUtil.GetInstance());
@@ -134,7 +144,6 @@ public static class DependencyInjection
         if (servicesRegistrationOptions.RegisterRealServices)
         {
             logger.LogInformation("Real analysis services registered.");
-            AddDopplerServices(services, configuration);
             services.AddIpqsReputationEvaluators(configuration);
         }
 
@@ -161,9 +170,25 @@ public static class DependencyInjection
             .Get<ServiceSecretOptions>();
         ArgumentNullException.ThrowIfNull(serviceSecretOptions);
 
-        services.AddDopplerApiKeyProvider(dopplerOptions, options =>
+        services.AddDopplerSecretsProvider(dopplerOptions, options =>
         {
             options.ApiKeySecretNames = [serviceSecretOptions.IpqsApiKeySecretName];
+            options.GcsCredentialSecretName = serviceSecretOptions.GcsCredentialSecretName;
         });
+    }
+
+    private static void AddFileStorageContext(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var optionsSection = configuration.GetSection(FileStorageContextOptions.SectionName);
+
+        services.AddOptions<FileStorageContextOptions>()
+            .Bind(optionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddPipePool();
+        services.AddScoped<IFileStorageContext, FileStorageContext>();
     }
 }

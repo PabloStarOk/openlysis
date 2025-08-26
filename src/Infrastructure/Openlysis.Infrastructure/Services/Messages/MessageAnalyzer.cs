@@ -4,8 +4,8 @@ using ErrorOr;
 
 using Microsoft.Extensions.Logging;
 
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.EmailAddresses.Services;
-using Openlysis.Application.Files.Contracts.Models;
 using Openlysis.Application.Files.Services;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.Phones.Services;
@@ -63,7 +63,8 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         GlobalId userId,
         bool isPrivate,
         bool reanalyze,
-        FileData[] files,
+        ProcessedFile[] files,
+        Dictionary<ProcessedFile, string> filePasswords,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(files);
@@ -71,11 +72,13 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         List<FileMultiAnalysis> fileMultiAnalyses = [];
         foreach (var file in files)
         {
+            filePasswords.TryGetValue(file, out string? password);
             ErrorOr<FileMultiAnalysis> result = await _fileAnalysisService.AnalyzeAsync(
                 userId,
+                file,
+                password ?? string.Empty,
                 isPrivate,
                 reanalyze,
-                file,
                 cancellationToken);
 
             if (result.IsError)
@@ -86,9 +89,9 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                     + "\n\tFile Content Type: {FileContentType}"
                     + "\n\tFile Size: {FileSize}"
                     + "\n\tErrors: {Errors}",
-                    file.Name,
-                    file.ContentType,
-                    file.Stream.Length,
+                    file.Metadata.Name,
+                    file.Metadata.ContentType,
+                    file.Metadata.Size,
                     result.Errors);
                 continue;
             }

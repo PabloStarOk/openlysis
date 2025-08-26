@@ -2,6 +2,7 @@ using MassTransit;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 using Openlysis.Infrastructure.Shared.Communication;
 using Openlysis.MultiAnalyzer.Communication.Consumers.Files;
@@ -20,11 +21,13 @@ internal static class DependencyInjection
     /// </summary>
     /// <param name="services">The service collection to add consumers to.</param>
     /// <param name="configuration">The application configuration.</param>
+    /// <param name="environment">The host environment.</param>
     internal static void AddCommunicationConsumers(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
-        services.AddCommunicationInfrastructure(configuration);
+        services.AddCommunicationInfrastructure(configuration, environment);
         services.AddMassTransit(
             x =>
             {

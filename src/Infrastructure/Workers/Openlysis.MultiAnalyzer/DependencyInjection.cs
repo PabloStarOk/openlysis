@@ -4,6 +4,7 @@ using Doppler.NET.Configuration;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Openlysis.Analyzers.Filescan;
@@ -35,12 +36,15 @@ internal static class DependencyInjection
     /// </summary>
     /// <param name="services">The service collection to register services into.</param>
     /// <param name="configuration">The application configuration instance.</param>
+    /// <param name="environment">The host environment instance.</param>
     internal static void AddWorkerServices(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         services.AddInfrastructure(configuration);
-        services.AddCommunicationConsumers(configuration);
+        services.AddCommunicationConsumers(configuration, environment);
+        AddDopplerServices(services, configuration);
         AddAnalysisServices(services, configuration);
         services.AddHostedService<AnalysisWorker>();
     }
@@ -73,7 +77,6 @@ internal static class DependencyInjection
         if (servicesRegistrationOptions.RegisterRealServices)
         {
             logger.LogInformation("Real analysis services registered.");
-            AddDopplerServices(services, configuration);
             services.AddFilescanIoAnalyzers(apiKeyOptions.FilescanApiKeySecretName, configuration);
             services.AddUrlQueryAnalyzer(apiKeyOptions.UrlQueryApiKeySecretName, configuration);
             services.AddHybridAnalyzer(apiKeyOptions.HybridAnalysisApiKeySecretName, configuration);
@@ -98,20 +101,21 @@ internal static class DependencyInjection
             .Get<DopplerClientOptions>();
         ArgumentNullException.ThrowIfNull(dopplerOptions);
 
-        var apiKeyOptions = configuration
+        var serviceSecretOptions = configuration
             .GetRequiredSection(ServiceSecretOptions.SectionName)
             .Get<ServiceSecretOptions>();
-        ArgumentNullException.ThrowIfNull(apiKeyOptions);
+        ArgumentNullException.ThrowIfNull(serviceSecretOptions);
 
-        services.AddDopplerApiKeyProvider(dopplerOptions, options =>
+        services.AddDopplerSecretsProvider(dopplerOptions, options =>
         {
             options.ApiKeySecretNames =
             [
-                apiKeyOptions.FilescanApiKeySecretName,
-                apiKeyOptions.UrlQueryApiKeySecretName,
-                apiKeyOptions.HybridAnalysisApiKeySecretName,
-                apiKeyOptions.VirusTotalApiKeySecretName,
+                serviceSecretOptions.FilescanApiKeySecretName,
+                serviceSecretOptions.UrlQueryApiKeySecretName,
+                serviceSecretOptions.HybridAnalysisApiKeySecretName,
+                serviceSecretOptions.VirusTotalApiKeySecretName,
             ];
+            options.GcsCredentialSecretName = serviceSecretOptions.GcsCredentialSecretName;
         });
     }
 }

@@ -8,7 +8,7 @@ internal sealed record ServiceSecretOptions
     /// <summary>
     /// The configuration section name for API keys.
     /// </summary>
-    public const string SectionName = "ApiKeys";
+    public const string SectionName = "Secrets";
 
     /// <summary>
     /// Gets or sets the secret name for the Filescan API key.
@@ -29,4 +29,9 @@ internal sealed record ServiceSecretOptions
     /// Gets or sets the secret name for the VirusTotal API key.
     /// </summary>
     public string VirusTotalApiKeySecretName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the secret name for the Google Cloud Storage (GCS) credentials.
+    /// </summary>
+    public string GcsCredentialSecretName { get; set; }
 }

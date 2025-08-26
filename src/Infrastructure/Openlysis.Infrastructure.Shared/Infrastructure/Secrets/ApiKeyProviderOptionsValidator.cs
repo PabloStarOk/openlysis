@@ -3,12 +3,12 @@ using Microsoft.Extensions.Options;
 namespace Openlysis.Infrastructure.Shared.Infrastructure.Secrets;
 
 /// <summary>
-/// Validates <see cref="DopplerApiKeyProviderOptions"/> to ensure all required properties are set and valid.
+/// Validates <see cref="DopplerSecretsProviderOptions"/> to ensure all required properties are set and valid.
 /// </summary>
-internal sealed class ApiKeyProviderOptionsValidator : IValidateOptions<DopplerApiKeyProviderOptions>
+internal sealed class ApiKeyProviderOptionsValidator : IValidateOptions<DopplerSecretsProviderOptions>
 {
     /// <inheritdoc/>
-    public ValidateOptionsResult Validate(string? name, DopplerApiKeyProviderOptions options)
+    public ValidateOptionsResult Validate(string? name, DopplerSecretsProviderOptions options)
     {
         var errors = new List<string>();
 

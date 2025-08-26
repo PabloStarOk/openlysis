@@ -1,7 +1,7 @@
 using ErrorOr;
 
 using Openlysis.Application.Common.Enums;
-using Openlysis.Application.Files.Contracts.Models;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Messages;
@@ -26,6 +26,7 @@ public interface IMessageAnalysisService
     /// <param name="isPrivate">Indicates whether the message analysis is private to the requesting user.</param>
     /// <param name="message">The message to analyze.</param>
     /// <param name="files">An optional array of files associated with the message for analysis.</param>
+    /// <param name="filePasswords">A dictionary mapping each processed file to its password, if required for analysis.</param>
     /// <param name="reanalyze">Specifies whether to reanalyze the message even if there is an existing analysis available to retrieve.</param>
     /// <param name="requestCountryCode">The country code of the request origin, if provided.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests during the operation.</param>
@@ -34,7 +35,8 @@ public interface IMessageAnalysisService
         GlobalId userId,
         bool isPrivate,
         Message message,
-        FileData[]? files,
+        ProcessedFile[] files,
+        Dictionary<ProcessedFile, string> filePasswords,
         bool reanalyze,
         string? requestCountryCode,
         CancellationToken cancellationToken = default);

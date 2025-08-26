@@ -38,13 +38,13 @@ internal class FileRequestFactory : IRequestFactory
     /// <inheritdoc/>
     public VirusTotalAnalysisRequest Create()
     {
-        long fileSize = _fileData.Length;
+        long fileSize = _request.FileSize;
         if (fileSize > Files.SmallFilesMaxSizeInBytes && _largeFileUploadUrl is null)
         {
             throw new InvalidOperationException("Cannot process files larger than 32MB without a valid large file upload URL.");
         }
 
-        string endpointUrl = _fileData.Length <= Files.SmallFilesMaxSizeInBytes
+        string endpointUrl = fileSize <= Files.SmallFilesMaxSizeInBytes
             || string.IsNullOrWhiteSpace(_largeFileUploadUrl)
                 ? Addresses.SmallFilesEndpoint
                 : _largeFileUploadUrl;

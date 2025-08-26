@@ -1,3 +1,4 @@
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
 
 namespace Openlysis.Infrastructure.Shared.Communication.Services.Files;
@@ -22,11 +23,19 @@ internal class LocalFileStorageProvider : IFileStorageProvider
     /// <inheritdoc/>
     public async Task<string> UploadAsync(Stream fileData, CancellationToken cancellationToken = default)
     {
-        var fileId = Guid.NewGuid();
-        await using var fileStream = CreateFileStream(fileId.ToString(), FileAccess.Write, FileMode.CreateNew);
-        fileData.Position = 0;
-        await fileData.CopyToAsync(fileStream, cancellationToken);
-        return fileId.ToString();
+        var fileId = GlobalId.CreateUnique().ToString();
+        await using var fileStream = CreateFileStream(fileId, FileAccess.Write, FileMode.CreateNew);
+
+        try
+        {
+            await fileData.CopyToAsync(fileStream, cancellationToken);
+            return fileId;
+        }
+        catch
+        {
+            await DeleteAsync(fileId, CancellationToken.None);
+            throw;
+        }
     }
 
     /// <inheritdoc/>

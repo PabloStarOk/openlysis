@@ -31,7 +31,6 @@ internal class HashService : IHashService
         using var sha256 = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         using var sha512 = IncrementalHash.CreateHash(HashAlgorithmName.SHA512);
 
-        data.Position = 0;
         using IMemoryOwner<byte> memoryOwner = _memoryPool.Rent(BufferSize);
         var buffer = memoryOwner.Memory;
 
@@ -43,8 +42,6 @@ internal class HashService : IHashService
             sha256.AppendData(buffer.Span[..bytesRead]);
             sha512.AppendData(buffer.Span[..bytesRead]);
         }
-
-        data.Position = 0;
 
         string hexMd5 = Convert.ToHexString(md5.GetHashAndReset());
         string hexSha1 = Convert.ToHexString(sha1.GetHashAndReset());

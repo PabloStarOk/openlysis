@@ -2,9 +2,11 @@ using FastEndpoints;
 
 using FluentValidation;
 
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
 
 using Openlysis.API.Configuration.Options;
+using Openlysis.Application.Common.Models;
 
 namespace Openlysis.API.Endpoints.Messages.Analyze;
 
@@ -17,12 +19,14 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeMessageRequestValidator"/> class.
     /// </summary>
-    /// <param name="fileUploadOptions">
+    /// <param name="messageAnalysisOptions">
     /// An instance of <see cref="IOptionsMonitor{TOptions}"/> for monitoring changes to
-    /// <see cref="FileUploadOptions"/> configuration.
+    /// <see cref="MessageAnalysisOptions"/> configuration.
     /// </param>
+    /// <param name="formOptions">An instance of <see cref="IOptions{FormOptions}"/> for accessing form configuration options.</param>
     public AnalyzeMessageRequestValidator(
-        IOptionsMonitor<FileUploadOptions> fileUploadOptions)
+        IOptions<MessageAnalysisOptions> messageAnalysisOptions,
+        IOptions<FormOptions> formOptions)
     {
         RuleFor(x => x.MessageType)
             .NotNull()
@@ -45,8 +49,10 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
             .WithMessage("All attached files must have unique names.")
             .Must(NotAttachedFilesZeroWithLength)
             .WithMessage("All files must have length at least higher than zero.")
-            .Must(a => AttachedFilesNotExceedLimit(a, fileUploadOptions))
-            .WithMessage($"The number of attached files must not exceed the limit of {fileUploadOptions.CurrentValue.MaxFileUploadsLimit}.");
+            .Must(a => AttachedFilesNotExceedCountLimit(a, messageAnalysisOptions.Value))
+            .WithMessage($"The number of attached files must not exceed the limit of {messageAnalysisOptions.Value.MaxAttachedFiles}.")
+            .Must(a => AttachedFilesNotExceedSizeLimit(a, formOptions.Value))
+            .WithMessage($"Each attached file must not exceed the maximum allowed size of {formOptions.Value.MultipartBodyLengthLimit} bytes.");
 
         RuleFor(x => x.AttachedFilesPasswords)
             .Must(NotEmptyPasswords)
@@ -63,16 +69,9 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
     /// <returns>
     /// True if all files in the collection have a length greater than zero or if the collection is null/empty; otherwise, false.
     /// </returns>
-    private static bool NotAttachedFilesZeroWithLength(
-        IFormFileCollection? attachedFiles)
+    private static bool NotAttachedFilesZeroWithLength(ProcessedFile[] attachedFiles)
     {
-        if (attachedFiles is null)
-        {
-            return true;
-        }
-
-        return attachedFiles.Count is 0
-            || attachedFiles.All(file => file.Length > 0);
+        return attachedFiles.All(file => file.Metadata.Size > 0);
     }
 
     /// <summary>
@@ -80,29 +79,46 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
     /// in the file upload options.
     /// </summary>
     /// <param name="attachedFiles">The collection of attached files to validate.</param>
-    /// <param name="fileUploadOptions">
+    /// <param name="messageAnalysisOptions">
     /// An instance of <see cref="IOptionsMonitor{TOptions}"/> for monitoring changes to
-    /// <see cref="FileUploadOptions"/> configuration.
+    /// <see cref="MessageAnalysisOptions"/> configuration.
     /// </param>
     /// <returns>
     /// True if the number of attached files is less than or equal to the maximum limit; otherwise, false.
     /// </returns>
-    private static bool AttachedFilesNotExceedLimit(
-        IFormFileCollection? attachedFiles,
-        IOptionsMonitor<FileUploadOptions> fileUploadOptions)
+    private static bool AttachedFilesNotExceedCountLimit(
+        ProcessedFile[] attachedFiles,
+        MessageAnalysisOptions messageAnalysisOptions)
     {
-        return attachedFiles is null || attachedFiles.Count
-            <= fileUploadOptions.CurrentValue.MaxFileUploadsLimit;
+        return attachedFiles.Length <= messageAnalysisOptions.MaxAttachedFiles;
+    }
+
+    /// <summary>
+    /// Validates that the size of each attached file does not exceed the multipart body length limit
+    /// specified in the provided <see cref="FormOptions"/>.
+    /// </summary>
+    /// <param name="attachedFiles">The collection of attached files to validate.</param>
+    /// <param name="formOptions">The form options containing the multipart body length limit.</param>
+    /// <returns>
+    /// True if all attached files are within the size limit; otherwise, false.
+    /// </returns>
+    private static bool AttachedFilesNotExceedSizeLimit(
+        ProcessedFile[] attachedFiles,
+        FormOptions formOptions)
+    {
+        return attachedFiles.All(f => f.Metadata.Size <= formOptions.MultipartBodyLengthLimit);
     }
 
     /// <summary>
     /// Checks if all attached files have unique names.
     /// Returns true if the collection is null or all file names are unique; otherwise, false.
     /// </summary>
-    private static bool AttachedFilesWithUniqueNames(IFormFileCollection? attachedFiles)
+    private static bool AttachedFilesWithUniqueNames(ProcessedFile[] attachedFiles)
     {
-        return attachedFiles is null ||
-            attachedFiles.Select(f => f.FileName).Distinct().Count() == attachedFiles.Count;
+        return attachedFiles
+            .Select(f => f.Metadata.Name)
+            .Distinct()
+            .Count() == attachedFiles.Length;
     }
 
     /// <summary>
@@ -113,11 +129,9 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
     /// <returns>
     /// True if all passwords are non-empty or if the dictionary is null; otherwise, false.
     /// </returns>
-    private static bool NotEmptyPasswords(
-        Dictionary<string, string>? passwords)
+    private static bool NotEmptyPasswords(Dictionary<string, string> passwords)
     {
-        return passwords is null
-            || passwords.Values.All(p => !string.IsNullOrEmpty(p));
+        return passwords.Values.All(p => !string.IsNullOrEmpty(p));
     }
 
     /// <summary>
@@ -132,19 +146,19 @@ public sealed class AnalyzeMessageRequestValidator : Validator<AnalyzeMessageReq
     /// </returns>
     private static bool MatchAttachedFilesPasswords(
         AnalyzeMessageRequest request,
-        Dictionary<string, string>? passwords)
+        Dictionary<string, string> passwords)
     {
-        if (request.AttachedFiles is null || passwords is null)
+        if (request.AttachedFiles.Length is 0 || passwords.Count is 0)
         {
             return true;
         }
 
-        IFormFile[] distinctAttachedFiles = request.AttachedFiles
-            .DistinctBy(r => r.FileName)
+        ProcessedFile[] distinctAttachedFiles = request.AttachedFiles
+            .DistinctBy(r => r.Metadata.Name)
             .ToArray();
 
         return passwords.Keys
             .All(k => distinctAttachedFiles
-                .SingleOrDefault(f => f.FileName == k) is not null);
+                .SingleOrDefault(f => f.Metadata.Name == k) is not null);
     }
 }

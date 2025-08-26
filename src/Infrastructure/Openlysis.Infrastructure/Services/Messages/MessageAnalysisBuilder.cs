@@ -1,10 +1,10 @@
-using System.Collections.Concurrent;
 using System.Net.Mail;
 using System.Text;
 
 using Microsoft.IO;
 
 using Openlysis.Application.Common.Abstractions.Services;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.Messages.Contracts.Requests;
 using Openlysis.Domain.Common.Entities;
@@ -69,12 +69,12 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <inheritdoc/>
     public IMessageAnalysisBuilder WithMessageInformation(
         Message message,
-        Stream[] filesData)
+        ProcessedFile[] files)
     {
         _buildState = _buildState with
         {
             Message = message,
-            FilesData = filesData
+            Files = files
         };
         return this;
     }
@@ -142,7 +142,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         if (_buildState.UserId is null
             || _buildState.IsPrivate is null
             || _buildState.Message is null
-            || _buildState.FilesData is null
+            || _buildState.Files is null
             || _buildState.FileResults is null
             || _buildState.UrlResults is null
             || _buildState.EmailResults is null
@@ -172,7 +172,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         CancellationToken cancellationToken = default)
     {
         if (_buildState.Message is null
-            || _buildState.FilesData is null)
+            || _buildState.Files is null)
         {
             throw new InvalidOperationException("Message information and associated files must be set before generating the hash of the message.");
         }
@@ -186,7 +186,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
             _buildState.Message,
             cancellationToken);
 
-        if (_buildState.FilesData.Length is 0)
+        if (_buildState.Files.Length is 0)
         {
             _buildState = _buildState with
             {
@@ -195,9 +195,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
             return messageHashValues;
         }
 
-        HashValues[] filesHashValues = await HashFilesAsync(
-            _buildState.FilesData,
-            cancellationToken);
+        HashValues[] filesHashValues = _buildState.Files.Select(f => f.HashValues).ToArray();
 
         string compositeHash = CreateCompositeHash(
             messageHashValues,
@@ -220,7 +218,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
     /// <param name="UserId">The ID of the user associated with the message analysis.</param>
     /// <param name="IsPrivate">Indicates whether the message is private.</param>
     /// <param name="Message">The message being analyzed.</param>
-    /// <param name="FilesData">The data streams of the files attached to the message.</param>
+    /// <param name="Files">The data streams of the files attached to the message.</param>
     /// <param name="HashValues">The hash values of the message and associated files.</param>
     /// <param name="FileResults">The assessment results for the attached files.</param>
     /// <param name="UrlResults">The assessment results for the URLs in the message.</param>
@@ -234,7 +232,7 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         GlobalId? UserId = null,
         bool? IsPrivate = null,
         Message? Message = null,
-        Stream[]? FilesData = null,
+        ProcessedFile[]? Files = null,
         HashValues? HashValues = null,
         DataAssessmentResult<string>[]? FileResults = null,
         DataAssessmentResult<Uri>[]? UrlResults = null,
@@ -370,35 +368,6 @@ internal sealed class MessageAnalysisBuilder : IMessageAnalysisBuilder
         return await HashStringAsync(
             messageMetadata,
             cancellationToken);
-    }
-
-    /// <summary>
-    /// Computes the SHA-256 hash values for the provided file data streams.
-    /// </summary>
-    /// <param name="filesData">An array of streams representing the file data to be hashed.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>
-    /// A task that represents the asynchronous operation, containing an array of <see cref="HashValues"/>
-    /// with the computed hash values for each file.
-    /// </returns>
-    private async Task<HashValues[]> HashFilesAsync(
-        Stream[] filesData,
-        CancellationToken cancellationToken = default)
-    {
-        ConcurrentBag<HashValues> filesHashValues = [];
-        await Parallel.ForEachAsync(
-            filesData,
-            cancellationToken,
-            async (data, ct) =>
-            {
-                HashValues hashValues = await _hashService.HashDataAsync(
-                    data,
-                    ct);
-
-                filesHashValues.Add(hashValues);
-            });
-
-        return filesHashValues.ToArray();
     }
 
     /// <summary>

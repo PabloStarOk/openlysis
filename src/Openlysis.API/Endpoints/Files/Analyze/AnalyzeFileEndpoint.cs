@@ -3,9 +3,8 @@ using ErrorOr;
 using FastEndpoints;
 
 using Openlysis.API.Endpoints.Common.Responses;
-using Openlysis.Application.Files.Contracts.Models;
+using Openlysis.API.Middlewares.Files;
 using Openlysis.Application.Files.Services;
-using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
@@ -22,8 +21,8 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileEndpoint"/> class.
     /// </summary>
-    /// <param name="logger">The logger instance for debugging endpoint operations.</param>
-    /// <param name="multiAnalysisService">The service used for analyzing files.</param>
+    /// <param name="logger">Logger for tracing and debugging.</param>
+    /// <param name="multiAnalysisService">Service to perform multi-file analysis.</param>
     public AnalyzeFileEndpoint(
         ILogger<AnalyzeFileEndpoint> logger,
         IFileMultiAnalysisService multiAnalysisService)
@@ -38,8 +37,9 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
     public override void Configure()
     {
         Post(string.Empty);
+        PostProcessor<FileStorageCleanupPostProcessor<AnalyzeFileRequest, AnalysisIdentifiers>>();
         Group<FileAnalysesGroup>();
-        AllowFileUploads();
+        AllowFileUploads(dontAutoBindFormData: true);
         Version(1);
         Description(
             b =>
@@ -57,38 +57,26 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
             {
                 s.Summary = "Uploads a file.";
                 s.Description = "Uploads a file to be analyzed.";
-                s.RequestParam(r => r.File, "File to be analyzed.");
-                s.RequestParam(r => r.Password, "Password of the file if it is protected (Not recommended to upload confidential files) (Optional).");
-                s.RequestParam(r => r.IsPrivate, "If the file analysis is private. True is the default. (Optional)");
-                s.RequestParam(r => r.Reanalyze, "If the file must analyzed again, instead of returning the last analysis. False is the default. (Optional).");
+                s.RequestParam(x => x.File, "File to be analyzed. If there are multiple files, only the first one will be accepted. Default content type is `application/octet-stream.`");
+                s.RequestParam(x => x.Password, "Password of the file if it is protected `(Not recommended to upload confidential files)` `(Optional)`.");
+                s.RequestParam(x => x.IsPrivate, "If the file analysis is private. `True` is the default. `(Optional)`");
+                s.RequestParam(x => x.Reanalyze, "If the file must analyzed again, instead of returning the last analysis. `False` is the default. `(Optional)`.");
             });
     }
 
-    /// <summary>
-    /// Handles the file analysis request.
-    /// </summary>
-    /// <param name="request">The request containing the file to be analyzed.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public override async Task HandleAsync(AnalyzeFileRequest request, CancellationToken ct)
+    /// <inheritdoc/>
+    public override async Task HandleAsync(AnalyzeFileRequest req, CancellationToken ct)
     {
-        var userId = GlobalId.Parse(request.UserId);
-
 #if DEBUG
-        LogFileMetadata(request);
+        LogFileMetadata(req);
 #endif
 
-        await using var stream = request.File!.OpenReadStream();
-        var fileData = new FileData(
-            request.File.FileName,
-            request.File.ContentType,
-            request.Password,
-            stream);
         var result = await _multiAnalysisService.AnalyzeAsync(
-            userId,
-            request.IsPrivate,
-            request.Reanalyze,
-            fileData,
+            req.UserId,
+            req.File,
+            req.Password,
+            req.IsPrivate,
+            req.Reanalyze,
             ct);
 
         if (result.IsError)
@@ -139,8 +127,8 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
             + "\n\tFilename: {Filename}"
             + "\n\tContent type: {ContentType}"
             + "\n\tFile password: {Password}",
-            request.File?.FileName,
-            request.File?.ContentType,
+            request.File.Metadata.Name,
+            request.File.Metadata.ContentType,
             request.Password);
     }
 #endif

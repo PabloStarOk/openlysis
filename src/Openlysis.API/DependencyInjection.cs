@@ -6,15 +6,20 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
 using NSwag;
 
+using Openlysis.API.Binders;
 using Openlysis.API.Configuration.Options;
 using Openlysis.API.Documentation;
+using Openlysis.API.Endpoints.Files.Analyze;
+using Openlysis.API.Endpoints.Messages.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
+using Openlysis.Infrastructure.Configuration;
 
 namespace Openlysis.API;
 
@@ -48,17 +53,17 @@ public static class DependencyInjection
             .GetRequiredSection(ServerOptions.SectionName)
             .Get<ServerOptions>();
 
-        var fileUploadOptionsSection = configuration
-            .GetRequiredSection(FileUploadOptions.SectionName);
-        var fileUploadOptions = fileUploadOptionsSection
-            .Get<FileUploadOptions>();
+        var messageAnalysisOptionsSection = configuration
+            .GetRequiredSection(MessageAnalysisOptions.SectionName);
+        var fileUploadOptions = messageAnalysisOptionsSection
+            .Get<MessageAnalysisOptions>();
 
         ArgumentNullException.ThrowIfNull(serverOptions);
-        ArgumentNullException.ThrowIfNull(fileUploadOptionsSection);
+        ArgumentNullException.ThrowIfNull(messageAnalysisOptionsSection);
         ArgumentNullException.ThrowIfNull(fileUploadOptions);
 
         // Add options
-        services.Configure<FileUploadOptions>(fileUploadOptionsSection);
+        services.Configure<MessageAnalysisOptions>(messageAnalysisOptionsSection);
 
         // Server options
         services.Configure<KestrelServerOptions>(
@@ -67,13 +72,9 @@ public static class DependencyInjection
                 options.Limits.MaxRequestBodySize = serverOptions.MaxRequestBodySize;
             });
 
-        // Request options
-        services.Configure<FormOptions>(
-            options =>
-            {
-                options.MultipartBodyLengthLimit = fileUploadOptions.MaxFileSize;
-                options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
-            });
+        ConfigureFileStorageContextOptions(services);
+
+        AddMultipartRequestBinders(services, configuration);
 
         AddJwtAuthentication(services, configuration, environment);
         services.AddAuthorization();
@@ -154,5 +155,32 @@ public static class DependencyInjection
                     options.MetadataAddress = jwtBearerOptions.MetadataAddress;
                     options.TokenValidationParameters = jwtBearerOptions.TokenValidationParameters;
                 });
+    }
+
+    private static void AddMultipartRequestBinders(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var formOptionsSection = configuration.GetRequiredSection(nameof(FormOptions));
+
+        services.AddOptions<FormOptions>()
+            .Bind(formOptionsSection)
+            .ValidateOnStart();
+
+        services.AddSingleton<IRequestBinder<AnalyzeFileRequest>, MultipartRequestBinderFactory<AnalyzeFileRequest>>();
+        services.AddSingleton<IRequestBinder<AnalyzeMessageRequest>, MultipartRequestBinderFactory<AnalyzeMessageRequest>>();
+
+        services.AddScoped<MultipartRequestBinder<AnalyzeMessageRequest>, AnalyzeMessageMultipartRequestBinder>();
+        services.AddScoped<MultipartRequestBinder<AnalyzeFileRequest>, AnalyzeFileMultipartRequestBinder>();
+    }
+
+    private static void ConfigureFileStorageContextOptions(IServiceCollection services)
+    {
+        services.Configure<FileStorageContextOptions>(options =>
+        {
+            using var serviceProvider = services.BuildServiceProvider();
+            var formOptions = serviceProvider.GetRequiredService<IOptions<FormOptions>>();
+            options.MaxFileSizeBytes = formOptions.Value.MultipartBodyLengthLimit;
+        });
     }
 }

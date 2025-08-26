@@ -46,8 +46,6 @@ internal class MimeTypeDetector : IMimeTypeDetector
         string? contentTypeFromRequest,
         CancellationToken cancellationToken = default)
     {
-        ValidateSeekableStream(stream);
-
         byte[] fileHeaderBuffer = await ReadHeaderBufferAsync(
             stream,
             cancellationToken);
@@ -82,23 +80,6 @@ internal class MimeTypeDetector : IMimeTypeDetector
     }
 
     /// <summary>
-    /// Validates that the provided stream is seekable for MIME type detection operations.
-    /// </summary>
-    /// <param name="stream">The stream to validate.</param>
-    /// <exception cref="InvalidOperationException">Thrown when the stream is not seekable.</exception>
-    /// <remarks>
-    /// MIME type detection requires the ability to read from the stream and reset its position,
-    /// which is only possible with seekable streams.
-    /// </remarks>
-    private static void ValidateSeekableStream(Stream stream)
-    {
-        if (!stream.CanSeek)
-        {
-            throw new InvalidOperationException("Stream must be seekable for MIME type detection to work properly.");
-        }
-    }
-
-    /// <summary>
     /// Reads a specified number of bytes from the beginning of a stream into a buffer.
     /// </summary>
     /// <param name="stream">The stream to read data from.</param>
@@ -115,7 +96,10 @@ internal class MimeTypeDetector : IMimeTypeDetector
             cancellationToken)
             .ConfigureAwait(false);
 
-        stream.Position = 0;
+        if (stream.CanSeek)
+        {
+            stream.Position = 0;
+        }
 
         return fileHeaderBuffer;
     }
