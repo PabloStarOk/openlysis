@@ -56,6 +56,11 @@ internal sealed class FileStorageContext : IFileStorageContext
         Stream fileStream,
         CancellationToken cancellationToken = default)
     {
+        if (_processedFiles.Count > _options.Value.MaxProcessableFiles)
+        {
+            throw new InvalidDataException($"The number of attached files must not exceed the limit of {_options.Value.MaxProcessableFiles}.");
+        }
+
         var hashPipe = _pipePool.Get();
         var uploadPipe = _pipePool.Get();
 

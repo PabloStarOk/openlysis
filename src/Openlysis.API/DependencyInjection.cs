@@ -6,7 +6,6 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Options;
 
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -64,7 +63,7 @@ public static class DependencyInjection
 
         // Server options
         ConfigureKestrelServerOptions(services, configuration);
-        ConfigureFileStorageContextOptions(services);
+        ConfigureFileStorageContextOptions(services, configuration);
         AddMultipartRequestBinders(services, configuration);
         AddJwtAuthentication(services, configuration, environment);
         services.AddAuthorization();
@@ -164,28 +163,22 @@ public static class DependencyInjection
         services.AddScoped<MultipartRequestBinder<AnalyzeFileRequest>, AnalyzeFileMultipartRequestBinder>();
     }
 
-    private static void ConfigureFileStorageContextOptions(IServiceCollection services)
+    private static void ConfigureFileStorageContextOptions(IServiceCollection services, IConfiguration configuration)
     {
+        MessageAnalysisOptions messageAnalysisOptions = GetMessageAnalysisOptions(configuration);
+        FormOptions formOptions = GetRequiredFormOptions(configuration);
+
         services.Configure<FileStorageContextOptions>(options =>
         {
-            using var serviceProvider = services.BuildServiceProvider();
-            var formOptions = serviceProvider.GetRequiredService<IOptions<FormOptions>>();
-            options.MaxFileSizeBytes = formOptions.Value.MultipartBodyLengthLimit;
+            options.MaxFileSizeBytes = formOptions.MultipartBodyLengthLimit;
+            options.MaxProcessableFiles = messageAnalysisOptions.MaxAttachedFiles;
         });
     }
 
     private static void ConfigureKestrelServerOptions(IServiceCollection services, IConfiguration configuration)
     {
-        var messageAnalysisOptions = configuration
-            .GetRequiredSection(MessageAnalysisOptions.SectionName)
-            .Get<MessageAnalysisOptions>();
-
-        var formOptions = configuration
-            .GetRequiredSection(nameof(FormOptions))
-            .Get<FormOptions>();
-
-        ArgumentNullException.ThrowIfNull(messageAnalysisOptions);
-        ArgumentNullException.ThrowIfNull(formOptions);
+        MessageAnalysisOptions messageAnalysisOptions = GetMessageAnalysisOptions(configuration);
+        FormOptions formOptions = GetRequiredFormOptions(configuration);
 
         const long overheadBuffer = AdditionalMultipartRequestSize * MiB;
         long maxRequestBodySize = messageAnalysisOptions.MaxAttachedFiles * formOptions.MultipartBodyLengthLimit;
@@ -194,5 +187,23 @@ public static class DependencyInjection
             {
                 options.Limits.MaxRequestBodySize = maxRequestBodySize + overheadBuffer;
             });
+    }
+
+    private static MessageAnalysisOptions GetMessageAnalysisOptions(IConfiguration configuration)
+    {
+        var messageAnalysisOptions = configuration
+            .GetRequiredSection(MessageAnalysisOptions.SectionName)
+            .Get<MessageAnalysisOptions>();
+        ArgumentNullException.ThrowIfNull(messageAnalysisOptions);
+        return messageAnalysisOptions;
+    }
+
+    private static FormOptions GetRequiredFormOptions(IConfiguration configuration)
+    {
+        var formOptions = configuration
+            .GetRequiredSection(nameof(FormOptions))
+            .Get<FormOptions>();
+        ArgumentNullException.ThrowIfNull(formOptions);
+        return formOptions;
     }
 }

@@ -28,4 +28,8 @@ public sealed record FileStorageContextOptions
     /// </summary>
     required public long MaxFileSizeBytes { get; set; }
 
+    /// <summary>
+    /// Gets or sets the maximum number of files that can be processed by the context.
+    /// </summary>
+    required public int MaxProcessableFiles { get; set; }
 }
