@@ -13,7 +13,7 @@ var shutdownTokenSource = new CancellationTokenSource();
 builder.ConfigureServices((context, services) =>
 {
     services.AddSingleton(shutdownTokenSource);
-    services.AddWorkerServices(context.Configuration);
+    services.AddWorkerServices(context.Configuration, context.HostingEnvironment);
 });
 
 IHost host = builder.Build();

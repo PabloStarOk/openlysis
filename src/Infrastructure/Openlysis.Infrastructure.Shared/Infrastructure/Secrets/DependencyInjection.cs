@@ -4,6 +4,8 @@ using Doppler.NET.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+using Openlysis.Infrastructure.Shared.Communication.Services.Files;
+
 namespace Openlysis.Infrastructure.Shared.Infrastructure.Secrets;
 
 /// <summary>
@@ -17,17 +19,17 @@ public static class DependencyInjection
     /// <param name="services">The service collection to add the provider to.</param>
     /// <param name="dopplerOptions">Options for configuring the Doppler client.</param>
     /// <param name="configure">Delegate to configure DopplerApiKeyProviderOptions.</param>
-    public static void AddDopplerApiKeyProvider(
+    public static void AddDopplerSecretsProvider(
         this IServiceCollection services,
         DopplerClientOptions dopplerOptions,
-        Action<DopplerApiKeyProviderOptions> configure)
+        Action<DopplerSecretsProviderOptions> configure)
     {
         services.AddSingleton<
-            IValidateOptions<DopplerApiKeyProviderOptions>,
+            IValidateOptions<DopplerSecretsProviderOptions>,
             ApiKeyProviderOptionsValidator>();
 
         services
-            .AddOptions<DopplerApiKeyProviderOptions>()
+            .AddOptions<DopplerSecretsProviderOptions>()
             .Configure(configure)
             .ValidateOnStart();
 
@@ -37,8 +39,9 @@ public static class DependencyInjection
             options.ProjectName = dopplerOptions.ProjectName;
             options.ConfigName = dopplerOptions.ConfigName;
         });
-        services.AddSingleton<DopplerApiKeyProvider>();
-        services.AddHostedService(sp => sp.GetRequiredService<DopplerApiKeyProvider>());
-        services.AddSingleton<IApiKeyProvider>(sp => sp.GetRequiredService<DopplerApiKeyProvider>());
+        services.AddSingleton<DopplerSecretsProvider>();
+        services.AddHostedService(sp => sp.GetRequiredService<DopplerSecretsProvider>());
+        services.AddSingleton<IApiKeyProvider>(sp => sp.GetRequiredService<DopplerSecretsProvider>());
+        services.AddSingleton<IGoogleCloudCredentialProvider>(sp => sp.GetRequiredService<DopplerSecretsProvider>());
     }
 }

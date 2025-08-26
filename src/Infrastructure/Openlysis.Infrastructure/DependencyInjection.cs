@@ -5,6 +5,7 @@ using Doppler.NET.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
 
@@ -48,9 +49,11 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">Collection of services.</param>
     /// <param name="configuration">Configuration of the application.</param>
+    /// <param name="environment">Host environment information.</param>
     public static void AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         // Get options
         string? connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -86,8 +89,10 @@ public static class DependencyInjection
         services.AddScoped<IFileMultiAnalyzer, FileMultiAnalyzer>();
         services.AddScoped<IUrlMultiAnalyzer, UrlMultiAnalyzer>();
 
+        AddDopplerServices(services, configuration);
+
         // Add message senders
-        services.AddUpdateAnalysisConsumers(configuration);
+        services.AddUpdateAnalysisConsumers(configuration, environment);
         using (var sp = services.BuildServiceProvider())
         {
             var logger = sp
@@ -139,7 +144,6 @@ public static class DependencyInjection
         if (servicesRegistrationOptions.RegisterRealServices)
         {
             logger.LogInformation("Real analysis services registered.");
-            AddDopplerServices(services, configuration);
             services.AddIpqsReputationEvaluators(configuration);
         }
 
@@ -166,9 +170,10 @@ public static class DependencyInjection
             .Get<ServiceSecretOptions>();
         ArgumentNullException.ThrowIfNull(serviceSecretOptions);
 
-        services.AddDopplerApiKeyProvider(dopplerOptions, options =>
+        services.AddDopplerSecretsProvider(dopplerOptions, options =>
         {
             options.ApiKeySecretNames = [serviceSecretOptions.IpqsApiKeySecretName];
+            options.GcsCredentialSecretName = serviceSecretOptions.GcsCredentialSecretName;
         });
     }
 

@@ -92,6 +92,11 @@ public sealed class FileStreamFactory : IStreamFactory, IDisposable, IAsyncDispo
                 return false;
             }
 
+            if (!cachedStream.CanSeek)
+            {
+                return false;
+            }
+
             cachedStream.Position = 0;
             return true;
         }

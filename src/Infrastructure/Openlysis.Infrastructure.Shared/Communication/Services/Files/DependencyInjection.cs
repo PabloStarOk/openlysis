@@ -1,8 +1,11 @@
+using Google.Cloud.Storage.V1;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
+using Openlysis.Infrastructure.Shared.Infrastructure.PipePool;
 
 namespace Openlysis.Infrastructure.Shared.Communication.Services.Files;
 
@@ -49,6 +52,42 @@ internal static class DependencyInjection
 
         services.AddSingleton(dirInfo);
         services.AddScoped<IFileStorageProvider, LocalFileStorageProvider>();
+    }
+
+    /// <summary>
+    /// Registers the Google Cloud Storage provider and its dependencies into the service collection.
+    /// </summary>
+    /// <param name="services">The service collection to which the dependencies will be added.</param>
+    /// <param name="configuration">The configuration instance used to configure the provider.</param>
+    internal static void AddGoogleCloudStorageProvider(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var optionsSection = configuration.GetRequiredSection(GoogleCloudStorageOptions.SectionName);
+
+        services.AddSingleton<
+            IValidateOptions<GoogleCloudStorageOptions>,
+            GoogleCloudStorageOptionsValidator>();
+
+        services.AddOptions<GoogleCloudStorageOptions>()
+            .Bind(optionsSection)
+            .ValidateOnStart();
+
+        services.AddPipePool();
+        services.AddSingleton<Lazy<StorageClient>>(sp =>
+        {
+            return new Lazy<StorageClient>(() =>
+            {
+                var credentialProvider = sp.GetRequiredService<IGoogleCloudCredentialProvider>();
+                var builder = new StorageClientBuilder
+                {
+                    Credential = credentialProvider.Credential,
+                };
+                return builder.Build();
+            });
+        });
+
+        services.AddScoped<IFileStorageProvider, GoogleCloudStorageProvider>();
     }
 
     /// <summary>

@@ -8,10 +8,15 @@ internal sealed record ServiceSecretOptions
     /// <summary>
     /// The configuration section name for API keys.
     /// </summary>
-    public const string SectionName = "ApiKeys";
+    public const string SectionName = "Secrets";
 
     /// <summary>
     /// Gets or sets the secret name used to retrieve the IPQS API key.
     /// </summary>
     required public string IpqsApiKeySecretName { get; set; }
+
+    /// <summary>
+    /// Gets or sets the secret name used to retrieve the GCS credentials.
+    /// </summary>
+    required public string GcsCredentialSecretName { get; set; }
 }

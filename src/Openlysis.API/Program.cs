@@ -6,7 +6,7 @@ using Openlysis.Infrastructure.Shared.Infrastructure.ConfigLoader;
 var builder = WebApplication.CreateSlimBuilder();
 
 builder.Configuration.UseConfigLoader();
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 builder.Services.AddApi(builder.Configuration, builder.Environment);
 

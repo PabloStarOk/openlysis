@@ -2,6 +2,7 @@ using MassTransit;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
@@ -24,9 +25,11 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">The IServiceCollection to add services to.</param>
     /// <param name="configuration">The IConfiguration to use for configuring services.</param>
+    /// <param name="environment">The IHostEnvironment to determine the environment for service configuration.</param>
     public static void AddCommunicationInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         // Get options
         var brokerSettingsSection = configuration
@@ -41,7 +44,14 @@ public static class DependencyInjection
             .ValidateOnStart();
 
         // Add local file storage provider
-        services.AddLocalFileStorageProvider(configuration);
+        if (environment.IsProduction())
+        {
+            services.AddGoogleCloudStorageProvider(configuration);
+        }
+        else
+        {
+            services.AddLocalFileStorageProvider(configuration);
+        }
 
         // Endpoint uri provider
         services.AddSingleton<IEndpointUriProvider, EndpointUriProvider>();
