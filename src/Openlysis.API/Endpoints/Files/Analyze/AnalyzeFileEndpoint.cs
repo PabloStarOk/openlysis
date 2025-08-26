@@ -2,6 +2,9 @@ using ErrorOr;
 
 using FastEndpoints;
 
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
+
 using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Middlewares.Files;
 using Openlysis.Application.Files.Services;
@@ -17,18 +20,22 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
 
     private readonly ILogger<AnalyzeFileEndpoint> _logger;
     private readonly IFileMultiAnalysisService _multiAnalysisService;
+    private readonly IOptions<FormOptions> _formOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileEndpoint"/> class.
     /// </summary>
     /// <param name="logger">Logger for tracing and debugging.</param>
     /// <param name="multiAnalysisService">Service to perform multi-file analysis.</param>
+    /// <param name="formOptions">Options for form data, including file upload limits.</param>
     public AnalyzeFileEndpoint(
         ILogger<AnalyzeFileEndpoint> logger,
-        IFileMultiAnalysisService multiAnalysisService)
+        IFileMultiAnalysisService multiAnalysisService,
+        IOptions<FormOptions> formOptions)
     {
         _logger = logger;
         _multiAnalysisService = multiAnalysisService;
+        _formOptions = formOptions;
     }
 
     /// <summary>
@@ -57,7 +64,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
             {
                 s.Summary = "Uploads a file.";
                 s.Description = "Uploads a file to be analyzed.";
-                s.RequestParam(x => x.File, "File to be analyzed. If there are multiple files, only the first one will be accepted. Default content type is `application/octet-stream.`");
+                s.RequestParam(x => x.File, $"File to be analyzed. If there are multiple files, only the first one will be accepted. Default content type is `application/octet-stream.` Max file size: `{_formOptions.Value.MultipartBodyLengthLimit}` bytes.");
                 s.RequestParam(x => x.Password, "Password of the file if it is protected `(Not recommended to upload confidential files)` `(Optional)`.");
                 s.RequestParam(x => x.IsPrivate, "If the file analysis is private. `True` is the default. `(Optional)`");
                 s.RequestParam(x => x.Reanalyze, "If the file must analyzed again, instead of returning the last analysis. `False` is the default. `(Optional)`.");
