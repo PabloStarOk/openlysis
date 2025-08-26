@@ -2,6 +2,10 @@ using ErrorOr;
 
 using FastEndpoints;
 
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
+
+using Openlysis.API.Configuration.Options;
 using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.Messages.GetAnalysisById;
 using Openlysis.API.Middlewares.Files;
@@ -26,18 +30,26 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
 
     private readonly ILogger<AnalyzeMessageEndpoint> _logger;
     private readonly IMessageAnalysisService _messageAnalysisService;
+    private readonly IOptions<MessageAnalysisOptions> _messageAnalysisOptions;
+    private readonly IOptions<FormOptions> _formOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeMessageEndpoint"/> class.
     /// </summary>
     /// <param name="logger">The logger instance for debugging endpoint operations.</param>
     /// <param name="messageAnalysisService">The service responsible for providing the core functionality.</param>
+    /// <param name="messageAnalysisOptions">The options for message analysis configuration.</param>
+    /// <param name="formOptions">The options for form configuration, including file upload limits.</param>
     public AnalyzeMessageEndpoint(
         ILogger<AnalyzeMessageEndpoint> logger,
-        IMessageAnalysisService messageAnalysisService)
+        IMessageAnalysisService messageAnalysisService,
+        IOptions<MessageAnalysisOptions> messageAnalysisOptions,
+        IOptions<FormOptions> formOptions)
     {
         _logger = logger;
         _messageAnalysisService = messageAnalysisService;
+        _messageAnalysisOptions = messageAnalysisOptions;
+        _formOptions = formOptions;
     }
 
     /// <inheritdoc/>
@@ -67,7 +79,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
                 s.RequestParam(r => r.Sender, "Sender of the message.");
                 s.RequestParam(r => r.Content, "Content of the message.");
                 s.RequestParam(r => r.Subject, "Subject of the message, can be null or empty.");
-                s.RequestParam(r => r.AttachedFiles, "Files attached to the message.");
+                s.RequestParam(r => r.AttachedFiles, $"Files attached to the message. Max amount: `{_messageAnalysisOptions.Value.MaxAttachedFiles}`. Max size per file: `{_formOptions.Value.MultipartBodyLengthLimit}` bytes.");
                 s.RequestParam(r => r.AttachedFilesPasswords, "A dictionary where the key is the name of an attached file and the value is its corresponding password, if required. Should be sent as a JSON for proper binding.");
                 s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who sends the message. Default is true");
                 s.RequestParam(r => r.Reanalyze, "If the extracted data and the message should be reanalyzed even if there are existing analyses for theme. Default is false.");
