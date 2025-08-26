@@ -73,7 +73,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         foreach (var file in files)
         {
             filePasswords.TryGetValue(file, out string? password);
-            ErrorOr<FileMultiAnalysis> result = await _fileAnalysisService.AnalyzeAsync(
+            var requestResult = await _fileAnalysisService.AnalyzeAsync(
                 userId,
                 file,
                 password ?? string.Empty,
@@ -81,7 +81,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                 reanalyze,
                 cancellationToken);
 
-            if (result.IsError)
+            if (requestResult.IsError)
             {
                 _logger.LogError(
                     "File could not be analyzed due to one or more errors."
@@ -92,11 +92,11 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                     file.Metadata.Name,
                     file.Metadata.ContentType,
                     file.Metadata.Size,
-                    result.Errors);
+                    requestResult.Errors);
                 continue;
             }
 
-            fileMultiAnalyses.Add(result.Value);
+            fileMultiAnalyses.Add(requestResult.Value.Analysis);
         }
 
         return fileMultiAnalyses;

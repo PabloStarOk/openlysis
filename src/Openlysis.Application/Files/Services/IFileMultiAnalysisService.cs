@@ -22,10 +22,10 @@ public interface IFileMultiAnalysisService
     /// <param name="reanalyze">Specifies whether to reanalyze the file if it has been analyzed before.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>
-    /// A task that represents the asynchronous operation.
-    /// The task result contains an <see cref="ErrorOr{T}"/> object with the initial file multi analysis.
+    /// A task representing the asynchronous operation.
+    /// The result is an <see cref="ErrorOr{T}"/> containing the analysis request outcome.
     /// </returns>
-    public Task<ErrorOr<FileMultiAnalysis>> AnalyzeAsync(
+    public Task<ErrorOr<AnalysisRequestResult<FileMultiAnalysis>>> AnalyzeAsync(
         GlobalId userId,
         ProcessedFile processedFile,
         string filePassword,

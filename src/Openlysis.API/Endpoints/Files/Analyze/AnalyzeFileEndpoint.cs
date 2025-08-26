@@ -7,7 +7,9 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Middlewares.Files;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.Files.Services;
+using Openlysis.Domain.Files;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
@@ -54,6 +56,7 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
                 b.WithName(Name);
                 b.WithDisplayName(Name);
                 b.Accepts<AnalyzeFileRequest>(contentType: "multipart/form-data");
+                b.Produces<AnalysisIdentifiers>();
                 b.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
                 b.ProducesProblem(StatusCodes.Status400BadRequest);
                 b.ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -64,6 +67,8 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
             {
                 s.Summary = "Uploads a file.";
                 s.Description = "Uploads a file to be analyzed.";
+                s.Responses[StatusCodes.Status200OK] = "Analysis result successfully retrieved.";
+                s.Responses[StatusCodes.Status202Accepted] = "Analysis request accepted and queued for processing.";
                 s.RequestParam(x => x.File, $"File to be analyzed. If there are multiple files, only the first one will be accepted. Default content type is `application/octet-stream.` Max file size: `{_formOptions.Value.MultipartBodyLengthLimit}` bytes.");
                 s.RequestParam(x => x.Password, "Password of the file if it is protected `(Not recommended to upload confidential files)` `(Optional)`.");
                 s.RequestParam(x => x.IsPrivate, "If the file analysis is private. `True` is the default. `(Optional)`");
@@ -109,17 +114,26 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifi
             return;
         }
 
-        Response = AnalysisIdentifiers.Parse(result.Value);
+        AnalysisRequestResult<FileMultiAnalysis> requestResult = result.Value;
+        var analysisIdentifiers = AnalysisIdentifiers.Parse(requestResult.Analysis);
 
+        // Retrieved final analysis result 200.
+        if (requestResult.RequestStatus is AnalysisRequestStatus.Retrieved)
+        {
+            await SendOkAsync(analysisIdentifiers, CancellationToken.None);
+            return;
+        }
+
+        // Retrieved queued analysis 202.
         var routeValues = new Dictionary<string, string>
         {
-            { "id", Response.Id },
+            { "id", analysisIdentifiers.Id },
         };
 
         await SendResultAsync(Results.AcceptedAtRoute(
             GetAnalysisById.GetAnalysisByIdEndpoint.Name,
             routeValues,
-            Response));
+            analysisIdentifiers));
     }
 
 #if DEBUG

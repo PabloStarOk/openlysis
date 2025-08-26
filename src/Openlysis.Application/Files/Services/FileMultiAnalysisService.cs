@@ -41,7 +41,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<FileMultiAnalysis>> AnalyzeAsync(
+    public async Task<ErrorOr<AnalysisRequestResult<FileMultiAnalysis>>> AnalyzeAsync(
         GlobalId userId,
         ProcessedFile processedFile,
         string filePassword,
@@ -60,7 +60,10 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
         if (existingAnalyses.Count > 0 && !reanalyze)
         {
             await _fileStorageContext.RemoveAsync(processedFile);
-            return existingAnalyses[0];
+
+            return new AnalysisRequestResult<FileMultiAnalysis>(
+                AnalysisRequestStatus.Retrieved,
+                existingAnalyses[0]);
         }
 
         var multiAnalysis = FileMultiAnalysis.Create(
@@ -78,7 +81,9 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
             isPrivate,
             cancellationToken);
 
-        return multiAnalysis;
+        return new AnalysisRequestResult<FileMultiAnalysis>(
+            AnalysisRequestStatus.Queued,
+            multiAnalysis);
     }
 
     /// <inheritdoc/>
