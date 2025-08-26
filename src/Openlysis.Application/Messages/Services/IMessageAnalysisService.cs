@@ -31,7 +31,7 @@ public interface IMessageAnalysisService
     /// <param name="requestCountryCode">The country code of the request origin, if provided.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests during the operation.</param>
     /// <returns>A task representing the asynchronous operation, containing the result of the message analysis.</returns>
-    public Task<ErrorOr<MessageAnalysis>> AnalyzeAsync(
+    public Task<ErrorOr<AnalysisRequestResult<MessageAnalysis>>> AnalyzeAsync(
         GlobalId userId,
         bool isPrivate,
         Message message,

@@ -1,5 +1,3 @@
-using ErrorOr;
-
 using FastEndpoints;
 
 using Microsoft.AspNetCore.Http.Features;
@@ -66,6 +64,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
                 builder.WithName(Name);
                 builder.WithDisplayName(Name);
                 builder.Accepts<AnalyzeMessageRequest>("multipart/form-data");
+                builder.Produces<AnalysisIdentifiers>();
                 builder.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
                 builder.ProducesValidationProblem();
             },
@@ -75,6 +74,8 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
             {
                 s.Summary = "Analyze a message.";
                 s.Description = "Sends a message to be analyzed.";
+                s.Responses[StatusCodes.Status200OK] = "Analysis result successfully retrieved.";
+                s.Responses[StatusCodes.Status202Accepted] = "Analysis request accepted and queued for processing.";
                 s.RequestParam(r => r.MessageType, "Type of the message. Accepted values are 'SMS' or 'email'.");
                 s.RequestParam(r => r.Sender, "Sender of the message.");
                 s.RequestParam(r => r.Content, "Content of the message.");
@@ -106,7 +107,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
         LogAttachedFiles(req.AttachedFiles, filePasswords);
 #endif
 
-        ErrorOr<MessageAnalysis> analyzeResult = await _messageAnalysisService
+        var analyzeResult = await _messageAnalysisService
             .AnalyzeAsync(
             userId: req.UserId,
             isPrivate: req.IsPrivate,
@@ -130,17 +131,25 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
             return;
         }
 
-        MessageAnalysis messageAnalysis = analyzeResult.Value;
-        Response = AnalysisIdentifiers.Parse(messageAnalysis);
+        AnalysisRequestResult<MessageAnalysis> requestResult = analyzeResult.Value;
+        var analysisIdentifiers = AnalysisIdentifiers.Parse(requestResult.Analysis);
 
+        // Retrieved final analysis result 200.
+        if (requestResult.RequestStatus is AnalysisRequestStatus.Retrieved)
+        {
+            await SendOkAsync(analysisIdentifiers, CancellationToken.None);
+            return;
+        }
+
+        // Retrieved queued analysis 202.
         var routeValues = new RouteValueDictionary
             {
-                { "id", Response.Id },
+                { "id", analysisIdentifiers.Id },
             };
         IResult acceptedResult = Results.AcceptedAtRoute (
             GetAnalysisByIdEndpoint.Name,
             routeValues,
-            Response);
+            analysisIdentifiers);
         await SendResultAsync(acceptedResult);
     }
 

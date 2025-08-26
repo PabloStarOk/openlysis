@@ -55,7 +55,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<MessageAnalysis>> AnalyzeAsync(
+    public async Task<ErrorOr<AnalysisRequestResult<MessageAnalysis>>> AnalyzeAsync(
         GlobalId userId,
         bool isPrivate,
         Message message,
@@ -78,7 +78,9 @@ internal class MessageAnalysisService : IMessageAnalysisService
         if (lastExistingAnalysis is not null
             && !reanalyze)
         {
-            return lastExistingAnalysis;
+            return new AnalysisRequestResult<MessageAnalysis>(
+                AnalysisRequestStatus.Retrieved,
+                lastExistingAnalysis);
         }
 
         string sender = message.Sender;
@@ -124,7 +126,9 @@ internal class MessageAnalysisService : IMessageAnalysisService
             messageAnalysis,
             cancellationToken);
 
-        return messageAnalysis;
+        return new AnalysisRequestResult<MessageAnalysis>(
+            AnalysisRequestStatus.Queued,
+            messageAnalysis);
     }
 
     /// <inheritdoc/>
