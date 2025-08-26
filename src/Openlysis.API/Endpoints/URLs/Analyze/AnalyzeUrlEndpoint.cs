@@ -6,6 +6,7 @@ using FastEndpoints;
 
 using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.URLs.GetAnalysisById;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.URLs.Services;
 using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
@@ -53,6 +54,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalysisIdentifier
                 builder.WithName(Name);
                 builder.WithDisplayName(Name);
                 builder.Accepts<AnalyzeUrlRequest>("application/x-www-form-urlencoded");
+                builder.Produces<AnalysisIdentifiers>();
                 builder.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
                 builder.ProducesValidationProblem();
                 builder.ProducesProblem(StatusCodes.Status500InternalServerError);
@@ -66,6 +68,8 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalysisIdentifier
                 s.ExampleRequest = new AnalyzeUrlRequest(
                     Guid.NewGuid().ToString(),
                     "https://example-site.com");
+                s.Responses[StatusCodes.Status200OK] = "Analysis result successfully retrieved.";
+                s.Responses[StatusCodes.Status202Accepted] = "Analysis request accepted and queued for processing.";
                 s.RequestParam(r => r.Url, "URL to be analyzed.");
                 s.RequestParam(r => r.Reanalyze, "Indicates whether the URL should be reanalyzed even if an existing analysis is available. Default is false.");
                 s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who uploads the URL. Default is false");
@@ -86,7 +90,7 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalysisIdentifier
             return;
         }
 
-        ErrorOr<UrlMultiAnalysis> result = await _multiAnalysisService
+        var result = await _multiAnalysisService
             .AnalyzeAsync(userId, req.IsPrivate, url, req.Reanalyze, ct);
 
         if (result.IsError)
@@ -102,13 +106,22 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalysisIdentifier
             return;
         }
 
-        Response = AnalysisIdentifiers.Parse(result.Value);
+        AnalysisRequestResult<UrlMultiAnalysis> requestResult = result.Value;
+        var analysisIdentifiers = AnalysisIdentifiers.Parse(requestResult.Analysis);
 
+        // Retrieved final analysis result 200.
+        if (requestResult.RequestStatus is AnalysisRequestStatus.Retrieved)
+        {
+            await SendOkAsync(analysisIdentifiers, CancellationToken.None);
+            return;
+        }
+
+        // Retrieved queued analysis 202.
         var routeValues = new RouteValueDictionary
         {
-            { "id", Response.Id },
+            { "id", analysisIdentifiers.Id },
         };
-        IResult accepted = Results.AcceptedAtRoute(GetAnalysisByIdEndpoint.Name, routeValues, Response);
+        IResult accepted = Results.AcceptedAtRoute(GetAnalysisByIdEndpoint.Name, routeValues, analysisIdentifiers);
         await SendResultAsync(accepted);
     }
 

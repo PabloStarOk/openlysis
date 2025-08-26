@@ -113,25 +113,25 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         List<UrlMultiAnalysis> urlMultiAnalyses = [];
         foreach (var url in urls)
         {
-            ErrorOr<UrlMultiAnalysis> result = await _urlAnalysisService.AnalyzeAsync(
+            var requestResult = await _urlAnalysisService.AnalyzeAsync(
                 userId,
                 isPrivate,
                 url,
                 reanalyze,
                 cancellationToken);
 
-            if (result.IsError)
+            if (requestResult.IsError)
             {
                 _logger.LogError(
                     "Url could not be analyzed due to one or more errors."
                     + "\n\tUrl: {Url}."
                     + "\n\tErrors: {Errors}.",
                     url,
-                    result.Errors);
+                    requestResult.Errors);
                 continue;
             }
 
-            urlMultiAnalyses.Add(result.Value);
+            urlMultiAnalyses.Add(requestResult.Value.Analysis);
         }
 
         return urlMultiAnalyses;

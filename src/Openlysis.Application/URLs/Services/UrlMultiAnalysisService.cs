@@ -7,6 +7,7 @@ using Microsoft.IO;
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Enums;
+using Openlysis.Application.Common.Models;
 using Openlysis.Application.URLs.Contracts.Abstractions;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.ValueObjects;
@@ -49,7 +50,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     }
 
     /// <inheritdoc/>
-    public async Task<ErrorOr<UrlMultiAnalysis>> AnalyzeAsync(
+    public async Task<ErrorOr<AnalysisRequestResult<UrlMultiAnalysis>>> AnalyzeAsync(
         GlobalId userId,
         bool isPrivate,
         Uri url,
@@ -73,7 +74,9 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         if (lastExistingAnalyses.Count > 0
             && !reanalyze)
         {
-            return lastExistingAnalyses[0];
+            return new AnalysisRequestResult<UrlMultiAnalysis>(
+                AnalysisRequestStatus.Retrieved,
+                lastExistingAnalyses[0]);
         }
 
         var multiAnalysis = UrlMultiAnalysis.Create(
@@ -89,7 +92,9 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             url,
             cancellationToken);
 
-        return multiAnalysis;
+        return new AnalysisRequestResult<UrlMultiAnalysis>(
+            AnalysisRequestStatus.Queued,
+            multiAnalysis);
     }
 
     /// <inheritdoc/>
