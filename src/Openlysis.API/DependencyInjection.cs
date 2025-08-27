@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 
 using FastEndpoints;
@@ -6,6 +7,7 @@ using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.ObjectPool;
 
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
@@ -123,6 +125,7 @@ public static class DependencyInjection
             });
 
         services.AddExceptionHandlers();
+        AddStringBuilderPool(services);
     }
 
     private static void AddJwtAuthentication(
@@ -205,5 +208,15 @@ public static class DependencyInjection
             .Get<FormOptions>();
         ArgumentNullException.ThrowIfNull(formOptions);
         return formOptions;
+    }
+
+    private static void AddStringBuilderPool(IServiceCollection services)
+    {
+        services.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+        services.AddSingleton<ObjectPool<StringBuilder>>(sp =>
+        {
+            var poolProvider = sp.GetRequiredService<ObjectPoolProvider>();
+            return poolProvider.CreateStringBuilderPool();
+        });
     }
 }

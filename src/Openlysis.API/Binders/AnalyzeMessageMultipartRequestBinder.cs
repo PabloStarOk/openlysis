@@ -1,8 +1,10 @@
 using System.Buffers;
+using System.Text;
 using System.Text.Json;
 
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.ObjectPool;
 using Microsoft.Extensions.Options;
 
 using Openlysis.API.Endpoints.Messages.Analyze;
@@ -32,12 +34,14 @@ internal sealed class AnalyzeMessageMultipartRequestBinder : MultipartRequestBin
     /// </summary>
     /// <param name="fileStorageContext">The file storage context for handling file operations.</param>
     /// <param name="memoryPool">The memory pool used for buffering multipart data.</param>
+    /// <param name="stringBuilderPool">The string builder pool for efficient string operations.</param>
     /// <param name="formOptions">The form options for multipart parsing.</param>
     public AnalyzeMessageMultipartRequestBinder(
         IFileStorageContext fileStorageContext,
         MemoryPool<byte> memoryPool,
+        ObjectPool<StringBuilder> stringBuilderPool,
         IOptions<FormOptions> formOptions)
-        : base(fileStorageContext, memoryPool, formOptions)
+        : base(fileStorageContext, memoryPool, stringBuilderPool, formOptions)
     {
     }
 

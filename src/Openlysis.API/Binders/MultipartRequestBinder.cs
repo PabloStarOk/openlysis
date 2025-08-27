@@ -8,6 +8,7 @@ using FastEndpoints;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.ObjectPool;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 
@@ -45,6 +46,7 @@ public abstract class MultipartRequestBinder<TRequest>
     protected GlobalId UserId { get; private set; } = null!;
 
     private readonly MemoryPool<byte> _memoryPool;
+    private readonly ObjectPool<StringBuilder> _stringBuilderPool;
     private readonly IOptions<FormOptions> _formOptions;
 
     /// <summary>
@@ -52,14 +54,17 @@ public abstract class MultipartRequestBinder<TRequest>
     /// </summary>
     /// <param name="fileStorageContext">The file storage context for handling file operations.</param>
     /// <param name="memoryPool">The memory pool used for buffer management.</param>
+    /// <param name="stringBuilderPool">The string builder pool for efficient string operations.</param>
     /// <param name="formOptions">The form options for multipart request limits and settings.</param>
     protected MultipartRequestBinder(
         IFileStorageContext fileStorageContext,
         MemoryPool<byte> memoryPool,
+        ObjectPool<StringBuilder> stringBuilderPool,
         IOptions<FormOptions> formOptions)
     {
         FileStorageContext = fileStorageContext;
         _memoryPool = memoryPool;
+        _stringBuilderPool = stringBuilderPool;
         _formOptions = formOptions;
     }
 
@@ -159,26 +164,32 @@ public abstract class MultipartRequestBinder<TRequest>
             streamEncoding = Encoding.UTF8;
         }
 
-        var stringBuilder = new StringBuilder();
-
         using var memoryOwner = _memoryPool.Rent(SectionReadBufferSize);
         Memory<byte> buffer = memoryOwner.Memory;
+        StringBuilder stringBuilder = _stringBuilderPool.Get();
 
-        int totalBytesRead = 0;
-        int bytesRead;
-        while ((bytesRead = await body.ReadAsync(buffer, cancellationToken)) > 0)
+        try
         {
-            totalBytesRead += bytesRead;
-            if (totalBytesRead > _formOptions.Value.ValueLengthLimit)
+            int totalBytesRead = 0;
+            int bytesRead;
+            while ((bytesRead = await body.ReadAsync(buffer, cancellationToken)) > 0)
             {
-                throw new InvalidDataException("Section value exceeds allowed length.");
+                totalBytesRead += bytesRead;
+                if (totalBytesRead > _formOptions.Value.ValueLengthLimit)
+                {
+                    throw new InvalidDataException("Section value exceeds allowed length of .");
+                }
+
+                var bytes = buffer[..bytesRead];
+                stringBuilder.Append(streamEncoding.GetString(bytes.Span));
             }
 
-            var bytes = buffer[..bytesRead];
-            stringBuilder.Append(streamEncoding.GetString(bytes.Span));
+            return stringBuilder.ToString();
         }
-
-        return stringBuilder.ToString();
+        finally
+        {
+            _stringBuilderPool.Return(stringBuilder);
+        }
     }
 
     private async Task ParseRequestAsync(HttpContext httpContext, CancellationToken cancellationToken)

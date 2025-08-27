@@ -1,7 +1,9 @@
 using System.Buffers;
+using System.Text;
 
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.ObjectPool;
 using Microsoft.Extensions.Options;
 
 using Openlysis.API.Endpoints.Files.Analyze;
@@ -26,12 +28,14 @@ internal sealed class AnalyzeFileMultipartRequestBinder : MultipartRequestBinder
     /// </summary>
     /// <param name="fileStorageContext">The file storage context for handling file operations.</param>
     /// <param name="memoryPool">The memory pool used for buffer management.</param>
+    /// <param name="stringBuilderPool">The string builder pool for efficient string operations.</param>
     /// <param name="formOptions">The form options for multipart request limits and settings.</param>
     public AnalyzeFileMultipartRequestBinder(
         IFileStorageContext fileStorageContext,
         MemoryPool<byte> memoryPool,
+        ObjectPool<StringBuilder> stringBuilderPool,
         IOptions<FormOptions> formOptions)
-        : base(fileStorageContext, memoryPool, formOptions)
+        : base(fileStorageContext, memoryPool, stringBuilderPool, formOptions)
     {
     }
 
