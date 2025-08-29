@@ -110,10 +110,10 @@ internal class MessageAnalysisService : IMessageAnalysisService
         }
 
         Uri[] urls = ExtractDataFromValidInputs(
-            _dataExtractor.ExtractUrls, subject, content).ToArray();
-        IEnumerable<MailAddress> emailAddresses = ExtractDataFromValidInputs(
+            _dataExtractor.ExtractUrls, subject, content);
+        MailAddress[] emailAddresses = ExtractDataFromValidInputs(
             _dataExtractor.ExtractEmailAddresses, sender, subject, content);
-        IEnumerable<string> phoneNumbers = ExtractDataFromValidInputs(
+        string[] phoneNumbers = ExtractDataFromValidInputs(
             _dataExtractor.ExtractPhoneNumbers, subject, content);
 
         IEnumerable<EmailAddressMultiReputation> emailAddressesReputations =
@@ -238,14 +238,15 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// <returns>
     /// An enumerable collection containing all extracted data from the provided inputs.
     /// </returns>
-    private static IEnumerable<TData> ExtractDataFromValidInputs<TData>(
+    private static TData[] ExtractDataFromValidInputs<TData>(
         Func<string, IEnumerable<TData>> extractionMethod,
         params string?[] inputs)
     {
         return inputs
             .Where(i => !string.IsNullOrWhiteSpace(i))
             .SelectMany(extractionMethod!)
-            .ToHashSet();
+            .ToHashSet()
+            .ToArray();
     }
 
     private async Task<MessageAnalysis?> FetchLastAnalysisAsync(
