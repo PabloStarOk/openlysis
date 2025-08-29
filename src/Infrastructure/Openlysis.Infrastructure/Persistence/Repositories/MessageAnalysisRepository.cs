@@ -115,6 +115,7 @@ public class MessageAnalysisRepository : IRepository<MessageAnalysis, GlobalId>
             throw new ArgumentException("Given MessageAnalysis doesn't exist in the database.");
         }
 
+        _dbContext.ChangeTracker.Clear();
         _dbContext.MessageAnalyses.Update(model);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }

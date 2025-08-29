@@ -35,6 +35,7 @@ internal class FileMultiAnalysisQueue : IFileMultiAnalysisQueue
         ProcessedFile processedFile,
         string filePassword,
         bool isPrivateFile,
+        GlobalId? correlationId,
         CancellationToken cancellationToken)
     {
         var analyzeFile = new AnalyzeFileMessage(
@@ -45,7 +46,8 @@ internal class FileMultiAnalysisQueue : IFileMultiAnalysisQueue
             processedFile.HashValues.Sha256,
             filePassword,
             isPrivateFile,
-            processedFile.StorageFileName);
+            processedFile.StorageFileName,
+            correlationId);
 
         ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(_endpointUriProvider.AnalyzeFileUri);
         await sendEndpoint.Send(analyzeFile, cancellationToken);

@@ -59,15 +59,19 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<FileMultiAnalysis>> AnalyzeFilesAsync(
+    public async ValueTask<IEnumerable<FileMultiAnalysis>> AnalyzeFilesAsync(
         GlobalId userId,
         bool isPrivate,
         bool reanalyze,
+        GlobalId correlationId,
         ProcessedFile[] files,
         Dictionary<ProcessedFile, string> filePasswords,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(files);
+        if (files.Length is 0)
+        {
+            return [];
+        }
 
         List<FileMultiAnalysis> fileMultiAnalyses = [];
         foreach (var file in files)
@@ -79,7 +83,8 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                 password ?? string.Empty,
                 isPrivate,
                 reanalyze,
-                cancellationToken);
+                cancellationToken,
+                correlationId);
 
             if (requestResult.IsError)
             {
@@ -103,13 +108,19 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<UrlMultiAnalysis>> AnalyzeUrlsAsync(
+    public async ValueTask<IEnumerable<UrlMultiAnalysis>> AnalyzeUrlsAsync(
         GlobalId userId,
         bool isPrivate,
-        IEnumerable<Uri> urls,
         bool reanalyze,
+        GlobalId correlationId,
+        Uri[] urls,
         CancellationToken cancellationToken = default)
     {
+        if (urls.Length is 0)
+        {
+            return [];
+        }
+
         List<UrlMultiAnalysis> urlMultiAnalyses = [];
         foreach (var url in urls)
         {
@@ -118,7 +129,8 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                 isPrivate,
                 url,
                 reanalyze,
-                cancellationToken);
+                cancellationToken,
+                correlationId);
 
             if (requestResult.IsError)
             {
@@ -138,10 +150,15 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<EmailAddressMultiReputation>> GetEmailAddressesReputationsAsync(
-        IEnumerable<MailAddress> emailAddresses,
+    public async ValueTask<IEnumerable<EmailAddressMultiReputation>> GetEmailAddressesReputationsAsync(
+        MailAddress[] emailAddresses,
         CancellationToken cancellationToken = default)
     {
+        if (emailAddresses.Length is 0)
+        {
+            return [];
+        }
+
         List<EmailAddressMultiReputation> multiReputations = [];
         foreach (var email in emailAddresses)
         {
@@ -168,10 +185,15 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<PhoneMultiReputation>> GetPhoneNumbersReputationsAsync(
-        IEnumerable<string> phoneNumbers,
+    public async ValueTask<IEnumerable<PhoneMultiReputation>> GetPhoneNumbersReputationsAsync(
+        string[] phoneNumbers,
         CancellationToken cancellationToken = default)
     {
+        if (phoneNumbers.Length is 0)
+        {
+            return [];
+        }
+
         List<PhoneMultiReputation> multiReputations = [];
         foreach (var phone in phoneNumbers)
         {

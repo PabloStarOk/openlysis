@@ -12,6 +12,10 @@ public record BrokerSettings
     /// </summary>
     public const string SectionName = "BrokerSettings";
 
+    private static int DefaultConcurrencyLimit { get; } = Environment.ProcessorCount * 2;
+
+    private static int[] DefaultRetryIntervals { get; } = [250, 500, 1000, 5000, 10000];
+
     /// <summary>
     /// Gets the scheme of the message broker.
     /// </summary>
@@ -71,4 +75,20 @@ public record BrokerSettings
     /// </summary>
     [Required]
     required public string UpdateUrlAnalysisEndpointName { get; init; }
+
+    /// <summary>
+    /// Gets the endpoint name for updating message analysis.
+    /// </summary>
+    [Required]
+    required public string MessageAnalysisUpdateEndpointName { get; init; }
+
+    /// <summary>
+    /// Gets the concurrency limit for message analysis updates.
+    /// </summary>
+    public int MessageAnalysisUpdateConcurrencyLimit { get; init; } = DefaultConcurrencyLimit;
+
+    /// <summary>
+    /// Gets the retry intervals (in milliseconds) for message analysis update attempts.
+    /// </summary>
+    public int[] MessageAnalysisUpdateRetryIntervals { get; init; } = DefaultRetryIntervals;
 }

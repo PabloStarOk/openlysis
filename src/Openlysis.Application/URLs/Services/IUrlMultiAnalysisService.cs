@@ -3,7 +3,6 @@ using ErrorOr;
 using Openlysis.Application.Common.Enums;
 using Openlysis.Application.Common.Models;
 using Openlysis.Domain.Common.ValueObjects;
-using Openlysis.Domain.Files;
 using Openlysis.Domain.URLs;
 
 namespace Openlysis.Application.URLs.Services;
@@ -21,6 +20,7 @@ public interface IUrlMultiAnalysisService
     /// <param name="url">The URL to be analyzed.</param>
     /// <param name="reanalyze">Indicates whether to reanalyze the URL even if it has been analyzed before.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <param name="correlationId">Optional correlation identifier that associates the analysis with a message analysis.</param>
     /// <returns>
     /// A task representing the asynchronous operation.
     /// The result is an <see cref="ErrorOr{T}"/> containing the analysis request outcome.
@@ -30,7 +30,8 @@ public interface IUrlMultiAnalysisService
         bool isPrivate,
         Uri url,
         bool reanalyze,
-        CancellationToken cancellationToken);
+        CancellationToken cancellationToken = default,
+        GlobalId? correlationId = null);
 
     /// <summary>
     /// Retrieves a URL analysis by its unique identifier.

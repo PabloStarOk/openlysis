@@ -24,6 +24,9 @@ internal sealed class EndpointUriProvider : IEndpointUriProvider, IDisposable
     /// <inheritdoc/>
     public Uri UpdateUrlMultiAnalysisUri { get; private set; }
 
+    /// <inheritdoc/>
+    public Uri MessageAnalysisUpdateUri { get; private set; }
+
     private readonly IDisposable? _optionsListener;
     private bool _isDisposed;
 
@@ -72,6 +75,9 @@ internal sealed class EndpointUriProvider : IEndpointUriProvider, IDisposable
         // Update URL multi analysis consumer.
         uriBuilder.Path = Uri.EscapeDataString(settings.UpdateUrlAnalysisEndpointName);
         UpdateUrlMultiAnalysisUri = uriBuilder.Uri;
+
+        uriBuilder.Path = Uri.EscapeDataString(settings.MessageAnalysisUpdateEndpointName);
+        MessageAnalysisUpdateUri = uriBuilder.Uri;
     }
 
     private void Dispose(bool disposing)

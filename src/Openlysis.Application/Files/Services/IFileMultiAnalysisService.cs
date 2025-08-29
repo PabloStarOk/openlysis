@@ -21,6 +21,7 @@ public interface IFileMultiAnalysisService
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="reanalyze">Specifies whether to reanalyze the file if it has been analyzed before.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
+    /// <param name="correlationId">Optional correlation identifier that associates the analysis with a message analysis.</param>
     /// <returns>
     /// A task representing the asynchronous operation.
     /// The result is an <see cref="ErrorOr{T}"/> containing the analysis request outcome.
@@ -31,7 +32,8 @@ public interface IFileMultiAnalysisService
         string filePassword,
         bool isPrivate,
         bool reanalyze,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        GlobalId? correlationId = null);
 
     /// <summary>
     /// Retrieves a file analysis by its unique identifier.

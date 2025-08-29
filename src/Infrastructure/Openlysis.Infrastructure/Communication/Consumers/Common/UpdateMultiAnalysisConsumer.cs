@@ -1,10 +1,10 @@
 using MassTransit;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
-using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Infrastructure.Shared.Communication.Abstractions;
 using Openlysis.Infrastructure.Shared.Communication.Contracts;
 
 namespace Openlysis.Infrastructure.Communication.Consumers.Common;
@@ -21,19 +21,19 @@ internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
     where TAnalysis : Analysis
 {
     private readonly IRepository<TMultiAnalysis, GlobalId> _repository;
-    private readonly IMessageAnalysisUpdater _messageAnalysisUpdater;
+    private readonly IEndpointUriProvider _endpointUriProvider;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateMultiAnalysisConsumer{TMultiAnalysis, TAnalysis}"/> class.
     /// </summary>
     /// <param name="repository">The repository for accessing and updating the multi-analysis aggregate.</param>
-    /// <param name="messageAnalysisUpdater">The service for notifying about child analysis state changes.</param>
+    /// <param name="endpointUriProvider">The provider for endpoint URIs used in message communication.</param>
     public UpdateMultiAnalysisConsumer(
         IRepository<TMultiAnalysis, GlobalId> repository,
-        IMessageAnalysisUpdater messageAnalysisUpdater)
+        IEndpointUriProvider endpointUriProvider)
     {
         _repository = repository;
-        _messageAnalysisUpdater = messageAnalysisUpdater;
+        _endpointUriProvider = endpointUriProvider;
     }
 
     /// <inheritdoc/>
@@ -63,9 +63,9 @@ internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
         }
 
         await _repository.UpdateAsync(multiAnalysis, context.CancellationToken);
-
-        await _messageAnalysisUpdater.NotifyChildAnalysisStateAsync(
-            multiAnalysis.Id,
-            context.CancellationToken);
+        if (message.CorrelationId is not null)
+        {
+            await context.Send(_endpointUriProvider.MessageAnalysisUpdateUri, message);
+        }
     }
 }

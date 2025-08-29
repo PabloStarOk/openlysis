@@ -9,7 +9,7 @@ namespace Openlysis.API.Endpoints.Messages.Common.Responses;
 /// <param name="EmailAddresses">A collection of detected email addresses.</param>
 /// <param name="PhoneNumbers">A collection of detected phone numbers.</param>
 public record MessageDetectedData(
-    IEnumerable<Uri> Urls,
+    IEnumerable<string> Urls,
     IEnumerable<string> EmailAddresses,
     IEnumerable<string> PhoneNumbers)
 {
@@ -20,11 +20,11 @@ public record MessageDetectedData(
     /// <returns>A new <see cref="MessageDetectedData"/> instance populated with detected URLs, email addresses, and phone numbers.</returns>
     public static MessageDetectedData CreateFromMessageAnalysis(MessageAnalysis source)
     {
-        IEnumerable<Uri> urls = source.DetectedUrlsResults
+        IEnumerable<string> urls = source.DetectedUrlsIndicators
             .Select(d => d.Value);
-        IEnumerable<string> emailAddresses = source.DetectedEmailAddressesResults
-            .Select(d => d.Value.Address);
-        IEnumerable<string> phoneNumbers = source.DetectedPhoneNumbersResults
+        IEnumerable<string> emailAddresses = source.DetectedEmailAddressesIndicators
+            .Select(d => d.Value);
+        IEnumerable<string> phoneNumbers = source.DetectedPhoneNumbersIndicators
             .Select(d => d.Value);
 
         return new MessageDetectedData(

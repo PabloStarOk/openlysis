@@ -13,6 +13,7 @@ using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Messages.Enums;
+using Openlysis.Domain.Messages.ValueObjects;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
 
@@ -27,31 +28,35 @@ internal class MessageAnalysisService : IMessageAnalysisService
     public bool AnalyzeIsAvailable => _messageAnalyzer.IsAvailable;
 
     private readonly IRepository<MessageAnalysis, GlobalId> _repository;
+    private readonly TimeProvider _timeProvider;
+    private readonly IMessageHashService _messageHashService;
     private readonly IMessageDataExtractor _dataExtractor;
     private readonly IMessageAnalyzer _messageAnalyzer;
-    private readonly IMessageAnalysisBuilder _messageAnalysisBuilder;
-    private readonly IMessageAnalysisUpdater _messageAnalysisUpdater;
+    private readonly IMessageAnalysisQueue _messageAnalysisQueue;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageAnalysisService"/> class.
     /// </summary>
     /// <param name="repository">The repository for managing <see cref="MessageAnalysis"/> entities.</param>
+    /// <param name="timeProvider">Provides the current time for timestamping analyses.</param>
+    /// <param name="messageHashService">Service for generating message hash values.</param>
     /// <param name="dataExtractor">The service responsible for extracting data (e.g., URLs, email addresses, phone numbers) from messages.</param>
     /// <param name="messageAnalyzer">The service responsible for analyzing messages and their associated data.</param>
-    /// <param name="messageAnalysisBuilder">The service responsible for building message analysis objects.</param>
-    /// <param name="messageAnalysisUpdater">The service responsible for updating message analysis data.</param>
+    /// <param name="messageAnalysisQueue">Queue for managing asynchronous message analysis operations.</param>
     public MessageAnalysisService(
         IRepository<MessageAnalysis, GlobalId> repository,
+        TimeProvider timeProvider,
+        IMessageHashService messageHashService,
         IMessageDataExtractor dataExtractor,
         IMessageAnalyzer messageAnalyzer,
-        IMessageAnalysisBuilder messageAnalysisBuilder,
-        IMessageAnalysisUpdater messageAnalysisUpdater)
+        IMessageAnalysisQueue messageAnalysisQueue)
     {
         _repository = repository;
+        _timeProvider = timeProvider;
+        _messageHashService = messageHashService;
         _dataExtractor = dataExtractor;
         _messageAnalyzer = messageAnalyzer;
-        _messageAnalysisBuilder = messageAnalysisBuilder;
-        _messageAnalysisUpdater = messageAnalysisUpdater;
+        _messageAnalysisQueue = messageAnalysisQueue;
     }
 
     /// <inheritdoc/>
@@ -70,10 +75,8 @@ internal class MessageAnalysisService : IMessageAnalysisService
             return Error.Failure("Service is not available");
         }
 
-        MessageAnalysis? lastExistingAnalysis = await FetchLastAnalysisAsync(
-                message,
-                files,
-                cancellationToken);
+        HashValues messageHashValues = await _messageHashService.HashAsync(message, files, cancellationToken);
+        MessageAnalysis? lastExistingAnalysis = await FetchLastAnalysisAsync(messageHashValues, cancellationToken);
 
         if (lastExistingAnalysis is not null
             && !reanalyze)
@@ -87,44 +90,62 @@ internal class MessageAnalysisService : IMessageAnalysisService
         string? subject = message.Subject;
         string content = message.Content;
 
+        var messageInformation = new MessageInformation(
+            message.Type,
+            message.Sender,
+            message.Subject,
+            message.Content,
+            messageHashValues);
+
+        var correlationId = GlobalId.CreateUnique();
+        var messageAnalysis = MessageAnalysis.Create(
+            _timeProvider.GetUtcNow().UtcDateTime,
+            userId,
+            isPrivate,
+            messageInformation);
+
         if (requestCountryCode is not null)
         {
             _dataExtractor.SetRequestCountryCode(requestCountryCode);
         }
 
-        IEnumerable<Uri> urls = ExtractDataFromValidInputs(
+        Uri[] urls = ExtractDataFromValidInputs(
             _dataExtractor.ExtractUrls, subject, content);
-        IEnumerable<MailAddress> emailAddresses = ExtractDataFromValidInputs(
+        MailAddress[] emailAddresses = ExtractDataFromValidInputs(
             _dataExtractor.ExtractEmailAddresses, sender, subject, content);
-        IEnumerable<string> phoneNumbers = ExtractDataFromValidInputs(
+        string[] phoneNumbers = ExtractDataFromValidInputs(
             _dataExtractor.ExtractPhoneNumbers, subject, content);
 
-        IEnumerable<FileMultiAnalysis> fileMultiAnalyses = [];
-        if (files.Length > 0)
-        {
-            fileMultiAnalyses = await _messageAnalyzer
-                .AnalyzeFilesAsync(userId, isPrivate, reanalyze, files, filePasswords, cancellationToken);
-        }
-
-        IEnumerable<UrlMultiAnalysis> urlMultiAnalyses =
-            await _messageAnalyzer.AnalyzeUrlsAsync(userId, isPrivate, urls, reanalyze, cancellationToken);
         IEnumerable<EmailAddressMultiReputation> emailAddressesReputations =
             await _messageAnalyzer.GetEmailAddressesReputationsAsync(emailAddresses, cancellationToken);
         IEnumerable<PhoneMultiReputation> phoneNumbersReputations =
             await _messageAnalyzer.GetPhoneNumbersReputationsAsync(phoneNumbers, cancellationToken);
 
-        MessageAnalysis messageAnalysis = await _messageAnalysisBuilder
-            .WithUserContext(userId, isPrivate)
-            .WithMessageInformation(message, files)
-            .WithFileMultiAnalyses(fileMultiAnalyses)
-            .WithUrlMultiAnalyses(urlMultiAnalyses)
-            .WithEmailAddressMultiReputations(emailAddressesReputations)
-            .WithPhoneNumberMultiReputations(phoneNumbersReputations)
-            .BuildAsync(cancellationToken);
+        messageAnalysis.AddEmailAddressResults(emailAddressesReputations.ToArray());
+        messageAnalysis.AddPhoneNumberResults(phoneNumbersReputations.ToArray());
 
-        await _messageAnalysisUpdater.AddPendingAsync(
-            messageAnalysis,
-            cancellationToken);
+        if (files.Length is 0 && urls.Length is 0)
+        {
+            messageAnalysis.CompleteInitialization();
+            await _repository.AddAsync(messageAnalysis, cancellationToken);
+            return new AnalysisRequestResult<MessageAnalysis>(
+                AnalysisRequestStatus.Retrieved,
+                messageAnalysis);
+        }
+
+        await _messageAnalysisQueue.EnqueueAsync(correlationId, messageAnalysis, cancellationToken);
+
+        IEnumerable<FileMultiAnalysis> fileMultiAnalyses =
+            await _messageAnalyzer.AnalyzeFilesAsync(userId, isPrivate, reanalyze, correlationId, files, filePasswords, cancellationToken);
+        IEnumerable<UrlMultiAnalysis> urlMultiAnalyses =
+            await _messageAnalyzer.AnalyzeUrlsAsync(userId, isPrivate, reanalyze, correlationId, urls, cancellationToken);
+
+        messageAnalysis.AddFileResults(fileMultiAnalyses.ToArray());
+        messageAnalysis.AddUrlResults(urlMultiAnalyses.ToArray());
+        messageAnalysis.CompleteInitialization();
+
+        await _repository.AddAsync(messageAnalysis, cancellationToken);
+        await _messageAnalysisQueue.SetAsInitializedAsync(correlationId, cancellationToken);
 
         return new AnalysisRequestResult<MessageAnalysis>(
             AnalysisRequestStatus.Queued,
@@ -217,42 +238,27 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// <returns>
     /// An enumerable collection containing all extracted data from the provided inputs.
     /// </returns>
-    private static IEnumerable<TData> ExtractDataFromValidInputs<TData>(
+    private static TData[] ExtractDataFromValidInputs<TData>(
         Func<string, IEnumerable<TData>> extractionMethod,
         params string?[] inputs)
     {
         return inputs
             .Where(i => !string.IsNullOrWhiteSpace(i))
             .SelectMany(extractionMethod!)
-            .ToHashSet();
+            .ToHashSet()
+            .ToArray();
     }
 
-    /// <summary>
-    /// Fetches the most recent analysis for the given message, if it exists.
-    /// </summary>
-    /// <param name="message">The message for which to fetch the last analysis.</param>
-    /// <param name="files">An array of <see cref="ProcessedFile"/> representing the files attached to the message.</param>
-    /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
-    /// <returns>
-    /// A task that represents the asynchronous operation. The task result contains the most recent
-    /// <see cref="MessageAnalysis"/> if found; otherwise, <c>null</c>.
-    /// </returns>
     private async Task<MessageAnalysis?> FetchLastAnalysisAsync(
-        Message message,
-        ProcessedFile[] files,
+        HashValues messageHashValues,
         CancellationToken cancellationToken)
     {
-        HashValues messageHashValues = await _messageAnalysisBuilder
-            .WithMessageInformation(message, files)
-            .GenerateHashAsync(cancellationToken);
-
         IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(
             page: 1,
             pageSize: 1,
             filter: m => m.Message.MessageHashValues == messageHashValues,
             orderBy: q => q.OrderByDescending(m => m.StartedDate),
             cancellationToken);
-
-        return existingAnalyses.FirstOrDefault();
+        return existingAnalyses.Count > 0 ? existingAnalyses[0] : null;
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Openlysis.Domain.Common.Entities;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
 using Openlysis.MultiAnalyzer.Abstractions;
 
 namespace Openlysis.MultiAnalyzer.Infrastructure.TimeoutRequests;
@@ -16,7 +17,7 @@ namespace Openlysis.MultiAnalyzer.Infrastructure.TimeoutRequests;
 internal sealed class TimeoutAnalysisRequestCoreFactory<TAnalysis, TRequest>
     : TimeoutRequestFactory<TRequest>
     where TAnalysis : Analysis
-    where TRequest : class
+    where TRequest : QueueMessage
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="TimeoutAnalysisRequestCoreFactory{TAnalysis, TRequest}"/> class.

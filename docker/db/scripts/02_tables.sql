@@ -147,6 +147,8 @@ CREATE TABLE IF NOT EXISTS attached_file_results (
     attached_file_result_id uuid PRIMARY KEY,
     data_type smallint NOT NULL,
     file_name text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
     message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
     file_multi_analysis_id uuid NOT NULL REFERENCES file_multi_analyses (file_multi_analysis_id) ON DELETE RESTRICT
 );
@@ -154,7 +156,9 @@ CREATE TABLE IF NOT EXISTS attached_file_results (
 CREATE TABLE IF NOT EXISTS detected_url_results (
     detected_url_results_id uuid PRIMARY KEY,
     data_type smallint NOT NULL,
-    url varchar(2083) NOT NULL,
+    url text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
     message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
     url_multi_analysis_id uuid NOT NULL REFERENCES url_multi_analyses (url_multi_analysis_id) ON DELETE RESTRICT
 );
@@ -162,7 +166,9 @@ CREATE TABLE IF NOT EXISTS detected_url_results (
 CREATE TABLE IF NOT EXISTS detected_email_address_results (
     detected_email_address_results_id uuid PRIMARY KEY,
     data_type smallint NOT NULL,
-    email_address varchar(254) NOT NULL,
+    email_address text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
     message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
     email_address_multi_reputation_id uuid NOT NULL REFERENCES email_address_multi_reputations (email_address_multi_reputation_id) ON DELETE RESTRICT
 );
@@ -170,8 +176,18 @@ CREATE TABLE IF NOT EXISTS detected_email_address_results (
 CREATE TABLE IF NOT EXISTS detected_phone_number_results (
     detected_phone_number_results_id uuid PRIMARY KEY,
     data_type smallint NOT NULL,
-    phone_number varchar(16) NOT NULL,
+    phone_number text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
     message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
     phone_multi_reputation_id uuid NOT NULL REFERENCES phone_multi_reputations (phone_multi_reputation_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS message_analysis_update_sagas (
+    correlation_id uuid PRIMARY KEY,
+    current_state int NOT NULL,
+    deferred_file_updates uuid[],
+    deferred_url_updates uuid[],
+    message_analysis_id uuid NOT NULL
 );
 COMMIT TRANSACTION;
