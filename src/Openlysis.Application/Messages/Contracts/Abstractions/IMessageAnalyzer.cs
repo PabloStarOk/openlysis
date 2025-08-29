@@ -34,7 +34,7 @@ public interface IMessageAnalyzer
     /// <param name="filePasswords">A dictionary mapping files to their passwords, if required for analysis.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of file analysis results.</returns>
-    public Task<IEnumerable<FileMultiAnalysis>> AnalyzeFilesAsync(
+    public ValueTask<IEnumerable<FileMultiAnalysis>> AnalyzeFilesAsync(
         GlobalId userId,
         bool isPrivate,
         bool reanalyze,
@@ -53,12 +53,12 @@ public interface IMessageAnalyzer
     /// <param name="urls">The collection of URLs to be analyzed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of URL analysis results.</returns>
-    public Task<IEnumerable<UrlMultiAnalysis>> AnalyzeUrlsAsync(
+    public ValueTask<IEnumerable<UrlMultiAnalysis>> AnalyzeUrlsAsync(
         GlobalId userId,
         bool isPrivate,
         bool reanalyze,
         GlobalId correlationId,
-        IEnumerable<Uri> urls,
+        Uri[] urls,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -67,8 +67,8 @@ public interface IMessageAnalyzer
     /// <param name="emailAddresses">The collection of email addresses to retrieve reputations for.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of email address reputations.</returns>
-    public Task<IEnumerable<EmailAddressMultiReputation>> GetEmailAddressesReputationsAsync(
-        IEnumerable<MailAddress> emailAddresses,
+    public ValueTask<IEnumerable<EmailAddressMultiReputation>> GetEmailAddressesReputationsAsync(
+        MailAddress[] emailAddresses,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -77,7 +77,7 @@ public interface IMessageAnalyzer
     /// <param name="phoneNumbers">The collection of phone numbers to retrieve reputations for.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of phone number reputations.</returns>
-    public Task<IEnumerable<PhoneMultiReputation>> GetPhoneNumbersReputationsAsync(
-        IEnumerable<string> phoneNumbers,
+    public ValueTask<IEnumerable<PhoneMultiReputation>> GetPhoneNumbersReputationsAsync(
+        string[] phoneNumbers,
         CancellationToken cancellationToken = default);
 }
