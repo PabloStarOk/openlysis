@@ -68,15 +68,6 @@ public sealed record AnalysisState
     }
 
     /// <summary>
-    /// Creates and returns an <see cref="AnalysisState"/> instance representing a failed analysis.
-    /// </summary>
-    /// <returns>An <see cref="AnalysisState"/> instance with a status of <see cref="AnalysisStatus.Failed"/>.</returns>
-    public static AnalysisState CreateFailed()
-    {
-        return new AnalysisState(AnalysisStatus.Failed, Verdict.Unknown);
-    }
-
-    /// <summary>
     /// Creates a new instance of <see cref="AnalysisState"/> with an updated verdict.
     /// </summary>
     /// <param name="newVerdict">The new verdict to set for the analysis.</param>
