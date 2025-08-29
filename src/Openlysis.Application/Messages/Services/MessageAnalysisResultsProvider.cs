@@ -51,7 +51,7 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
         MessageAnalysis messageAnalysis,
         CancellationToken cancellationToken = default)
     {
-        GlobalId[] ids = messageAnalysis.AttachedFilesResults
+        GlobalId[] ids = messageAnalysis.AttachedFilesIndicators
             .Select(a => a.ResultId)
             .ToArray();
 
@@ -68,7 +68,7 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
         MessageAnalysis messageAnalysis,
         CancellationToken cancellationToken = default)
     {
-        GlobalId[] ids = messageAnalysis.DetectedUrlsResults
+        GlobalId[] ids = messageAnalysis.DetectedUrlsIndicators
             .Select(a => a.ResultId)
             .ToArray();
 
@@ -85,7 +85,7 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
         MessageAnalysis messageAnalysis,
         CancellationToken cancellationToken = default)
     {
-        GlobalId[] ids = messageAnalysis.DetectedEmailAddressesResults
+        GlobalId[] ids = messageAnalysis.DetectedEmailAddressesIndicators
             .Select(a => a.ResultId)
             .ToArray();
 
@@ -102,7 +102,7 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
         MessageAnalysis messageAnalysis,
         CancellationToken cancellationToken = default)
     {
-        GlobalId[] ids = messageAnalysis.DetectedPhoneNumbersResults
+        GlobalId[] ids = messageAnalysis.DetectedPhoneNumbersIndicators
             .Select(a => a.ResultId)
             .ToArray();
 

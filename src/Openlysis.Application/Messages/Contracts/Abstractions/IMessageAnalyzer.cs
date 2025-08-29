@@ -29,6 +29,7 @@ public interface IMessageAnalyzer
     /// <param name="userId">The ID of the user requesting the analysis.</param>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
     /// <param name="reanalyze">Specifies whether to reanalyze the message even if there is an existing analysis available to retrieve.</param>
+    /// <param name="correlationId">A correlation identifier that associates the file multi-analyses with the message analysis.</param>
     /// <param name="files">The array of files to be analyzed.</param>
     /// <param name="filePasswords">A dictionary mapping files to their passwords, if required for analysis.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
@@ -37,6 +38,7 @@ public interface IMessageAnalyzer
         GlobalId userId,
         bool isPrivate,
         bool reanalyze,
+        GlobalId correlationId,
         ProcessedFile[] files,
         Dictionary<ProcessedFile, string> filePasswords,
         CancellationToken cancellationToken = default);
@@ -46,15 +48,17 @@ public interface IMessageAnalyzer
     /// </summary>
     /// <param name="userId">The ID of the user requesting the analysis.</param>
     /// <param name="isPrivate">Indicates whether the analysis is private.</param>
-    /// <param name="urls">The collection of URLs to be analyzed.</param>
     /// <param name="reanalyze">Specifies whether to reanalyze the URLs even if they were previously analyzed.</param>
+    /// <param name="correlationId">A correlation identifier that associates the URL multi-analyses with the message analysis.</param>
+    /// <param name="urls">The collection of URLs to be analyzed.</param>
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a collection of URL analysis results.</returns>
     public Task<IEnumerable<UrlMultiAnalysis>> AnalyzeUrlsAsync(
         GlobalId userId,
         bool isPrivate,
-        IEnumerable<Uri> urls,
         bool reanalyze,
+        GlobalId correlationId,
+        IEnumerable<Uri> urls,
         CancellationToken cancellationToken = default);
 
     /// <summary>

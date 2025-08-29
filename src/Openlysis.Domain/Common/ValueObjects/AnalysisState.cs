@@ -48,15 +48,23 @@ public sealed record AnalysisState
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="AnalysisState"/> class with the specified status and verdict.
+    /// </summary>
+    private AnalysisState(
+        AnalysisStatus status,
+        Verdict verdict)
+    {
+        Status = status;
+        Verdict = verdict;
+    }
+
+    /// <summary>
     /// Creates and returns the initial state of an analysis.
     /// </summary>
     /// <returns>An <see cref="AnalysisState"/> instance with default values.</returns>
     public static AnalysisState Initial()
     {
-        return new AnalysisState(
-            AnalysisStatus.Queued,
-            Verdict.Unknown,
-            ThreatZone.Unknown);
+        return new AnalysisState(AnalysisStatus.Queued, Verdict.Unknown);
     }
 
     /// <summary>
@@ -65,10 +73,7 @@ public sealed record AnalysisState
     /// <returns>An <see cref="AnalysisState"/> instance with a status of <see cref="AnalysisStatus.Failed"/>.</returns>
     public static AnalysisState CreateFailed()
     {
-        return new AnalysisState(
-            AnalysisStatus.Failed,
-            Verdict.Unknown,
-            ThreatZone.Unknown);
+        return new AnalysisState(AnalysisStatus.Failed, Verdict.Unknown);
     }
 
     /// <summary>

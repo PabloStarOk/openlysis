@@ -24,4 +24,9 @@ public interface IEndpointUriProvider
     /// Gets the URI for updating a URL multi-analysis.
     /// </summary>
     public Uri UpdateUrlMultiAnalysisUri { get; }
+
+    /// <summary>
+    /// Gets the URI for updating a message analysis.
+    /// </summary>
+    public Uri MessageAnalysisUpdateUri { get; }
 }

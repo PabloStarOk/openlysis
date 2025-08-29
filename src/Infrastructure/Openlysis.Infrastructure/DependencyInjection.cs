@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Text;
 
 using Doppler.NET.Configuration;
 
@@ -82,8 +83,10 @@ public static class DependencyInjection
 
         services.AddSingleton(_ => MemoryPool<byte>.Shared);
 
-        // Add hash service.
+        // Add hash serviceS.
         services.AddTransient<IHashService, HashService>();
+        services.AddSingleton(Encoding.UTF8);
+        services.AddTransient<IMessageHashService, MessageHashService>();
 
         // Add multi analyzers
         services.AddScoped<IFileMultiAnalysisQueue, FileMultiAnalysisQueue>();
@@ -119,10 +122,8 @@ public static class DependencyInjection
         services.AddTransient<IMessageDataExtractor, MessageDataExtractor>();
         services.AddTransient<IMessageAnalyzer, MessageAnalyzer>();
         services.AddSingleton(new RecyclableMemoryStreamManager());
-        services.AddTransient<IMessageAnalysisBuilder, MessageAnalysisBuilder>();
 
-        // Add message analysis coordinator
-        services.AddSingleton<IMessageAnalysisUpdater, MessageAnalysisUpdater>();
+        services.AddTransient<IMessageAnalysisQueue, MessageAnalysisQueue>();
     }
 
     /// <summary>

@@ -63,6 +63,7 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
         GlobalId userId,
         bool isPrivate,
         bool reanalyze,
+        GlobalId correlationId,
         ProcessedFile[] files,
         Dictionary<ProcessedFile, string> filePasswords,
         CancellationToken cancellationToken = default)
@@ -79,7 +80,8 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                 password ?? string.Empty,
                 isPrivate,
                 reanalyze,
-                cancellationToken);
+                cancellationToken,
+                correlationId);
 
             if (requestResult.IsError)
             {
@@ -106,8 +108,9 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
     public async Task<IEnumerable<UrlMultiAnalysis>> AnalyzeUrlsAsync(
         GlobalId userId,
         bool isPrivate,
-        IEnumerable<Uri> urls,
         bool reanalyze,
+        GlobalId correlationId,
+        IEnumerable<Uri> urls,
         CancellationToken cancellationToken = default)
     {
         List<UrlMultiAnalysis> urlMultiAnalyses = [];
@@ -118,7 +121,8 @@ internal sealed class MessageAnalyzer : IMessageAnalyzer
                 isPrivate,
                 url,
                 reanalyze,
-                cancellationToken);
+                cancellationToken,
+                correlationId);
 
             if (requestResult.IsError)
             {

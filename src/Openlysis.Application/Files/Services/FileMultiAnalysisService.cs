@@ -47,7 +47,8 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
         string filePassword,
         bool isPrivate,
         bool reanalyze,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        GlobalId? correlationId = null)
     {
         // Check if the file has already been analyzed.
         var existingAnalyses = await _repository.GetManyAsync(
@@ -79,6 +80,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
             processedFile,
             filePassword,
             isPrivate,
+            correlationId,
             cancellationToken);
 
         return new AnalysisRequestResult<FileMultiAnalysis>(

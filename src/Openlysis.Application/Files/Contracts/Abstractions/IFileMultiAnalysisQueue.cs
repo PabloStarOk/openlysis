@@ -15,6 +15,7 @@ public interface IFileMultiAnalysisQueue
     /// <param name="processedFile">The file to be queued for analysis.</param>
     /// <param name="filePassword">The password for the file, if required.</param>
     /// <param name="isPrivateFile">Indicates whether the file is private.</param>
+    /// <param name="correlationId">Optional correlation identifier that associates the analysis with a message analysis.</param>
     /// <param name="cancellationToken">The cancellation token to cancel the asynchronous operation.</param>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public Task QueueAsync(
@@ -22,5 +23,6 @@ public interface IFileMultiAnalysisQueue
         ProcessedFile processedFile,
         string filePassword,
         bool isPrivateFile,
+        GlobalId? correlationId,
         CancellationToken cancellationToken);
 }

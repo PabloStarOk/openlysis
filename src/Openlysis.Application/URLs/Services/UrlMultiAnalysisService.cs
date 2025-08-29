@@ -55,7 +55,8 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         bool isPrivate,
         Uri url,
         bool reanalyze,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default,
+        GlobalId? correlationId = null)
     {
         HashValues urlHashValues;
         byte[] urlBytes = Encoding.UTF8.GetBytes(url.AbsoluteUri);
@@ -90,6 +91,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         await _multiAnalysisQueue.QueueAsync(
             multiAnalysis.Id,
             url,
+            correlationId,
             cancellationToken);
 
         return new AnalysisRequestResult<UrlMultiAnalysis>(

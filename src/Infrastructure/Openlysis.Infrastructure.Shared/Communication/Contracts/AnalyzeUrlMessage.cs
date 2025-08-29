@@ -8,6 +8,9 @@ namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 /// </summary>
 /// <param name="MultiAnalysisId">The identifier of the multi-analysis which <see cref="UrlAnalysis"/> belong to.</param>
 /// <param name="Url">The URL to be analyzed.</param>
+/// <param name="CorrelationId">Optional correlation identifier that associates the request to a message analysis.</param>
 public record AnalyzeUrlMessage(
     GlobalId MultiAnalysisId,
-    Uri Url);
+    Uri Url,
+    GlobalId? CorrelationId = null)
+    : QueueMessage(CorrelationId);

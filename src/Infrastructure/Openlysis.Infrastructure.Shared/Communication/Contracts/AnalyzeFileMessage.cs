@@ -13,6 +13,7 @@ namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 /// <param name="FilePassword">The password for the file, if it is protected.</param>
 /// <param name="IsPrivateFile">Indicates whether the file is private.</param>
 /// <param name="StorageFileName">The name for this file in the storage.</param>
+/// <param name="CorrelationId">Optional correlation identifier that associates the request to a message analysis.</param>
 public sealed record AnalyzeFileMessage(
     GlobalId MultiAnalysisId,
     string Filename,
@@ -21,4 +22,6 @@ public sealed record AnalyzeFileMessage(
     string FileSha256,
     string FilePassword,
     bool IsPrivateFile,
-    string StorageFileName);
+    string StorageFileName,
+    GlobalId? CorrelationId = null)
+    : QueueMessage(CorrelationId);

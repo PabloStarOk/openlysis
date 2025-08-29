@@ -23,7 +23,7 @@ namespace Openlysis.MultiAnalyzer.Abstractions;
 internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
     : IRequestOrchestrator<TRequest>
     where TAnalysis : Analysis
-    where TRequest : class
+    where TRequest : QueueMessage
 {
     /// <summary>
     /// Gets the logger instance for logging operations within the analysis orchestrator.
@@ -48,6 +48,7 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
     private readonly IOptions<OrchestrationOptions> _options;
     private readonly IUpdateMessageSender<UpdateMultiAnalysisMessage<TAnalysis>> _updateMessageSender;
     private ConsumeContext<TRequest> _context;
+    private GlobalId _correlationId;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MultiAnalysisOrchestrator{TAnalysis,TRequest}"/> class.
@@ -71,6 +72,7 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
         CancellationToken cancellationToken)
     {
         _context = context;
+        _correlationId = context.Message.CorrelationId;
         await AnalyzeAsync(context.Message, cancellationToken);
         await UpdateAnalysesAsync(cancellationToken);
     }
@@ -195,7 +197,8 @@ internal abstract class MultiAnalysisOrchestrator<TAnalysis, TRequest>
         var message = new UpdateMultiAnalysisMessage<TAnalysis>(
             MultiAnalysisId,
             timeout,
-            UpdatableAnalyses);
+            UpdatableAnalyses,
+            _correlationId);
         await _updateMessageSender.SendAsync(_context, message, cancellationToken);
 
 #if DEBUG

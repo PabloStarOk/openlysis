@@ -32,9 +32,10 @@ internal class UrlMultiAnalysisQueue : IUrlMultiAnalysisQueue
     public async Task QueueAsync(
         GlobalId multiAnalysisId,
         Uri url,
+        GlobalId? correlationId,
         CancellationToken cancellationToken = default)
     {
-        var request = new AnalyzeUrlMessage(multiAnalysisId, url);
+        var request = new AnalyzeUrlMessage(multiAnalysisId, url, correlationId);
 
         ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(_endpointUriProvider.AnalyzeUrlUri);
         await sendEndpoint.Send(request, cancellationToken);

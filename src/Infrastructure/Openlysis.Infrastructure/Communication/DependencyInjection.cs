@@ -11,6 +11,8 @@ using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Communication.Consumers.Common;
 using Openlysis.Infrastructure.Communication.Consumers.Files;
 using Openlysis.Infrastructure.Communication.Consumers.URLs;
+using Openlysis.Infrastructure.Communication.Sagas.Messages;
+using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Shared.Communication;
 
 namespace Openlysis.Infrastructure.Communication;
@@ -42,6 +44,15 @@ internal static class DependencyInjection
                 x.AddConsumer<
                     UpdateMultiAnalysisConsumer<UrlMultiAnalysis, UrlAnalysis>,
                     UpdateUrlMultiAnalysisConsumerDefinition>();
+                x.AddSagaStateMachine<
+                    MessageAnalysisUpdateStateMachine,
+                    MessageAnalysisUpdateSaga,
+                    MessageAnalysisUpdateDefinition>()
+                    .EntityFrameworkRepository(r =>
+                    {
+                        r.ExistingDbContext<ApplicationDbContext>();
+                        r.UsePostgres();
+                    });
                 x.AddRabbitMqBroker(services);
             });
     }

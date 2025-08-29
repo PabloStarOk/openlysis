@@ -1,10 +1,16 @@
-using System.Net.Mail;
-
 using Openlysis.Domain.Common.Abstractions;
+using Openlysis.Domain.Common.Aggregates;
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Domain.EmailAddresses;
+using Openlysis.Domain.Files;
 using Openlysis.Domain.Messages.Entities;
 using Openlysis.Domain.Messages.ValueObjects;
+using Openlysis.Domain.Phones;
+using Openlysis.Domain.URLs;
+
+using DataType = Openlysis.Domain.Messages.Enums.DataType;
 
 namespace Openlysis.Domain.Messages;
 
@@ -42,47 +48,45 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <summary>
     /// Gets the results of the analyses for the attached files in the message.
     /// </summary>
-    public IReadOnlyList<DataAssessmentResult<string>> AttachedFilesResults { get; }
+    public IReadOnlyList<Indicator> AttachedFilesIndicators => _attachedFilesIndicators;
 
     /// <summary>
     /// Gets the detected URL results from the analysis.
     /// </summary>
-    public IReadOnlyList<DataAssessmentResult<Uri>> DetectedUrlsResults { get; }
+    public IReadOnlyList<Indicator> DetectedUrlsIndicators => _detectedUrlsIndicators;
 
     /// <summary>
     /// Gets the detected email address results from the analysis.
     /// </summary>
-    public IReadOnlyList<DataAssessmentResult<MailAddress>> DetectedEmailAddressesResults { get; }
+    public IReadOnlyList<Indicator> DetectedEmailAddressesIndicators => _detectedEmailAddressesIndicators;
 
     /// <summary>
     /// Gets the detected phone number results from the analysis.
     /// </summary>
-    public IReadOnlyList<DataAssessmentResult<string>> DetectedPhoneNumbersResults { get; }
+    public IReadOnlyList<Indicator> DetectedPhoneNumbersIndicators => _detectedPhoneNumbersIndicators;
+
+    private readonly List<Indicator> _attachedFilesIndicators = [];
+    private readonly List<Indicator> _detectedUrlsIndicators = [];
+    private readonly List<Indicator> _detectedEmailAddressesIndicators = [];
+    private readonly List<Indicator> _detectedPhoneNumbersIndicators = [];
+    private bool _initialized;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="MessageAnalysis"/> class.
+    /// Initializes a new instance of the <see cref="MessageAnalysis"/> class with the specified parameters.
     /// </summary>
-    /// <param name="id">The unique identifier for the message analysis.</param>
-    /// <param name="userId">The unique identifier of the user associated with the message analysis.</param>
-    /// <param name="isPrivate">A value indicating whether the message is private.</param>
+    /// <param name="id">The unique identifier for the analysis.</param>
+    /// <param name="userId">The unique identifier of the user associated with the analysis.</param>
+    /// <param name="isPrivate">Indicates whether the message is private.</param>
     /// <param name="startedDate">The date and time when the analysis started.</param>
-    /// <param name="message">The data of the message, including its type, sender, content, and hash set.</param>
-    /// <param name="state">The current state of the analysis, including its status, verdict, and threat zone.</param>
-    /// <param name="attachedFilesResults">An array of multi-analysis results for the attached files in the message.</param>
-    /// <param name="detectedUrlsResults">An array of multi-analysis results for the detected URLs in the message.</param>
-    /// <param name="detectedEmailAddressesResults">An array of reputation results for the detected email addresses in the message.</param>
-    /// <param name="detectedPhoneNumbersResults">An array of reputation results for the detected phone numbers in the message.</param>
-    protected MessageAnalysis(
+    /// <param name="message">The message information being analyzed.</param>
+    /// <param name="state">The initial state of the analysis.</param>
+    private MessageAnalysis(
         GlobalId id,
         GlobalId userId,
         bool isPrivate,
         DateTime startedDate,
         MessageInformation message,
-        AnalysisState state,
-        DataAssessmentResult<string>[] attachedFilesResults,
-        DataAssessmentResult<Uri>[] detectedUrlsResults,
-        DataAssessmentResult<MailAddress>[] detectedEmailAddressesResults,
-        DataAssessmentResult<string>[] detectedPhoneNumbersResults)
+        AnalysisState state)
         : base(id)
     {
         UserId = userId;
@@ -90,10 +94,6 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         StartedDate = startedDate;
         Message = message;
         State = state;
-        DetectedUrlsResults = detectedUrlsResults;
-        DetectedEmailAddressesResults = detectedEmailAddressesResults;
-        DetectedPhoneNumbersResults = detectedPhoneNumbersResults;
-        AttachedFilesResults = attachedFilesResults;
     }
 
     // For EF Core.
@@ -105,40 +105,25 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <remarks>
     /// This constructor is required by EF Core and should not be used directly in application code.
     /// </remarks>
-    protected MessageAnalysis()
+    private MessageAnalysis()
     {
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Creates a new instance of the <see cref="MessageAnalysis"/> class.
+    /// Creates a new <see cref="MessageAnalysis"/> instance with the specified parameters.
     /// </summary>
     /// <param name="startedDate">The date and time when the analysis started.</param>
-    /// <param name="userId">The unique identifier of the user associated with the message analysis.</param>
-    /// <param name="isPrivate">A value indicating whether the message is private.</param>
-    /// <param name="message">The data of the message, including its type, sender, content, and hash set.</param>
-    /// <param name="verdict">The verdict to assign to the analysis, indicating the severity or outcome.</param>
-    /// <param name="attachedFilesResults">An array of multi-analysis results for the attached files in the message.</param>
-    /// <param name="detectedUrlsResults">An array of multi-analysis results for the detected URLs in the message.</param>
-    /// <param name="detectedEmailAddressesResults">An array of reputation results for the detected email addresses in the message.</param>
-    /// <param name="detectedPhoneNumbersResults">An array of reputation results for the detected phone numbers in the message.</param>
-    /// <returns>A new instance of the <see cref="MessageAnalysis"/> class.</returns>
-    /// <remarks>
-    /// This factory method generates a new instance of the <see cref="MessageAnalysis"/> class,
-    /// initializing it with the provided parameters. It assigns a unique identifier to the
-    /// analysis, an initial verdict, and sets the default status and threat zone values.
-    /// </remarks>
+    /// <param name="userId">The unique identifier of the user associated with the analysis.</param>
+    /// <param name="isPrivate">Indicates whether the message is private.</param>
+    /// <param name="message">The message information being analyzed.</param>
+    /// <returns>A new <see cref="MessageAnalysis"/> object.</returns>
     public static MessageAnalysis Create(
         DateTime startedDate,
         GlobalId userId,
         bool isPrivate,
-        MessageInformation message,
-        Verdict verdict,
-        DataAssessmentResult<string>[] attachedFilesResults,
-        DataAssessmentResult<Uri>[] detectedUrlsResults,
-        DataAssessmentResult<MailAddress>[] detectedEmailAddressesResults,
-        DataAssessmentResult<string>[] detectedPhoneNumbersResults)
+        MessageInformation message)
     {
         GlobalId id = GlobalId.CreateUnique();
         var analysisState = AnalysisState.Initial();
@@ -148,38 +133,223 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
             isPrivate,
             startedDate,
             message,
-            analysisState.WithVerdict(verdict),
-            attachedFilesResults,
-            detectedUrlsResults,
-            detectedEmailAddressesResults,
-            detectedPhoneNumbersResults);
+            analysisState);
     }
 
     /// <summary>
-    /// Updates the analysis with a new verdict and overall status.
+    /// Adds the results of file analyses to the attached files indicators.
     /// </summary>
-    /// <param name="verdict">The new verdict to assign to the analysis.</param>
-    /// <param name="status">The new status to assign to the analysis.</param>
-    public void Update(
-        Verdict verdict,
-        AnalysisStatus status)
+    /// <param name="multiAnalyses">An array of <see cref="FileMultiAnalysis"/> objects representing the file analyses to add.</param>
+    public void AddFileResults(params FileMultiAnalysis[] multiAnalyses)
     {
-        ArgumentNullException.ThrowIfNull(verdict);
-        ArgumentNullException.ThrowIfNull(status);
+        ArgumentNullException.ThrowIfNull(multiAnalyses);
 
-        UpdateVerdict(verdict);
-        State = State.WithStatus(status);
-    }
-
-    /// <summary>
-    /// If the incoming verdict has a higher severity, updates the current one.
-    /// </summary>
-    /// <param name="incomingVerdict">The new verdict to evaluate and potentially assign.</param>
-    private void UpdateVerdict(Verdict incomingVerdict)
-    {
-        if (incomingVerdict > State.Verdict)
+        if (multiAnalyses.Length is 0)
         {
-            State = State.WithVerdict(incomingVerdict);
+            return;
         }
+
+        var indicators = multiAnalyses
+            .Select(f => Indicator.Create(
+                DataType.File,
+                f.FileMetadata.Name,
+                f.Id,
+                f.State.Verdict,
+                f.State.Status))
+            .ToArray();
+
+        _attachedFilesIndicators.AddRange(indicators);
+    }
+
+    /// <summary>
+    /// Adds the results of URL analyses to the detected URLs indicators.
+    /// </summary>
+    /// <param name="multiAnalyses">An array of <see cref="UrlMultiAnalysis"/> objects representing the URL analyses to add.</param>
+    public void AddUrlResults(params UrlMultiAnalysis[] multiAnalyses)
+    {
+        ArgumentNullException.ThrowIfNull(multiAnalyses);
+
+        if (multiAnalyses.Length is 0)
+        {
+            return;
+        }
+
+        var indicators = multiAnalyses
+                .Select(u => Indicator.Create(
+                    DataType.Url,
+                    u.Url.ToString(),
+                    u.Id,
+                    u.State.Verdict,
+                    u.State.Status))
+                .ToArray();
+
+        _detectedUrlsIndicators.AddRange(indicators);
+    }
+
+    /// <summary>
+    /// Adds the results of email address reputation analyses to the detected email addresses indicators.
+    /// </summary>
+    /// <param name="multiReputations">An array of <see cref="EmailAddressMultiReputation"/> objects representing the email address reputation analyses to add.</param>
+    public void AddEmailAddressResults(params EmailAddressMultiReputation[] multiReputations)
+    {
+        ArgumentNullException.ThrowIfNull(multiReputations);
+
+        if (multiReputations.Length is 0)
+        {
+            return;
+        }
+
+        var indicators = multiReputations
+            .Select(e => Indicator.Create(
+                DataType.EmailAddress,
+                e.EmailAddress.ToString(),
+                e.Id,
+                e.FinalVerdict,
+                AnalysisStatus.Completed))
+            .ToArray();
+
+        _detectedEmailAddressesIndicators.AddRange(indicators);
+    }
+
+    /// <summary>
+    /// Adds the results of phone number reputation analyses to the detected phone numbers indicators.
+    /// </summary>
+    /// <param name="multiReputations">An array of <c>PhoneMultiReputation</c> objects representing the phone number reputation analyses to add.</param>
+    public void AddPhoneNumberResults(params PhoneMultiReputation[] multiReputations)
+    {
+        ArgumentNullException.ThrowIfNull(multiReputations);
+
+        if (multiReputations.Length is 0)
+        {
+            return;
+        }
+
+        var indicators = multiReputations
+            .Select(p => Indicator.Create(
+                DataType.PhoneNumber,
+                p.Reputations[0].PhoneInfo.LocalFormat,
+                p.Id,
+                p.FinalVerdict,
+                AnalysisStatus.Completed))
+            .ToArray();
+
+        _detectedPhoneNumbersIndicators.AddRange(indicators);
+    }
+
+    /// <summary>
+    /// Marks the analysis as initialized and updates its information.
+    /// Ensures initialization logic is only executed once.
+    /// </summary>
+    public void CompleteInitialization()
+    {
+        if (_initialized)
+        {
+            return;
+        }
+
+        _initialized = true;
+        UpdateInformation();
+    }
+
+    /// <summary>
+    /// Updates the result of a specific analysis type.
+    /// Throws <see cref="ArgumentNullException"/> if <paramref name="multiAnalysis"/> is null.
+    /// </summary>
+    /// <typeparam name="TAnalysis">The type of analysis.</typeparam>
+    /// <param name="multiAnalysis">The analysis result to update.</param>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="multiAnalysis"/> is null.</exception>
+    public void UpdateResult<TAnalysis>(MultiAnalysis<TAnalysis> multiAnalysis)
+        where TAnalysis : Analysis
+    {
+        ArgumentNullException.ThrowIfNull(multiAnalysis);
+
+        List<Indicator> indicators = multiAnalysis switch
+        {
+            FileMultiAnalysis => _attachedFilesIndicators,
+            UrlMultiAnalysis => _detectedUrlsIndicators,
+            _ => throw new InvalidOperationException($"Unsupported analysis type: {typeof(TAnalysis).Name}"),
+        };
+
+        GlobalId id = multiAnalysis.Id;
+        if (indicators.All(i => i.ResultId != id))
+        {
+            throw new InvalidOperationException($"No indicator found for the given analysis ID: {id}.");
+        }
+
+        var indicator = indicators.Single(i => i.ResultId == id);
+        indicator.UpdateVerdict(multiAnalysis.State.Verdict);
+        indicator.UpdateStatus(multiAnalysis.State.Status);
+        UpdateInformation();
+    }
+
+    private void UpdateInformation()
+    {
+        UpdateVerdict();
+        UpdateStatus();
+    }
+
+    private void UpdateVerdict()
+    {
+        Verdict[] verdicts = _attachedFilesIndicators
+            .Concat(_detectedUrlsIndicators)
+            .Concat(_detectedEmailAddressesIndicators)
+            .Concat(_detectedPhoneNumbersIndicators)
+            .Select(i => i.State.Verdict)
+            .ToArray();
+
+        if (verdicts.Length is 0)
+        {
+            State = State.WithVerdict(Verdict.Unknown);
+            return;
+        }
+
+        State = State.WithVerdict(verdicts.Max());
+    }
+
+    private void UpdateStatus()
+    {
+        AnalysisStatus[] analysisStatuses = _attachedFilesIndicators
+            .Concat(_detectedUrlsIndicators)
+            .Concat(_detectedEmailAddressesIndicators)
+            .Concat(_detectedPhoneNumbersIndicators)
+            .Select(i => i.State.Status)
+            .ToArray();
+
+        // If there are no long-running analyses (files/URLs), the process is considered complete.
+        if (analysisStatuses.Length is 0)
+        {
+            State = State.WithStatus(AnalysisStatus.Completed);
+            return;
+        }
+
+        // If all analyses have timed out, set the overall status to Timeout.
+        if (analysisStatuses.All(s => s is AnalysisStatus.Timeout))
+        {
+            State = State.WithStatus(AnalysisStatus.Timeout);
+            return;
+        }
+
+        // If all analyses have failed, set the overall status to Failed.
+        if (analysisStatuses.All(s => s is AnalysisStatus.Failed))
+        {
+            State = State.WithStatus(AnalysisStatus.Failed);
+            return;
+        }
+
+        // If all analyses are finished (i.e., not Queued or InProgress) and at least one has 'Completed',
+        // set the overall status to 'Completed'.
+        if (analysisStatuses.All(s => s is not AnalysisStatus.Queued and not AnalysisStatus.InProgress)
+            && analysisStatuses.Any(s => s is AnalysisStatus.Completed))
+        {
+            State = State.WithStatus(AnalysisStatus.Completed);
+            return;
+        }
+
+        // Otherwise, determine the most representative status from the ongoing analyses.
+        var ongoingStatus = analysisStatuses
+            .Where(s => s is AnalysisStatus.Queued or AnalysisStatus.InProgress)
+            .Min(); // Queued (0) < InProgress (1)
+
+        State = State.WithStatus(ongoingStatus);
     }
 }

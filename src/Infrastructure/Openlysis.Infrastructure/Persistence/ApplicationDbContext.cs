@@ -11,6 +11,7 @@ using Openlysis.Infrastructure.Persistence.Configurations.EmailAddresses;
 using Openlysis.Infrastructure.Persistence.Configurations.Files;
 using Openlysis.Infrastructure.Persistence.Configurations.Messages;
 using Openlysis.Infrastructure.Persistence.Configurations.Phones;
+using Openlysis.Infrastructure.Persistence.Configurations.Sagas;
 using Openlysis.Infrastructure.Persistence.Configurations.URLs;
 
 namespace Openlysis.Infrastructure.Persistence;
@@ -68,5 +69,6 @@ public class ApplicationDbContext : DbContext
         modelBuilder.ApplyConfiguration(new PhoneMultiReputationConfiguration());
         modelBuilder.ApplyConfiguration(new EmailAddressMultiReputationConfiguration());
         modelBuilder.ApplyConfiguration(new MessageAnalysisConfiguration());
+        modelBuilder.ApplyConfiguration(new MessageAnalysisUpdateSagaConfiguration());
     }
 }
