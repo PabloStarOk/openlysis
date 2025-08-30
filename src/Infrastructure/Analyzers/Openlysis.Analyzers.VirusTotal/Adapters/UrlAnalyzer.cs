@@ -112,19 +112,9 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
         }
 
         GetAnalysisResponse analysis = result.Value;
+
 #if DEBUG
-        _logger.LogDebug(
-            "VirusTotal Results:"
-            + "\n\tHarmless: {Harmless}"
-            + "\n\tUndetected: {Undetected}"
-            + "\n\tSuspicious: {Suspicious}"
-            + "\n\tMalicious: {Malicious}"
-            + "\n\tTimeout: {Timeout}",
-            analysis.Attributes.Stats.Harmless,
-            analysis.Attributes.Stats.Undetected,
-            analysis.Attributes.Stats.Suspicious,
-            analysis.Attributes.Stats.Malicious,
-            analysis.Attributes.Stats.Timeout);
+        DebugFileAnalysis(analysis);
 #endif
 
         AnalysisStatus status = Maps.AnalysisStatusMap[analysis.Attributes.Status];
@@ -135,4 +125,24 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
             status,
             verdict);
     }
+
+#if DEBUG
+    private void DebugFileAnalysis(GetAnalysisResponse analysisResponse)
+    {
+        _logger.LogTrace(
+            "VirusTotal URL analysis results:"
+            + "\n\tID: {Id}"
+            + "\n\tHarmless: {Harmless}"
+            + "\n\tUndetected: {Undetected}"
+            + "\n\tSuspicious: {Suspicious}"
+            + "\n\tMalicious: {Malicious}"
+            + "\n\tTimeout: {Timeout}",
+            analysisResponse.Id,
+            analysisResponse.Attributes.Stats.Harmless,
+            analysisResponse.Attributes.Stats.Undetected,
+            analysisResponse.Attributes.Stats.Suspicious,
+            analysisResponse.Attributes.Stats.Malicious,
+            analysisResponse.Attributes.Stats.Timeout);
+    }
+#endif
 }

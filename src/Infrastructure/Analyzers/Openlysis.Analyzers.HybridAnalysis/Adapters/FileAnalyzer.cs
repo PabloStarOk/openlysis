@@ -303,7 +303,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         }
 
 #if DEBUG
-        DebugReportSummary(reportSummary);
+        DebugSandboxReportSummary(reportSummary);
 #endif
 
         return CreateAnalysisFromReport(reportSummary);
@@ -564,28 +564,24 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     }
 
 #if DEBUG
-    /// <summary>
-    /// Logs debug information about the sandbox analysis report summary.
-    /// </summary>
-    /// <param name="reportSummary">The summary of the sandbox analysis report containing verdict and threat score.</param>
-    private void DebugReportSummary(SandboxReportSummary reportSummary)
+    private void DebugSandboxReportSummary(SandboxReportSummary reportSummary)
     {
-        _logger.LogDebug(
-            "Hybrid Analysis Sandbox File Results:"
+        _logger.LogTrace(
+            "HybridAnalysis sandbox file summary results:"
+            + "\n\tJob ID: {JobId}"
+            + "\n\tStatus: {Status}"
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreatScore: {ThreatScore}",
+            reportSummary.JobId,
+            reportSummary.Status,
             reportSummary.Verdict,
             reportSummary.ThreatScore);
     }
 
-    /// <summary>
-    /// Logs debug information about the quick-scan analysis summary.
-    /// </summary>
-    /// <param name="analysisSummary">The summary of the quick-scan analysis containing verdict and threat score information.</param>
     private void DebugAnalysisSummary(AnalysisSummary analysisSummary)
     {
-        _logger.LogDebug(
-            "Hybrid Analysis Quick-Scan File Results:"
+        _logger.LogTrace(
+            "HybridAnalysis quick-scan file summary results:"
             + "\n\tVerdict: {Verdict}"
             + "\n\tThreatScore: {ThreatScore}",
             analysisSummary.Verdict,

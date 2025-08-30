@@ -149,12 +149,7 @@ internal class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
         }
 
 #if DEBUG
-        _logger.LogDebug(
-            "Hybrid Analysis Results:"
-            + "\n\tVerdict: {Verdict}"
-            + "\n\tThreatScore: {ThreatScore}",
-            reportSummary.Verdict,
-            reportSummary.ThreatScore);
+        DebugSandboxReportSummary(reportSummary);
 #endif
 
         return MapServiceAnalysis(reportSummary);
@@ -179,4 +174,20 @@ internal class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
             verdict,
             threatScore: threatScore);
     }
+
+#if DEBUG
+    private void DebugSandboxReportSummary(SandboxReportSummary reportSummary)
+    {
+        _logger.LogTrace(
+            "HybridAnalysis sandbox URL summary results:"
+            + "\n\tJob ID: {JobId}"
+            + "\n\tStatus: {Status}"
+            + "\n\tVerdict: {Verdict}"
+            + "\n\tThreatScore: {ThreatScore}",
+            reportSummary.JobId,
+            reportSummary.Status,
+            reportSummary.Verdict,
+            reportSummary.ThreatScore);
+    }
+#endif
 }

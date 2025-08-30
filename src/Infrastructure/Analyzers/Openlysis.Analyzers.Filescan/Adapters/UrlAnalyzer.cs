@@ -1,3 +1,5 @@
+using System.Text;
+
 using ErrorOr;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -125,6 +127,10 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
             return Error.Unexpected("Filescan get analysis response contains more than 1 report.");
         }
 
+#if DEBUG
+        DebugAnalysis(analysisResponse);
+#endif
+
         Verdict verdict = Verdict.Unknown;
         ThreatScore threatScore = ThreatScore.Create(null, null);
         if (analysisResponse.Reports.Count is not 0)
@@ -136,15 +142,6 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
             threatScore = ThreatScore.Create(
                 filescanReport.FinalVerdict?.ThreatLevel,
                 FinalVerdict.MaxPossibleThreatLevel);
-
-#if DEBUG
-            _logger.LogDebug(
-                "Filescan Results:"
-                + "\n\tVerdict: {Verdict}"
-                + "\n\tThreatScore: {ThreatScore}",
-                filescanReport.FinalVerdict?.Verdict,
-                filescanReport.FinalVerdict?.ThreatLevel);
-#endif
         }
 
         AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];
@@ -155,4 +152,28 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
             verdict,
             threatScore: threatScore);
     }
+
+#if DEBUG
+    private void DebugAnalysis(GetAnalysisResponse response)
+    {
+        var stringBuilder = new StringBuilder();
+        foreach ((string id, FilescanReport report) in response.Reports)
+        {
+            stringBuilder.AppendLine(
+                "Filescan URL Report:"
+                + $"\n\tID: {id}"
+                + $"\n\tVerdict: {report.FinalVerdict?.Verdict}"
+                + $"\n\tThreatScore: {report.FinalVerdict?.ThreatLevel}");
+        }
+
+        _logger.LogTrace(
+            "Filescan analysis results:"
+            + "\n\tFlow ID: {FlowId}"
+            + "\n\tStatus: {Status}"
+            + "\n\tReports: {Reports}",
+            response.FlowId,
+            response.Status,
+            stringBuilder.ToString());
+    }
+#endif
 }

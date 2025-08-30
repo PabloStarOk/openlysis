@@ -1,3 +1,5 @@
+using System.Text;
+
 using ErrorOr;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -141,7 +143,7 @@ public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         GetAnalysisResponse analysisResponse = result.Value;
 
 #if DEBUG
-        DebugFilescanAnalysis(analysisResponse);
+        DebugAnalysis(analysisResponse);
 #endif
 
         return CreateAnalysisFromResponse(analysisResponse);
@@ -186,37 +188,26 @@ public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     }
 
 #if DEBUG
-    /// <summary>
-    /// Logs debug information about an analysis of Filescan service.
-    /// </summary>
-    /// <param name="response">The analysis response containing reports to log.</param>
-    private void DebugFilescanAnalysis(GetAnalysisResponse response)
+    private void DebugAnalysis(GetAnalysisResponse response)
     {
-        foreach (var reportKeyValue in response.Reports)
+        var stringBuilder = new StringBuilder();
+        foreach ((string id, FilescanReport report) in response.Reports)
         {
-            DebugFilescanReport(
-                id: reportKeyValue.Key,
-                filescanReport: reportKeyValue.Value);
+            stringBuilder.AppendLine(
+                "Filescan file Report:"
+                + $"\n\tID: {id}"
+                + $"\n\tVerdict: {report.FinalVerdict?.Verdict}"
+                + $"\n\tThreatScore: {report.FinalVerdict?.ThreatLevel}");
         }
-    }
 
-    /// <summary>
-    /// Logs debug information about a specific Filescan report.
-    /// </summary>
-    /// <param name="id">The unique identifier of the report.</param>
-    /// <param name="filescanReport">The Filescan report containing analysis results to log.</param>
-    private void DebugFilescanReport(
-        string id,
-        FilescanReport filescanReport)
-    {
-        _logger.LogDebug(
-            "Filescan Report:"
-            + "\n\tID: {ReportId}"
-            + "\n\tVerdict: {Verdict}"
-            + "\n\tThreatScore: {ThreatScore}",
-            id,
-            filescanReport.FinalVerdict?.Verdict,
-            filescanReport.FinalVerdict?.ThreatLevel);
+        _logger.LogTrace(
+            "Filescan analysis results:"
+            + "\n\tFlow ID: {FlowId}"
+            + "\n\tStatus: {Status}"
+            + "\n\tReports: {Reports}",
+            response.FlowId,
+            response.Status,
+            stringBuilder.ToString());
     }
 #endif
 }

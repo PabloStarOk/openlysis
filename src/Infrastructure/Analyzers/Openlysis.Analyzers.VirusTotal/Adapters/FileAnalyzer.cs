@@ -146,7 +146,7 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         GetAnalysisResponse analysis = result.Value;
 
 #if DEBUG
-        DebugFileAnalysis(analysis);
+        DebugAnalysis(analysis);
 #endif
 
         return CreateAnalysisFromResponse(analysis);
@@ -175,20 +175,17 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     }
 
 #if DEBUG
-    /// <summary>
-    /// Logs debug information about the file analysis response from VirusTotal.
-    /// </summary>
-    /// <param name="analysisResponse">The response containing file analysis results from VirusTotal.</param>
-    private void DebugFileAnalysis(
-        GetAnalysisResponse analysisResponse)
+    private void DebugAnalysis(GetAnalysisResponse analysisResponse)
     {
-        _logger.LogDebug(
+        _logger.LogTrace(
             "VirusTotal file analysis results:"
+            + "\n\tID: {Id}"
             + "\n\tHarmless: {Harmless}"
             + "\n\tUndetected: {Undetected}"
             + "\n\tSuspicious: {Suspicious}"
             + "\n\tMalicious: {Malicious}"
             + "\n\tTimeout: {Timeout}",
+            analysisResponse.Id,
             analysisResponse.Attributes.Stats.Harmless,
             analysisResponse.Attributes.Stats.Undetected,
             analysisResponse.Attributes.Stats.Suspicious,

@@ -158,12 +158,6 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
             return ServiceErrors.NonSuccessStatusCode;
         }
 
-#if DEBUG
-        _logger.LogDebug(
-            "UrlQuery Analysis Report: {Body}",
-            await response.Content.ReadAsStringAsync(cancellationToken));
-#endif
-
         ErrorOr<GetReportResponse> reportResult = await _serviceDeserializer
             .DeserializeAsync<GetReportResponse>(response, cancellationToken);
 
@@ -175,13 +169,25 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
         GetReportResponse report = reportResult.Value;
 
 #if DEBUG
-        _logger.LogDebug(
-            "UrlQuery Report Sensors:\n{Body}",
-            report.Sensors);
+        DebugReport(report);
 #endif
 
         AnalysisStatus status = Maps.AnalysisStatusMap[report.Status];
         Verdict verdict = _verdictCalculator.Calculate(report.Sensors);
         return UrlAnalysis.Create(report.ReportId, ServiceName, status, verdict, id.Job);
     }
+
+#if DEBUG
+    private void DebugReport(GetReportResponse report)
+    {
+        _logger.LogTrace(
+            "urlquery URL report results:"
+            + "\n\tReport ID: {ReportId}"
+            + "\n\tStatus: {Status}"
+            + "\n\tSensors: {Sensors}",
+            report.ReportId,
+            report.Status,
+            report.Sensors);
+    }
+#endif
 }
