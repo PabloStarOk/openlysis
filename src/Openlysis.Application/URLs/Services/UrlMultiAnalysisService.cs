@@ -21,7 +21,7 @@ namespace Openlysis.Application.URLs.Services;
 /// </summary>
 internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
 {
-    private readonly IRepository<UrlMultiAnalysis, GlobalId> _repository;
+    private readonly IRepository<UrlMultiAnalysis> _repository;
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
     private readonly IUrlMultiAnalysisQueue _multiAnalysisQueue;
@@ -36,7 +36,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     /// <param name="multiAnalysisQueue">Queue for multi-analysis operations.</param>
     /// <param name="memoryStreamManager">The manager for recyclable <see cref="MemoryStream"/> used for storing URL string bytes.</param>
     public UrlMultiAnalysisService(
-        IRepository<UrlMultiAnalysis, GlobalId> repository,
+        IRepository<UrlMultiAnalysis> repository,
         TimeProvider timeProvider,
         IHashService hashService,
         IUrlMultiAnalysisQueue multiAnalysisQueue,
@@ -65,19 +65,16 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             urlHashValues = await _hashService.HashDataAsync(urlMemoryStream, cancellationToken);
         }
 
-        IReadOnlyList<UrlMultiAnalysis> lastExistingAnalyses = await GetAnalysesByHashAsync(
-            userId,
-            hash: urlHashValues.Sha256,
-            pageSize: 1,
-            size: 1,
-            order: OrderType.Dsc,
+        UrlMultiAnalysis? existingAnalysis = await _repository.FindAsync(
+            filter: f => f.DataHashValues == urlHashValues,
+            orderBy: q => q.OrderByDescending(x => x.StartedDate),
             cancellationToken);
-        if (lastExistingAnalyses.Count > 0
-            && !reanalyze)
+
+        if (existingAnalysis is not null && !reanalyze)
         {
             return new AnalysisRequestResult<UrlMultiAnalysis>(
                 AnalysisRequestStatus.Retrieved,
-                lastExistingAnalyses[0]);
+                existingAnalysis);
         }
 
         var multiAnalysis = UrlMultiAnalysis.Create(
@@ -85,9 +82,10 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             isPrivate,
             _timeProvider.GetUtcNow().UtcDateTime,
             url,
-            urlHashValues);
+            existingAnalysis?.DataHashValues ?? urlHashValues);
 
         await _repository.AddAsync(multiAnalysis, cancellationToken);
+        await _repository.SaveChangeAsync(cancellationToken);
         await _multiAnalysisQueue.QueueAsync(
             multiAnalysis.Id,
             url,
@@ -111,8 +109,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             return Error.NotFound();
         }
 
-        if (multiAnalysis.IsPrivate &&
-            multiAnalysis.UserId != userId)
+        if (multiAnalysis.IsPrivate && multiAnalysis.UserId != userId)
         {
             return Error.NotFound();
         }

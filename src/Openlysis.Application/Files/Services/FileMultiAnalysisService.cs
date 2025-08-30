@@ -16,7 +16,7 @@ namespace Openlysis.Application.Files.Services;
 /// </summary>
 internal class FileMultiAnalysisService : IFileMultiAnalysisService
 {
-    private readonly IRepository<FileMultiAnalysis, GlobalId> _repository;
+    private readonly IRepository<FileMultiAnalysis> _repository;
     private readonly TimeProvider _timeProvider;
     private readonly IFileMultiAnalysisQueue _multiAnalysisQueue;
     private readonly IFileStorageContext _fileStorageContext;
@@ -29,7 +29,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
     /// <param name="timeProvider">Provides the current time.</param>
     /// <param name="fileStorageContext">Context for file storage operations.</param>
     public FileMultiAnalysisService(
-        IRepository<FileMultiAnalysis, GlobalId> repository,
+        IRepository<FileMultiAnalysis> repository,
         IFileMultiAnalysisQueue multiAnalysisQueue,
         TimeProvider timeProvider,
         IFileStorageContext fileStorageContext)
@@ -50,31 +50,29 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
         CancellationToken cancellationToken = default,
         GlobalId? correlationId = null)
     {
-        // Check if the file has already been analyzed.
-        var existingAnalyses = await _repository.GetManyAsync(
-            page: 1,
-            pageSize: 1,
-            f => f.DataHashValues == processedFile.HashValues,
-            q => q.OrderByDescending(f => f.StartedDate),
+        FileMultiAnalysis? existingAnalysis = await _repository.FindAsync(
+            filter: f => f.DataHashValues == processedFile.HashValues,
+            orderBy: q => q.OrderByDescending(x => x.StartedDate),
             cancellationToken);
 
-        if (existingAnalyses.Count > 0 && !reanalyze)
+        if (existingAnalysis is not null && !reanalyze)
         {
             await _fileStorageContext.RemoveAsync(processedFile);
 
             return new AnalysisRequestResult<FileMultiAnalysis>(
                 AnalysisRequestStatus.Retrieved,
-                existingAnalyses[0]);
+                existingAnalysis);
         }
 
         var multiAnalysis = FileMultiAnalysis.Create(
             userId,
             isPrivate,
             _timeProvider.GetUtcNow().UtcDateTime,
-            processedFile.HashValues,
+            existingAnalysis?.DataHashValues ?? processedFile.HashValues,
             processedFile.Metadata);
 
         await _repository.AddAsync(multiAnalysis, cancellationToken);
+        await _repository.SaveChangeAsync(cancellationToken);
         await _multiAnalysisQueue.QueueAsync(
             multiAnalysis.Id,
             processedFile,
@@ -101,8 +99,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
             return Error.NotFound();
         }
 
-        if (multiAnalysis.IsPrivate
-            && multiAnalysis.UserId != userId)
+        if (multiAnalysis.IsPrivate && multiAnalysis.UserId != userId)
         {
             return Error.NotFound();
         }

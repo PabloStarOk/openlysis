@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Openlysis.Application.Common.Abstractions.Contracts;
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Reputations;
-using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.Phones.Entities;
 
@@ -33,7 +32,7 @@ internal class PhoneReputationService :
     /// </param>
     public PhoneReputationService(
         ILogger<PhoneReputationService> logger,
-        IRepository<PhoneMultiReputation, GlobalId> repository,
+        IRepository<PhoneMultiReputation> repository,
         TimeProvider timeProvider,
         IEnumerable<IReputationEvaluator<string, PhoneReputation>> reputationEvaluators)
         : base(logger, repository, timeProvider, reputationEvaluators)

@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Openlysis.Application.Common.Abstractions.Contracts;
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Reputations;
-using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.EmailAddresses.Entities;
 
@@ -32,7 +31,7 @@ internal class EmailAddressReputationService :
     /// </param>
     public EmailAddressReputationService(
         ILogger<EmailAddressReputationService> logger,
-        IRepository<EmailAddressMultiReputation, GlobalId> repository,
+        IRepository<EmailAddressMultiReputation> repository,
         TimeProvider timeProvider,
         IEnumerable<IReputationEvaluator<MailAddress, EmailAddressReputation>> reputationEvaluators)
         : base(logger, repository, timeProvider, reputationEvaluators)

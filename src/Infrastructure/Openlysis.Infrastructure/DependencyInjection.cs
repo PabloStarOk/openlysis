@@ -15,7 +15,6 @@ using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Files.Contracts.Abstractions;
 using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.URLs.Contracts.Abstractions;
-using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
 using Openlysis.Domain.Messages;
@@ -71,15 +70,15 @@ public static class DependencyInjection
             TimeSpan.FromMilliseconds(regexSettings.TimeoutMs));
 
         // Add analyses database.
-        services.AddDbContext<ApplicationDbContext>(options =>
+        services.AddDbContext<DbContext, ApplicationDbContext>(options =>
             options.UseNpgsql(connectionString));
 
         // Add repositories.
-        services.AddScoped<IRepository<FileMultiAnalysis, GlobalId>, FileMultiAnalysisRepository>();
-        services.AddScoped<IRepository<UrlMultiAnalysis, GlobalId>, UrlMultiAnalysisRepository>();
-        services.AddScoped<IRepository<PhoneMultiReputation, GlobalId>, PhoneMultiReputationRepository>();
-        services.AddScoped<IRepository<EmailAddressMultiReputation, GlobalId>, EmailAddressMultiReputationRepository>();
-        services.AddScoped<IRepository<MessageAnalysis, GlobalId>, MessageAnalysisRepository>();
+        services.AddScoped<IRepository<FileMultiAnalysis>, Repository<FileMultiAnalysis>>();
+        services.AddScoped<IRepository<UrlMultiAnalysis>, Repository<UrlMultiAnalysis>>();
+        services.AddScoped<IRepository<PhoneMultiReputation>, Repository<PhoneMultiReputation>>();
+        services.AddScoped<IRepository<EmailAddressMultiReputation>, Repository<EmailAddressMultiReputation>>();
+        services.AddScoped<IRepository<MessageAnalysis>, Repository<MessageAnalysis>>();
 
         services.AddSingleton(_ => MemoryPool<byte>.Shared);
 

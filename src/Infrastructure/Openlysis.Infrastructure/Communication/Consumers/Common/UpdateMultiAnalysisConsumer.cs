@@ -3,7 +3,6 @@ using MassTransit;
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
-using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
 using Openlysis.Infrastructure.Shared.Communication.Contracts;
 
@@ -20,7 +19,7 @@ internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
     where TMultiAnalysis : MultiAnalysis<TAnalysis>
     where TAnalysis : Analysis
 {
-    private readonly IRepository<TMultiAnalysis, GlobalId> _repository;
+    private readonly IRepository<TMultiAnalysis> _repository;
     private readonly IEndpointUriProvider _endpointUriProvider;
 
     /// <summary>
@@ -29,7 +28,7 @@ internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
     /// <param name="repository">The repository for accessing and updating the multi-analysis aggregate.</param>
     /// <param name="endpointUriProvider">The provider for endpoint URIs used in message communication.</param>
     public UpdateMultiAnalysisConsumer(
-        IRepository<TMultiAnalysis, GlobalId> repository,
+        IRepository<TMultiAnalysis> repository,
         IEndpointUriProvider endpointUriProvider)
     {
         _repository = repository;
@@ -62,7 +61,8 @@ internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
             multiAnalysis.SetAsTimedOut();
         }
 
-        await _repository.UpdateAsync(multiAnalysis, context.CancellationToken);
+        _repository.Update(multiAnalysis);
+        await _repository.SaveChangeAsync();
         if (message.CorrelationId is not null)
         {
             await context.Send(_endpointUriProvider.MessageAnalysisUpdateUri, message);

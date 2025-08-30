@@ -27,7 +27,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// <inheritdoc/>
     public bool AnalyzeIsAvailable => _messageAnalyzer.IsAvailable;
 
-    private readonly IRepository<MessageAnalysis, GlobalId> _repository;
+    private readonly IRepository<MessageAnalysis> _repository;
     private readonly TimeProvider _timeProvider;
     private readonly IMessageHashService _messageHashService;
     private readonly IMessageDataExtractor _dataExtractor;
@@ -44,7 +44,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// <param name="messageAnalyzer">The service responsible for analyzing messages and their associated data.</param>
     /// <param name="messageAnalysisQueue">Queue for managing asynchronous message analysis operations.</param>
     public MessageAnalysisService(
-        IRepository<MessageAnalysis, GlobalId> repository,
+        IRepository<MessageAnalysis> repository,
         TimeProvider timeProvider,
         IMessageHashService messageHashService,
         IMessageDataExtractor dataExtractor,
@@ -76,14 +76,16 @@ internal class MessageAnalysisService : IMessageAnalysisService
         }
 
         HashValues messageHashValues = await _messageHashService.HashAsync(message, files, cancellationToken);
-        MessageAnalysis? lastExistingAnalysis = await FetchLastAnalysisAsync(messageHashValues, cancellationToken);
+        MessageAnalysis? lastMessageAnalysis = await _repository.FindAsync(
+            filter: m => m.Message.MessageHashValues == messageHashValues,
+            orderBy: q => q.OrderByDescending(x => x.StartedDate),
+            cancellationToken);
 
-        if (lastExistingAnalysis is not null
-            && !reanalyze)
+        if (lastMessageAnalysis is not null && !reanalyze)
         {
             return new AnalysisRequestResult<MessageAnalysis>(
                 AnalysisRequestStatus.Retrieved,
-                lastExistingAnalysis);
+                lastMessageAnalysis);
         }
 
         string sender = message.Sender;
@@ -95,7 +97,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
             message.Sender,
             message.Subject,
             message.Content,
-            messageHashValues);
+            lastMessageAnalysis?.Message.MessageHashValues ?? messageHashValues);
 
         var correlationId = GlobalId.CreateUnique();
         var messageAnalysis = MessageAnalysis.Create(
@@ -128,6 +130,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
         {
             messageAnalysis.CompleteInitialization();
             await _repository.AddAsync(messageAnalysis, cancellationToken);
+            await _repository.SaveChangeAsync(cancellationToken);
             return new AnalysisRequestResult<MessageAnalysis>(
                 AnalysisRequestStatus.Retrieved,
                 messageAnalysis);
@@ -145,6 +148,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
         messageAnalysis.CompleteInitialization();
 
         await _repository.AddAsync(messageAnalysis, cancellationToken);
+        await _repository.SaveChangeAsync(cancellationToken);
         await _messageAnalysisQueue.SetAsInitializedAsync(correlationId, cancellationToken);
 
         return new AnalysisRequestResult<MessageAnalysis>(
@@ -164,8 +168,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
             return Error.NotFound();
         }
 
-        if (messageAnalysis.IsPrivate &&
-            messageAnalysis.UserId != userId)
+        if (messageAnalysis.IsPrivate && messageAnalysis.UserId != userId)
         {
             return Error.NotFound();
         }
@@ -247,18 +250,5 @@ internal class MessageAnalysisService : IMessageAnalysisService
             .SelectMany(extractionMethod!)
             .ToHashSet()
             .ToArray();
-    }
-
-    private async Task<MessageAnalysis?> FetchLastAnalysisAsync(
-        HashValues messageHashValues,
-        CancellationToken cancellationToken)
-    {
-        IReadOnlyList<MessageAnalysis> existingAnalyses = await _repository.GetManyAsync(
-            page: 1,
-            pageSize: 1,
-            filter: m => m.Message.MessageHashValues == messageHashValues,
-            orderBy: q => q.OrderByDescending(m => m.StartedDate),
-            cancellationToken);
-        return existingAnalyses.Count > 0 ? existingAnalyses[0] : null;
     }
 }

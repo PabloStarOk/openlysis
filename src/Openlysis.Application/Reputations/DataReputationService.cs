@@ -8,7 +8,6 @@ using Openlysis.Application.Common.Abstractions.Contracts;
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
-using Openlysis.Domain.Common.ValueObjects;
 
 namespace Openlysis.Application.Reputations;
 
@@ -37,7 +36,7 @@ internal abstract class DataReputationService<
     protected TimeProvider TimeProvider { get; }
 
     private readonly ILogger<DataReputationService<TData, TServiceReputation, TMultiReputation>> _logger;
-    private readonly IRepository<TMultiReputation, GlobalId> _repository;
+    private readonly IRepository<TMultiReputation> _repository;
     private readonly IEnumerable<IReputationEvaluator<TData, TServiceReputation>> _reputationEvaluators;
 
     /// <summary>
@@ -49,7 +48,7 @@ internal abstract class DataReputationService<
     /// <param name="reputationEvaluators">A collection of reputation evaluators used for evaluating data.</param>
     protected DataReputationService(
         ILogger<DataReputationService<TData, TServiceReputation, TMultiReputation>> logger,
-        IRepository<TMultiReputation, GlobalId> repository,
+        IRepository<TMultiReputation> repository,
         TimeProvider timeProvider,
         IEnumerable<IReputationEvaluator<TData, TServiceReputation>> reputationEvaluators)
     {
@@ -100,6 +99,7 @@ internal abstract class DataReputationService<
         if (storeInDatabase)
         {
             await _repository.AddAsync(multiReputation, cancellationToken);
+            await _repository.SaveChangeAsync(cancellationToken);
         }
 
         return multiReputation;

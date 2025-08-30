@@ -14,10 +14,10 @@ namespace Openlysis.Application.Messages.Services;
 /// </summary>
 internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsProvider
 {
-    private readonly IRepository<FileMultiAnalysis, GlobalId> _fileMultiAnalysisRepository;
-    private readonly IRepository<UrlMultiAnalysis, GlobalId> _urlMultiAnalysisRepository;
-    private readonly IRepository<EmailAddressMultiReputation, GlobalId> _emailReputationsRepository;
-    private readonly IRepository<PhoneMultiReputation, GlobalId> _phoneReputationsRepository;
+    private readonly IRepository<FileMultiAnalysis> _fileMultiAnalysisRepository;
+    private readonly IRepository<UrlMultiAnalysis> _urlMultiAnalysisRepository;
+    private readonly IRepository<EmailAddressMultiReputation> _emailReputationsRepository;
+    private readonly IRepository<PhoneMultiReputation> _phoneReputationsRepository;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageAnalysisResultsProvider"/> class.
@@ -35,10 +35,10 @@ internal sealed class MessageAnalysisResultsProvider : IMessageAnalysisResultsPr
     /// The repository for retrieving phone number reputation results.
     /// </param>
     public MessageAnalysisResultsProvider(
-        IRepository<FileMultiAnalysis, GlobalId> fileMultiAnalysisRepository,
-        IRepository<UrlMultiAnalysis, GlobalId> urlMultiAnalysisRepository,
-        IRepository<EmailAddressMultiReputation, GlobalId> emailReputationsRepository,
-        IRepository<PhoneMultiReputation, GlobalId> phoneReputationsRepository)
+        IRepository<FileMultiAnalysis> fileMultiAnalysisRepository,
+        IRepository<UrlMultiAnalysis> urlMultiAnalysisRepository,
+        IRepository<EmailAddressMultiReputation> emailReputationsRepository,
+        IRepository<PhoneMultiReputation> phoneReputationsRepository)
     {
         _fileMultiAnalysisRepository = fileMultiAnalysisRepository;
         _urlMultiAnalysisRepository = urlMultiAnalysisRepository;
