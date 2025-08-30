@@ -34,7 +34,9 @@ internal sealed class MessageAnalysisUpdateDefinition : SagaDefinition<MessageAn
         IRegistrationContext context)
     {
         ConsumersOptions options = _consumersOptions.Value;
+
         endpointConfigurator.ConcurrentMessageLimit = options.MessageAnalysisUpdate.ConcurrencyLimit;
+        endpointConfigurator.PrefetchCount = options.MessageAnalysisUpdate.ConcurrencyLimit;
 
         endpointConfigurator.UseMessageRetry(r => r.Intervals(options.MessageAnalysisUpdate.RetryIntervals));
         endpointConfigurator.UseInMemoryOutbox(context);

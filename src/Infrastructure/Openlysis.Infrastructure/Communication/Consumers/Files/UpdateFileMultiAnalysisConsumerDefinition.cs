@@ -15,6 +15,8 @@ namespace Openlysis.Infrastructure.Communication.Consumers.Files;
 internal sealed class UpdateFileMultiAnalysisConsumerDefinition
     : ConsumerDefinition<UpdateMultiAnalysisConsumer<FileMultiAnalysis, FileAnalysis>>
 {
+    private readonly IOptions<ConsumersOptions> _consumersOptions;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFileMultiAnalysisConsumerDefinition"/> class.
     /// </summary>
@@ -22,5 +24,21 @@ internal sealed class UpdateFileMultiAnalysisConsumerDefinition
     public UpdateFileMultiAnalysisConsumerDefinition(IOptions<ConsumersOptions> consumersOptions)
     {
         EndpointName = consumersOptions.Value.UpdateFileAnalysis.Name;
+        _consumersOptions = consumersOptions;
+    }
+
+    /// <inheritdoc/>
+    protected override void ConfigureConsumer(
+        IReceiveEndpointConfigurator endpointConfigurator,
+        IConsumerConfigurator<UpdateMultiAnalysisConsumer<FileMultiAnalysis, FileAnalysis>> consumerConfigurator,
+        IRegistrationContext context)
+    {
+        ConsumersOptions options = _consumersOptions.Value;
+
+        endpointConfigurator.ConcurrentMessageLimit = options.UpdateFileAnalysis.ConcurrencyLimit;
+        endpointConfigurator.PrefetchCount = options.UpdateFileAnalysis.ConcurrencyLimit;
+
+        endpointConfigurator.UseMessageRetry(r => r.Intervals(options.UpdateFileAnalysis.RetryIntervals));
+        endpointConfigurator.UseInMemoryOutbox(context);
     }
 }
