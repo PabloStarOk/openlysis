@@ -45,16 +45,12 @@ internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
             context.CancellationToken);
         ArgumentNullException.ThrowIfNull(multiAnalysis);
 
-        foreach (var analysis in message.UpdatableAnalyses)
+        if (!multiAnalysis.State.CanBeUpdated)
         {
-            if (multiAnalysis.Analyses.Contains(analysis))
-            {
-                multiAnalysis.UpdateAnalysis(analysis);
-                continue;
-            }
-
-            multiAnalysis.AddAnalysis(analysis);
+            return;
         }
+
+        multiAnalysis.AddOrUpdateAnalyses(message.UpdatableAnalyses.ToArray());
 
         if (message.Timeout)
         {

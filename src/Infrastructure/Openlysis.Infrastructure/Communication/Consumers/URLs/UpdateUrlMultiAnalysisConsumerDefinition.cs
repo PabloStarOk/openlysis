@@ -6,6 +6,7 @@ using Openlysis.Domain.URLs;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Communication.Consumers.Common;
 using Openlysis.Infrastructure.Shared.Communication.Configuration;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
 
 namespace Openlysis.Infrastructure.Communication.Consumers.URLs;
 
@@ -40,5 +41,10 @@ internal sealed class UpdateUrlMultiAnalysisConsumerDefinition
 
         endpointConfigurator.UseMessageRetry(r => r.Intervals(options.UpdateUrlAnalysis.RetryIntervals));
         endpointConfigurator.UseInMemoryOutbox(context);
+
+        IPartitioner partitioner = endpointConfigurator.CreatePartitioner(options.UpdateUrlAnalysis.ConcurrencyLimit);
+        endpointConfigurator.UsePartitioner<UpdateMultiAnalysisMessage<UrlAnalysis>>(
+            partitioner,
+            consumeContext => consumeContext.Message.MultiAnalysisId.Value);
     }
 }

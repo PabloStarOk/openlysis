@@ -6,6 +6,7 @@ using Openlysis.Domain.Files;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Infrastructure.Communication.Consumers.Common;
 using Openlysis.Infrastructure.Shared.Communication.Configuration;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
 
 namespace Openlysis.Infrastructure.Communication.Consumers.Files;
 
@@ -40,5 +41,10 @@ internal sealed class UpdateFileMultiAnalysisConsumerDefinition
 
         endpointConfigurator.UseMessageRetry(r => r.Intervals(options.UpdateFileAnalysis.RetryIntervals));
         endpointConfigurator.UseInMemoryOutbox(context);
+
+        IPartitioner partitioner = endpointConfigurator.CreatePartitioner(options.UpdateFileAnalysis.ConcurrencyLimit);
+        endpointConfigurator.UsePartitioner<UpdateMultiAnalysisMessage<FileAnalysis>>(
+            partitioner,
+            consumeContext => consumeContext.Message.MultiAnalysisId.Value);
     }
 }

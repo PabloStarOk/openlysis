@@ -94,47 +94,24 @@ public abstract class MultiAnalysis<TAnalysis>
 #pragma warning restore CS8618
 
     /// <summary>
-    /// Adds a new analysis to the multi-analysis.
+    /// Adds new analyses to the multi-analysis or updates existing ones.
+    /// If an analysis already exists, it is updated; otherwise, it is added.
+    /// Updates the overall information after processing.
     /// </summary>
-    /// <param name="analysis">The analysis to add.</param>
-    /// <exception cref="ArgumentNullException">Thrown if the provided analysis is null.</exception>
-    /// <exception cref="InvalidOperationException">Thrown if the analysis already exists in the collection.</exception>
-    public void AddAnalysis(TAnalysis analysis)
+    /// <param name="analyses">The analyses to add or update.</param>
+    public void AddOrUpdateAnalyses(params TAnalysis[] analyses)
     {
-        ArgumentNullException.ThrowIfNull(analysis);
-        if (_analyses.Contains(analysis))
+        foreach (TAnalysis analysis in analyses)
         {
-            throw new InvalidOperationException("Multi-analysis already contains the given analysis.");
-        }
-
-        _analyses.Add(analysis);
-        UpdateInformation();
-    }
-
-    /// <summary>
-    /// Updates an existing analysis in the collection.
-    /// </summary>
-    /// <param name="analysis">The analysis to update.</param>
-    /// <exception cref="InvalidOperationException">
-    /// Thrown if the analysis does not exist in the collection.
-    /// </exception>
-    public void UpdateAnalysis(TAnalysis analysis)
-    {
-        if (!_analyses.Contains(analysis))
-        {
-            throw new InvalidOperationException("Analysis does not exist in the multi-analysis.");
-        }
-
-        TAnalysis existingAnalysis = _analyses.Single(a => a == analysis);
-        if (existingAnalysis.State is not
+            if (_analyses.Contains(analysis))
             {
-                Status: AnalysisStatus.Queued or AnalysisStatus.InProgress
-            })
-        {
-            return;
+                UpdateAnalysis(analysis);
+                continue;
+            }
+
+            AddAnalysis(analysis);
         }
 
-        HandleAnalysisUpdate(existingAnalysis, analysis);
         UpdateInformation();
     }
 
@@ -184,6 +161,49 @@ public abstract class MultiAnalysis<TAnalysis>
     /// Updates the average threat score of the multi-analysis based on the associated analyses.
     /// </summary>
     protected abstract void HandleAverageThreatScoreUpdate();
+
+    /// <summary>
+    /// Adds a new analysis to the multi-analysis.
+    /// </summary>
+    /// <param name="analysis">The analysis to add.</param>
+    /// <exception cref="ArgumentNullException">Thrown if the provided analysis is null.</exception>
+    /// <exception cref="InvalidOperationException">Thrown if the analysis already exists in the collection.</exception>
+    private void AddAnalysis(TAnalysis analysis)
+    {
+        ArgumentNullException.ThrowIfNull(analysis);
+        if (_analyses.Contains(analysis))
+        {
+            throw new InvalidOperationException("Multi-analysis already contains the given analysis.");
+        }
+
+        _analyses.Add(analysis);
+    }
+
+    /// <summary>
+    /// Updates an existing analysis in the collection.
+    /// </summary>
+    /// <param name="analysis">The analysis to update.</param>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown if the analysis does not exist in the collection.
+    /// </exception>
+    private void UpdateAnalysis(TAnalysis analysis)
+    {
+        if (!_analyses.Contains(analysis))
+        {
+            throw new InvalidOperationException("Analysis does not exist in the multi-analysis.");
+        }
+
+        TAnalysis existingAnalysis = _analyses.Single(a => a == analysis);
+        if (existingAnalysis.State is not
+            {
+                Status: AnalysisStatus.Queued or AnalysisStatus.InProgress,
+            })
+        {
+            return;
+        }
+
+        HandleAnalysisUpdate(existingAnalysis, analysis);
+    }
 
     /// <summary>
     /// Updates the final verdict of the multi-analysis based on the associated analyses.
