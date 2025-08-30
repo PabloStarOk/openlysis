@@ -15,10 +15,9 @@ internal sealed class AnalyzeFileConsumerDefinition
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileConsumerDefinition"/> class.
     /// </summary>
-    /// <param name="brokerOptions">The broker settings options used to configure the endpoint name.</param>
-    public AnalyzeFileConsumerDefinition(
-        IOptions<BrokerSettings> brokerOptions)
+    /// <param name="consumersOptions">The options for configuring consumers.</param>
+    public AnalyzeFileConsumerDefinition(IOptions<ConsumersOptions> consumersOptions)
     {
-        EndpointName = brokerOptions.Value.AnalyzeFileEndpointName;
+        EndpointName = consumersOptions.Value.AnalyzeFile.Name;
     }
 }

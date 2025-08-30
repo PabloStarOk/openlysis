@@ -12,20 +12,18 @@ public record BrokerSettings
     /// </summary>
     public const string SectionName = "BrokerSettings";
 
-    private static int DefaultConcurrencyLimit { get; } = Environment.ProcessorCount * 2;
-
-    private static int[] DefaultRetryIntervals { get; } = [250, 500, 1000, 5000, 10000];
-
     /// <summary>
     /// Gets the scheme of the message broker.
     /// </summary>
     [Required]
+    [MinLength(1)]
     required public string Scheme { get; init; }
 
     /// <summary>
     /// Gets the host name of the RabbitMQ server.
     /// </summary>
     [Required]
+    [MinLength(1)]
     required public string Host { get; init; }
 
     /// <summary>
@@ -38,57 +36,20 @@ public record BrokerSettings
     /// Gets the virtual host to use when connecting to the RabbitMQ server.
     /// </summary>
     [Required]
+    [MinLength(1)]
     required public string VirtualHost { get; init; }
 
     /// <summary>
     /// Gets the username to use when connecting to the RabbitMQ server.
     /// </summary>
     [Required]
+    [MinLength(1)]
     required public string Username { get; init; }
 
     /// <summary>
     /// Gets the password to use when connecting to the RabbitMQ server.
     /// </summary>
     [Required]
+    [MinLength(1)]
     required public string Password { get; init; }
-
-    /// <summary>
-    /// Gets the endpoint name for analyzing files.
-    /// </summary>
-    [Required]
-    required public string AnalyzeFileEndpointName { get; init; }
-
-    /// <summary>
-    /// Gets the endpoint name for analyzing URLs.
-    /// </summary>
-    [Required]
-    required public string AnalyzeUrlEndpointName { get; init; }
-
-    /// <summary>
-    /// Gets the endpoint name for updating file analysis.
-    /// </summary>
-    [Required]
-    required public string UpdateFileAnalysisEndpointName { get; init; }
-
-    /// <summary>
-    /// Gets the endpoint name for updating URL analysis.
-    /// </summary>
-    [Required]
-    required public string UpdateUrlAnalysisEndpointName { get; init; }
-
-    /// <summary>
-    /// Gets the endpoint name for updating message analysis.
-    /// </summary>
-    [Required]
-    required public string MessageAnalysisUpdateEndpointName { get; init; }
-
-    /// <summary>
-    /// Gets the concurrency limit for message analysis updates.
-    /// </summary>
-    public int MessageAnalysisUpdateConcurrencyLimit { get; init; } = DefaultConcurrencyLimit;
-
-    /// <summary>
-    /// Gets the retry intervals (in milliseconds) for message analysis update attempts.
-    /// </summary>
-    public int[] MessageAnalysisUpdateRetryIntervals { get; init; } = DefaultRetryIntervals;
 }

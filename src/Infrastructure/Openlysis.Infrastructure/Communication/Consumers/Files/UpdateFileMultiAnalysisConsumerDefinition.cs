@@ -18,10 +18,9 @@ internal sealed class UpdateFileMultiAnalysisConsumerDefinition
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateFileMultiAnalysisConsumerDefinition"/> class.
     /// </summary>
-    /// <param name="brokerOptions">The broker settings options used to configure the endpoint name.</param>
-    public UpdateFileMultiAnalysisConsumerDefinition(
-        IOptions<BrokerSettings> brokerOptions)
+    /// <param name="consumersOptions">The options for configuring consumers.</param>
+    public UpdateFileMultiAnalysisConsumerDefinition(IOptions<ConsumersOptions> consumersOptions)
     {
-        EndpointName = brokerOptions.Value.UpdateFileAnalysisEndpointName;
+        EndpointName = consumersOptions.Value.UpdateFileAnalysis.Name;
     }
 }

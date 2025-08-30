@@ -34,12 +34,16 @@ public static class DependencyInjection
         // Get options
         var brokerSettingsSection = configuration
             .GetRequiredSection(BrokerSettings.SectionName);
-
-        ArgumentNullException.ThrowIfNull(brokerSettingsSection);
+        var consumersOptionsSection = configuration.GetRequiredSection(ConsumersOptions.SectionName);
 
         // Add options
         services.AddOptions<BrokerSettings>()
             .Bind(brokerSettingsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<ConsumersOptions>()
+            .Bind(consumersOptionsSection)
             .ValidateDataAnnotations()
             .ValidateOnStart();
 

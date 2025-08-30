@@ -15,16 +15,16 @@ namespace Openlysis.Infrastructure.Communication.Sagas.Messages;
 /// </summary>
 internal sealed class MessageAnalysisUpdateDefinition : SagaDefinition<MessageAnalysisUpdateSaga>
 {
-    private readonly IOptions<BrokerSettings> _brokerOptions;
+    private readonly IOptions<ConsumersOptions> _consumersOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageAnalysisUpdateDefinition"/> class.
     /// </summary>
-    /// <param name="brokerOptions">The broker settings options.</param>
-    public MessageAnalysisUpdateDefinition(IOptions<BrokerSettings> brokerOptions)
+    /// <param name="consumersOptions">The options for configuring consumers.</param>
+    public MessageAnalysisUpdateDefinition(IOptions<ConsumersOptions> consumersOptions)
     {
-        EndpointName = brokerOptions.Value.MessageAnalysisUpdateEndpointName;
-        _brokerOptions = brokerOptions;
+        EndpointName = consumersOptions.Value.MessageAnalysisUpdate.Name;
+        _consumersOptions = consumersOptions;
     }
 
     /// <inheritdoc/>
@@ -33,12 +33,13 @@ internal sealed class MessageAnalysisUpdateDefinition : SagaDefinition<MessageAn
         ISagaConfigurator<MessageAnalysisUpdateSaga> sagaConfigurator,
         IRegistrationContext context)
     {
-        endpointConfigurator.ConcurrentMessageLimit = _brokerOptions.Value.MessageAnalysisUpdateConcurrencyLimit;
+        ConsumersOptions options = _consumersOptions.Value;
+        endpointConfigurator.ConcurrentMessageLimit = options.MessageAnalysisUpdate.ConcurrencyLimit;
 
-        endpointConfigurator.UseMessageRetry(r => r.Intervals(_brokerOptions.Value.MessageAnalysisUpdateRetryIntervals));
+        endpointConfigurator.UseMessageRetry(r => r.Intervals(options.MessageAnalysisUpdate.RetryIntervals));
         endpointConfigurator.UseInMemoryOutbox(context);
 
-        IPartitioner partitioner = endpointConfigurator.CreatePartitioner(_brokerOptions.Value.MessageAnalysisUpdateConcurrencyLimit);
+        IPartitioner partitioner = endpointConfigurator.CreatePartitioner(options.MessageAnalysisUpdate.ConcurrencyLimit);
         sagaConfigurator.Message<MessageAnalysisStarted>(
             x => x.UsePartitioner(partitioner, m => m.Message.CorrelationId.Value));
         sagaConfigurator.Message<MessageAnalysisInitialized>(

@@ -18,10 +18,9 @@ internal sealed class UpdateUrlMultiAnalysisConsumerDefinition
     /// <summary>
     /// Initializes a new instance of the <see cref="UpdateUrlMultiAnalysisConsumerDefinition"/> class.
     /// </summary>
-    /// <param name="brokerOptions">The broker settings options used to configure the endpoint name.</param>
-    public UpdateUrlMultiAnalysisConsumerDefinition(
-        IOptions<BrokerSettings> brokerOptions)
+    /// <param name="consumersOptions">The options for configuring consumers.</param>
+    public UpdateUrlMultiAnalysisConsumerDefinition(IOptions<ConsumersOptions> consumersOptions)
     {
-        EndpointName = brokerOptions.Value.UpdateUrlAnalysisEndpointName;
+        EndpointName = consumersOptions.Value.UpdateUrlAnalysis.Name;
     }
 }

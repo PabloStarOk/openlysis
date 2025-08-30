@@ -15,10 +15,9 @@ internal sealed class AnalyzeUrlConsumerDefinition
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeUrlConsumerDefinition"/> class.
     /// </summary>
-    /// <param name="brokerOptions">The broker settings options used to configure the consumer.</param>
-    public AnalyzeUrlConsumerDefinition(
-        IOptions<BrokerSettings> brokerOptions)
+    /// <param name="consumersOptions">The options for configuring consumers.</param>
+    public AnalyzeUrlConsumerDefinition(IOptions<ConsumersOptions> consumersOptions)
     {
-        EndpointName = brokerOptions.Value.AnalyzeUrlEndpointName;
+        EndpointName = consumersOptions.Value.AnalyzeUrl.Name;
     }
 }
