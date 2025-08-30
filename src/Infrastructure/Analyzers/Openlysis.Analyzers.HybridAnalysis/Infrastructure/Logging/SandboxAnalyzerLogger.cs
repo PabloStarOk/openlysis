@@ -38,14 +38,11 @@ public class SandboxAnalyzerLogger<TCategoryName>
     /// </summary>
     /// <param name="response">The HTTP response message.</param>
     /// <param name="reportState">The report state response containing error details.</param>
-    /// <param name="cancellationToken">The cancellation token to cancel the operation.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public async Task LogStateErrorAsync(
+    public void LogStateError(
         HttpResponseMessage response,
-        ReportStateResponse reportState,
-        CancellationToken cancellationToken = default)
+        ReportStateResponse reportState)
     {
-        string requestLog = await GetFormattedHttpRequestAsync(response.RequestMessage, cancellationToken);
+        string requestLog = GetFormattedHttpRequest(response.RequestMessage);
 
         Logger.LogError(
             "Report status was Error at {ServiceName} sandbox service analyzer."

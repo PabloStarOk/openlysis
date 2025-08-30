@@ -147,7 +147,7 @@ internal class SandboxAnalyzer : ISandboxAnalyzer
         ReportStateResponse reportState = result.Value;
         if (reportState.Status is Status.Error)
         {
-            await _analyzerLogger.LogStateErrorAsync(response, reportState, cancellationToken);
+            _analyzerLogger.LogStateError(response, reportState);
         }
 
         return reportState.Status;

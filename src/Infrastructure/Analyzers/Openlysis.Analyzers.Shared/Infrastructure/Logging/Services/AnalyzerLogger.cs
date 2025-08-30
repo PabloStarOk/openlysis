@@ -46,7 +46,7 @@ public class AnalyzerLogger<TCategoryName, TOptions>
         HttpResponseMessage response,
         CancellationToken cancellationToken = default)
     {
-        string requestString = await GetFormattedHttpRequestAsync(response.RequestMessage, cancellationToken);
+        string requestString = GetFormattedHttpRequest(response.RequestMessage);
         string responseString = await response.Content.ReadAsStringAsync(cancellationToken);
 
         Logger.LogError(
@@ -90,11 +90,8 @@ public class AnalyzerLogger<TCategoryName, TOptions>
     /// Formats the HTTP request message into a readable string.
     /// </summary>
     /// <param name="request">The HTTP request message to format.</param>
-    /// <param name="cancellationToken">A token to cancel the asynchronous operation.</param>
     /// <returns>A formatted string representing the HTTP request message.</returns>
-    protected async Task<string> GetFormattedHttpRequestAsync(
-        HttpRequestMessage? request,
-        CancellationToken cancellationToken = default)
+    protected string GetFormattedHttpRequest(HttpRequestMessage? request)
     {
         var stringBuilder = new StringBuilder();
 
@@ -114,12 +111,6 @@ public class AnalyzerLogger<TCategoryName, TOptions>
                 .Any(h => h.Key == Options.CurrentValue.ApiKeyHeaderName
                     && !string.IsNullOrWhiteSpace(h.Value.ToString()));
             stringBuilder.AppendLine($"Contains API Key: {containsApiKeyHeader.ToString()}");
-        }
-
-        if (request?.Content is not null)
-        {
-            string requestString = await request.Content.ReadAsStringAsync(cancellationToken);
-            stringBuilder.AppendLine($"Request Body: {requestString}");
         }
 
         return stringBuilder.ToString();
