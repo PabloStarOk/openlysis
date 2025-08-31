@@ -92,7 +92,7 @@ internal sealed class FileAnalysisStubBuilder
             + "\n\tReports amount: {ReportsAmount}"
             + "\n\tReports: {Reports}",
             typeof(FileAnalysis),
-            analysis.ServiceName,
+            analysis.ExternalId.Service,
             analysis.Id,
             analysis.ExternalId,
             analysis.State.Verdict,

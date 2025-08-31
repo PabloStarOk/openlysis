@@ -73,7 +73,7 @@ internal sealed class UrlAnalysisStubBuilder
             + "\n\tThreat score: {ThreatScore}"
             + "\n\tStatus: {Status}",
             nameof(UrlAnalysis),
-            analysis.ServiceName,
+            analysis.ExternalId.Service,
             analysis.Id,
             analysis.ExternalId,
             analysis.State.Verdict,

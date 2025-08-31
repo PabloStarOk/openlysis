@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS file_multi_analyses
 CREATE TABLE IF NOT EXISTS file_analyses (
     file_analysis_id uuid PRIMARY KEY,
     external_id varchar(200) NOT NULL,
-    service_name varchar(30) NOT NULL,
     status smallint NOT NULL,
     verdict smallint NOT NULL,
     threat_zone smallint NOT NULL,
@@ -79,7 +78,6 @@ CREATE TABLE IF NOT EXISTS url_multi_analyses
 CREATE TABLE url_analyses (
     url_analysis_id uuid PRIMARY KEY,
     external_id varchar(200) NOT NULL,
-    service_name varchar(30) NOT NULL,
     status smallint NOT NULL,
     verdict smallint NOT NULL,
     threat_zone smallint NOT NULL,

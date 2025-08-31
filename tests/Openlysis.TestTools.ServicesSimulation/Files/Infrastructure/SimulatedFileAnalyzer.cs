@@ -79,7 +79,6 @@ internal sealed class SimulatedFileAnalyzer
         return FileAnalysis.CreateWithId(
             result.Value.Id,
             result.Value.ExternalId,
-            result.Value.ServiceName,
             result.Value.State.Status,
             result.Value.State.Verdict,
             result.Value.Reports.ToList(),

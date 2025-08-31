@@ -14,7 +14,6 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
 {
     private const string IdKey = "id";
     private const string ExternalIdKey = "externalid";
-    private const string ServiceNameKey = "servicename";
     private const string StatusKey = "status";
     private const string VerdictKey = "verdict";
     private const string ThreatScoreKey = "threatscore";
@@ -28,7 +27,6 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
     {
         string id = string.Empty;
         string externalId = string.Empty;
-        string serviceName = string.Empty;
         AnalysisStatus status = 0;
         Verdict verdict = 0;
         List<FileReport> reports = [];
@@ -50,10 +48,6 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
 
                 case ExternalIdKey:
                     externalId = reader.GetString() ?? string.Empty;
-                    break;
-
-                case ServiceNameKey:
-                    serviceName = reader.GetString() ?? string.Empty;
                     break;
 
                 case StatusKey:
@@ -81,7 +75,6 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
         return FileAnalysis.CreateWithId(
             GlobalId.Parse(id),
             ExternalAnalysisId.Parse(externalId),
-            serviceName,
             status,
             verdict,
             reports,
@@ -96,7 +89,6 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
     {
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? IdKey;
         string externalIdKey = options.PropertyNamingPolicy?.ConvertName(ExternalIdKey) ?? ExternalIdKey;
-        string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? ServiceNameKey;
         string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? StatusKey;
         string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? VerdictKey;
         string reportsKey = options.PropertyNamingPolicy?.ConvertName(ReportsKey) ?? ReportsKey;
@@ -104,7 +96,6 @@ internal class FileAnalysisJsonConverter : JsonConverter<FileAnalysis>
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.ToString());
         writer.WriteString(externalIdKey, value.ExternalId.ToString());
-        writer.WriteString(serviceNameKey, value.ServiceName);
         writer.WriteString(statusKey, value.State.Status.ToString());
         writer.WriteString(verdictKey, value.State.Verdict.ToString());
 

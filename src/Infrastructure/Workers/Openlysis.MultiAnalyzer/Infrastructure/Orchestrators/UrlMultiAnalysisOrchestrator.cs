@@ -87,7 +87,7 @@ internal sealed class UrlMultiAnalysisOrchestrator
         UrlAnalysis pendingAnalysis,
         CancellationToken cancellationToken)
     {
-        var analyzer = _analyzers[pendingAnalysis.ServiceName];
+        var analyzer = _analyzers[pendingAnalysis.ExternalId.Service];
         if (!analyzer.CanGetAnalysisStatus)
         {
             Logger.LogDebug("Trying to get analysis status when service is unavailable.");

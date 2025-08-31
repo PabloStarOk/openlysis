@@ -22,18 +22,16 @@ public sealed class FileAnalysis : Analysis
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="externalId">The identifiers assigned by the external analysis service.</param>
-    /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="reports">The dictionary of reports associated with the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
     private FileAnalysis(
         GlobalId id,
         ExternalAnalysisId externalId,
-        string serviceName,
         AnalysisState state,
         List<FileReport> reports,
         ThreatScore threatScore)
-        : base(id, externalId, serviceName, state, threatScore)
+        : base(id, externalId, state, threatScore)
     {
         _reports = reports;
     }
@@ -69,8 +67,7 @@ public sealed class FileAnalysis : Analysis
         var state = AnalysisState.Initial().WithVerdict(verdict).WithStatus(status);
         return new FileAnalysis(
             GlobalId.CreateUnique(),
-            ExternalAnalysisId.Create(externalPrimaryId, externalJobId),
-            serviceName,
+            ExternalAnalysisId.Create(externalPrimaryId, serviceName, externalJobId),
             state,
             [],
             threatScore ?? ThreatScore.CreateNull());
@@ -81,7 +78,6 @@ public sealed class FileAnalysis : Analysis
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="externalId">The identifiers assigned by the external analysis service.</param>
-    /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="status">The initial status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="reports">The list of reports associated with the analysis.</param>
@@ -90,7 +86,6 @@ public sealed class FileAnalysis : Analysis
     public static FileAnalysis CreateWithId(
         GlobalId id,
         ExternalAnalysisId externalId,
-        string serviceName,
         AnalysisStatus status,
         Verdict verdict,
         List<FileReport> reports,
@@ -100,7 +95,6 @@ public sealed class FileAnalysis : Analysis
         return new FileAnalysis(
             id,
             externalId,
-            serviceName,
             state,
             reports,
             threatScore ?? ThreatScore.CreateNull());

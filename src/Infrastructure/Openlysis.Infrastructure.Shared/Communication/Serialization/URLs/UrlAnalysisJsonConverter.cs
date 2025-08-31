@@ -14,7 +14,6 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
 {
     private const string IdKey = "id";
     private const string ExternalIdKey = "externalid";
-    private const string ServiceNameKey = "servicename";
     private const string StatusKey = "status";
     private const string VerdictKey = "verdict";
     private const string ThreatScoreKey = "threatscore";
@@ -27,7 +26,6 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
     {
         string id = string.Empty;
         string externalId = string.Empty;
-        string serviceName = string.Empty;
         AnalysisStatus status = 0;
         Verdict verdict = 0;
         ThreatScore threatScore = ThreatScore.Create(null, null);
@@ -50,10 +48,6 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
                     externalId = reader.GetString() ?? string.Empty;
                     break;
 
-                case ServiceNameKey:
-                    serviceName = reader.GetString() ?? string.Empty;
-                    break;
-
                 case StatusKey:
                     status = Enum.Parse<AnalysisStatus>(reader.GetString() ?? string.Empty, ignoreCase: true);
                     break;
@@ -71,7 +65,6 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
         return UrlAnalysis.CreateWithId(
             GlobalId.Parse(id),
             ExternalAnalysisId.Parse(externalId),
-            serviceName,
             status,
             verdict,
             threatScore);
@@ -85,14 +78,12 @@ internal class UrlAnalysisJsonConverter : JsonConverter<UrlAnalysis>
     {
         string idKey = options.PropertyNamingPolicy?.ConvertName(IdKey) ?? IdKey;
         string externalIdKey = options.PropertyNamingPolicy?.ConvertName(ExternalIdKey) ?? ExternalIdKey;
-        string serviceNameKey = options.PropertyNamingPolicy?.ConvertName(ServiceNameKey) ?? ServiceNameKey;
         string statusKey = options.PropertyNamingPolicy?.ConvertName(StatusKey) ?? StatusKey;
         string verdictKey = options.PropertyNamingPolicy?.ConvertName(VerdictKey) ?? VerdictKey;
 
         writer.WriteStartObject();
         writer.WriteString(idKey, value.Id.ToString());
         writer.WriteString(externalIdKey, value.ExternalId.ToString());
-        writer.WriteString(serviceNameKey, value.ServiceName);
         writer.WriteString(statusKey, value.State.Status.ToString());
         writer.WriteString(verdictKey, value.State.Verdict.ToString());
 
