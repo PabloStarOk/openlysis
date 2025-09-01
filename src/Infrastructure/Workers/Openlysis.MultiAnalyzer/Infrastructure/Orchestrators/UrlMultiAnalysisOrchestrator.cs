@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.URLs.Entities;
@@ -120,8 +121,9 @@ internal sealed class UrlMultiAnalysisOrchestrator
         }
 
         // Get full analysis
+        var identity = AnalysisIdentity.FromAnalysis(pendingAnalysis);
         ErrorOr<UrlAnalysis> getAnalysisResult = await analyzer.GetAnalysisAsync(
-            pendingAnalysis.ExternalId,
+            identity,
             cancellationToken);
         if (getAnalysisResult.IsError)
         {

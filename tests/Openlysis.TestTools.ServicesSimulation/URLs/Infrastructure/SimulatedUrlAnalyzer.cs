@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.Common.Enums;
@@ -96,12 +97,12 @@ internal sealed class SimulatedUrlAnalyzer
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity id,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateGetAnalysisAsync(
             _analyzerServiceOptions,
-            id,
+            id.ExternalId,
             cancellationToken);
     }
 

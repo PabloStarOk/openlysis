@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.Files.Services;
 using Openlysis.Domain.Common.Enums;
@@ -141,8 +142,9 @@ internal sealed class FileMultiAnalysisOrchestrator
         }
 
         // Get full analysis
+        var identity = AnalysisIdentity.FromAnalysis(pendingAnalysis);
         ErrorOr<FileAnalysis> getAnalysisResult = await analyzer.GetAnalysisAsync(
-            pendingAnalysis.ExternalId,
+            identity,
             cancellationToken);
         if (getAnalysisResult.IsError)
         {

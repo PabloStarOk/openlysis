@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.URLQuery.Core.Abstractions;
 using Openlysis.Analyzers.URLQuery.Core.Configuration;
@@ -146,10 +147,10 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
-        string formattedUrl = string.Format(Addresses.ReportEndpoint, id.Primary);
+        string formattedUrl = string.Format(Addresses.ReportEndpoint, identity.ExternalId.Primary);
         using HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
@@ -174,7 +175,7 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 
         AnalysisStatus status = Maps.AnalysisStatusMap[report.Status];
         Verdict verdict = _verdictCalculator.Calculate(report.Sensors);
-        return UrlAnalysis.Create(report.ReportId, ServiceName, status, verdict, id.Job);
+        return UrlAnalysis.CreateWithId(identity.Id, identity.ExternalId, status, verdict);
     }
 
 #if DEBUG

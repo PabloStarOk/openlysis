@@ -15,6 +15,7 @@ using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
 using Openlysis.Analyzers.Filescan.Infrastructure.Factories;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.Common.Constants;
@@ -126,10 +127,10 @@ public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
-        var getScanRequest = new GetScanRequest(id.Primary);
+        var getScanRequest = new GetScanRequest(identity.ExternalId.Primary);
         ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(
             httpClient,
             getScanRequest,
@@ -146,21 +147,25 @@ public class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         DebugAnalysis(analysisResponse);
 #endif
 
-        return CreateAnalysisFromResponse(analysisResponse);
+        return CreateAnalysisFromResponse(identity, analysisResponse);
     }
 
     /// <summary>
     /// Creates a <see cref="FileAnalysis"/> instance from the Filescan analysis response.
     /// </summary>
+    /// <param name="identity">An <see cref="AnalysisIdentity"/> representing the analysis to retrieve.</param>
     /// <param name="response">The analysis response containing reports from the Filescan service.</param>
     /// <returns>A populated <see cref="FileAnalysis"/> object with status and reports extracted from the response.</returns>
-    private FileAnalysis CreateAnalysisFromResponse(GetAnalysisResponse response)
+    private FileAnalysis CreateAnalysisFromResponse(
+        AnalysisIdentity identity,
+        GetAnalysisResponse response)
     {
-        var serviceAnalysis = FileAnalysis.Create(
-            response.FlowId,
-            ServiceName,
+        var serviceAnalysis = FileAnalysis.CreateWithId(
+            identity.Id,
+            identity.ExternalId,
             AnalysisStatus.Queued,
-            Verdict.Unknown);
+            Verdict.Unknown,
+            reports: []);
 
         foreach (var reportKeyValuePair in response.Reports)
         {

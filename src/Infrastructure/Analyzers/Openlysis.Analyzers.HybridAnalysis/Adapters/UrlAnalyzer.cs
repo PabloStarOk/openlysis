@@ -12,6 +12,7 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Factories;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.Common.Enums;
@@ -128,12 +129,12 @@ internal class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<SandboxReportSummary> result = await _sandboxAnalyzer.GetReportSummaryAsync(
             httpClient,
-            id.Primary,
+            identity.ExternalId.Primary,
             cancellationToken);
 
         if (result.IsError)
@@ -152,7 +153,13 @@ internal class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
         DebugSandboxReportSummary(reportSummary);
 #endif
 
-        return MapServiceAnalysis(reportSummary);
+        UrlAnalysis analysis = MapServiceAnalysis(reportSummary);
+        return UrlAnalysis.CreateWithId(
+            identity.Id,
+            identity.ExternalId,
+            analysis.State.Status,
+            analysis.State.Verdict,
+            analysis.ThreatScore);
     }
 
     /// <summary>

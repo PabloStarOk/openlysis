@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
@@ -98,12 +99,12 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
             httpClient,
-            id.Primary,
+            identity.ExternalId.Primary,
             cancellationToken);
 
         if (result.IsError)
@@ -119,9 +120,9 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
 
         AnalysisStatus status = Maps.AnalysisStatusMap[analysis.Attributes.Status];
         Verdict verdict = _verdictCalculator.Calculate(analysis.Attributes.Stats);
-        return UrlAnalysis.Create(
-            analysis.Id,
-            ServiceName,
+        return UrlAnalysis.CreateWithId(
+            identity.Id,
+            identity.ExternalId,
             status,
             verdict);
     }

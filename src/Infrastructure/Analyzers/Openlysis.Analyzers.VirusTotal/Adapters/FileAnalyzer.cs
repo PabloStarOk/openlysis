@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Analyzers.VirusTotal.Core.Abstractions;
@@ -130,12 +131,12 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
         ErrorOr<GetAnalysisResponse> result = await _vtAnalyzer.GetAnalysisAsync(
             httpClient,
-            id.Primary,
+            identity.ExternalId.Primary,
             cancellationToken);
 
         if (result.IsError)
@@ -149,15 +150,17 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         DebugAnalysis(analysis);
 #endif
 
-        return CreateAnalysisFromResponse(analysis);
+        return CreateAnalysisFromResponse(identity, analysis);
     }
 
     /// <summary>
     /// Creates a FileServiceAnalysis object from the VirusTotal analysis response.
     /// </summary>
+    /// <param name="identity">An <see cref="AnalysisIdentity"/> representing the analysis to retrieve.</param>
     /// <param name="analysisResponse">The response data from VirusTotal's analysis.</param>
     /// <returns>A configured FileServiceAnalysis object with updated verdict and status.</returns>
     private FileAnalysis CreateAnalysisFromResponse(
+        AnalysisIdentity identity,
         GetAnalysisResponse analysisResponse)
     {
         AnalysisStatus status = Maps.AnalysisStatusMap[
@@ -165,11 +168,12 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         Verdict verdict = _verdictCalculator.Calculate(
             analysisResponse.Attributes.Stats);
 
-        var serviceAnalysis = FileAnalysis.Create(
-            analysisResponse.Id,
-            ServiceName,
+        var serviceAnalysis = FileAnalysis.CreateWithId(
+            identity.Id,
+            identity.ExternalId,
             status,
-            verdict);
+            verdict,
+            reports: []);
 
         return serviceAnalysis;
     }
