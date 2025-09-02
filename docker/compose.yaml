@@ -26,7 +26,7 @@ services:
       - api-network
 
   broker:
-    image: rabbitmq:4-management-alpine
+    image: masstransit/rabbitmq:4.1.3
     container_name: ${BROKER_CONTAINER_NAME}
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
@@ -72,6 +72,28 @@ services:
     networks:
       - api-network
 
+  analyzer-worker-migrations:
+      build: 
+        context: ../
+        dockerfile: "src/Infrastructure/Workers/Openlysis.MultiAnalyzer/Dockerfile"
+        target: migrations
+        no_cache: true
+        args: 
+          - BUILD_CONFIGURATION=${WORKER_BUILD_CONFIGURATION}
+      container_name: ${WORKER_MIGRATIONS_CONTAINER_NAME}
+      environment:
+        DOTNET_ENVIRONMENT: ${APP_ENVIRONMENT}
+        DOPPLER_SERVICE_TOKEN: ${DOPPLER_WORKER_SERVICE_TOKEN}
+      command: ["dotnet", "ef", "database", "update", "--context", "JobServiceSagaDbContext"]
+      depends_on:
+        database:
+          condition: service_healthy
+      networks:
+        - api-network
+      configs:
+        - source: analyzer-worker-config
+          target: ${WORKER_MIGRATIONS_CONFIG_TARGET_FILEPATH}
+
   analyzer-worker:
     build: 
       context: ../
@@ -86,6 +108,10 @@ services:
     depends_on:
       broker:
         condition: service_healthy
+      database:
+        condition: service_healthy
+      analyzer-worker-migrations:
+        condition: service_completed_successfully
     volumes:
       - type: volume
         source: openlysis-temp-file-storage

@@ -3,7 +3,7 @@ using Openlysis.Domain.Common.ValueObjects;
 namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 
 /// <summary>
-/// Represents a message to request a file analysis within a multi-analysis context.
+/// Represents a message to request a file analysis job within a multi-analysis context.
 /// </summary>
 /// <param name="MultiAnalysisId">The global identifier for the multi-analysis operation.</param>
 /// <param name="Filename">The name of the file to analyze.</param>
@@ -14,7 +14,7 @@ namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 /// <param name="IsPrivateFile">Indicates whether the file is private.</param>
 /// <param name="StorageFileName">The name for this file in the storage.</param>
 /// <param name="CorrelationId">Optional correlation identifier that associates the request to a message analysis.</param>
-public sealed record AnalyzeFileMessage(
+public sealed record FileAnalysisJobMessage(
     GlobalId MultiAnalysisId,
     string Filename,
     string FileContentType,
@@ -24,4 +24,4 @@ public sealed record AnalyzeFileMessage(
     bool IsPrivateFile,
     string StorageFileName,
     GlobalId? CorrelationId = null)
-    : QueueMessage(CorrelationId);
+    : AnalysisJobMessage(MultiAnalysisId, CorrelationId);

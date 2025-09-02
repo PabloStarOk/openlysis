@@ -35,9 +35,9 @@ internal class UrlMultiAnalysisQueue : IUrlMultiAnalysisQueue
         GlobalId? correlationId,
         CancellationToken cancellationToken = default)
     {
-        var request = new AnalyzeUrlMessage(multiAnalysisId, url, correlationId);
+        var jobMessage = new UrlAnalysisJobMessage(multiAnalysisId, url, correlationId);
 
         ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(_endpointUriProvider.AnalyzeUrlUri);
-        await sendEndpoint.Send(request, cancellationToken);
+        await sendEndpoint.Send(jobMessage, cancellationToken);
     }
 }

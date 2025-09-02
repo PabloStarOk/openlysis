@@ -3,24 +3,27 @@ using System.Threading.Tasks;
 
 using MassTransit;
 
+using Openlysis.Domain.Common.Entities;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
+
 namespace Openlysis.MultiAnalyzer.Abstractions;
 
 /// <summary>
-/// Defines a contract for sending update messages asynchronously.
+/// Defines a contract for sending update messages for multi-analysis operations.
 /// </summary>
-/// <typeparam name="TMessage">The type of the message to send.</typeparam>
-internal interface IUpdateMessageSender<in TMessage>
-    where TMessage : class
+internal interface IUpdateMessageSender
 {
     /// <summary>
-    /// Sends an update message asynchronously using the provided MassTransit consume context.
+    /// Sends an update message for a multi-analysis operation.
     /// </summary>
-    /// <param name="context">The MassTransit consume context for the current message.</param>
-    /// <param name="message">The update message to send.</param>
-    /// <param name="cancellationToken">A token to observe while waiting for the task to complete.</param>
-    /// <returns>A task that represents the asynchronous send operation.</returns>
-    public Task SendAsync(
-        ConsumeContext context,
-        TMessage message,
-        CancellationToken cancellationToken = default);
+    /// <typeparam name="TAnalysis">The type of analysis being updated.</typeparam>
+    /// <param name="endpointProvider">The endpoint provider used to send the message.</param>
+    /// <param name="message">The update message containing analysis data.</param>
+    /// <param name="cancellationToken">A token to cancel the operation.</param>
+    /// <returns>A task representing the asynchronous send operation.</returns>
+    public Task SendAsync<TAnalysis>(
+        ISendEndpointProvider endpointProvider,
+        UpdateMultiAnalysisMessage<TAnalysis> message,
+        CancellationToken cancellationToken = default)
+        where TAnalysis : Analysis;
 }

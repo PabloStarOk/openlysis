@@ -4,21 +4,19 @@ using System.Threading.Tasks;
 
 using MassTransit;
 
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.URLs.Entities;
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
 using Openlysis.Infrastructure.Shared.Communication.Contracts;
 using Openlysis.MultiAnalyzer.Abstractions;
 
-namespace Openlysis.MultiAnalyzer.Infrastructure.Communication;
+namespace Openlysis.MultiAnalyzer.Infrastructure;
 
 /// <summary>
 /// Sends update messages for multi-analysis operations involving <see cref="UrlAnalysis"/> and <see cref="FileAnalysis"/>.
-/// Implements <see cref="IUpdateMessageSender{T}"/> twice to support both types.
 /// </summary>
-internal sealed class UpdateMultiAnalysisMessageSender
-    : IUpdateMessageSender<UpdateMultiAnalysisMessage<UrlAnalysis>>,
-    IUpdateMessageSender<UpdateMultiAnalysisMessage<FileAnalysis>>
+internal sealed class UpdateMultiAnalysisMessageSender : IUpdateMessageSender
 {
     private readonly IEndpointUriProvider _brokerEpProvider;
 
@@ -34,24 +32,20 @@ internal sealed class UpdateMultiAnalysisMessageSender
     }
 
     /// <inheritdoc/>
-    public async Task SendAsync(
-        ConsumeContext context,
-        UpdateMultiAnalysisMessage<UrlAnalysis> message,
+    public async Task SendAsync<TAnalysis>(
+        ISendEndpointProvider endpointProvider,
+        UpdateMultiAnalysisMessage<TAnalysis> message,
         CancellationToken cancellationToken = default)
+        where TAnalysis : Analysis
     {
-        Uri uri = _brokerEpProvider.UpdateUrlMultiAnalysisUri;
-        ISendEndpoint endpoint = await context.GetSendEndpoint(uri);
-        await endpoint.Send(message, cancellationToken);
-    }
+        Uri endpointUri = message switch
+        {
+            UpdateMultiAnalysisMessage<FileAnalysis> => _brokerEpProvider.UpdateFileMultiAnalysisUri,
+            UpdateMultiAnalysisMessage<UrlAnalysis> => _brokerEpProvider.UpdateUrlMultiAnalysisUri,
+            _ => throw new ArgumentOutOfRangeException(nameof(message), message, "Unsupported analysis type for multi-analysis update."),
+        };
 
-    /// <inheritdoc/>
-    public async Task SendAsync(
-        ConsumeContext context,
-        UpdateMultiAnalysisMessage<FileAnalysis> message,
-        CancellationToken cancellationToken = default)
-    {
-        Uri uri = _brokerEpProvider.UpdateFileMultiAnalysisUri;
-        ISendEndpoint endpoint = await context.GetSendEndpoint(uri);
+        ISendEndpoint endpoint = await endpointProvider.GetSendEndpoint(endpointUri);
         await endpoint.Send(message, cancellationToken);
     }
 }
