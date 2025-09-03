@@ -32,6 +32,10 @@ COPY ["src/Shared/Doppler.NET/", "Shared/Doppler.NET/"]
 WORKDIR /src/Infrastructure/Workers/Openlysis.MultiAnalyzer
 RUN dotnet build "Openlysis.MultiAnalyzer.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+FROM build AS migrations
+RUN dotnet tool install --global dotnet-ef --version 9.*
+ENV PATH="$PATH:/root/.dotnet/tools"
+
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "Openlysis.MultiAnalyzer.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false

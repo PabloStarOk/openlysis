@@ -38,7 +38,7 @@ public record FileAnalysisDto(
         return new FileAnalysisDto(
             source.ExternalId.Primary,
             source.ExternalId.Job,
-            source.ServiceName,
+            source.ExternalId.Service,
             source.State.Status,
             source.State.Verdict,
             source.State.ThreatZone,

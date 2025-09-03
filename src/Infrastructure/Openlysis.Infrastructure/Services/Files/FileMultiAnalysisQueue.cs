@@ -38,7 +38,7 @@ internal class FileMultiAnalysisQueue : IFileMultiAnalysisQueue
         GlobalId? correlationId,
         CancellationToken cancellationToken)
     {
-        var analyzeFile = new AnalyzeFileMessage(
+        var jobMessage = new FileAnalysisJobMessage(
             multiAnalysisId,
             processedFile.Metadata.Name,
             processedFile.Metadata.ContentType,
@@ -50,6 +50,6 @@ internal class FileMultiAnalysisQueue : IFileMultiAnalysisQueue
             correlationId);
 
         ISendEndpoint sendEndpoint = await _sendEndpointProvider.GetSendEndpoint(_endpointUriProvider.AnalyzeFileUri);
-        await sendEndpoint.Send(analyzeFile, cancellationToken);
+        await sendEndpoint.Send(jobMessage, cancellationToken);
     }
 }

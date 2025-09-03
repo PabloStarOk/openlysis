@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
 using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.Common.Enums;
@@ -79,7 +80,6 @@ internal sealed class SimulatedFileAnalyzer
         return FileAnalysis.CreateWithId(
             result.Value.Id,
             result.Value.ExternalId,
-            result.Value.ServiceName,
             result.Value.State.Status,
             result.Value.State.Verdict,
             result.Value.Reports.ToList(),
@@ -102,12 +102,12 @@ internal sealed class SimulatedFileAnalyzer
     /// <inheritdoc/>
     protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity id,
         CancellationToken cancellationToken = default)
     {
         return await _behaviorSimulator.SimulateGetAnalysisAsync(
             _analyzerServiceOptions,
-            id,
+            id.ExternalId,
             cancellationToken);
     }
 

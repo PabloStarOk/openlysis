@@ -14,16 +14,14 @@ public sealed class UrlAnalysis : Analysis
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="externalId">The identifiers assigned by the external analysis service.</param>
-    /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
     private UrlAnalysis(
         GlobalId id,
         ExternalAnalysisId externalId,
-        string serviceName,
         AnalysisState state,
         ThreatScore threatScore)
-        : base(id, externalId, serviceName, state, threatScore)
+        : base(id, externalId, state, threatScore)
     {
     }
 
@@ -60,8 +58,7 @@ public sealed class UrlAnalysis : Analysis
 
         return new UrlAnalysis(
             GlobalId.CreateUnique(),
-            ExternalAnalysisId.Create(externalPrimaryId, externalJobId),
-            serviceName,
+            ExternalAnalysisId.Create(externalPrimaryId, serviceName, externalJobId),
             state,
             threatScore ?? ThreatScore.CreateNull());
     }
@@ -71,7 +68,6 @@ public sealed class UrlAnalysis : Analysis
     /// </summary>
     /// <param name="id">The unique identifier for the analysis.</param>
     /// <param name="externalId">The identifiers assigned by the external analysis service.</param>
-    /// <param name="serviceName">The name of the service that performed the analysis.</param>
     /// <param name="status">The current status of the analysis.</param>
     /// <param name="verdict">The verdict of the analysis.</param>
     /// <param name="threatScore">The threat score of the analysis. Optional.</param>
@@ -79,7 +75,6 @@ public sealed class UrlAnalysis : Analysis
     public static UrlAnalysis CreateWithId(
         GlobalId id,
         ExternalAnalysisId externalId,
-        string serviceName,
         AnalysisStatus status,
         Verdict verdict,
         ThreatScore? threatScore = null)
@@ -91,7 +86,6 @@ public sealed class UrlAnalysis : Analysis
         return new UrlAnalysis(
             id,
             externalId,
-            serviceName,
             state,
             threatScore ?? ThreatScore.CreateNull());
     }

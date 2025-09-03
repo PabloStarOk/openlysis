@@ -6,7 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.5.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -20,6 +27,10 @@
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.HybridAnalysis\Openlysis.Analyzers.HybridAnalysis.csproj" />
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj" />
     <ProjectReference Include="..\..\Analyzers\Openlysis.Analyzers.VirusTotal\Openlysis.Analyzers.VirusTotal.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Infrastructure\Persistence\Migrations\" />
   </ItemGroup>
 
 </Project>

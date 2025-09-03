@@ -126,18 +126,11 @@ public class UrlMultiAnalysisConfiguration : IEntityTypeConfiguration<UrlMultiAn
 
         builder.Property(u => u.ExternalId)
             .HasColumnName("external_id")
-            .HasColumnType(VarcharType)
-            .HasMaxLength(200)
+            .HasColumnType("text")
             .IsRequired()
             .HasConversion(
                 id => id.ToString(),
                 id => ExternalAnalysisId.Parse(id));
-
-        builder.Property(u => u.ServiceName)
-            .HasColumnName("service_name")
-            .HasColumnType(VarcharType)
-            .HasMaxLength(30)
-            .IsRequired();
 
         builder.OwnsOne(u => u.State, stateBuilder =>
         {

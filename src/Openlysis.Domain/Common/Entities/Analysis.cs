@@ -15,11 +15,6 @@ public abstract class Analysis : Entity<GlobalId>
     public ExternalAnalysisId ExternalId { get; }
 
     /// <summary>
-    /// Gets the name of the service.
-    /// </summary>
-    public string ServiceName { get; }
-
-    /// <summary>
     /// Gets the current state of the analysis.
     /// </summary>
     public AnalysisState State { get; private set; }
@@ -34,19 +29,16 @@ public abstract class Analysis : Entity<GlobalId>
     /// </summary>
     /// <param name="id">The unique identifier for the analysis entity.</param>
     /// <param name="externalId">The identifiers assigned by the external analysis service.</param>
-    /// <param name="serviceName">The name of the external service providing the analysis.</param>
     /// <param name="state">The current state of the analysis.</param>
     /// <param name="threatScore">The threat score assigned by the service.</param>
     protected Analysis(
         GlobalId id,
         ExternalAnalysisId externalId,
-        string serviceName,
         AnalysisState state,
         ThreatScore threatScore)
         : base(id)
     {
         ExternalId = externalId;
-        ServiceName = serviceName;
         State = state;
         ThreatScore = threatScore;
     }

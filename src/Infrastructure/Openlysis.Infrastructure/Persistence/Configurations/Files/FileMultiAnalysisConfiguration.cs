@@ -140,18 +140,11 @@ public class FileMultiAnalysisConfiguration : IEntityTypeConfiguration<FileMulti
 
         builder.Property(s => s.ExternalId)
             .HasColumnName("external_id")
-            .HasColumnType(VarcharType)
-            .HasMaxLength(200)
+            .HasColumnType("text")
             .IsRequired()
             .HasConversion(
                 id => id.ToString(),
                 dbValue => ExternalAnalysisId.Parse(dbValue));
-
-        builder.Property(s => s.ServiceName)
-            .HasColumnName("service_name")
-            .HasColumnType(VarcharType)
-            .HasMaxLength(30)
-            .IsRequired();
 
         builder.OwnsOne(s => s.State, stateBuilder =>
         {

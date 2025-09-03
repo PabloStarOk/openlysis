@@ -116,13 +116,14 @@ public abstract class MultiAnalysis<TAnalysis>
     }
 
     /// <summary>
-    /// Sets the state of the multi-analysis and its updatable analyses as timed out.
-    /// Updates the status of all analyses that can be updated to <see cref="AnalysisStatus.Timeout"/>.
+    /// Sets the state of the multi-analysis and its updatable analyses to the specified status.
+    /// Updates the status of all analyses that can be updated to the given <paramref name="status"/>.
     /// </summary>
+    /// <param name="status">The <see cref="AnalysisStatus"/> to set for the multi-analysis and its analyses.</param>
     /// <remarks>
     /// If the multi-analysis or all contained analyses cannot be updated, the method returns without changes.
     /// </remarks>
-    public void SetAsTimedOut()
+    public void SetAs(AnalysisStatus status)
     {
         if (!State.CanBeUpdated)
         {
@@ -131,7 +132,7 @@ public abstract class MultiAnalysis<TAnalysis>
 
         if (_analyses.Count is 0)
         {
-            State = State.WithStatus(AnalysisStatus.Timeout);
+            State = State.WithStatus(status);
             return;
         }
 
@@ -142,7 +143,7 @@ public abstract class MultiAnalysis<TAnalysis>
 
         foreach (var analysis in _analyses.Where(a => a.State.CanBeUpdated))
         {
-            analysis.UpdateStatus(AnalysisStatus.Timeout);
+            analysis.UpdateStatus(status);
         }
 
         UpdateStatus();

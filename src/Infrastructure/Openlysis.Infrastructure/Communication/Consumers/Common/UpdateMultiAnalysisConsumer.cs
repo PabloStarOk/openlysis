@@ -3,6 +3,7 @@ using MassTransit;
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Common.Enums;
 using Openlysis.Infrastructure.Shared.Communication.Abstractions;
 using Openlysis.Infrastructure.Shared.Communication.Contracts;
 
@@ -54,7 +55,11 @@ internal sealed class UpdateMultiAnalysisConsumer<TMultiAnalysis, TAnalysis>
 
         if (message.Timeout)
         {
-            multiAnalysis.SetAsTimedOut();
+            multiAnalysis.SetAs(AnalysisStatus.Timeout);
+        }
+        else if (message.Failed)
+        {
+            multiAnalysis.SetAs(AnalysisStatus.Failed);
         }
 
         _repository.Update(multiAnalysis);

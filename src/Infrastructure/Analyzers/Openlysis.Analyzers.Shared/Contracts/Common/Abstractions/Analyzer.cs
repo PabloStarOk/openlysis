@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using Openlysis.Analyzers.Shared.Contracts.Common.Configuration;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.Common.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.Common.Entities;
@@ -186,14 +187,16 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// <summary>
     /// Gets the analysis by its identifier asynchronously.
     /// </summary>
-    /// <param name="id">A <see cref="ExternalAnalysisId"/>.</param>
+    /// <param name="identity">An <see cref="AnalysisIdentity"/> representing the analysis to retrieve.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis result or an error.</returns>
     public async Task<ErrorOr<TAnalysis>> GetAnalysisAsync(
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(id.Primary);
+        ArgumentNullException.ThrowIfNull(identity);
+        ArgumentNullException.ThrowIfNull(identity.Id);
+        ArgumentNullException.ThrowIfNull(identity.ExternalId);
 
         if (!CanGetAnalysis)
         {
@@ -203,7 +206,7 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
         try
         {
             HttpClient httpClient = _httpClientFactory.CreateClient(ServiceName);
-            ErrorOr<TAnalysis> result = await OnGetAnalysisAsync(httpClient, id, cancellationToken);
+            ErrorOr<TAnalysis> result = await OnGetAnalysisAsync(httpClient, identity, cancellationToken);
             if (!result.IsError)
             {
                 _rateQuotaService?.Track(AnalysisEndpointType.GetResults);
@@ -266,12 +269,12 @@ public abstract class Analyzer<TAnalysis, TRequest> : IDisposable
     /// Gets the analysis by its identifier asynchronously.
     /// </summary>
     /// <param name="httpClient">The HTTP client to use for getting the analysis.</param>
-    /// <param name="id">The identifier of the analysis.</param>
+    /// <param name="identity">An <see cref="AnalysisIdentity"/> representing the analysis to retrieve.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the analysis result or an error.</returns>
     protected abstract Task<ErrorOr<TAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default);
 
     /// <summary>

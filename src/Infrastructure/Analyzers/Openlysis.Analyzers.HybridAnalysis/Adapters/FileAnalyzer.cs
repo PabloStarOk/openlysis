@@ -14,6 +14,7 @@ using Openlysis.Analyzers.HybridAnalysis.Core.Models.Objects;
 using Openlysis.Analyzers.HybridAnalysis.Core.Models.Responses;
 using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Factories;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.Common.Enums;
@@ -132,13 +133,13 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<FileAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
-        var formattedId = FormattedAnalysisId.Parse(id.Primary);
+        var formattedId = FormattedAnalysisId.Parse(identity.ExternalId.Primary);
         bool analyzedWithSandbox = formattedId.AnalysisType is AnalysisType.Sandbox;
 
-        return analyzedWithSandbox
+        var result = analyzedWithSandbox
             ? await GetSandboxAnalysisAsync(
                 httpClient,
                 formattedId,
@@ -147,6 +148,20 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
                 httpClient,
                 formattedId,
                 cancellationToken);
+
+        if (result.IsError)
+        {
+            return result;
+        }
+
+        FileAnalysis analysis = result.Value;
+        return FileAnalysis.CreateWithId(
+            identity.Id,
+            identity.ExternalId,
+            analysis.State.Status,
+            analysis.State.Verdict,
+            analysis.Reports.ToList(),
+            analysis.ThreatScore);
     }
 
     /// <summary>

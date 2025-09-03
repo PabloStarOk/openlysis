@@ -15,6 +15,7 @@ using Openlysis.Analyzers.Filescan.Core.Models.Requests;
 using Openlysis.Analyzers.Filescan.Core.Models.Responses;
 using Openlysis.Analyzers.Filescan.Infrastructure.Factories;
 using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Common.Models;
 using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
 using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
 using Openlysis.Domain.Common.Enums;
@@ -101,10 +102,10 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
     /// <inheritdoc/>
     protected override async Task<ErrorOr<UrlAnalysis>> OnGetAnalysisAsync(
         HttpClient httpClient,
-        ExternalAnalysisId id,
+        AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
-        var getScanRequest = new GetScanRequest(id.Primary);
+        var getScanRequest = new GetScanRequest(identity.ExternalId.Primary);
 
         ErrorOr<GetAnalysisResponse> result = await _filescanAnalyzer.GetAnalysisAsync(
             httpClient,
@@ -145,9 +146,9 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
         }
 
         AnalysisStatus status = Maps.AnalysisStatusMap[analysisResponse.Status];
-        return UrlAnalysis.Create(
-            analysisResponse.FlowId,
-            ServiceName,
+        return UrlAnalysis.CreateWithId(
+            identity.Id,
+            identity.ExternalId,
             status,
             verdict,
             threatScore: threatScore);

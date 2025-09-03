@@ -66,9 +66,11 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="configurator">The IBusRegistrationConfigurator to configure the message broker.</param>
     /// <param name="services">The IServiceCollection to build the service provider.</param>
+    /// <param name="configure">Optional action to further configure the RabbitMQ bus factory.</param>
     public static void AddRabbitMqBroker(
         this IBusRegistrationConfigurator configurator,
-        IServiceCollection services)
+        IServiceCollection services,
+        Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator>? configure = null)
     {
         BrokerSettings brokerSettings;
         using (var serviceProvider = services.BuildServiceProvider())
@@ -102,6 +104,7 @@ public static class DependencyInjection
                 });
 
             cfg.ConfigureEndpoints(registrationContext);
+            configure?.Invoke(registrationContext, cfg);
         });
     }
 }
