@@ -150,6 +150,19 @@ public class UrlAnalyzer : Analyzer<UrlAnalysis, AnalyzeUrlRequest>
         AnalysisIdentity identity,
         CancellationToken cancellationToken = default)
     {
+        // Ensure analysis can be retrieved.
+        var statusResult = await OnGetStatusAsync(httpClient, identity.ExternalId, cancellationToken);
+        if (statusResult.IsError)
+        {
+            return statusResult.Errors;
+        }
+
+        if (statusResult.Value is AnalysisStatus.Queued or AnalysisStatus.InProgress)
+        {
+            return UrlAnalysis.CreateWithId(identity.Id, identity.ExternalId, statusResult.Value, Verdict.Unknown);
+        }
+
+        // Retrieve analysis.
         string formattedUrl = string.Format(Addresses.ReportEndpoint, identity.ExternalId.Primary);
         using HttpResponseMessage response = await httpClient.GetAsync(formattedUrl, cancellationToken);
 
