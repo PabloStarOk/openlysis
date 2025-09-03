@@ -23,6 +23,7 @@ internal sealed class FileMultiAnalyzer : MultiAnalyzer<FileAnalysis, FileAnalys
 {
     private readonly IFileStorageProvider _fileStorageProvider;
     private FileStreamFactory _fileStreamFactory;
+    private string _storageFileName;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMultiAnalyzer"/> class.
@@ -46,6 +47,7 @@ internal sealed class FileMultiAnalyzer : MultiAnalyzer<FileAnalysis, FileAnalys
     /// <inheritdoc/>
     protected override AnalyzeFileRequest CreateRequest(FileAnalysisJobMessage message)
     {
+        _storageFileName = message.StorageFileName;
         _fileStreamFactory = new FileStreamFactory(message.StorageFileName, _fileStorageProvider);
         return new AnalyzeFileRequest(
             _fileStreamFactory,
@@ -58,11 +60,16 @@ internal sealed class FileMultiAnalyzer : MultiAnalyzer<FileAnalysis, FileAnalys
     }
 
     /// <inheritdoc/>
-    protected override async ValueTask CleanUpAsync()
+    protected override async ValueTask CleanUpAsync(bool success)
     {
         if (_fileStreamFactory is not null)
         {
             await _fileStreamFactory.DisposeAsync();
+        }
+
+        if (success)
+        {
+            await _fileStorageProvider.DeleteAsync(_storageFileName);
         }
     }
 }

@@ -81,15 +81,13 @@ internal abstract class MultiAnalyzer<TAnalysis, TMessage, TRequest>
             }
 
             _startedAnalysesChannel.Writer.Complete();
+            await CleanUpAsync(success: true);
         }
         catch (Exception exception)
         {
             _startedAnalysesChannel.Writer.Complete(exception);
+            await CleanUpAsync(success: false);
             throw;
-        }
-        finally
-        {
-            await CleanUpAsync();
         }
     }
 
@@ -137,8 +135,9 @@ internal abstract class MultiAnalyzer<TAnalysis, TMessage, TRequest>
     /// Performs cleanup operations after analysis is complete.
     /// Can be overridden by derived classes to implement custom cleanup logic.
     /// </summary>
+    /// <param name="success">Indicates whether the analysis completed successfully.</param>
     /// <returns>A completed <see cref="ValueTask"/> by default.</returns>
-    protected virtual ValueTask CleanUpAsync()
+    protected virtual ValueTask CleanUpAsync(bool success)
     {
         return ValueTask.CompletedTask;
     }
