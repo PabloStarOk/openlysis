@@ -45,7 +45,6 @@ internal sealed class FileAnalysisJobConsumerDefinition
         ConsumersOptions options = _consumersOptions.Value;
 
         endpointConfigurator.PrefetchCount = options.AnalyzeFile.ConcurrencyLimit;
-        endpointConfigurator.UseMessageRetry(r => r.Intervals(options.AnalyzeFile.RetryIntervals));
 
         consumerConfigurator.Options<JobOptions<FileAnalysisJobMessage>>(jobOptions =>
         {

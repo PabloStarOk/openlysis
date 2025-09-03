@@ -11,10 +11,12 @@ namespace Openlysis.Infrastructure.Shared.Communication.Contracts;
 /// <param name="Timeout">Indicates whether the update is due to a timeout.</param>
 /// <param name="UpdatableAnalyses">A collection of analyses to be updated within the multi-analysis aggregate.</param>
 /// <param name="CorrelationId">Optional correlation identifier that associates the multi-analysis to a message analysis.</param>
+/// <param name="Failed">Indicates whether the multi-analysis has failed.</param>
 public record UpdateMultiAnalysisMessage<TAnalysis>(
     GlobalId MultiAnalysisId,
     bool Timeout,
     IEnumerable<TAnalysis> UpdatableAnalyses,
-    GlobalId? CorrelationId)
+    GlobalId? CorrelationId,
+    bool Failed = false)
     : QueueMessage(CorrelationId)
     where TAnalysis : Analysis;

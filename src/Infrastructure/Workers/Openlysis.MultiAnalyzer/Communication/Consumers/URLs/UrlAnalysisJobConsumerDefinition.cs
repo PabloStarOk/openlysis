@@ -45,7 +45,6 @@ internal sealed class UrlAnalysisJobConsumerDefinition
         ConsumersOptions options = _consumersOptions.Value;
 
         endpointConfigurator.PrefetchCount = options.AnalyzeUrl.ConcurrencyLimit;
-        endpointConfigurator.UseMessageRetry(r => r.Intervals(options.AnalyzeUrl.RetryIntervals));
 
         consumerConfigurator.Options<JobOptions<UrlAnalysisJobMessage>>(jobOptions =>
         {

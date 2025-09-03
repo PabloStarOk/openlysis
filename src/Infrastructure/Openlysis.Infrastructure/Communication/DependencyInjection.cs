@@ -14,6 +14,7 @@ using Openlysis.Infrastructure.Communication.Consumers.URLs;
 using Openlysis.Infrastructure.Communication.Sagas.Messages;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Shared.Communication;
+using Openlysis.Infrastructure.Shared.Communication.Contracts;
 
 namespace Openlysis.Infrastructure.Communication;
 
@@ -44,6 +45,12 @@ internal static class DependencyInjection
                 x.AddConsumer<
                     UpdateMultiAnalysisConsumer<UrlMultiAnalysis, UrlAnalysis>,
                     UpdateUrlMultiAnalysisConsumerDefinition>();
+                x.AddConsumer<
+                    FaultedMultiAnalysisConsumer<FileAnalysis, FileAnalysisJobMessage>,
+                    FailedFileAnalysesConsumerDefinition>();
+                x.AddConsumer<
+                    FaultedMultiAnalysisConsumer<UrlAnalysis, UrlAnalysisJobMessage>,
+                    FailedUrlAnalysesConsumerDefinition>();
                 x.AddSagaStateMachine<
                     MessageAnalysisUpdateStateMachine,
                     MessageAnalysisUpdateSaga,
