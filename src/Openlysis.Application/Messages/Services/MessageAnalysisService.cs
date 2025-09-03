@@ -3,6 +3,7 @@ using System.Net.Mail;
 using ErrorOr;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Enums;
 using Openlysis.Application.Common.Models;
 using Openlysis.Application.Messages.Contracts.Abstractions;
@@ -33,6 +34,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
     private readonly IMessageDataExtractor _dataExtractor;
     private readonly IMessageAnalyzer _messageAnalyzer;
     private readonly IMessageAnalysisQueue _messageAnalysisQueue;
+    private readonly IRecentAnalysisFinder<MessageAnalysis> _recentAnalysisFinder;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageAnalysisService"/> class.
@@ -43,13 +45,15 @@ internal class MessageAnalysisService : IMessageAnalysisService
     /// <param name="dataExtractor">The service responsible for extracting data (e.g., URLs, email addresses, phone numbers) from messages.</param>
     /// <param name="messageAnalyzer">The service responsible for analyzing messages and their associated data.</param>
     /// <param name="messageAnalysisQueue">Queue for managing asynchronous message analysis operations.</param>
+    /// <param name="recentAnalysisFinder">Finder for the most recent analysis of a message.</param>
     public MessageAnalysisService(
         IRepository<MessageAnalysis> repository,
         TimeProvider timeProvider,
         IMessageHashService messageHashService,
         IMessageDataExtractor dataExtractor,
         IMessageAnalyzer messageAnalyzer,
-        IMessageAnalysisQueue messageAnalysisQueue)
+        IMessageAnalysisQueue messageAnalysisQueue,
+        IRecentAnalysisFinder<MessageAnalysis> recentAnalysisFinder)
     {
         _repository = repository;
         _timeProvider = timeProvider;
@@ -57,6 +61,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
         _dataExtractor = dataExtractor;
         _messageAnalyzer = messageAnalyzer;
         _messageAnalysisQueue = messageAnalysisQueue;
+        _recentAnalysisFinder = recentAnalysisFinder;
     }
 
     /// <inheritdoc/>
@@ -76,28 +81,27 @@ internal class MessageAnalysisService : IMessageAnalysisService
         }
 
         HashValues messageHashValues = await _messageHashService.HashAsync(message, files, cancellationToken);
-        MessageAnalysis? lastMessageAnalysis = await _repository.FindAsync(
-            filter: m => m.Message.MessageHashValues == messageHashValues,
-            orderBy: q => q.OrderByDescending(x => x.StartedDate),
-            cancellationToken);
+        ReusableAnalysis<MessageAnalysis> reusableAnalysis = await _recentAnalysisFinder
+            .FindMostRecentAsync(userId, messageHashValues, cancellationToken);
 
-        if (lastMessageAnalysis is not null && !reanalyze)
+        if (reusableAnalysis.IsReusable && !reanalyze)
         {
             return new AnalysisRequestResult<MessageAnalysis>(
                 AnalysisRequestStatus.Retrieved,
-                lastMessageAnalysis);
+                reusableAnalysis.Analysis);
         }
 
         string sender = message.Sender;
         string? subject = message.Subject;
         string content = message.Content;
 
+        HashValues reusedHashValues = reusableAnalysis.Analysis?.Message.MessageHashValues ?? messageHashValues;
         var messageInformation = new MessageInformation(
             message.Type,
             message.Sender,
             message.Subject,
             message.Content,
-            lastMessageAnalysis?.Message.MessageHashValues ?? messageHashValues);
+            reusedHashValues);
 
         var correlationId = GlobalId.CreateUnique();
         var messageAnalysis = MessageAnalysis.Create(

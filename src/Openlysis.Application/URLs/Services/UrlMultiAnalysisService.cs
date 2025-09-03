@@ -26,6 +26,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     private readonly IHashService _hashService;
     private readonly IUrlMultiAnalysisQueue _multiAnalysisQueue;
     private readonly RecyclableMemoryStreamManager _memoryStreamManager;
+    private readonly IRecentAnalysisFinder<UrlMultiAnalysis> _recentAnalysisFinder;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UrlMultiAnalysisService"/> class.
@@ -35,18 +36,21 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     /// <param name="hashService">The service for generating and managing hashes.</param>
     /// <param name="multiAnalysisQueue">Queue for multi-analysis operations.</param>
     /// <param name="memoryStreamManager">The manager for recyclable <see cref="MemoryStream"/> used for storing URL string bytes.</param>
+    /// <param name="recentAnalysisFinder">Finder for the most recent analysis of a URL.</param>
     public UrlMultiAnalysisService(
         IRepository<UrlMultiAnalysis> repository,
         TimeProvider timeProvider,
         IHashService hashService,
         IUrlMultiAnalysisQueue multiAnalysisQueue,
-        RecyclableMemoryStreamManager memoryStreamManager)
+        RecyclableMemoryStreamManager memoryStreamManager,
+        IRecentAnalysisFinder<UrlMultiAnalysis> recentAnalysisFinder)
     {
         _repository = repository;
         _timeProvider = timeProvider;
         _hashService = hashService;
         _multiAnalysisQueue = multiAnalysisQueue;
         _memoryStreamManager = memoryStreamManager;
+        _recentAnalysisFinder = recentAnalysisFinder;
     }
 
     /// <inheritdoc/>
@@ -65,24 +69,23 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
             urlHashValues = await _hashService.HashDataAsync(urlMemoryStream, cancellationToken);
         }
 
-        UrlMultiAnalysis? existingAnalysis = await _repository.FindAsync(
-            filter: f => f.DataHashValues == urlHashValues,
-            orderBy: q => q.OrderByDescending(x => x.StartedDate),
-            cancellationToken);
+        ReusableAnalysis<UrlMultiAnalysis> reusableAnalysis = await _recentAnalysisFinder
+            .FindMostRecentAsync(userId, urlHashValues, cancellationToken);
 
-        if (existingAnalysis is not null && !reanalyze)
+        if (reusableAnalysis.IsReusable && !reanalyze)
         {
             return new AnalysisRequestResult<UrlMultiAnalysis>(
                 AnalysisRequestStatus.Retrieved,
-                existingAnalysis);
+                reusableAnalysis.Analysis);
         }
 
+        HashValues reusedHashValues = reusableAnalysis.Analysis?.DataHashValues ?? urlHashValues;
         var multiAnalysis = UrlMultiAnalysis.Create(
             userId,
             isPrivate,
             _timeProvider.GetUtcNow().UtcDateTime,
             url,
-            existingAnalysis?.DataHashValues ?? urlHashValues);
+            reusedHashValues);
 
         await _repository.AddAsync(multiAnalysis, cancellationToken);
         await _repository.SaveChangeAsync(cancellationToken);

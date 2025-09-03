@@ -17,15 +17,18 @@ using Openlysis.Application.Messages.Contracts.Abstractions;
 using Openlysis.Application.URLs.Contracts.Abstractions;
 using Openlysis.Domain.EmailAddresses;
 using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.Entities;
 using Openlysis.Domain.Messages;
 using Openlysis.Domain.Phones;
 using Openlysis.Domain.URLs;
+using Openlysis.Domain.URLs.Entities;
 using Openlysis.Evaluators.Ipqs;
 using Openlysis.Infrastructure.Communication;
 using Openlysis.Infrastructure.Configuration;
 using Openlysis.Infrastructure.Persistence;
 using Openlysis.Infrastructure.Persistence.Repositories;
 using Openlysis.Infrastructure.Services.Files;
+using Openlysis.Infrastructure.Services.Finders;
 using Openlysis.Infrastructure.Services.Hashing;
 using Openlysis.Infrastructure.Services.Messages;
 using Openlysis.Infrastructure.Services.URLs;
@@ -123,6 +126,7 @@ public static class DependencyInjection
         services.AddSingleton(new RecyclableMemoryStreamManager());
 
         services.AddTransient<IMessageAnalysisQueue, MessageAnalysisQueue>();
+        AddRecentAnalysisFinders(services, configuration);
     }
 
     /// <summary>
@@ -190,5 +194,27 @@ public static class DependencyInjection
 
         services.AddPipePool();
         services.AddScoped<IFileStorageContext, FileStorageContext>();
+    }
+
+    private static void AddRecentAnalysisFinders(IServiceCollection services, IConfiguration configuration)
+    {
+        var optionsSection = configuration.GetRequiredSection(AnalysisReuseOptions.SectionName);
+
+        services.AddOptions<AnalysisReuseOptions>()
+            .Bind(optionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddTransient<
+            IRecentAnalysisFinder<FileMultiAnalysis>,
+            RecentMultiAnalysisFinder<FileAnalysis, FileMultiAnalysis>>();
+
+        services.AddTransient<
+            IRecentAnalysisFinder<UrlMultiAnalysis>,
+            RecentMultiAnalysisFinder<UrlAnalysis, UrlMultiAnalysis>>();
+
+        services.AddTransient<
+            IRecentAnalysisFinder<MessageAnalysis>,
+            RecentMessageAnalysisFinder>();
     }
 }

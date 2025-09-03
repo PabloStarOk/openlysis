@@ -20,6 +20,7 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
     private readonly TimeProvider _timeProvider;
     private readonly IFileMultiAnalysisQueue _multiAnalysisQueue;
     private readonly IFileStorageContext _fileStorageContext;
+    private readonly IRecentAnalysisFinder<FileMultiAnalysis> _recentAnalysisFinder;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileMultiAnalysisService"/> class.
@@ -28,16 +29,19 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
     /// <param name="multiAnalysisQueue">Queue for multi-analysis operations.</param>
     /// <param name="timeProvider">Provides the current time.</param>
     /// <param name="fileStorageContext">Context for file storage operations.</param>
+    /// <param name="recentAnalysisFinder">Finder for the most recent analysis of a file.</param>
     public FileMultiAnalysisService(
         IRepository<FileMultiAnalysis> repository,
         IFileMultiAnalysisQueue multiAnalysisQueue,
         TimeProvider timeProvider,
-        IFileStorageContext fileStorageContext)
+        IFileStorageContext fileStorageContext,
+        IRecentAnalysisFinder<FileMultiAnalysis> recentAnalysisFinder)
     {
         _repository = repository;
         _timeProvider = timeProvider;
         _multiAnalysisQueue = multiAnalysisQueue;
         _fileStorageContext = fileStorageContext;
+        _recentAnalysisFinder = recentAnalysisFinder;
     }
 
     /// <inheritdoc/>
@@ -50,25 +54,23 @@ internal class FileMultiAnalysisService : IFileMultiAnalysisService
         CancellationToken cancellationToken = default,
         GlobalId? correlationId = null)
     {
-        FileMultiAnalysis? existingAnalysis = await _repository.FindAsync(
-            filter: f => f.DataHashValues == processedFile.HashValues,
-            orderBy: q => q.OrderByDescending(x => x.StartedDate),
-            cancellationToken);
+        ReusableAnalysis<FileMultiAnalysis> reusableAnalysis = await _recentAnalysisFinder
+            .FindMostRecentAsync(userId, processedFile.HashValues, cancellationToken);
 
-        if (existingAnalysis is not null && !reanalyze)
+        if (reusableAnalysis.IsReusable && !reanalyze)
         {
             await _fileStorageContext.RemoveAsync(processedFile);
-
             return new AnalysisRequestResult<FileMultiAnalysis>(
                 AnalysisRequestStatus.Retrieved,
-                existingAnalysis);
+                reusableAnalysis.Analysis);
         }
 
+        var reusedHashValues = reusableAnalysis.Analysis?.DataHashValues ?? processedFile.HashValues;
         var multiAnalysis = FileMultiAnalysis.Create(
             userId,
             isPrivate,
             _timeProvider.GetUtcNow().UtcDateTime,
-            existingAnalysis?.DataHashValues ?? processedFile.HashValues,
+            reusedHashValues,
             processedFile.Metadata);
 
         await _repository.AddAsync(multiAnalysis, cancellationToken);
