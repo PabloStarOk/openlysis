@@ -54,4 +54,19 @@ internal class HashService : IHashService
             hexSha256,
             hexSha512);
     }
+
+    /// <inheritdoc/>
+    public HashValues HashData(ReadOnlySpan<byte> data)
+    {
+        string hexMd5 = Convert.ToHexString(MD5.HashData(data));
+        string hexSha1 = Convert.ToHexString(SHA1.HashData(data));
+        string hexSha256 = Convert.ToHexString(SHA256.HashData(data));
+        string hexSha512 = Convert.ToHexString(SHA512.HashData(data));
+
+        return HashValues.Create(
+            hexMd5,
+            hexSha1,
+            hexSha256,
+            hexSha512);
+    }
 }

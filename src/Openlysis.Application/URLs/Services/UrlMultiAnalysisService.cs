@@ -2,8 +2,6 @@ using System.Text;
 
 using ErrorOr;
 
-using Microsoft.IO;
-
 using Openlysis.Application.Common.Abstractions.Persistence;
 using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Application.Common.Enums;
@@ -25,7 +23,6 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     private readonly TimeProvider _timeProvider;
     private readonly IHashService _hashService;
     private readonly IUrlMultiAnalysisQueue _multiAnalysisQueue;
-    private readonly RecyclableMemoryStreamManager _memoryStreamManager;
     private readonly IRecentAnalysisFinder<UrlMultiAnalysis> _recentAnalysisFinder;
 
     /// <summary>
@@ -35,21 +32,18 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
     /// <param name="timeProvider">The service for providing the current time.</param>
     /// <param name="hashService">The service for generating and managing hashes.</param>
     /// <param name="multiAnalysisQueue">Queue for multi-analysis operations.</param>
-    /// <param name="memoryStreamManager">The manager for recyclable <see cref="MemoryStream"/> used for storing URL string bytes.</param>
     /// <param name="recentAnalysisFinder">Finder for the most recent analysis of a URL.</param>
     public UrlMultiAnalysisService(
         IRepository<UrlMultiAnalysis> repository,
         TimeProvider timeProvider,
         IHashService hashService,
         IUrlMultiAnalysisQueue multiAnalysisQueue,
-        RecyclableMemoryStreamManager memoryStreamManager,
         IRecentAnalysisFinder<UrlMultiAnalysis> recentAnalysisFinder)
     {
         _repository = repository;
         _timeProvider = timeProvider;
         _hashService = hashService;
         _multiAnalysisQueue = multiAnalysisQueue;
-        _memoryStreamManager = memoryStreamManager;
         _recentAnalysisFinder = recentAnalysisFinder;
     }
 
@@ -62,12 +56,8 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         CancellationToken cancellationToken = default,
         GlobalId? correlationId = null)
     {
-        HashValues urlHashValues;
         byte[] urlBytes = Encoding.UTF8.GetBytes(url.AbsoluteUri);
-        await using (var urlMemoryStream = _memoryStreamManager.GetStream(urlBytes))
-        {
-            urlHashValues = await _hashService.HashDataAsync(urlMemoryStream, cancellationToken);
-        }
+        HashValues urlHashValues = _hashService.HashData(urlBytes);
 
         ReusableAnalysis<UrlMultiAnalysis> reusableAnalysis = await _recentAnalysisFinder
             .FindMostRecentAsync(userId, urlHashValues, cancellationToken);

@@ -45,7 +45,7 @@ internal sealed class MessageHashService : IMessageHashService
         ArgumentNullException.ThrowIfNull(message);
         ArgumentNullException.ThrowIfNull(processedFiles);
 
-        HashValues messageHashValues = await HashMessageAsync(message, cancellationToken);
+        HashValues messageHashValues = HashMessage(message);
         var filesHashValues = processedFiles.Select(f => f.HashValues).ToArray();
         if (filesHashValues.Length is 0)
         {
@@ -55,7 +55,7 @@ internal sealed class MessageHashService : IMessageHashService
         return await CreateCompositeHashAsync(messageHashValues, cancellationToken, filesHashValues);
     }
 
-    private async ValueTask<HashValues> HashMessageAsync(Message message, CancellationToken cancellationToken)
+    private HashValues HashMessage(Message message)
     {
         string concatenatedMessage = string.Join(
             separator: string.Empty,
@@ -64,8 +64,7 @@ internal sealed class MessageHashService : IMessageHashService
             message.Content);
 
         byte[] inputBytes = _encoding.GetBytes(concatenatedMessage);
-        await using var memoryStream = _memoryStreamManager.GetStream(nameof(HashMessageAsync), inputBytes);
-        return await _hashService.HashDataAsync(memoryStream, cancellationToken);
+        return _hashService.HashData(inputBytes);
     }
 
     private async Task<HashValues> CreateCompositeHashAsync(
