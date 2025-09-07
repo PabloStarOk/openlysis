@@ -17,28 +17,28 @@ namespace Openlysis.Infrastructure.Shared.Communication.Services.Files;
 /// </summary>
 internal sealed class GoogleCloudStorageProvider : IFileStorageProvider
 {
-    private readonly ILogger<GoogleCloudStorageProvider> _logger;
     private readonly IOptions<GoogleCloudStorageOptions> _options;
     private readonly ObjectPool<Pipe> _pipePool;
     private readonly Lazy<StorageClient> _storageClient;
+    private readonly ILoggerFactory _loggerFactory;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GoogleCloudStorageProvider"/> class.
     /// </summary>
-    /// <param name="logger">Logger for logging operations.</param>
     /// <param name="options">Options containing Google Cloud Storage configuration.</param>
     /// <param name="pipePool">Object pool for <see cref="Pipe"/> instances.</param>
     /// <param name="storageClient">Lazy-loaded Google Cloud <see cref="StorageClient"/>.</param>
+    /// <param name="loggerFactory">Factory for creating logger instances.</param>
     public GoogleCloudStorageProvider(
-        ILogger<GoogleCloudStorageProvider> logger,
         IOptions<GoogleCloudStorageOptions> options,
         ObjectPool<Pipe> pipePool,
-        Lazy<StorageClient> storageClient)
+        Lazy<StorageClient> storageClient,
+        ILoggerFactory loggerFactory)
     {
-        _logger = logger;
         _options = options;
         _pipePool = pipePool;
         _storageClient = storageClient;
+        _loggerFactory = loggerFactory;
     }
 
     /// <inheritdoc/>
@@ -56,8 +56,9 @@ internal sealed class GoogleCloudStorageProvider : IFileStorageProvider
     public Task<Stream> DownloadAsync(string fileId, CancellationToken cancellationToken = default)
     {
         Pipe pipe = _pipePool.Get();
-        var pooledPipeStream = PooledPipeStream.Create(_pipePool, pipe);
-        _ = Task.Run(() => StreamFileAsync(fileId, pooledPipeStream, cancellationToken), cancellationToken);
+        ILogger<PooledDownloadStream> logger = _loggerFactory.CreateLogger<PooledDownloadStream>();
+        var pooledPipeStream = PooledDownloadStream.Create(logger, _pipePool, _storageClient.Value, pipe);
+        pooledPipeStream.StartStreaming(_options.Value.BucketName, fileId, cancellationToken);
         return Task.FromResult<Stream>(pooledPipeStream);
     }
 
@@ -70,40 +71,17 @@ internal sealed class GoogleCloudStorageProvider : IFileStorageProvider
             .ConfigureAwait(false);
     }
 
-    private async Task StreamFileAsync(
-        string fileId,
-        PooledPipeStream pooledPipeStream,
-        CancellationToken cancellationToken = default)
-    {
-        string bucketName = _options.Value.BucketName;
-        _logger.LogInformation("Starting GCS download stream for file: {FileId}", fileId);
-
-        try
-        {
-            await _storageClient.Value
-                .DownloadObjectAsync(bucketName, fileId, pooledPipeStream, null, cancellationToken)
-                .ConfigureAwait(false);
-            await pooledPipeStream.CompleteWriterAsync();
-            _logger.LogInformation("Finished GCS download stream for file: {FileId}", fileId);
-        }
-        catch (Exception exception)
-        {
-            _logger.LogError(exception, "Error during GCS download stream for file: {FileId}", fileId);
-            await pooledPipeStream.CompleteWriterAsync(exception);
-        }
-    }
-
     /// <summary>
     /// A pooled stream implementation using <see cref="System.IO.Pipelines.Pipe"/> for efficient memory usage.
     /// Used to facilitate streaming data between Google Cloud Storage and consumers.
     /// </summary>
-    private sealed class PooledPipeStream : Stream
+    private sealed class PooledDownloadStream : Stream
     {
         public override bool CanRead => _pipeReaderStream.CanRead;
 
         public override bool CanSeek => _pipeReaderStream.CanSeek;
 
-        public override bool CanWrite => _pipeWriterStream.CanWrite;
+        public override bool CanWrite => false;
 
         public override long Length => _pipeReaderStream.Length;
 
@@ -113,28 +91,42 @@ internal sealed class GoogleCloudStorageProvider : IFileStorageProvider
             set => _pipeReaderStream.Position = value;
         }
 
+        private readonly ILogger<PooledDownloadStream> _logger;
         private readonly ObjectPool<Pipe> _pipePool;
+        private readonly StorageClient _storageClient;
         private readonly Pipe _pipe;
         private readonly Stream _pipeWriterStream;
         private readonly Stream _pipeReaderStream;
+        private CancellationTokenSource? _cancellationTokenSource;
+        private Task? _streamingTask;
         private int _disposed;
 
-        private PooledPipeStream(
+        private PooledDownloadStream(
+            ILogger<PooledDownloadStream> logger,
             ObjectPool<Pipe> pipePool,
+            StorageClient storageClient,
             Pipe pipe,
             Stream pipeWriterStream,
             Stream pipeReaderStream)
         {
+            _logger = logger;
             _pipePool = pipePool;
+            _storageClient = storageClient;
             _pipe = pipe;
             _pipeWriterStream = pipeWriterStream;
             _pipeReaderStream = pipeReaderStream;
         }
 
-        public static PooledPipeStream Create(ObjectPool<Pipe> pipePool, Pipe pipe)
+        public static PooledDownloadStream Create(
+            ILogger<PooledDownloadStream> logger,
+            ObjectPool<Pipe> pipePool,
+            StorageClient storageClient,
+            Pipe pipe)
         {
-            return new PooledPipeStream(
+            return new PooledDownloadStream(
+                logger,
                 pipePool,
+                storageClient,
                 pipe,
                 pipe.Writer.AsStream(),
                 pipe.Reader.AsStream());
@@ -172,22 +164,13 @@ internal sealed class GoogleCloudStorageProvider : IFileStorageProvider
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            _pipeWriterStream.Write(buffer, offset, count);
+            throw new NotSupportedException();
         }
 
-        public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public void StartStreaming(string bucketName, string storageFileName, CancellationToken cancellationToken)
         {
-            await _pipeWriterStream.WriteAsync(buffer.AsMemory(offset, count), cancellationToken);
-        }
-
-        public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
-        {
-            await _pipeWriterStream.WriteAsync(buffer, cancellationToken);
-        }
-
-        public async ValueTask CompleteWriterAsync(Exception? exception = null)
-        {
-            await _pipe.Writer.CompleteAsync(exception);
+            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _streamingTask = StreamAsync(bucketName, storageFileName, _cancellationTokenSource.Token);
         }
 
         public override async ValueTask DisposeAsync()
@@ -197,11 +180,30 @@ internal sealed class GoogleCloudStorageProvider : IFileStorageProvider
                 return;
             }
 
+            if (_cancellationTokenSource is not null)
+            {
+                await _cancellationTokenSource.CancelAsync();
+            }
+
+            try
+            {
+                if (_streamingTask is not null)
+                {
+                    await _streamingTask;
+                }
+            }
+            catch (Exception)
+            {
+                // Already logged
+            }
+
             await base.DisposeAsync();
-            await _pipeWriterStream.DisposeAsync();
+            _streamingTask?.Dispose();
+            _cancellationTokenSource?.Dispose();
             await _pipe.Writer.CompleteAsync();
-            await _pipeReaderStream.DisposeAsync();
             await _pipe.Reader.CompleteAsync();
+            await _pipeWriterStream.DisposeAsync();
+            await _pipeReaderStream.DisposeAsync();
             _pipePool.Return(_pipe);
         }
 
@@ -212,12 +214,53 @@ internal sealed class GoogleCloudStorageProvider : IFileStorageProvider
                 return;
             }
 
+            _cancellationTokenSource?.Cancel();
+
+            try
+            {
+                _streamingTask?.GetAwaiter().GetResult();
+            }
+            catch (Exception)
+            {
+                // Already logged
+            }
+
             base.Dispose(disposing);
-            _pipeWriterStream.Dispose();
+            _streamingTask?.Dispose();
+            _cancellationTokenSource?.Dispose();
             _pipe.Writer.Complete();
-            _pipeReaderStream.Dispose();
             _pipe.Reader.Complete();
+            _pipeWriterStream.Dispose();
+            _pipeReaderStream.Dispose();
             _pipePool.Return(_pipe);
+        }
+
+        /// <summary>
+        /// Streams the contents of a file from Google Cloud Storage into the pipe writer stream.
+        /// </summary>
+        /// <param name="bucketName">The name of the GCS bucket.</param>
+        /// <param name="storageFileName">The name of the file in GCS to download.</param>
+        /// <param name="cancellationToken">Token to observe for cancellation requests.</param>
+        private async Task StreamAsync(string bucketName, string storageFileName, CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Starting GCS download stream for file: {FileName}", storageFileName);
+            try
+            {
+                await _storageClient
+                    .DownloadObjectAsync(bucketName, storageFileName, _pipeWriterStream, null, cancellationToken)
+                    .ConfigureAwait(false);
+                await _pipe.Writer.CompleteAsync();
+                _logger.LogInformation("Finished GCS download stream for file: {FileName}", storageFileName);
+            }
+            catch (OperationCanceledException)
+            {
+                await _pipe.Writer.CompleteAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Error during GCS download stream for file: {FileName}", storageFileName);
+                await _pipe.Writer.CompleteAsync(exception).ConfigureAwait(false);
+            }
         }
     }
 }
