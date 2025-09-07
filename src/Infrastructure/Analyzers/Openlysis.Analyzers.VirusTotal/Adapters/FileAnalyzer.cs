@@ -75,7 +75,6 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
             return ServiceErrors.FileTooLarge;
         }
 
-        Stream fileData = await request.StreamFactory.CreateStreamAsync(this);
         string? fileUploadUrl = null;
         if (request.FileSize > Files.SmallFilesMaxSizeInBytes)
         {
@@ -89,7 +88,8 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
             fileUploadUrl = getUploadUrlResult.Value;
         }
 
-        var factory = new FileRequestFactory(request, fileData, fileUploadUrl);
+        await using Stream fileStream = await request.StreamFactory.CreateStreamAsync(this);
+        var factory = new FileRequestFactory(request, fileStream, fileUploadUrl);
         ErrorOr<AnalyzeResponse> result = await _vtAnalyzer.AnalyzeAsync(
             httpClient,
             factory,

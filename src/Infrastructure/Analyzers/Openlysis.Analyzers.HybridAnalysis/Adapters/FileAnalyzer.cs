@@ -80,11 +80,14 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
             return ServiceErrors.FileTooLarge;
         }
 
-        Stream fileData = await request.StreamFactory.CreateStreamAsync(this);
-        string mimeType = await _mimeTypeDetector.DetectAsync(
-            fileData,
-            request.FileContentType,
-            cancellationToken);
+        string mimeType;
+        await using (Stream fileStream = await request.StreamFactory.CreateStreamAsync(this))
+        {
+            mimeType = await _mimeTypeDetector.DetectAsync(
+                fileStream,
+                request.FileContentType,
+                cancellationToken);
+        }
 
         bool useSandbox = _sandboxAnalyzer.CanAnalyzeMimeType(mimeType);
 
@@ -197,10 +200,11 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
 
         SandboxEnvironment osEnvironment =
             _sandboxAnalyzer.DetermineEnvironment(mimeType);
+        await using Stream fileStream = await request.StreamFactory.CreateStreamAsync(this);
         var requestFactory = new FileSandboxRequestFactory(
             _analyzerOptions.CurrentValue,
             request,
-            await request.StreamFactory.CreateStreamAsync(this),
+            fileStream,
             osEnvironment,
             mimeType);
         ErrorOr<SandboxSubmitResponse> result = await _sandboxAnalyzer.AnalyzeAsync(
@@ -419,9 +423,10 @@ internal class FileAnalyzer : Analyzer<FileAnalysis, AnalyzeFileRequest>
         }
 
         QuickScanService bestQuickScanService = serviceResult.Value;
+        await using Stream fileStream = await request.StreamFactory.CreateStreamAsync(this);
         var requestFactory = new FileQuickScanRequestFactory(
             request,
-            await request.StreamFactory.CreateStreamAsync(this),
+            fileStream,
             bestQuickScanService.Name,
             mimeType);
         ErrorOr<QuickScanResponse> scanResult = await _quickScanner.ScanAsync(
