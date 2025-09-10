@@ -18,7 +18,7 @@ namespace Openlysis.Infrastructure.Communication.Sagas.Messages;
 
 /// <summary>
 /// Represents the MassTransit state machine for updating the state of a MessageAnalysis.
-/// Handles events related to the initialization and update of file and URL multi-analyses,
+/// Handles events related to the initialization and update of related file and URL multi-analyses,
 /// and manages saga transitions and completion.
 /// </summary>
 internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachine<MessageAnalysisUpdateSaga>
@@ -26,32 +26,32 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
     /// <summary>
     /// Gets state representing the initialization phase of the saga.
     /// </summary>
-    public State Initialiazing { get; }
+    public State Initializing { get; } = null!;
 
     /// <summary>
     /// Gets state representing the in-progress phase of the saga.
     /// </summary>
-    public State InProgress { get; }
+    public State InProgress { get; } = null!;
 
     /// <summary>
     /// Gets event triggered when a MessageAnalysis is started.
     /// </summary>
-    public Event<MessageAnalysisStarted> Started { get; }
+    public Event<MessageAnalysisStarted> Started { get; } = null!;
 
     /// <summary>
     /// Gets event triggered when a MessageAnalysis is initialized.
     /// </summary>
-    public Event<MessageAnalysisInitialized> Initialized { get; }
+    public Event<MessageAnalysisInitialized> Initialized { get; } = null!;
 
     /// <summary>
     /// Gets event triggered when a FileMultiAnalysis is updated.
     /// </summary>
-    public Event<UpdateMultiAnalysisMessage<FileAnalysis>> FileMultiAnalysisUpdated { get; }
+    public Event<UpdateMultiAnalysisMessage<FileAnalysis>> FileMultiAnalysisUpdated { get; } = null!;
 
     /// <summary>
     /// Gets event triggered when a UrlMultiAnalysis is updated.
     /// </summary>
-    public Event<UpdateMultiAnalysisMessage<UrlAnalysis>> UrlMultiAnalysisUpdated { get; }
+    public Event<UpdateMultiAnalysisMessage<UrlAnalysis>> UrlMultiAnalysisUpdated { get; } = null!;
 
     private readonly ILogger<MessageAnalysisUpdateStateMachine> _logger;
     private readonly IServiceScopeFactory _serviceScopeFactory;
@@ -68,7 +68,7 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
         _logger = logger;
         _serviceScopeFactory = serviceScopeFactory;
 
-        InstanceState(x => x.CurrentState, Initialiazing, InProgress);
+        InstanceState(x => x.CurrentState, Initializing, InProgress);
 
         Event(() => Started, e => e.CorrelateById(x => x.Message.CorrelationId.Value));
         Event(() => Initialized, e => e.CorrelateById(x => x.Message.CorrelationId.Value));
@@ -77,20 +77,10 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
         Event(() => UrlMultiAnalysisUpdated, e => e.CorrelateBy((saga, context) =>
             context.Message.CorrelationId != null && saga.CorrelationId == context.Message.CorrelationId.Value));
 
-        Initially(
-            When(Started).Then(context =>
-                {
-                    _logger.LogDebug(
-                        "Saga {CorrelationId}: Started MessageAnalysis with ID {MessageAnalysisId}",
-                        context.Message.CorrelationId,
-                        context.Message.MessageAnalysisId);
-                    context.Saga.CorrelationId = context.Message.CorrelationId.Value;
-                    context.Saga.MessageAnalysisId = context.Message.MessageAnalysisId;
-                })
-                .TransitionTo(Initialiazing));
+        Initially(When(Started).Then(SetUpSagaInformation).TransitionTo(Initializing));
 
         During(
-            Initialiazing,
+            Initializing,
             When(FileMultiAnalysisUpdated).Then(context =>
             {
                 _logger.LogDebug(
@@ -107,57 +97,53 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
                     context.Message.MultiAnalysisId);
                 context.Saga.DeferredUrlUpdates.Add(context.Message.MultiAnalysisId);
             }),
-            When(Initialized).ThenAsync(UpdateDeferredMultiAnalysesAsync).TransitionTo(InProgress));
+            When(Initialized).ThenAsync(ApplyDeferredUpdatesAsync).TransitionTo(InProgress));
 
         During(
             InProgress,
-            When(FileMultiAnalysisUpdated).ThenAsync(async context =>
-            {
-                _logger.LogDebug(
-                    "Saga {CorrelationId}: Received FileMultiAnalysis update for {MultiAnalysisId}",
-                    context.Saga.CorrelationId,
-                    context.Message.MultiAnalysisId);
-                await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
-                var repository = scope.ServiceProvider.GetRequiredService<IRepository<MessageAnalysis>>();
-                FileMultiAnalysis multiAnalysis = await GetFileMultiAnalysisAsync(
-                    scope.ServiceProvider,
-                    context.Message.MultiAnalysisId,
-                    context.CancellationToken);
-                await UpdateResultAsync(repository, multiAnalysis, context);
-                await repository.SaveChangeAsync(context.CancellationToken);
-                _logger.LogDebug(
-                    "Saga {CorrelationId}: Finished FileMultiAnalysis update for {MultiAnalysisId}",
-                    context.Saga.CorrelationId,
-                    context.Message.MultiAnalysisId);
-            }),
-            When(UrlMultiAnalysisUpdated).ThenAsync(async context =>
-            {
-                _logger.LogDebug(
-                    "Saga {CorrelationId}: Received UrlMultiAnalysis update for {MultiAnalysisId}",
-                    context.Saga.CorrelationId,
-                    context.Message.MultiAnalysisId);
-                await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
-                var repository = scope.ServiceProvider.GetRequiredService<IRepository<MessageAnalysis>>();
-                UrlMultiAnalysis multiAnalysis =
-                    await GetUrlMultiAnalysisAsync(
-                        scope.ServiceProvider,
-                        context.Message.MultiAnalysisId,
-                        context.CancellationToken);
-                await UpdateResultAsync(repository, multiAnalysis, context);
-                await repository.SaveChangeAsync(context.CancellationToken);
-                _logger.LogDebug(
-                    "Saga {CorrelationId}: Finished UrlMultiAnalysis update for {MultiAnalysisId}",
-                    context.Saga.CorrelationId,
-                    context.Message.MultiAnalysisId);
-            }));
+            When(FileMultiAnalysisUpdated).ThenAsync(ApplyUpdateAsync<FileMultiAnalysis, FileAnalysis>),
+            When(UrlMultiAnalysisUpdated).ThenAsync(ApplyUpdateAsync<UrlMultiAnalysis, UrlAnalysis>));
 
         SetCompletedWhenFinalized();
     }
 
-    private async Task UpdateDeferredMultiAnalysesAsync(BehaviorContext<MessageAnalysisUpdateSaga> context)
+    private static async Task<MessageAnalysis> GetRequiredAnalysisAsync(
+        IRepository<MessageAnalysis> repository,
+        BehaviorContext<MessageAnalysisUpdateSaga> context)
+    {
+        GlobalId messageAnalysisId = context.Saga.MessageAnalysisId;
+        MessageAnalysis? messageAnalysis = await repository.GetAsync(messageAnalysisId, context.CancellationToken);
+        return messageAnalysis
+            ?? throw new InvalidOperationException($"MessageAnalysis entity not found. ID: {messageAnalysisId}, Saga CorrelationId: {context.Saga.CorrelationId}");
+    }
+
+    private static async Task<TMultiAnalysis> GetRequiredMultiAnalysisAsync<TMultiAnalysis, TAnalysis>(
+        IServiceProvider serviceProvider,
+        GlobalId id,
+        CancellationToken cancellationToken)
+        where TMultiAnalysis : MultiAnalysis<TAnalysis>
+        where TAnalysis : Analysis
+    {
+        var repository = serviceProvider.GetRequiredService<IRepository<TMultiAnalysis>>();
+        TMultiAnalysis? multiAnalysis = await repository.GetAsync(id, cancellationToken);
+        return multiAnalysis ?? throw new InvalidOperationException($"{typeof(TMultiAnalysis).Name} not found for ID: {id}");
+    }
+
+    private void SetUpSagaInformation(BehaviorContext<MessageAnalysisUpdateSaga, MessageAnalysisStarted> context)
+    {
+        _logger.LogDebug(
+            "Saga {CorrelationId}: Started MessageAnalysis with ID {MessageAnalysisId}",
+            context.Message.CorrelationId,
+            context.Message.MessageAnalysisId);
+        context.Saga.CorrelationId = context.Message.CorrelationId.Value;
+        context.Saga.MessageAnalysisId = context.Message.MessageAnalysisId;
+    }
+
+    private async Task ApplyDeferredUpdatesAsync(BehaviorContext<MessageAnalysisUpdateSaga> context)
     {
         await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
         var repository = scope.ServiceProvider.GetRequiredService<IRepository<MessageAnalysis>>();
+        MessageAnalysis messageAnalysis = await GetRequiredAnalysisAsync(repository, context);
 
         foreach (var deferredId in context.Saga.DeferredFileUpdates)
         {
@@ -165,9 +151,12 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
                 "Saga {CorrelationId}: Updating MessageAnalysis from deferred FileMultiAnalysis {MultiAnalysisId}",
                 context.Saga.CorrelationId,
                 deferredId);
-            FileMultiAnalysis multiAnalysis =
-                await GetFileMultiAnalysisAsync(scope.ServiceProvider, deferredId, context.CancellationToken);
-            await UpdateResultAsync(repository, multiAnalysis, context);
+
+            var multiAnalysis = await GetRequiredMultiAnalysisAsync<FileMultiAnalysis, FileAnalysis>(
+                scope.ServiceProvider,
+                deferredId,
+                context.CancellationToken);
+            messageAnalysis.UpdateResult(multiAnalysis);
         }
 
         foreach (var deferredId in context.Saga.DeferredUrlUpdates)
@@ -176,71 +165,60 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
                 "Saga {CorrelationId}: Updating MessageAnalysis from deferred UrlMultiAnalysis {MultiAnalysisId}",
                 context.Saga.CorrelationId,
                 deferredId);
-            UrlMultiAnalysis multiAnalysis =
-                await GetUrlMultiAnalysisAsync(scope.ServiceProvider, deferredId, context.CancellationToken);
-            await UpdateResultAsync(repository, multiAnalysis, context);
+
+            var multiAnalysis = await GetRequiredMultiAnalysisAsync<UrlMultiAnalysis, UrlAnalysis>(
+                scope.ServiceProvider,
+                deferredId,
+                context.CancellationToken);
+            messageAnalysis.UpdateResult(multiAnalysis);
         }
 
+        repository.Update(messageAnalysis);
         await repository.SaveChangeAsync(context.CancellationToken);
+        await CompleteSagaIfFinishedAsync(messageAnalysis, context);
     }
 
-    private async Task<FileMultiAnalysis> GetFileMultiAnalysisAsync(
-        IServiceProvider serviceProvider,
-        GlobalId multiAnalysisId,
-        CancellationToken cancellationToken)
-    {
-        var repository = serviceProvider.GetRequiredService<IRepository<FileMultiAnalysis>>();
-        FileMultiAnalysis? fileMultiAnalysis = await repository.GetAsync(multiAnalysisId, cancellationToken);
-        if (fileMultiAnalysis is null)
-        {
-            throw new InvalidOperationException($"FileMultiAnalysis not found for ID: {multiAnalysisId}");
-        }
-
-        return fileMultiAnalysis;
-    }
-
-    private async Task<UrlMultiAnalysis> GetUrlMultiAnalysisAsync(
-        IServiceProvider serviceProvider,
-        GlobalId multiAnalysisId,
-        CancellationToken cancellationToken)
-    {
-        var repository = serviceProvider.GetRequiredService<IRepository<UrlMultiAnalysis>>();
-        UrlMultiAnalysis? urlMultiAnalysis = await repository.GetAsync(multiAnalysisId, cancellationToken);
-        if (urlMultiAnalysis is null)
-        {
-            throw new InvalidOperationException($"UrlMultiAnalysis not found for ID: {multiAnalysisId}");
-        }
-
-        return urlMultiAnalysis;
-    }
-
-    private async Task UpdateResultAsync<TAnalysis>(
-        IRepository<MessageAnalysis> repository,
-        MultiAnalysis<TAnalysis> multiAnalysis,
-        BehaviorContext<MessageAnalysisUpdateSaga> context)
+    private async Task ApplyUpdateAsync<TMultiAnalysis, TAnalysis>(
+        BehaviorContext<MessageAnalysisUpdateSaga, UpdateMultiAnalysisMessage<TAnalysis>> context)
+        where TMultiAnalysis : MultiAnalysis<TAnalysis>
         where TAnalysis : Analysis
     {
-        MessageAnalysis? messageAnalysis = await repository.FindAsync(
-            filter: m =>
-                m.AttachedFilesIndicators.Any(i => i.ResultId == multiAnalysis.Id)
-                || m.DetectedUrlsIndicators.Any(i => i.ResultId == multiAnalysis.Id),
-            orderBy: null,
+        _logger.LogDebug(
+            "Saga {CorrelationId}: Received {MultiAnalysisType} update with ID {MultiAnalysisId}",
+            context.Saga.CorrelationId,
+            typeof(TMultiAnalysis).Name,
+            context.Message.MultiAnalysisId);
+
+        await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
+        var repository = scope.ServiceProvider.GetRequiredService<IRepository<MessageAnalysis>>();
+        TMultiAnalysis multiAnalysis = await GetRequiredMultiAnalysisAsync<TMultiAnalysis, TAnalysis>(
+            scope.ServiceProvider,
+            context.Message.MultiAnalysisId,
             context.CancellationToken);
-
-        if (messageAnalysis is null)
-        {
-            throw new InvalidOperationException($"No matching MessageAnalysis found for the provided MultiAnalysis ID: {multiAnalysis.Id}");
-        }
-
+        MessageAnalysis messageAnalysis = await GetRequiredAnalysisAsync(repository, context);
         messageAnalysis.UpdateResult(multiAnalysis);
         repository.Update(messageAnalysis);
+        await repository.SaveChangeAsync(context.CancellationToken);
+        await CompleteSagaIfFinishedAsync(messageAnalysis, context);
 
+        _logger.LogDebug(
+            "Saga {CorrelationId}: Finished {MultiAnalysisType} update with ID {MultiAnalysisId}",
+            context.Saga.CorrelationId,
+            typeof(TMultiAnalysis).Name,
+            context.Message.MultiAnalysisId);
+    }
+
+    private async Task CompleteSagaIfFinishedAsync(
+        MessageAnalysis messageAnalysis,
+        BehaviorContext<MessageAnalysisUpdateSaga> context)
+    {
         if (messageAnalysis.State.CanBeUpdated)
         {
             return;
         }
 
         await context.SetCompleted();
+
         _logger.LogDebug(
             "Saga {CorrelationId}: State machine completed for MessageAnalysis {MessageAnalysisId}",
             context.Saga.CorrelationId,
