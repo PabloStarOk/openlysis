@@ -208,7 +208,7 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
             context.Message.MultiAnalysisId);
     }
 
-    private async Task CompleteSagaIfFinishedAsync(
+    private async ValueTask CompleteSagaIfFinishedAsync(
         MessageAnalysis messageAnalysis,
         BehaviorContext<MessageAnalysisUpdateSaga> context)
     {
