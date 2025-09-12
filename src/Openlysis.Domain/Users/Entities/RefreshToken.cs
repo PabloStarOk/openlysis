@@ -4,9 +4,9 @@ using Openlysis.Domain.Common.ValueObjects;
 namespace Openlysis.Domain.Users.Entities;
 
 /// <summary>
-/// Represents a refresh token entity used for user authentication and session management.
+/// Represents a refresh token aggregate used for user authentication and session management.
 /// </summary>
-public sealed class RefreshToken : Entity<long>
+public sealed class RefreshToken : AggregateRoot<long>
 {
     /// <summary>
     /// Gets the hashed value of the refresh token.

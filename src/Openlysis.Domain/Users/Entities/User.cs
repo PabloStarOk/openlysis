@@ -5,9 +5,9 @@ using Openlysis.Domain.Users.ValueObjects;
 namespace Openlysis.Domain.Users.Entities;
 
 /// <summary>
-/// Represents a user entity with an email and password hash.
+/// Represents a user aggregate with an email and password hash.
 /// </summary>
-public sealed class User : Entity<GlobalId>
+public sealed class User : AggregateRoot<GlobalId>
 {
     /// <summary>
     /// Gets the user's email address.
