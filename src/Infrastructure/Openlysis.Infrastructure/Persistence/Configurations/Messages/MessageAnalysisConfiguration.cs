@@ -107,7 +107,7 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
                 .IsRequired();
 
             messageBuilder
-                .HasOne(m => m.MessageHashValues)
+                .HasOne(m => m.HashValues)
                 .WithMany()
                 .HasForeignKey("sha256")
                 .IsRequired();
@@ -117,7 +117,7 @@ public class MessageAnalysisConfiguration : IEntityTypeConfiguration<MessageAnal
                 .IsRequired();
 
             messageBuilder
-                .Navigation(m => m.MessageHashValues)
+                .Navigation(m => m.HashValues)
                 .AutoInclude();
         });
 

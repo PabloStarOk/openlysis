@@ -46,9 +46,9 @@ public sealed record AnalysisIdentifiers(
     {
         return new AnalysisIdentifiers(
             source.Id.ToString(),
-            source.Message.MessageHashValues.Sha256,
-            source.Message.MessageHashValues.Sha1,
-            source.Message.MessageHashValues.Md5,
-            source.Message.MessageHashValues.Sha512);
+            source.Message.HashValues.Sha256,
+            source.Message.HashValues.Sha1,
+            source.Message.HashValues.Md5,
+            source.Message.HashValues.Sha512);
     }
 }

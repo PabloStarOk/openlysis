@@ -29,9 +29,9 @@ public record MessageInformation
     public string Content { get; }
 
     /// <summary>
-    /// Gets the hash set representing the message sender and content as a whole.
+    /// Gets the hash values of the message as a whole.
     /// </summary>
-    public HashValues MessageHashValues { get; }
+    public HashValues HashValues { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MessageInformation"/> class with the specified parameters.
@@ -40,19 +40,19 @@ public record MessageInformation
     /// <param name="sender">The sender of the message.</param>
     /// <param name="subject">The subject of the message. Can be null if no subject is provided.</param>
     /// <param name="content">The content of the message.</param>
-    /// <param name="messageHashValues">The hash set representing the message sender and content as a whole.</param>
+    /// <param name="hashValues">The hash values of the message as a whole.</param>
     public MessageInformation(
         MessageType type,
         string sender,
         string? subject,
         string content,
-        HashValues messageHashValues)
+        HashValues hashValues)
     {
         Type = type;
         Sender = sender;
         Subject = subject;
         Content = content;
-        MessageHashValues = messageHashValues;
+        HashValues = hashValues;
     }
 
     // For EF Core.

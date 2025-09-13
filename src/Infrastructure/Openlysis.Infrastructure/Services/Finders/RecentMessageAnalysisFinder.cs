@@ -45,7 +45,7 @@ internal sealed class RecentMessageAnalysisFinder : IRecentAnalysisFinder<Messag
         DateTimeOffset now = _timeProvider.GetUtcNow();
         DateTimeOffset limitDate = now.Subtract(TimeSpan.FromHours(_options.Value.MaxAgeHours));
         MessageAnalysis? analysis = await _repository.FindAsync(
-            filter: m => m.Message.MessageHashValues == hashValues,
+            filter: m => m.Message.HashValues == hashValues,
             orderBy: q => q.OrderByDescending(m => m.StartedDate),
             cancellationToken);
 

@@ -95,7 +95,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
         string? subject = message.Subject;
         string content = message.Content;
 
-        HashValues reusedHashValues = reusableAnalysis.Analysis?.Message.MessageHashValues ?? messageHashValues;
+        HashValues reusedHashValues = reusableAnalysis.Analysis?.Message.HashValues ?? messageHashValues;
         var messageInformation = new MessageInformation(
             message.Type,
             message.Sender,
@@ -192,10 +192,10 @@ internal class MessageAnalysisService : IMessageAnalysisService
         var analyses = await _repository.GetManyAsync(
             page,
             pageSize,
-            u => (u.Message.MessageHashValues.Sha256 == hash
-                    || u.Message.MessageHashValues.Md5 == hash
-                    || u.Message.MessageHashValues.Sha1 == hash
-                    || u.Message.MessageHashValues.Sha512 == hash)
+            u => (u.Message.HashValues.Sha256 == hash
+                    || u.Message.HashValues.Md5 == hash
+                    || u.Message.HashValues.Sha1 == hash
+                    || u.Message.HashValues.Sha512 == hash)
                 && (!u.IsPrivate || (u.IsPrivate && u.UserId == userId)),
             OrderBy,
             cancellationToken);
