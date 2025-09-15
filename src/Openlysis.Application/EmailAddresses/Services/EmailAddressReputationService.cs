@@ -42,7 +42,7 @@ internal class EmailAddressReputationService :
     protected override EmailAddressMultiReputation CreateMultiReputation(MailAddress data)
     {
         return EmailAddressMultiReputation.Create(
-            TimeProvider.GetUtcNow().UtcDateTime,
+            TimeProvider.GetUtcNow(),
             data);
     }
 }

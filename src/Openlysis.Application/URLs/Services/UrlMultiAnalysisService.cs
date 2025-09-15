@@ -73,7 +73,7 @@ internal class UrlMultiAnalysisService : IUrlMultiAnalysisService
         var multiAnalysis = UrlMultiAnalysis.Create(
             userId,
             isPrivate,
-            _timeProvider.GetUtcNow().UtcDateTime,
+            _timeProvider.GetUtcNow(),
             url,
             reusedHashValues);
 

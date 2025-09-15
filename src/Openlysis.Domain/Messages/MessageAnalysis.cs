@@ -33,7 +33,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <summary>
     /// Gets the date and time when the analysis started.
     /// </summary>
-    public DateTime StartedDate { get; }
+    public DateTimeOffset StartedDate { get; }
 
     /// <summary>
     /// Gets the data of the message, including its type, sender, content, and hash set.
@@ -84,7 +84,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
         GlobalId id,
         GlobalId userId,
         bool isPrivate,
-        DateTime startedDate,
+        DateTimeOffset startedDate,
         MessageInformation message,
         AnalysisState state)
         : base(id)
@@ -120,7 +120,7 @@ public class MessageAnalysis : AggregateRoot<GlobalId>
     /// <param name="message">The message information being analyzed.</param>
     /// <returns>A new <see cref="MessageAnalysis"/> object.</returns>
     public static MessageAnalysis Create(
-        DateTime startedDate,
+        DateTimeOffset startedDate,
         GlobalId userId,
         bool isPrivate,
         MessageInformation message)

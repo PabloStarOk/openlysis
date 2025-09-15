@@ -21,7 +21,7 @@ public abstract class MultiReputation<TReputation>
     /// <summary>
     /// Gets the date when the reputation evaluation was performed.
     /// </summary>
-    public DateTime ReputationEvaluationDate { get; }
+    public DateTimeOffset ReputationEvaluationDate { get; }
 
     /// <summary>
     /// Gets the final verdict of the multi-reputation.
@@ -47,7 +47,7 @@ public abstract class MultiReputation<TReputation>
     /// <param name="finalThreatZone">The initial final threat zone of the multi-reputation.</param>
     protected MultiReputation(
         GlobalId id,
-        DateTime reputationEvaluationDate,
+        DateTimeOffset reputationEvaluationDate,
         Verdict finalVerdict,
         ThreatZone finalThreatZone)
         : base(id)

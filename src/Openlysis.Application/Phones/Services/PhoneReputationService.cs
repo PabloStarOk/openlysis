@@ -43,7 +43,7 @@ internal class PhoneReputationService :
     protected override PhoneMultiReputation CreateMultiReputation(string data)
     {
         return PhoneMultiReputation.Create(
-            TimeProvider.GetUtcNow().UtcDateTime,
+            TimeProvider.GetUtcNow(),
             data);
     }
 }

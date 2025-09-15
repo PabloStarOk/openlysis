@@ -22,7 +22,7 @@ namespace Openlysis.API.Endpoints.Files.Common.Responses;
 public record FileMultiAnalysisDto(
     string Id,
     bool IsPrivate,
-    DateTime StartedDate,
+    DateTimeOffset StartedDate,
     AnalysisStatus Status,
     Verdict FinalVerdict,
     ThreatZone FinalThreatZone,

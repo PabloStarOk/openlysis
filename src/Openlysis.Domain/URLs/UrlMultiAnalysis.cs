@@ -29,7 +29,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlAnalysis>
         GlobalId id,
         GlobalId userId,
         bool isPrivate,
-        DateTime startedDate,
+        DateTimeOffset startedDate,
         AnalysisState state,
         HashValues urlHashValues,
         Uri url)
@@ -65,7 +65,7 @@ public sealed class UrlMultiAnalysis : MultiAnalysis<UrlAnalysis>
     public static UrlMultiAnalysis Create(
         GlobalId userId,
         bool isPrivate,
-        DateTime startedDate,
+        DateTimeOffset startedDate,
         Uri url,
         HashValues urlHashValues)
     {

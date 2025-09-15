@@ -19,7 +19,7 @@ namespace Openlysis.API.Endpoints.Messages.Common.Responses;
 public record MessageAnalysisDto(
     string Id,
     bool IsPrivate,
-    DateTime StartedDate,
+    DateTimeOffset StartedDate,
     MessageInformation MessageInformation,
     AnalysisStatus Status,
     Verdict Verdict,

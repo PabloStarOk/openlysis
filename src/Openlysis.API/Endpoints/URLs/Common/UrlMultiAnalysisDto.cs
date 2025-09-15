@@ -20,7 +20,7 @@ namespace Openlysis.API.Endpoints.URLs.Common;
 public record UrlMultiAnalysisDto(
     string Id,
     bool IsPrivate,
-    DateTime StartedDate,
+    DateTimeOffset StartedDate,
     AnalysisStatus Status,
     Verdict FinalVerdict,
     ThreatZone FinalThreatZone,

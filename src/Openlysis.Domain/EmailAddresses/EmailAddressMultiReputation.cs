@@ -27,7 +27,7 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressReputatio
     /// <param name="emailAddress">The email address associated with the multi-reputation.</param>
     private EmailAddressMultiReputation(
         GlobalId id,
-        DateTime evaluationReputationDate,
+        DateTimeOffset evaluationReputationDate,
         Verdict finalVerdict,
         ThreatZone finalThreatZone,
         MailAddress emailAddress)
@@ -52,7 +52,7 @@ public class EmailAddressMultiReputation : MultiReputation<EmailAddressReputatio
     /// <param name="emailAddress">The email address associated with the multi-reputation.</param>
     /// <returns>A new instance of <see cref="EmailAddressMultiReputation"/>.</returns>
     public static EmailAddressMultiReputation Create(
-        DateTime reputationEvaluationDate,
+        DateTimeOffset reputationEvaluationDate,
         MailAddress emailAddress)
     {
         GlobalId globalId = GlobalId.CreateUnique();

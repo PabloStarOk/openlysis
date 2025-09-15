@@ -31,7 +31,7 @@ public abstract class MultiAnalysis<TAnalysis>
     /// <summary>
     /// Gets the date and time when the analysis started.
     /// </summary>
-    public DateTime StartedDate { get; }
+    public DateTimeOffset StartedDate { get; }
 
     /// <summary>
     /// Gets the current state of the analysis.
@@ -66,7 +66,7 @@ public abstract class MultiAnalysis<TAnalysis>
         GlobalId id,
         GlobalId userId,
         bool isPrivate,
-        DateTime startedDate,
+        DateTimeOffset startedDate,
         AnalysisState state,
         HashValues dataHashValues)
         : base(id)

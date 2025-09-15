@@ -25,7 +25,7 @@ public class PhoneMultiReputation : MultiReputation<PhoneReputation>
     /// <param name="phoneNumber">The phone number associated with the multi-reputation.</param>
     private PhoneMultiReputation(
         GlobalId id,
-        DateTime reputationEvaluationDate,
+        DateTimeOffset reputationEvaluationDate,
         Verdict finalVerdict,
         ThreatZone finalThreatZone,
         string phoneNumber)
@@ -50,7 +50,7 @@ public class PhoneMultiReputation : MultiReputation<PhoneReputation>
     /// <param name="phoneNumber">The phone number associated with the multi-reputation.</param>
     /// <returns>A new instance of <see cref="PhoneMultiReputation"/>.</returns>
     public static PhoneMultiReputation Create(
-        DateTime reputationEvaluationDate,
+        DateTimeOffset reputationEvaluationDate,
         string phoneNumber)
     {
         GlobalId globalId = GlobalId.CreateUnique();

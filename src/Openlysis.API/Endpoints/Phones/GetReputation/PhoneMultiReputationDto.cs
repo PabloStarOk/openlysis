@@ -14,7 +14,7 @@ namespace Openlysis.API.Endpoints.Phones.GetReputation;
 /// <param name="Reputations">A collection of <see cref="PhoneReputationDto"/>.</param>
 public record PhoneMultiReputationDto(
     string Id,
-    DateTime EvaluationDate,
+    DateTimeOffset EvaluationDate,
     Verdict FinalVerdict,
     ThreatZone FinalThreatZone,
     string PhoneNumber,

@@ -41,7 +41,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileAnalysis>
         GlobalId id,
         GlobalId userId,
         bool isPrivate,
-        DateTime startedDate,
+        DateTimeOffset startedDate,
         AnalysisState state,
         HashValues dataHashValues,
         FileMetadata fileMetadata)
@@ -77,7 +77,7 @@ public class FileMultiAnalysis : MultiAnalysis<FileAnalysis>
     public static FileMultiAnalysis Create(
         GlobalId userId,
         bool isPrivate,
-        DateTime startedDate,
+        DateTimeOffset startedDate,
         HashValues dataHashValues,
         FileMetadata fileMetadata)
     {

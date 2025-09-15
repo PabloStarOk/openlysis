@@ -105,7 +105,7 @@ internal class MessageAnalysisService : IMessageAnalysisService
 
         var correlationId = GlobalId.CreateUnique();
         var messageAnalysis = MessageAnalysis.Create(
-            _timeProvider.GetUtcNow().UtcDateTime,
+            _timeProvider.GetUtcNow(),
             userId,
             isPrivate,
             messageInformation);

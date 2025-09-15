@@ -14,7 +14,7 @@ namespace Openlysis.API.Endpoints.EmailAddresses.GetReputation;
 /// <param name="Reputations">A collection of <see cref="EmailAddressReputationDto"/>.</param>
 public record EmailAddressMultiReputationDto(
     string Id,
-    DateTime EvaluationDate,
+    DateTimeOffset EvaluationDate,
     Verdict FinalVerdict,
     ThreatZone FinalThreatZone,
     string EmailAddress,
