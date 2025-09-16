@@ -20,6 +20,7 @@ using Openlysis.API.Documentation;
 using Openlysis.API.Endpoints.Files.Analyze;
 using Openlysis.API.Endpoints.Messages.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
+using Openlysis.API.Notifications;
 using Openlysis.Infrastructure.Configuration;
 
 namespace Openlysis.API;
@@ -69,6 +70,7 @@ public static class DependencyInjection
         AddMultipartRequestBinders(services, configuration);
         AddJwtAuthentication(services, configuration, environment);
         services.AddAuthorization();
+        services.AddPushNotifications();
 
         services.AddProblemDetails(
             opt =>
