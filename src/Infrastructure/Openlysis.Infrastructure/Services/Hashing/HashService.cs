@@ -48,7 +48,7 @@ internal class HashService : IHashService
         string hexSha256 = Convert.ToHexString(sha256.GetHashAndReset());
         string hexSha512 = Convert.ToHexString(sha512.GetHashAndReset());
 
-        return HashValues.Create(
+        return new HashValues(
             hexMd5,
             hexSha1,
             hexSha256,
@@ -63,7 +63,7 @@ internal class HashService : IHashService
         string hexSha256 = Convert.ToHexString(SHA256.HashData(data));
         string hexSha512 = Convert.ToHexString(SHA512.HashData(data));
 
-        return HashValues.Create(
+        return new HashValues(
             hexMd5,
             hexSha1,
             hexSha256,

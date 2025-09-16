@@ -32,7 +32,7 @@ public sealed class HashValues : IEquatable<HashValues>
     /// <param name="sha1">The SHA-1 hash value.</param>
     /// <param name="sha256">The SHA-256 hash value.</param>
     /// <param name="sha512">The SHA-512 hash value.</param>
-    private HashValues(
+    public HashValues(
         string md5,
         string sha1,
         string sha256,
@@ -58,32 +58,6 @@ public sealed class HashValues : IEquatable<HashValues>
     }
 #pragma warning restore S1144
 #pragma warning restore CS8618
-
-    /// <summary>
-    /// Creates a new instance of the <see cref="HashValues"/> class with the specified hash values.
-    /// </summary>
-    /// <param name="md5">The MD5 hash value.</param>
-    /// <param name="sha1">The SHA-1 hash value.</param>
-    /// <param name="sha256">The SHA-256 hash value.</param>
-    /// <param name="sha512">The SHA-512 hash value.</param>
-    /// <returns>A new <see cref="HashValues"/> instance.</returns>
-    public static HashValues Create(
-        string md5,
-        string sha1,
-        string sha256,
-        string sha512)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(md5);
-        ArgumentException.ThrowIfNullOrWhiteSpace(sha1);
-        ArgumentException.ThrowIfNullOrWhiteSpace(sha256);
-        ArgumentException.ThrowIfNullOrWhiteSpace(sha512);
-
-        return new HashValues(
-            md5,
-            sha1,
-            sha256,
-            sha512);
-    }
 
     public static bool operator ==(HashValues left, HashValues right)
     {
