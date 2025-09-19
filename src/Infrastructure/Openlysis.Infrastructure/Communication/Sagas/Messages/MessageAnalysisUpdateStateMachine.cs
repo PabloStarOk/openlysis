@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Openlysis.Application.Common.Abstractions.Persistence;
+using Openlysis.Application.Common.Abstractions.Services;
 using Openlysis.Domain.Common.Aggregates;
 using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.ValueObjects;
@@ -143,6 +144,7 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
     {
         await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
         var repository = scope.ServiceProvider.GetRequiredService<IRepository<MessageAnalysis>>();
+        var updatesNotifier = scope.ServiceProvider.GetRequiredService<IMessageAnalysisUpdatesNotifier>();
         MessageAnalysis messageAnalysis = await GetRequiredAnalysisAsync(repository, context);
 
         foreach (var deferredId in context.Saga.DeferredFileUpdates)
@@ -175,6 +177,7 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
 
         repository.Update(messageAnalysis);
         await repository.SaveChangeAsync(context.CancellationToken);
+        await updatesNotifier.NotifyAsync(messageAnalysis, context.CancellationToken);
         await CompleteSagaIfFinishedAsync(messageAnalysis, context);
     }
 
@@ -191,6 +194,7 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
 
         await using AsyncServiceScope scope = _serviceScopeFactory.CreateAsyncScope();
         var repository = scope.ServiceProvider.GetRequiredService<IRepository<MessageAnalysis>>();
+        var updatesNotifier = scope.ServiceProvider.GetRequiredService<IMessageAnalysisUpdatesNotifier>();
         TMultiAnalysis multiAnalysis = await GetRequiredMultiAnalysisAsync<TMultiAnalysis, TAnalysis>(
             scope.ServiceProvider,
             context.Message.MultiAnalysisId,
@@ -199,6 +203,7 @@ internal sealed class MessageAnalysisUpdateStateMachine : MassTransitStateMachin
         messageAnalysis.UpdateResult(multiAnalysis);
         repository.Update(messageAnalysis);
         await repository.SaveChangeAsync(context.CancellationToken);
+        await updatesNotifier.NotifyAsync(messageAnalysis, context.CancellationToken);
         await CompleteSagaIfFinishedAsync(messageAnalysis, context);
 
         _logger.LogDebug(

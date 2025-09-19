@@ -6,6 +6,7 @@ using FastEndpoints.Swagger;
 
 using FluentValidation.Results;
 
+using Openlysis.API.Notifications;
 using Openlysis.Application.Common.Enums;
 using Openlysis.Domain.Common.Enums;
 using Openlysis.Domain.Messages.Enums;
@@ -69,6 +70,8 @@ public static class AppConfiguration
 
                 c.Errors.ResponseBuilder = BuildValidationFailureResponse;
             });
+
+        app.UsePushNotifications();
     }
 
     private static HttpValidationProblemDetails BuildValidationFailureResponse(
