@@ -72,18 +72,18 @@ services:
     networks:
       - api-network
 
-  analyzer-worker-migrations:
+  analysis-orchestrator-migrations:
       build: 
         context: ../
-        dockerfile: "src/Infrastructure/Workers/Openlysis.MultiAnalyzer/Dockerfile"
+        dockerfile: "src/Infrastructure/Services/Openlysis.AnalysisOrchestrator/Dockerfile"
         target: migrations
         no_cache: true
         args: 
-          - BUILD_CONFIGURATION=${WORKER_BUILD_CONFIGURATION}
-      container_name: ${WORKER_MIGRATIONS_CONTAINER_NAME}
+          - BUILD_CONFIGURATION=${ANALYSIS_ORCHESTRATOR_BUILD_CONFIGURATION}
+      container_name: ${ANALYSIS_ORCHESTRATOR_MIGRATIONS_CONTAINER_NAME}
       environment:
         DOTNET_ENVIRONMENT: ${APP_ENVIRONMENT}
-        DOPPLER_SERVICE_TOKEN: ${DOPPLER_WORKER_SERVICE_TOKEN}
+        DOPPLER_SERVICE_TOKEN: ${DOPPLER_ANALYSIS_ORCHESTRATOR_SERVICE_TOKEN}
       command: ["dotnet", "ef", "database", "update", "--context", "JobServiceSagaDbContext"]
       depends_on:
         database:
@@ -91,26 +91,26 @@ services:
       networks:
         - api-network
       configs:
-        - source: analyzer-worker-config
-          target: ${WORKER_MIGRATIONS_CONFIG_TARGET_FILEPATH}
+        - source: analysis-orchestrator-config
+          target: ${ANALYSIS_ORCHESTRATOR_MIGRATIONS_CONFIG_TARGET_FILEPATH}
 
-  analyzer-worker:
+  analysis-orchestrator:
     build: 
       context: ../
-      dockerfile: "src/Infrastructure/Workers/Openlysis.MultiAnalyzer/Dockerfile"
+      dockerfile: "src/Infrastructure/Services/Openlysis.AnalysisOrchestrator/Dockerfile"
       no_cache: true
       args: 
-        - BUILD_CONFIGURATION=${WORKER_BUILD_CONFIGURATION}
-    container_name: ${WORKER_CONTAINER_NAME}
+        - BUILD_CONFIGURATION=${ANALYSIS_ORCHESTRATOR_BUILD_CONFIGURATION}
+    container_name: ${ANALYSIS_ORCHESTRATOR_CONTAINER_NAME}
     environment:
       DOTNET_ENVIRONMENT: ${APP_ENVIRONMENT}
-      DOPPLER_SERVICE_TOKEN: ${DOPPLER_WORKER_SERVICE_TOKEN}
+      DOPPLER_SERVICE_TOKEN: ${DOPPLER_ANALYSIS_ORCHESTRATOR_SERVICE_TOKEN}
     depends_on:
       broker:
         condition: service_healthy
       database:
         condition: service_healthy
-      analyzer-worker-migrations:
+      analysis-orchestrator-migrations:
         condition: service_completed_successfully
     volumes:
       - type: volume
@@ -119,8 +119,8 @@ services:
     networks:
       - api-network
     configs:
-      - source: analyzer-worker-config
-        target: ${WORKER_CONFIG_TARGET_FILEPATH}
+      - source: analysis-orchestrator-config
+        target: ${ANALYSIS_ORCHESTRATOR_CONFIG_TARGET_FILEPATH}
 
   api:
     build:
@@ -166,7 +166,7 @@ networks:
 configs:
   auth-config:
    file: ${AUTH_CONFIG_SOURCE_FILEPATH}
-  analyzer-worker-config:
-    file: ${WORKER_CONFIG_SOURCE_FILEPATH}
+  analysis-orchestrator-config:
+    file: ${ANALYSIS_ORCHESTRATOR_CONFIG_SOURCE_FILEPATH}
   api-config:
     file: ${API_CONFIG_SOURCE_FILEPATH}

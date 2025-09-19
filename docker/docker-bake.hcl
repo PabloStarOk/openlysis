@@ -1,5 +1,5 @@
 group "default" {
-  targets = [ "database", "auth", "analyzer-worker", "api" ]
+  targets = [ "database", "auth", "analysis-orchestrator", "api" ]
 }
 
 target "database" {
@@ -18,12 +18,12 @@ target "auth" {
     description = "Authentication API for managing user identities and access."
 }
 
-target "analyzer-worker" {
+target "analysis-orchestrator" {
     context = "../"
-    dockerfile = "src/Infrastructure/Workers/Openlysis.MultiAnalyzer/Dockerfile"
-    tags = [ "openlysis-analyzer-worker:latest" ]
+    dockerfile = "src/Infrastructure/Services/Openlysis.AnalysisOrchestrator/Dockerfile"
+    tags = [ "openlysis-analysis-orchestrator:latest" ]
     no-cache = true
-    description = "Worker service to execute and update analyses using different services."
+    description = "The service to start and poll analyses using different services."
 }
 
 target "api" {
