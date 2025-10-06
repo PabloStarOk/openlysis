@@ -28,7 +28,7 @@ public record AnalyzeMessageRequest(
     [property: JsonSchema(JsonObjectType.Array, Format = "file")]
     ProcessedFile[] AttachedFiles,
     Dictionary<string, string> AttachedFilesPasswords,
-    string? CountryCode = null,
+    string CountryCode = "US",
     bool IsPrivate = true,
     bool Reanalyze = false)
 {
@@ -45,5 +45,5 @@ public record AnalyzeMessageRequest(
     /// <summary>
     /// Gets the normalized country code in uppercase format, or null if no country code is provided.
     /// </summary>
-    public string? NormalizedCountryCode => CountryCode?.ToUpper();
+    public string NormalizedCountryCode => CountryCode.ToUpper();
 }

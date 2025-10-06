@@ -84,7 +84,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
                 s.RequestParam(r => r.AttachedFilesPasswords, "A dictionary where the key is the name of an attached file and the value is its corresponding password, if required. Should be sent as a JSON for proper binding.");
                 s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who sends the message. Default is true");
                 s.RequestParam(r => r.Reanalyze, "If the extracted data and the message should be reanalyzed even if there are existing analyses for theme. Default is false.");
-                s.RequestParam(r => r.CountryCode, "A code of the country where detected phone numbers can be associated to, it must be in ISO 3166-1 alpha-2 format (e.g. 'US').");
+                s.RequestParam(r => r.CountryCode, "A code of the country where detected phone numbers can be associated to, it must be in ISO 3166-1 alpha-2 format (e.g. 'US'). Default is `US`.");
             });
     }
 
