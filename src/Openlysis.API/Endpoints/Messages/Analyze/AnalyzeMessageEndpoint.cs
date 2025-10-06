@@ -97,6 +97,7 @@ public class AnalyzeMessageEndpoint : Endpoint<AnalyzeMessageRequest, AnalysisId
                 statusCode: StatusCodes.Status503ServiceUnavailable,
                 detail: "Service to analyze a message is unavailable, try again later.");
             await SendResultAsync(result);
+            return;
         }
 
         MessageType messageType = (MessageType)req.MessageType!;
