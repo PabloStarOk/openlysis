@@ -53,7 +53,6 @@ internal static class DependencyInjection
         services.AddTransient<IUpdateMessageSender, UpdateMultiAnalysisMessageSender>();
         services.AddCommunication(configuration, environment);
         AddJobTimeoutOptions(services, configuration);
-        AddDopplerServices(services, configuration);
         AddAnalyzers(services, configuration);
         AddMultiAnalyzerOptions(services, configuration);
         AddFileMultiAnalyzer(services);
@@ -61,6 +60,57 @@ internal static class DependencyInjection
         AddPollingOptions(services, configuration);
         AddMultiAnalysisPoller<FileAnalysis, AnalyzeFileRequest>(services);
         AddMultiAnalysisPoller<UrlAnalysis, AnalyzeUrlRequest>(services);
+    }
+
+    private static void AddJobTimeoutOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        IConfigurationSection configSection = configuration
+            .GetRequiredSection(JobTimeoutOptions.SectionName);
+
+        services.AddOptions<JobTimeoutOptions>()
+            .Bind(configSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+    }
+
+    private static void AddAnalyzers(IServiceCollection services, IConfiguration configuration)
+    {
+        var servicesRegistrationOptions = configuration
+            .GetRequiredSection(ServicesRegistrationOptions.SectionName)
+            .Get<ServicesRegistrationOptions>();
+        ArgumentNullException.ThrowIfNull(servicesRegistrationOptions);
+
+        using var serviceProvider = services.BuildServiceProvider();
+        var logger = serviceProvider
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger(LoggingCategory);
+
+        if (servicesRegistrationOptions.RegisterRealServices)
+        {
+            services.AddHttpClient();
+            services.AddRateQuotaRestorerJobs(QuartzSchedulerId, QuartzSchedulerName);
+            AddDopplerServices(services, configuration);
+            AddRealAnalyzers(services, configuration);
+            logger.LogInformation("Real analysis services registered.");
+        }
+
+        if (servicesRegistrationOptions.RegisterSimulatedServices)
+        {
+            services.AddSimulatedAnalysisServices(configuration);
+            logger.LogInformation("Simulated analysis services registered.");
+        }
+
+        services.AddSingleton<IReadOnlyDictionary<string, Analyzer<FileAnalysis, AnalyzeFileRequest>>>(sp =>
+        {
+            var analyzers = sp.GetRequiredService<IEnumerable<Analyzer<FileAnalysis, AnalyzeFileRequest>>>();
+            return analyzers.ToDictionary(a => a.ServiceName);
+        });
+
+        services.AddSingleton<IReadOnlyDictionary<string, Analyzer<UrlAnalysis, AnalyzeUrlRequest>>>(sp =>
+        {
+            var analyzers = sp.GetRequiredService<IEnumerable<Analyzer<UrlAnalysis, AnalyzeUrlRequest>>>();
+            return analyzers.ToDictionary(a => a.ServiceName);
+        });
     }
 
     private static void AddDopplerServices(
@@ -90,65 +140,17 @@ internal static class DependencyInjection
         });
     }
 
-    private static void AddJobTimeoutOptions(IServiceCollection services, IConfiguration configuration)
+    private static void AddRealAnalyzers(IServiceCollection services, IConfiguration configuration)
     {
-        IConfigurationSection configSection = configuration
-            .GetRequiredSection(JobTimeoutOptions.SectionName);
-
-        services.AddOptions<JobTimeoutOptions>()
-            .Bind(configSection)
-            .ValidateDataAnnotations()
-            .ValidateOnStart();
-    }
-
-    private static void AddAnalyzers(
-        IServiceCollection services,
-        IConfiguration configuration)
-    {
-        var servicesRegistrationOptions = configuration
-            .GetRequiredSection(ServicesRegistrationOptions.SectionName)
-            .Get<ServicesRegistrationOptions>();
-        ArgumentNullException.ThrowIfNull(servicesRegistrationOptions);
-
         var apiKeyOptions = configuration
             .GetRequiredSection(ServiceSecretOptions.SectionName)
             .Get<ServiceSecretOptions>();
         ArgumentNullException.ThrowIfNull(apiKeyOptions);
 
-        services.AddHttpClient();
-        services.AddRateQuotaRestorerJobs(QuartzSchedulerId, QuartzSchedulerName);
-
-        using var serviceProvider = services.BuildServiceProvider();
-        var logger = serviceProvider
-            .GetRequiredService<ILoggerFactory>()
-            .CreateLogger(LoggingCategory);
-
-        if (servicesRegistrationOptions.RegisterRealServices)
-        {
-            logger.LogInformation("Real analysis services registered.");
-            services.AddFilescanIoAnalyzers(apiKeyOptions.FilescanApiKeySecretName, configuration);
-            services.AddUrlQueryAnalyzer(apiKeyOptions.UrlQueryApiKeySecretName, configuration);
-            services.AddHybridAnalyzer(apiKeyOptions.HybridAnalysisApiKeySecretName, configuration);
-            services.AddVirusTotalAnalyzers(apiKeyOptions.VirusTotalApiKeySecretName, configuration);
-        }
-
-        if (servicesRegistrationOptions.RegisterSimulatedServices)
-        {
-            logger.LogInformation("Simulated analysis services registered.");
-            services.AddSimulatedAnalysisServices(configuration);
-        }
-
-        services.AddSingleton<IReadOnlyDictionary<string, Analyzer<FileAnalysis, AnalyzeFileRequest>>>(sp =>
-        {
-            var analyzers = sp.GetRequiredService<IEnumerable<Analyzer<FileAnalysis, AnalyzeFileRequest>>>();
-            return analyzers.ToDictionary(a => a.ServiceName);
-        });
-
-        services.AddSingleton<IReadOnlyDictionary<string, Analyzer<UrlAnalysis, AnalyzeUrlRequest>>>(sp =>
-        {
-            var analyzers = sp.GetRequiredService<IEnumerable<Analyzer<UrlAnalysis, AnalyzeUrlRequest>>>();
-            return analyzers.ToDictionary(a => a.ServiceName);
-        });
+        services.AddFilescanIoAnalyzers(apiKeyOptions.FilescanApiKeySecretName, configuration);
+        services.AddUrlQueryAnalyzer(apiKeyOptions.UrlQueryApiKeySecretName, configuration);
+        services.AddHybridAnalyzer(apiKeyOptions.HybridAnalysisApiKeySecretName, configuration);
+        services.AddVirusTotalAnalyzers(apiKeyOptions.VirusTotalApiKeySecretName, configuration);
     }
 
     private static void AddMultiAnalyzerOptions(

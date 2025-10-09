@@ -38,6 +38,7 @@ internal static class DependencyInjection
         IConfiguration configuration,
         ILogger logger)
     {
+        services.AddHttpClient();
         services.AddSingleton<
             IValidateOptions<FileAnalysisStubFactoryOptions>,
             FileAnalysisStubFactoryOptionsValidator>();
