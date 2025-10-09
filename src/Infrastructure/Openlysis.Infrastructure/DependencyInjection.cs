@@ -94,16 +94,16 @@ public static class DependencyInjection
         services.AddScoped<IFileMultiAnalysisQueue, FileMultiAnalysisQueue>();
         services.AddScoped<IUrlMultiAnalysisQueue, UrlMultiAnalysisQueue>();
 
-        AddDopplerServices(services, configuration);
-
         // Add message senders
         services.AddUpdateAnalysisConsumers(configuration, environment);
+
+        // Add reputation services.
         using (var sp = services.BuildServiceProvider())
         {
             var logger = sp
                 .GetRequiredService<ILoggerFactory>()
                 .CreateLogger(nameof(Infrastructure));
-            RegisterReputationServices(services, configuration, logger);
+            AddReputationServices(services, configuration, logger);
         }
 
         // Add rate quota service jobs.
@@ -135,7 +135,7 @@ public static class DependencyInjection
     /// <param name="services">The service collection to add services to.</param>
     /// <param name="configuration">The application configuration containing service registration options.</param>
     /// <param name="logger">The logger used to log registration information.</param>
-    private static void RegisterReputationServices(
+    private static void AddReputationServices(
         IServiceCollection services,
         IConfiguration configuration,
         ILogger logger)
@@ -147,8 +147,9 @@ public static class DependencyInjection
 
         if (servicesRegistrationOptions.RegisterRealServices)
         {
-            logger.LogInformation("Real analysis services registered.");
+            AddDopplerServices(services, configuration);
             services.AddIpqsReputationEvaluators(configuration);
+            logger.LogInformation("Real analysis services registered.");
         }
 
         if (!servicesRegistrationOptions.RegisterSimulatedServices)
@@ -156,8 +157,8 @@ public static class DependencyInjection
             return;
         }
 
-        logger.LogInformation("Simulated analysis services registered.");
         services.AddSimulatedReputationServices(configuration);
+        logger.LogInformation("Simulated analysis services registered.");
     }
 
     private static void AddDopplerServices(
