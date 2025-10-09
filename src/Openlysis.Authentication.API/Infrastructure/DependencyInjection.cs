@@ -34,13 +34,15 @@ internal static class DependencyInjection
     /// </summary>
     /// <param name="services">The service collection to add services to.</param>
     /// <param name="configuration">The application configuration instance.</param>
+    /// <param name="environment">The host environment instance.</param>
     public static void AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
         AddRepositories(services, configuration);
         AddPasswordHasher(services, configuration);
-        AddCertificateProvider(services, configuration);
+        AddCertificateProvider(services, configuration, environment);
         AddSigningCertificateManager(services);
         AddTokenGenerator(services, configuration);
         AddTokenHasher(services);
@@ -101,8 +103,17 @@ internal static class DependencyInjection
 
     private static void AddCertificateProvider(
         IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IHostEnvironment environment)
     {
+        if (environment.IsDevelopment())
+        {
+            services.AddSingleton<DevelopmentCertificateProvider>();
+            services.AddHostedService(sp => sp.GetRequiredService<DevelopmentCertificateProvider>());
+            services.AddSingleton<ICertificateProvider>(sp => sp.GetRequiredService<DevelopmentCertificateProvider>());
+            return;
+        }
+
         var certificateOptionsSection = configuration
             .GetRequiredSection(DopplerCertificateOptions.SectionName);
 

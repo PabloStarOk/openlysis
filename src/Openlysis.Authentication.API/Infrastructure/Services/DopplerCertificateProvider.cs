@@ -15,6 +15,7 @@ namespace Openlysis.Authentication.API.Infrastructure.Services;
 /// </summary>
 internal sealed class DopplerCertificateProvider : ICertificateProvider, IHostedService, IDisposable
 {
+    private readonly ILogger<DopplerCertificateProvider> _logger;
     private readonly IOptions<DopplerCertificateOptions> _certificateOptions;
     private readonly IDopplerClient _dopplerClient;
     private X509Certificate2? _certificate;
@@ -36,12 +37,15 @@ internal sealed class DopplerCertificateProvider : ICertificateProvider, IHosted
     /// <summary>
     /// Initializes a new instance of the <see cref="DopplerCertificateProvider"/> class.
     /// </summary>
+    /// <param name="logger">The logger instance for logging operations.</param>
     /// <param name="certificateOptions">The options containing Doppler certificate configuration.</param>
     /// <param name="dopplerClient">The Doppler client used to fetch secrets.</param>
     public DopplerCertificateProvider(
+        ILogger<DopplerCertificateProvider> logger,
         IOptions<DopplerCertificateOptions> certificateOptions,
         IDopplerClient dopplerClient)
     {
+        _logger = logger;
         _certificateOptions = certificateOptions;
         _dopplerClient = dopplerClient;
     }
@@ -69,6 +73,7 @@ internal sealed class DopplerCertificateProvider : ICertificateProvider, IHosted
         }
 
         _certificate = CreateCertificate(certSecret, passwdSecret);
+        _logger.LogInformation("X509 certificate from Doppler has been loaded successfully.");
     }
 
     /// <inheritdoc/>
