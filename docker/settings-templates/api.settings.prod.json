@@ -1,0 +1,127 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=database; Port=5432; Database=openlysis; Username=openlysis_api; Password=Openlysis-Strong-Password-1234; SslMode=Disable; TrustServerCertificate=true;"
+  },
+  "BrokerSettings": {
+    "Scheme": "rabbitmq",
+    "Host": "broker",
+    "Port": 5672,
+    "VirtualHost": "/",
+    "Username": "Openlysis",
+    "Password": "Openlysis-Strong-Password-1234"
+  },
+  "ServicesRegistration": {
+    "RegisterRealServices": true,
+    "RegisterSimulatedServices": false
+  },
+  "ConfigurationPaths": {
+    "Directories": [],
+    "JsonFiles": []
+  },
+  "ConsumersOptions": {
+    "AnalyzeFile": {
+      "Name": "analyze-file",
+      "ConcurrencyLimit": 144
+    },
+    "AnalyzeUrl": {
+      "Name": "analyze-url",
+      "ConcurrencyLimit": 144
+    },
+    "UpdateFileAnalysis": {
+      "Name": "update-file-multi-analysis",
+      "ConcurrencyLimit": 144
+    },
+    "UpdateUrlAnalysis": {
+      "Name": "update-url-multi-analysis",
+      "ConcurrencyLimit": 144
+    },
+    "MessageAnalysisUpdate": {
+      "Name": "message-analysis-update",
+      "ConcurrencyLimit": 48
+    }
+  },
+  "FormOptions": {
+    "MemoryBufferThreshold": 0,
+    "BufferBody": false,
+    "BufferBodyLengthLimit": 0,
+    "ValueCountLimit": 20,
+    "ValueLengthLimit": 4194304,
+    "MultipartBodyLengthLimit": 52428800
+  },
+  "MessageAnalysis": {
+    "MaxAttachedFiles": 5
+  },
+  "JwtBearerOptions": {
+    "Authority": "http://auth:8080",
+    "MetadataAddress": "http://auth:8080/openid-configuration",
+    "RequireHttpsMetadata": false,
+    "TokenValidationParameters": {
+      "ValidateIssuer": true,
+      "ValidateAudience": true,
+      "ValidateLifetime": true,
+      "ValidateIssuerSigningKey": true,
+      "RequireExpirationTime": true,
+      "RequireSignedTokens": true,
+      "IssuerSigningKey": true,
+      "ClockSkew": "00:00:15",
+      "ValidIssuer": "http://auth:8080",
+      "ValidAudience": "http://api:8080"
+    }
+  },
+  "AnalysisReuse": {
+    "MaxAgeHours": 72
+  },
+  "Regex": {
+    "TimeoutMs": 2000
+  },
+  "DopplerClient": {
+    "ServiceTokenEnvVariable": "DOPPLER_SERVICE_TOKEN",
+    "ProjectName": "openlysis-analysis-api",
+    "ConfigName": "dev"
+  },
+  "Secrets": {
+    "IpqsApiKeySecretName": "IPQS_API_KEY",
+    "GcsCredentialSecretName": "GCS_SERVICE_ACCOUNT_KEY_JSON"
+  },
+  "GoogleCloudStorage": {
+    "BucketName": "analyzable-files"
+  },
+  "Ipqs": {
+    "Evaluator": {
+      "ServiceName": "Ipqs",
+      "BaseAddress": "https://www.ipqualityscore.com/api/json/",
+      "RequestsTimeoutMs": 120000,
+      "ApiKeySecretName": "IPQS_API_KEY"
+    },
+    "VerdictCalculation": {
+      "Phone": {
+        "FraudScoreSuspiciousThreshold": 75,
+        "FraudScoreMaliciousThreshold": 90,
+        "SpamVerdict": "Suspicious",
+        "VoipVerdict": "Suspicious",
+        "InactiveVerdict": "Suspicious"
+      },
+      "EmailAddress": {
+        "FraudScoreSuspiciousThreshold": 75,
+        "FraudScoreMaliciousThreshold": 90
+      }
+    },
+    "EmailAddressVerification": {
+      "Timeout": 20
+    },
+    "RateQuotaService": {
+      "RateWindowRefreshIntervalMs": 1000,
+      "RateQuota": {
+        "AssessDataReputation": {
+          "EndpointTypes": [
+            "EvaluateReputation"
+          ],
+          "MinuteRate": 0,
+          "HourlyRate": 0,
+          "DailyQuota": 0,
+          "MonthlyQuota": 2000
+        }
+      }
+    }
+  }
+}

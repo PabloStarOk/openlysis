@@ -1,0 +1,48 @@
+{
+  "ConnectionStrings": {
+    "AuthConnection": "Server=database; Port=5432; Database=openlysis; Username=openlysis_api; Password=Openlysis-Strong-Password-1234; SslMode=Disable; TrustServerCertificate=true;"
+  },
+  "DopplerClient": {
+    "ServiceTokenEnvVariable": "DOPPLER_SERVICE_TOKEN",
+    "ProjectName": "openlysis-auth-api",
+    "ConfigName": "dev"
+  },
+  "DopplerCertificate": {
+    "CertificateSecretName": "SIGNING_CERTIFICATE_BASE64",
+    "PasswordSecretName": "SIGNING_CERTIFICATE_PASSWD"
+  },
+  "PasswordRequirements": {
+    "MinLength": 8,
+    "MinLowerChars": 1,
+    "MinUpperChars": 1,
+    "MinDigits": 1,
+    "MinSpecialChars": 1
+  },
+  "PasswordHashing": {
+    "HashSizeBytes": 32,
+    "SaltSizeBytes": 16,
+    "MemorySizeKibibytes": 19456,
+    "Iterations": 3,
+    "ParallelismDegree": 2
+  },
+  "JwtGeneration": {
+    "ExpirationSeconds": 900,
+    "Issuer": "http://auth:8080",
+    "Audience": "http://api:8080",
+    "RefreshTokenSizeBytes": 32
+  },
+  "OpenIdConfiguration": {
+    "Issuer": "http://auth:8080",
+    "TokenEndpoint": "http://auth:8080/api/v1/sign-in",
+    "JwksUri": "http://auth:8080/jwks.json",
+    "SubjectTypesSupported": [
+      "public"
+    ],
+    "IdTokenSigningAlgValuesSupported": [
+      "ES256"
+    ]
+  },
+  "RefreshToken": {
+    "ExpirationDays": 180
+  }
+}

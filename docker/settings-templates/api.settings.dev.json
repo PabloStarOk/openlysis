@@ -1,0 +1,113 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=database; Port=5432; Database=openlysis; Username=openlysis_api; Password=Openlysis-Strong-Password-1234; SslMode=Disable; TrustServerCertificate=true;"
+  },
+  "BrokerSettings": {
+    "Scheme": "rabbitmq",
+    "Host": "broker",
+    "Port": 5672,
+    "VirtualHost": "/",
+    "Username": "Openlysis",
+    "Password": "Openlysis-Strong-Password-1234"
+  },
+  "ServicesRegistration": {
+    "RegisterRealServices": false,
+    "RegisterSimulatedServices": true
+  },
+  "ConfigurationPaths": {
+    "Directories": [],
+    "JsonFiles": []
+  },
+  "ConsumersOptions": {
+    "AnalyzeFile": {
+      "Name": "analyze-file",
+      "ConcurrencyLimit": 144
+    },
+    "AnalyzeUrl": {
+      "Name": "analyze-url",
+      "ConcurrencyLimit": 144
+    },
+    "UpdateFileAnalysis": {
+      "Name": "update-file-multi-analysis",
+      "ConcurrencyLimit": 144
+    },
+    "UpdateUrlAnalysis": {
+      "Name": "update-url-multi-analysis",
+      "ConcurrencyLimit": 144
+    },
+    "MessageAnalysisUpdate": {
+      "Name": "message-analysis-update",
+      "ConcurrencyLimit": 48
+    }
+  },
+  "FormOptions": {
+    "MemoryBufferThreshold": 0,
+    "BufferBody": false,
+    "BufferBodyLengthLimit": 0,
+    "ValueCountLimit": 20,
+    "ValueLengthLimit": 4194304,
+    "MultipartBodyLengthLimit": 52428800
+  },
+  "MessageAnalysis": {
+    "MaxAttachedFiles": 5
+  },
+  "JwtBearerOptions": {
+    "Authority": "http://auth:8080",
+    "MetadataAddress": "http://auth:8080/openid-configuration",
+    "RequireHttpsMetadata": false,
+    "TokenValidationParameters": {
+      "ValidateIssuer": true,
+      "ValidateAudience": true,
+      "ValidateLifetime": true,
+      "ValidateIssuerSigningKey": true,
+      "RequireExpirationTime": true,
+      "RequireSignedTokens": true,
+      "IssuerSigningKey": true,
+      "ClockSkew": "00:00:15",
+      "ValidIssuer": "http://auth:8080",
+      "ValidAudience": "http://api:8080"
+    }
+  },
+  "AnalysisReuse": {
+    "MaxAgeHours": 72
+  },
+  "Regex": {
+    "TimeoutMs": 2000
+  },
+  "ServicesSimulation": {
+    "EmailAddressReputationServices": [
+      {
+        "Name": "Email Reputation Service A",
+        "IsAvailable": true,
+        "StubFactory": {
+          "VerdictSimulation": {
+            "SimulationType": "Random"
+          },
+          "ReturnRandomDisposable": true,
+          "FixedIsDisposable": null,
+          "ReturnRandomRiskyTld": true,
+          "FixedIsRiskyTld": null
+        },
+        "GetReputationEndpoint": {
+          "LatencyMs": 0,
+          "ReturnError": false
+        }
+      }
+    ],
+    "PhoneNumberReputationServices": [
+      {
+        "Name": "Phone Reputation Service A",
+        "IsAvailable": true,
+        "StubFactory": {
+          "VerdictSimulation": {
+            "SimulationType": "Random"
+          }
+        },
+        "GetReputationEndpoint": {
+          "LatencyMs": 0,
+          "ReturnError": false
+        }
+      }
+    ]
+  }
+}
