@@ -7,23 +7,33 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Domain", "src\Ope
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Application", "src\Openlysis.Application\Openlysis.Application.csproj", "{4ED7738B-9246-47D9-9351-ECAE2EB4D0C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure", "src\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj", "{E5EBF866-0154-421C-BC87-209A3269645A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure", "src\Infrastructure\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj", "{E5EBF866-0154-421C-BC87-209A3269645A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API", "src\Openlysis.API\Openlysis.API.csproj", "{56C77A97-4A8E-48DC-B14D-45935FFC177C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Filescan", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.Filescan\Openlysis.Analyzers.Filescan.csproj", "{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Filescan", "src\Infrastructure\Analyzers\Openlysis.Analyzers.Filescan\Openlysis.Analyzers.Filescan.csproj", "{FBCB12F7-B40A-484C-A60F-A946B2C97A2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.MultiAnalyzer", "src\Openlysis.Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.AnalysisOrchestrator", "src\Infrastructure\Services\Openlysis.AnalysisOrchestrator\Openlysis.AnalysisOrchestrator.csproj", "{746ABED0-00F1-458B-9F2B-C9EA29644E7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Contracts", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.Contracts\Openlysis.Analyzers.Contracts.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.Shared", "src\Infrastructure\Analyzers\Openlysis.Analyzers.Shared\Openlysis.Analyzers.Shared.csproj", "{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.API.Authentication", "src\Openlysis.API.Authentication\Openlysis.API.Authentication.csproj", "{48E79F4E-E6CD-490B-B44F-63775080B1D6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.URLQuery", "src\Infrastructure\Analyzers\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj", "{CB37658F-C911-41EC-BB74-A3956FA601DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.URLQuery", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.URLQuery\Openlysis.Analyzers.URLQuery.csproj", "{CB37658F-C911-41EC-BB74-A3956FA601DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.HybridAnalysis", "src\Infrastructure\Analyzers\Openlysis.Analyzers.HybridAnalysis\Openlysis.Analyzers.HybridAnalysis.csproj", "{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.HybridAnalysis", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.HybridAnalysis\Openlysis.Analyzers.HybridAnalysis.csproj", "{4405CB3C-F613-4C8F-8F0B-7A7C9A83DB68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.VirusTotal", "src\Infrastructure\Analyzers\Openlysis.Analyzers.VirusTotal\Openlysis.Analyzers.VirusTotal.csproj", "{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Analyzers.VirusTotal", "src\Openlysis.Analyzers.Clients\Openlysis.Analyzers.VirusTotal\Openlysis.Analyzers.VirusTotal.csproj", "{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Evaluators.Shared", "src\Infrastructure\Evaluators\Openlysis.Evaluators.Shared\Openlysis.Evaluators.Shared.csproj", "{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Infrastructure.Shared", "src\Infrastructure\Openlysis.Infrastructure.Shared\Openlysis.Infrastructure.Shared.csproj", "{CC6549E5-ABC5-4EA2-B680-B150D267F472}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Evaluators.Ipqs", "src\Infrastructure\Evaluators\Openlysis.Evaluators.Ipqs\Openlysis.Evaluators.Ipqs.csproj", "{36B3603F-D153-488C-ACD9-5AE3A5488807}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.TestTools.ServicesSimulation", "tests\Openlysis.TestTools.ServicesSimulation\Openlysis.TestTools.ServicesSimulation.csproj", "{E5D607ED-DAE3-4286-9B5A-214D1919645D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Openlysis.Authentication.API", "src\Openlysis.Authentication.API\Openlysis.Authentication.API.csproj", "{7968152C-2017-4A43-98E8-E994353E8E92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doppler.NET", "src\Shared\Doppler.NET\Doppler.NET.csproj", "{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}"
 EndProject
 
 Global
@@ -60,10 +70,6 @@ Global
 		{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37E14EDF-9957-4AC0-9A0D-97C012AE57D7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{48E79F4E-E6CD-490B-B44F-63775080B1D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{48E79F4E-E6CD-490B-B44F-63775080B1D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{48E79F4E-E6CD-490B-B44F-63775080B1D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{48E79F4E-E6CD-490B-B44F-63775080B1D6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CB37658F-C911-41EC-BB74-A3956FA601DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CB37658F-C911-41EC-BB74-A3956FA601DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB37658F-C911-41EC-BB74-A3956FA601DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,6 +82,30 @@ Global
 		{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87F84C04-7BFC-43B6-B778-F1D09CE1DC0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{816AB99D-9E0C-4AF9-9D48-C58F6CB2A2BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC6549E5-ABC5-4EA2-B680-B150D267F472}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC6549E5-ABC5-4EA2-B680-B150D267F472}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC6549E5-ABC5-4EA2-B680-B150D267F472}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC6549E5-ABC5-4EA2-B680-B150D267F472}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36B3603F-D153-488C-ACD9-5AE3A5488807}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36B3603F-D153-488C-ACD9-5AE3A5488807}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36B3603F-D153-488C-ACD9-5AE3A5488807}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36B3603F-D153-488C-ACD9-5AE3A5488807}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5D607ED-DAE3-4286-9B5A-214D1919645D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5D607ED-DAE3-4286-9B5A-214D1919645D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5D607ED-DAE3-4286-9B5A-214D1919645D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5D607ED-DAE3-4286-9B5A-214D1919645D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7968152C-2017-4A43-98E8-E994353E8E92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7968152C-2017-4A43-98E8-E994353E8E92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7968152C-2017-4A43-98E8-E994353E8E92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7968152C-2017-4A43-98E8-E994353E8E92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E8D49B4-76E6-4F29-8FBE-05D550560AA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

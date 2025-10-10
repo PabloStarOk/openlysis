@@ -2,34 +2,35 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using MediatR;
-
+using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.Files.Common.Responses;
-using Openlysis.Application.FileAnalyses.Queries;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Application.Files.Services;
+using Openlysis.Domain.Common.ValueObjects;
+using Openlysis.Domain.Files;
 
 namespace Openlysis.API.Endpoints.Files.GetAnalysisById;
 
 /// <summary>
 /// Endpoint for retrieving file analysis by hash.
 /// </summary>
-public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisDto>
+public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, FileMultiAnalysisDto>
 {
-    private readonly IMediator _mediator;
-
     /// <summary>
-    /// Gets the name of the endpoint.
+    /// The name identifier for the GetAnalysisById endpoint.
     /// </summary>
-    public static string Name { get; } = "GetFileAnalysisById";
+    public const string Name = "GetFileAnalysisById";
+
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAnalysisByIdEndpoint"/> class.
     /// </summary>
-    /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
-    public GetAnalysisByIdEndpoint(IMediator mediator)
+    /// <param name="multiAnalysisService">
+    /// The service used to retrieve file analysis by ID.
+    /// </param>
+    public GetAnalysisByIdEndpoint(IFileMultiAnalysisService multiAnalysisService)
     {
-        _mediator = mediator;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <summary>
@@ -45,41 +46,24 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
                 b.WithName(Name);
                 b.WithDisplayName(Name);
                 b.Produces<FileMultiAnalysisDto>();
-                b.ProducesProblemDetails();
-                b.ProducesProblemDetails(StatusCodes.Status404NotFound);
+                b.ProducesProblem(StatusCodes.Status400BadRequest);
+                b.ProducesProblem(StatusCodes.Status404NotFound);
             });
         Summary(
             s =>
             {
                 s.Summary = "Get a file analysis by ID.";
                 s.Description = "Get a file analysis by its ID.";
-                s.Params = new Dictionary<string, string>
-                {
-                    { "id", "ID of the analysis to retrieve." },
-                };
+                s.RequestParam(r => r.Id, "ID of the analysis to get.");
             });
     }
 
-    /// <summary>
-    /// Handles the request to get a file analysis by its hash.
-    /// </summary>
-    /// <param name="ct">A <see cref="CancellationToken"/> to cancel the operation.</param>
-    /// <returns>The result of the file analysis.</returns>
-    public override async Task HandleAsync(CancellationToken ct)
+    /// <inheritdoc/>
+    public override async Task HandleAsync(GetAnalysisByIdRequest req, CancellationToken ct)
     {
-        string id = Route<string>("id") ?? string.Empty;
+        GlobalId userId = GlobalId.Parse(req.UserId);
 
-        // ID is null or empty
-        if (string.IsNullOrWhiteSpace(id))
-        {
-            await SendResultAsync(Results.Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: "ID is required."));
-            return;
-        }
-
-        // Invalid ID
-        if (!Guid.TryParse(id, out Guid guid))
+        if (!GlobalId.TryParse(req.Id, out GlobalId? globalId))
         {
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
@@ -87,15 +71,12 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
             return;
         }
 
-        var fileAnalysisId = FileMultiAnalysisId.Create(guid);
-        var query = new FileMultiAnalysisQuery(fileAnalysisId);
+        ErrorOr<FileMultiAnalysis> result = await _multiAnalysisService
+            .GetAnalysisByIdAsync(userId, globalId, ct);
 
-        ErrorOr<FileMultiAnalysis> mediatorResult = await _mediator.Send(query, ct);
-
-        if (mediatorResult.IsError)
+        if (result.IsError)
         {
-            // Not found
-            if (mediatorResult.Errors.Any(e => e.Type is ErrorType.NotFound))
+            if (result.Errors.Any(e => e.Type is ErrorType.NotFound))
             {
                 await SendResultAsync(Results.Problem(
                     statusCode: StatusCodes.Status404NotFound,
@@ -103,11 +84,10 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
                 return;
             }
 
-            // Other errors
             var extensions = new Dictionary<string, object?>
             {
                 {
-                    "errors", mediatorResult.Errors
+                    "errors", result.Errors
                 },
             };
             await SendResultAsync(Results.Problem(
@@ -117,7 +97,6 @@ public class GetAnalysisByIdEndpoint : EndpointWithoutRequest<FileMultiAnalysisD
             return;
         }
 
-        Response = FileMultiAnalysisDto.Parse(mediatorResult.Value);
-        await SendOkAsync(Response, ct);
+        Response = FileMultiAnalysisDto.Parse(result.Value);
     }
 }

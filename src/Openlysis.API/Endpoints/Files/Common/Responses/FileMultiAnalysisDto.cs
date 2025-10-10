@@ -1,30 +1,35 @@
-using Openlysis.Domain.Common.Hash;
-using Openlysis.Domain.FileAnalyses;
-using Openlysis.Domain.FileAnalyses.ValueObjects;
+using Openlysis.Domain.Common.Entities;
+using Openlysis.Domain.Common.Enums;
+using Openlysis.Domain.Files;
+using Openlysis.Domain.Files.ValueObjects;
 
 namespace Openlysis.API.Endpoints.Files.Common.Responses;
 
 /// <summary>
-/// Represents the response for a file multi analysis.
+/// Data transfer object for <see cref="FileMultiAnalysis"/>.
 /// </summary>
 /// <param name="Id">The unique identifier of the file multi analysis.</param>
+/// <param name="IsPrivate">Indicates if the analysis is private.</param>
 /// <param name="StartedDate">The date and time when the analysis started.</param>
-/// <param name="AverageVerdict">The average verdict of the file multi analysis.</param>
-/// <param name="AverageThreatZone">The average threat zone of the file multi analysis.</param>
-/// <param name="Status">The status of the file multi analysis.</param>
-/// <param name="FileMetadata">Metadata of the file.</param>
-/// <param name="HashSet">The set of content hashes associated with the file.</param>
-/// <param name="ServiceAnalyses">The array of service analyses generated from the analysis.</param>
-/// <param name="ReportsAmount">The number of reports generated.</param>
+/// <param name="Status">The current status of the file multi analysis.</param>
+/// <param name="FinalVerdict">The final verdict of the file multi analysis.</param>
+/// <param name="FinalThreatZone">The final threat zone of the file multi analysis.</param>
+/// <param name="AverageThreatScore">The average threat score of the file multi analysis, if available.</param>
+/// <param name="FileMetadata">Metadata of the file being analyzed.</param>
+/// <param name="FileHashValues">A set of content hashes associated with the file.</param>
+/// <param name="Analyses">A collection of <see cref="FileAnalysisDto"/>.</param>
+/// <param name="ReportsAmount">The total number of reports generated from the analysis.</param>
 public record FileMultiAnalysisDto(
     string Id,
-    DateTime StartedDate,
-    string AverageVerdict,
-    string AverageThreatZone,
-    string Status,
+    bool IsPrivate,
+    DateTimeOffset StartedDate,
+    AnalysisStatus Status,
+    Verdict FinalVerdict,
+    ThreatZone FinalThreatZone,
+    float? AverageThreatScore,
     FileMetadata FileMetadata,
-    ContentHashSet HashSet,
-    IEnumerable<ServiceFileAnalysisDto> ServiceAnalyses,
+    HashValues FileHashValues,
+    IEnumerable<FileAnalysisDto> Analyses,
     int ReportsAmount)
 {
     /// <summary>
@@ -34,36 +39,17 @@ public record FileMultiAnalysisDto(
     /// <returns>A <see cref="FileMultiAnalysisDto"/> object.</returns>
     public static FileMultiAnalysisDto Parse(FileMultiAnalysis source)
     {
-        // Parse the service analyses from the source object
-        var serviceAnalyses = source.ServiceFileAnalyses.Select(
-            s =>
-            {
-                // Parse the reports from the service analysis
-                IEnumerable<ReportDto> reportDtos = s.Reports
-                    .Select(
-                        r => new ReportDto(
-                            r.Id.Value,
-                            r.Verdict.ToString(),
-                            r.ThreatZone.ToString(),
-                            r.ThreatLevel));
-
-                // Return a new ServiceFileAnalysisDto object
-                return new ServiceFileAnalysisDto(
-                    s.ServiceName,
-                    s.Status.ToString(),
-                    reportDtos);
-            });
-
-        // Return a new FileMultiAnalysisDto object
         return new FileMultiAnalysisDto(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
+            source.IsPrivate,
             source.StartedDate,
-            source.AverageVerdict.ToString(),
-            source.AverageThreatZone.ToString(),
-            source.Status.ToString(),
+            source.State.Status,
+            source.State.Verdict,
+            source.State.ThreatZone,
+            source.AverageThreatScore,
             source.FileMetadata,
-            source.ContentHashSet,
-            serviceAnalyses,
+            source.DataHashValues,
+            source.Analyses.Select(FileAnalysisDto.Parse),
             source.ReportsAmount);
     }
 }

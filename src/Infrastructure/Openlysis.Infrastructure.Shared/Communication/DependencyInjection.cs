@@ -1,0 +1,110 @@
+using MassTransit;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+
+using Openlysis.Infrastructure.Shared.Communication.Abstractions;
+using Openlysis.Infrastructure.Shared.Communication.Configuration;
+using Openlysis.Infrastructure.Shared.Communication.Serialization.Common;
+using Openlysis.Infrastructure.Shared.Communication.Serialization.Files;
+using Openlysis.Infrastructure.Shared.Communication.Serialization.URLs;
+using Openlysis.Infrastructure.Shared.Communication.Services.Broker;
+using Openlysis.Infrastructure.Shared.Communication.Services.Files;
+
+namespace Openlysis.Infrastructure.Shared.Communication;
+
+/// <summary>
+/// Provides methods for adding infrastructure services and configuring RabbitMQ broker settings.
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Adds infrastructure services to the specified IServiceCollection.
+    /// </summary>
+    /// <param name="services">The IServiceCollection to add services to.</param>
+    /// <param name="configuration">The IConfiguration to use for configuring services.</param>
+    /// <param name="environment">The IHostEnvironment to determine the environment for service configuration.</param>
+    public static void AddCommunicationInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
+    {
+        // Get options
+        var brokerSettingsSection = configuration
+            .GetRequiredSection(BrokerSettings.SectionName);
+        var consumersOptionsSection = configuration.GetRequiredSection(ConsumersOptions.SectionName);
+
+        // Add options
+        services.AddOptions<BrokerSettings>()
+            .Bind(brokerSettingsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<ConsumersOptions>()
+            .Bind(consumersOptionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        // Add local file storage provider
+        if (environment.IsProduction())
+        {
+            services.AddGoogleCloudStorageProvider(configuration);
+        }
+        else
+        {
+            services.AddLocalFileStorageProvider(configuration);
+        }
+
+        // Endpoint uri provider
+        services.AddSingleton<IEndpointUriProvider, EndpointUriProvider>();
+    }
+
+    /// <summary>
+    /// Configures RabbitMQ broker settings for MassTransit.
+    /// </summary>
+    /// <param name="configurator">The IBusRegistrationConfigurator to configure the message broker.</param>
+    /// <param name="services">The IServiceCollection to build the service provider.</param>
+    /// <param name="configure">Optional action to further configure the RabbitMQ bus factory.</param>
+    public static void AddRabbitMqBroker(
+        this IBusRegistrationConfigurator configurator,
+        IServiceCollection services,
+        Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator>? configure = null)
+    {
+        BrokerSettings brokerSettings;
+        using (var serviceProvider = services.BuildServiceProvider())
+        {
+            brokerSettings = serviceProvider
+                .GetRequiredService<IOptions<BrokerSettings>>()
+                .Value;
+        }
+
+        configurator.UsingRabbitMq((registrationContext, cfg) =>
+        {
+            cfg.Host(
+                brokerSettings.Host,
+                brokerSettings.Port,
+                brokerSettings.VirtualHost,
+                hostConfig =>
+                {
+                    hostConfig.Username(brokerSettings.Username);
+                    hostConfig.Password(brokerSettings.Password);
+                });
+
+            cfg.ConfigureJsonSerializerOptions(
+                options =>
+                {
+                    options.Converters.Add(new GlobalIdConverter());
+                    options.Converters.Add(new ThreatScoreJsonConverter());
+                    options.Converters.Add(new FileAnalysisJsonConverter());
+                    options.Converters.Add(new FileReportJsonConverter());
+                    options.Converters.Add(new UrlAnalysisJsonConverter());
+                    return options;
+                });
+
+            cfg.ConfigureEndpoints(registrationContext);
+            configure?.Invoke(registrationContext, cfg);
+        });
+    }
+}

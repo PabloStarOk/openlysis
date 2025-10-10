@@ -1,16 +1,12 @@
-using System.Security.Claims;
-
 using ErrorOr;
 
 using FastEndpoints;
 
-using MediatR;
-
+using Openlysis.API.Endpoints.Common.Requests;
 using Openlysis.API.Endpoints.URLs.Common;
-using Openlysis.Application.URLs.Queries;
-using Openlysis.Domain.Common.MultiAnalyses.ValueObjects;
+using Openlysis.Application.URLs.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.URLs.GetAnalysisById;
 
@@ -28,19 +24,19 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
     public const string Name = "GetUrlAnalysisById";
 
     private readonly ILogger<GetAnalysisByIdEndpoint> _logger;
-    private readonly IMediator _mediator;
+    private readonly IUrlMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="GetAnalysisByIdEndpoint"/> class.
     /// </summary>
     /// <param name="logger">The logger instance to log information.</param>
-    /// <param name="mediator">The mediator instance to send queries.</param>
+    /// <param name="multiAnalysisService">The service responsible for analyzing URLs.</param>
     public GetAnalysisByIdEndpoint(
         ILogger<GetAnalysisByIdEndpoint> logger,
-        IMediator mediator)
+        IUrlMultiAnalysisService multiAnalysisService)
     {
         _logger = logger;
-        _mediator = mediator;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <inheritdoc/>
@@ -56,7 +52,7 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
                 builder.WithDisplayName(Name);
                 builder.Accepts<GetAnalysisByIdRequest>();
                 builder.Produces<UrlMultiAnalysisDto>();
-                builder.Produces(StatusCodes.Status404NotFound);
+                builder.ProducesProblem(StatusCodes.Status404NotFound);
                 builder.ProducesProblem(StatusCodes.Status500InternalServerError);
             },
             clearDefaults: true);
@@ -72,21 +68,25 @@ public class GetAnalysisByIdEndpoint : Endpoint<GetAnalysisByIdRequest, UrlMulti
     /// <inheritdoc/>
     public override async Task HandleAsync(GetAnalysisByIdRequest req, CancellationToken ct)
     {
-        Claim userIdClaim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        UserId userId = UserId.Create(Guid.Parse(userIdClaim.Value));
+        var userId = GlobalId.Parse(req.UserId);
 
-        var multiAnalysisId = MultiAnalysisId.Create(req.Id);
+        if (!GlobalId.TryParse(req.Id, out GlobalId? id))
+        {
+            await SendResultAsync(Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: "Provided ID has an invalid format."));
+            return;
+        }
 
-        var query = new UrlMultiAnalysisQuery(
-            multiAnalysisId,
-            userId);
-
-        ErrorOr<UrlMultiAnalysis> result = await _mediator.Send(query, ct);
+        ErrorOr<UrlMultiAnalysis> result = await _multiAnalysisService
+            .GetAnalysisByIdAsync(userId, id, ct);
         if (result.IsError)
         {
             if (result.Errors.Any(e => e.Type is ErrorType.NotFound))
             {
-                await SendNotFoundAsync(ct);
+                await SendResultAsync(Results.Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    detail: "File analysis with the specified ID does not exist."));
                 return;
             }
 

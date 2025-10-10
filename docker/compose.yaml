@@ -1,0 +1,172 @@
+name: ${COMPOSE_NAME}
+
+services:
+  database:
+    build:
+      context: ../
+      dockerfile: "docker/db/Dockerfile"
+    container_name: ${DATABASE_CONTAINER_NAME}
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 20s
+      start_period: 5s
+      retries: 5
+    environment:
+      PGUSER: ${PGUSER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      API_DB_USER_NAME: ${API_DB_USER_NAME}
+      API_USER_DB_PASSWORD: ${API_USER_DB_PASSWORD}
+      API_DB_NAME: ${API_DB_NAME}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - openlysis-db-volume:/var/lib/postgresql/data
+    networks:
+      - api-network
+
+  broker:
+    image: masstransit/rabbitmq:4.1.3
+    container_name: ${BROKER_CONTAINER_NAME}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 20s
+      start_period: 5s
+      retries: 5
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - ${RABBITMQ_NODE_PORT}:5672
+      - ${RABBITMQ_MANAGEMENT_PORT}:15672
+    networks:
+      - api-network
+
+  auth:
+    build:
+      context: ../
+      dockerfile: src/Openlysis.Authentication.API/Dockerfile
+      no_cache: true
+      args:
+        - BUILD_CONFIGURATION=${AUTH_BUILD_CONFIGURATION}
+    container_name: auth-api
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 20s
+      start_period: 5s
+      retries: 5
+    ports:
+      - ${AUTH_PORT}:8080
+      - ${AUTH_PORT_2}:8081
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT}
+      DOPPLER_SERVICE_TOKEN: ${DOPPLER_AUTH_SERVICE_TOKEN}
+    depends_on:
+      database:
+        condition: service_healthy
+    configs:
+      - source: auth-config
+        target: ${AUTH_CONFIG_TARGET_FILEPATH}
+    networks:
+      - api-network
+
+  analysis-orchestrator-migrations:
+      build: 
+        context: ../
+        dockerfile: "src/Infrastructure/Services/Openlysis.AnalysisOrchestrator/Dockerfile"
+        target: migrations
+        no_cache: true
+        args: 
+          - BUILD_CONFIGURATION=${ANALYSIS_ORCHESTRATOR_BUILD_CONFIGURATION}
+      container_name: ${ANALYSIS_ORCHESTRATOR_MIGRATIONS_CONTAINER_NAME}
+      environment:
+        DOTNET_ENVIRONMENT: ${APP_ENVIRONMENT}
+        DOPPLER_SERVICE_TOKEN: ${DOPPLER_ANALYSIS_ORCHESTRATOR_SERVICE_TOKEN}
+      command: ["dotnet", "ef", "database", "update", "--context", "JobServiceSagaDbContext"]
+      depends_on:
+        database:
+          condition: service_healthy
+      networks:
+        - api-network
+      configs:
+        - source: analysis-orchestrator-config
+          target: ${ANALYSIS_ORCHESTRATOR_MIGRATIONS_CONFIG_TARGET_FILEPATH}
+
+  analysis-orchestrator:
+    build: 
+      context: ../
+      dockerfile: "src/Infrastructure/Services/Openlysis.AnalysisOrchestrator/Dockerfile"
+      no_cache: true
+      args: 
+        - BUILD_CONFIGURATION=${ANALYSIS_ORCHESTRATOR_BUILD_CONFIGURATION}
+    container_name: ${ANALYSIS_ORCHESTRATOR_CONTAINER_NAME}
+    environment:
+      DOTNET_ENVIRONMENT: ${APP_ENVIRONMENT}
+      DOPPLER_SERVICE_TOKEN: ${DOPPLER_ANALYSIS_ORCHESTRATOR_SERVICE_TOKEN}
+    depends_on:
+      broker:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+      analysis-orchestrator-migrations:
+        condition: service_completed_successfully
+    volumes:
+      - type: volume
+        source: openlysis-temp-file-storage
+        target: ${API_TEMP_FILE_STORAGE_FILEPATH}
+    networks:
+      - api-network
+    configs:
+      - source: analysis-orchestrator-config
+        target: ${ANALYSIS_ORCHESTRATOR_CONFIG_TARGET_FILEPATH}
+
+  api:
+    build:
+      context: ../
+      dockerfile: "src/Openlysis.API/Dockerfile"
+      no_cache: true
+      args:
+        - BUILD_CONFIGURATION=${API_BUILD_CONFIGURATION}
+    container_name: ${API_CONTAINER_NAME}
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${APP_ENVIRONMENT}
+      DOPPLER_SERVICE_TOKEN: ${DOPPLER_API_SERVICE_TOKEN}
+    ports:
+      - ${API_PORT}:8080
+      - ${API_PORT_2}:8081
+    volumes:
+      - type: volume
+        source: openlysis-temp-file-storage
+        target: ${API_TEMP_FILE_STORAGE_FILEPATH}
+    networks:
+      - api-network
+    depends_on:
+      database:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
+    configs:
+      - source: api-config
+        target: ${API_CONFIG_TARGET_FILEPATH}
+
+volumes:
+  openlysis-db-volume:
+    name: openlysis-db-volume
+  openlysis-temp-file-storage:
+    name: openlysis-temp-file-storage
+
+networks:
+  api-network:
+    driver: bridge
+
+configs:
+  auth-config:
+   file: ${AUTH_CONFIG_SOURCE_FILEPATH}
+  analysis-orchestrator-config:
+    file: ${ANALYSIS_ORCHESTRATOR_CONFIG_SOURCE_FILEPATH}
+  api-config:
+    file: ${API_CONFIG_SOURCE_FILEPATH}

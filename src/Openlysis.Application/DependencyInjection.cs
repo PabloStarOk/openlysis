@@ -1,5 +1,11 @@
 using Microsoft.Extensions.DependencyInjection;
 
+using Openlysis.Application.EmailAddresses.Services;
+using Openlysis.Application.Files.Services;
+using Openlysis.Application.Messages.Services;
+using Openlysis.Application.Phones.Services;
+using Openlysis.Application.URLs.Services;
+
 namespace Openlysis.Application;
 
 /// <summary>
@@ -10,15 +16,25 @@ public static class DependencyInjection
     /// <summary>
     /// Adds services needed for the application layer.
     /// </summary>
-    /// <param name="serviceCollection">Collection of services.</param>
-    public static void AddApplication(this IServiceCollection serviceCollection)
+    /// <param name="services">Collection of services.</param>
+    public static void AddApplication(this IServiceCollection services)
     {
-        serviceCollection.AddMediatR(
-            config =>
-            {
-                config.Lifetime = ServiceLifetime.Scoped;
-                config.RegisterServicesFromAssemblies(typeof(DependencyInjection).Assembly);
-            });
-        serviceCollection.AddSingleton(TimeProvider.System);
+        services.AddSingleton(TimeProvider.System);
+
+        // Add file multi analysis service.
+        services.AddScoped<IFileMultiAnalysisService, FileMultiAnalysisService>();
+
+        // Add file multi analysis service.
+        services.AddScoped<IUrlMultiAnalysisService, UrlMultiAnalysisService>();
+
+        // Add phone number reputation service
+        services.AddScoped<IPhoneReputationService, PhoneReputationService>();
+
+        // Add email address reputation service.
+        services.AddScoped<IEmailAddressReputationService, EmailAddressReputationService>();
+
+        // Add message analysis services.
+        services.AddScoped<IMessageAnalysisService, MessageAnalysisService>();
+        services.AddScoped<IMessageAnalysisResultsProvider, MessageAnalysisResultsProvider>();
     }
 }

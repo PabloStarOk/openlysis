@@ -1,0 +1,191 @@
+BEGIN TRANSACTION;
+CREATE TABLE IF NOT EXISTS users(
+    user_id uuid PRIMARY KEY,
+    email_address text NOT NULL UNIQUE,
+    password_hash bytea NOT NULL,
+    password_hash_salt bytea NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS refresh_tokens(
+    token_id bigserial PRIMARY KEY,
+    token_hash bytea NOT NULL UNIQUE,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    expires_at timestamptz NOT NULL,
+    revoked_at timestamptz,
+    user_id uuid NOT NULL REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS refresh_token_hash_index ON refresh_tokens(token_hash);
+
+CREATE TABLE IF NOT EXISTS hash_values (
+    sha256 bytea PRIMARY KEY,
+    md5 bytea NOT NULL,
+    sha1 bytea NOT NULL,
+    sha512 bytea NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS file_multi_analyses
+(
+    file_multi_analysis_id uuid PRIMARY KEY,
+    is_private boolean NOT NULL,
+    started_date timestamp with time zone NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
+    average_threat_score real,
+    file_name varchar(100) NOT NULL,
+    size bigint NOT NULL,
+    content_type text NOT NULL,
+    user_id uuid REFERENCES users (user_id),
+    sha256 bytea REFERENCES hash_values(sha256) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS file_analyses (
+    file_analysis_id uuid PRIMARY KEY,
+    external_id varchar(200) NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
+    raw_threat_score real,
+    max_possible_threat_score real,
+    file_multi_analysis_id uuid NOT NULL REFERENCES file_multi_analyses (file_multi_analysis_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS file_reports (
+    file_report_id uuid PRIMARY KEY,
+    external_id varchar(200) NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
+    raw_threat_score real,
+    max_possible_threat_score real,
+    file_analysis_id uuid NOT NULL REFERENCES file_analyses (file_analysis_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS url_multi_analyses
+(
+    url_multi_analysis_id uuid PRIMARY KEY,
+    is_private boolean NOT NULL,
+    started_date timestamp with time zone NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
+    average_threat_score real,
+    url varchar(2083) NOT NULl,
+    user_id uuid NOT NULL REFERENCES users(user_id),
+    sha256 bytea NOT NULL REFERENCES hash_values(sha256)
+);
+
+CREATE TABLE url_analyses (
+    url_analysis_id uuid PRIMARY KEY,
+    external_id varchar(200) NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
+    raw_threat_score real,
+    max_possible_threat_score real,
+    url_multi_analysis_id uuid NOT NULL REFERENCES url_multi_analyses (url_multi_analysis_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS email_address_multi_reputations (
+    email_address_multi_reputation_id uuid PRIMARY KEY,
+    evaluation_date timestamp with time zone NOT NULL,
+    final_verdict smallint NOT NULL,
+    final_threat_zone smallint NOT NULL,
+    email_address varchar(254) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS email_address_reputations (
+    email_address_reputation_id uuid PRIMARY KEY,
+    service_name varchar(30) NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
+    is_disposable boolean,
+    is_risky_tld boolean,
+    email_address_multi_reputation_id uuid REFERENCES email_address_multi_reputations (email_address_multi_reputation_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS phone_multi_reputations
+(
+    phone_multi_reputation_id uuid PRIMARY KEY,
+    evaluation_date timestamp with time zone NOT NULL,
+    final_verdict smallint NOT NULL,
+    final_threat_zone smallint NOT NULL,
+    phone_number varchar(16) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS phone_reputations
+(
+    phone_reputation_id uuid PRIMARY KEY,
+    service_name varchar(30) NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
+    phone_local_format varchar(30) NOT NULL,
+    phone_country_code char(2) NOT NULL,
+    phone_dialing_code smallint NOT NULL,
+    phone_line_type varchar(20) NOT NULL,
+    phone_multi_reputation_id uuid REFERENCES phone_multi_reputations(phone_multi_reputation_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS message_analysis (
+    message_analysis_id uuid PRIMARY KEY,
+    is_private boolean NOT NULL,
+    started_date timestamp with time zone NOT NULL,
+    message_type smallint NOT NULL,
+    message_sender varchar(254) NOT NULL,
+    message_subject varchar(998),
+    message_content text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    threat_zone smallint NOT NULL,
+    user_id uuid NOT NULL REFERENCES users (user_id),
+    sha256 bytea NOT NULL REFERENCES hash_values (sha256) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS attached_file_results (
+    attached_file_result_id uuid PRIMARY KEY,
+    data_type smallint NOT NULL,
+    file_name text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
+    file_multi_analysis_id uuid NOT NULL REFERENCES file_multi_analyses (file_multi_analysis_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS detected_url_results (
+    detected_url_results_id uuid PRIMARY KEY,
+    data_type smallint NOT NULL,
+    url text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
+    url_multi_analysis_id uuid NOT NULL REFERENCES url_multi_analyses (url_multi_analysis_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS detected_email_address_results (
+    detected_email_address_results_id uuid PRIMARY KEY,
+    data_type smallint NOT NULL,
+    email_address text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
+    email_address_multi_reputation_id uuid NOT NULL REFERENCES email_address_multi_reputations (email_address_multi_reputation_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS detected_phone_number_results (
+    detected_phone_number_results_id uuid PRIMARY KEY,
+    data_type smallint NOT NULL,
+    phone_number text NOT NULL,
+    status smallint NOT NULL,
+    verdict smallint NOT NULL,
+    message_analysis_id uuid NOT NULL REFERENCES message_analysis (message_analysis_id) ON DELETE RESTRICT,
+    phone_multi_reputation_id uuid NOT NULL REFERENCES phone_multi_reputations (phone_multi_reputation_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS message_analysis_update_sagas (
+    correlation_id uuid PRIMARY KEY,
+    current_state int NOT NULL,
+    deferred_file_updates uuid[],
+    deferred_url_updates uuid[],
+    message_analysis_id uuid NOT NULL
+);
+COMMIT TRANSACTION;

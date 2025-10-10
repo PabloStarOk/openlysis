@@ -1,5 +1,5 @@
+using Openlysis.Domain.Common.Entities;
 using Openlysis.Domain.Common.Enums;
-using Openlysis.Domain.Common.Hash;
 using Openlysis.Domain.URLs;
 
 namespace Openlysis.API.Endpoints.URLs.Common;
@@ -11,23 +11,23 @@ namespace Openlysis.API.Endpoints.URLs.Common;
 /// <param name="IsPrivate">Indicates if the analysis is private.</param>
 /// <param name="StartedDate">The date when the analysis started.</param>
 /// <param name="Status">The current status of the analysis.</param>
-/// <param name="AverageVerdict">The average verdict of the analysis.</param>
-/// <param name="AverageThreatZone">The average threat zone of the analysis.</param>
+/// <param name="FinalVerdict">The final verdict of the analysis.</param>
+/// <param name="FinalThreatZone">The final threat zone of the analysis.</param>
 /// <param name="AverageThreatScore">The average threat score of the analysis.</param>
 /// <param name="Url">The URL being analyzed.</param>
-/// <param name="UrlHashSet">The set of content hashes for the URL.</param>
-/// <param name="ServiceAnalyses">The analyses from different services.</param>
+/// <param name="UrlHashValues">The set of content hashes for the URL.</param>
+/// <param name="Analyses">A collection of <see cref="UrlAnalysisDto"/>.</param>
 public record UrlMultiAnalysisDto(
     string Id,
     bool IsPrivate,
-    DateTime StartedDate,
+    DateTimeOffset StartedDate,
     AnalysisStatus Status,
-    Verdict AverageVerdict,
-    ThreatZone AverageThreatZone,
+    Verdict FinalVerdict,
+    ThreatZone FinalThreatZone,
     float? AverageThreatScore,
     Uri Url,
-    ContentHashSet UrlHashSet,
-    UrlServiceAnalysisDto[] ServiceAnalyses)
+    HashValues UrlHashValues,
+    IEnumerable<UrlAnalysisDto> Analyses)
 {
     /// <summary>
     /// Parses a <see cref="UrlMultiAnalysis"/> object into a <see cref="UrlMultiAnalysisDto"/>.
@@ -36,20 +36,16 @@ public record UrlMultiAnalysisDto(
     /// <returns>A <see cref="UrlMultiAnalysisDto"/> object.</returns>
     public static UrlMultiAnalysisDto Parse(UrlMultiAnalysis source)
     {
-        UrlServiceAnalysisDto[] serviceAnalyses = source.ServiceAnalyses
-            .Select(UrlServiceAnalysisDto.Parse)
-            .ToArray();
-
         return new UrlMultiAnalysisDto(
-            source.Id.Value.ToString(),
+            source.Id.ToString(),
             source.IsPrivate,
             source.StartedDate,
-            source.Status,
-            source.AverageVerdict,
-            source.AverageThreatZone,
+            source.State.Status,
+            source.State.Verdict,
+            source.State.ThreatZone,
             source.AverageThreatScore,
             source.Url,
-            source.UrlHashSet,
-            serviceAnalyses);
+            source.DataHashValues,
+            source.Analyses.Select(UrlAnalysisDto.Parse));
     }
 }

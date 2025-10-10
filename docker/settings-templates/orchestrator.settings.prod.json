@@ -1,0 +1,299 @@
+{
+  "ConnectionStrings": {
+    "MassTransit": "Server=database; Port=5432; Database=openlysis; Username=openlysis_api; Password=Openlysis-Strong-Password-1234; SslMode=Disable; TrustServerCertificate=true;"
+  },
+  "BrokerSettings": {
+    "Scheme": "rabbitmq",
+    "Host": "broker",
+    "Port": 5672,
+    "VirtualHost": "/",
+    "Username": "Openlysis",
+    "Password": "Openlysis-Strong-Password-1234"
+  },
+  "ServicesRegistration": {
+    "RegisterRealServices": true,
+    "RegisterSimulatedServices": false
+  },
+  "ConfigurationPaths": {
+    "Directories": [],
+    "JsonFiles": []
+  },
+  "ConsumersOptions": {
+    "AnalyzeFile": {
+      "Name": "analyze-file",
+      "ConcurrencyLimit": 144
+    },
+    "AnalyzeUrl": {
+      "Name": "analyze-url",
+      "ConcurrencyLimit": 144
+    },
+    "UpdateFileAnalysis": {
+      "Name": "update-file-multi-analysis",
+      "ConcurrencyLimit": 144
+    },
+    "UpdateUrlAnalysis": {
+      "Name": "update-url-multi-analysis",
+      "ConcurrencyLimit": 144
+    },
+    "MessageAnalysisUpdate": {
+      "Name": "message-analysis-update",
+      "ConcurrencyLimit": 48
+    }
+  },
+  "Polling": {
+    "BatchIntervalMs": 10000,
+    "CyclesPerBatch": 3,
+    "CycleIntervalMs": 3000
+  },
+  "JobTimeout": {
+    "TimeoutSeconds": 900,
+    "TimeoutCancellationSeconds": 905
+  },
+  "MultiAnalyzer": {
+    "RetryIntervals": [250, 500, 1000, 2000]
+  },
+  "DopplerClient": {
+    "ServiceTokenEnvVariable": "DOPPLER_SERVICE_TOKEN",
+    "ProjectName": "openlysis-orchestrator",
+    "ConfigName": "dev"
+  },
+  "Secrets": {
+    "FilescanApiKeySecretName": "FILESCAN_API_KEY",
+    "HybridAnalysisApiKeySecretName": "HYBRID_ANALYSIS_API_KEY",
+    "UrlQueryApiKeySecretName": "URL_QUERY_API_KEY",
+    "VirusTotalApiKeySecretName": "VIRUS_TOTAL_API_KEY",
+    "GcsCredentialSecretName": "GCS_SERVICE_ACCOUNT_KEY_JSON"
+  },
+  "GoogleCloudStorage": {
+    "BucketName": "analyzable-files"
+  },
+  "Filescan": {
+    "Analyzer": {
+      "ServiceName": "Filescan",
+      "ApiKeyHeaderName": "X-Api-Key",
+      "BaseAddress": "https://www.filescan.io/api/",
+      "RequestsTimeoutMs": 120000,
+      "AnalyzeConsumeRequest": true,
+      "GetStatusConsumeRequest": false,
+      "GetAnalysisConsumeRequest": false,
+      "FileMaxSizeInBytes": 103809024
+    },
+    "RateQuotaService": {
+      "RateWindowRefreshIntervalMs": 1000,
+      "RateQuota": {
+        "AnalyzeEndpoint": {
+          "EndpointTypes": [
+            "Analyze"
+          ],
+          "MinuteRate": 0,
+          "HourlyRate": 60,
+          "DailyQuota": 0,
+          "MonthlyQuota": 0
+        }
+      }
+    }
+  },
+  "UrlQuery": {
+    "Analyzer": {
+      "ServiceName": "UrlQuery",
+      "ApiKeyHeaderName": "x-apikey",
+      "BaseAddress": "https://api.urlquery.net/public/v1/",
+      "RequestsTimeoutMs": 120000,
+      "DefaultUserAgent": "Mobile",
+      "AnalyzeConsumeRequest": false,
+      "GetStatusConsumeRequest": false,
+      "GetAnalysisConsumeRequest": false
+    },
+    "VerdictCalculation": {
+      "MaliciousVerdictCountThreshold": 1,
+      "SuspiciousVerdictCountThreshold": 1,
+      "MaliciousAlertMessageThreshold": 1,
+      "SuspiciousAlertMessageThreshold": 1,
+      "SensorWeights": {
+        "Ids": 1,
+        "Tds": 3,
+        "Urlquery": 2
+      },
+      "AlertVerdicts": {
+        "Malicious": [
+          "Phishing",
+          "Malicious",
+          "Malware",
+          "Fraud",
+          "Scam"
+        ],
+        "Suspicious": [
+          "Suspicious"
+        ],
+        "Undetected": [
+          "Undetected",
+          "Clean",
+          "Benign",
+          "NoThreat"
+        ]
+      },
+      "AlertMessages": {
+        "Malicious": [
+          "Phishing - NakedPages Phishing Kit",
+          "Phishing - Tycoon Phishing Kit",
+          "Phishing - La Banque postale",
+          "Malicious - Copy/Paste Social Engineering",
+          "ET POLICY Executable and linking format (ELF) file download"
+        ],
+        "Suspicious": [
+          "Sinkholed",
+          "Detects a suspicious ELF binary with UPX compression",
+          "Linux.Packer.Patched_UPX",
+          "Suspicious - Anti-debugging code"
+        ]
+      },
+      "AlertSeverityThresholds": {
+        "HighSeverityMaliciousThreshold": 1,
+        "MediumSeveritySuspiciousThreshold": 1
+      },
+      "TdsAlertThresholds": {
+        "MaliciousAlertThreshold": 1,
+        "SuspiciousAlertThreshold": 1
+      },
+      "UrlqueryAlertThresholds": {
+        "MaliciousAlertThreshold": 1,
+        "SuspiciousAlertThreshold": 1
+      }
+    }
+  },
+  "HybridAnalysis": {
+    "Analyzer": {
+      "ServiceName": "HybridAnalysis",
+      "ApiKeyHeaderName": "api-key",
+      "BaseAddress": "https://hybrid-analysis.com/api/v2/",
+      "RequestsTimeoutMs": 120000,
+      "UserAgent": "Falcon Sandbox",
+      "DefaultSandboxEnvironment": "Windows11x64",
+      "PreferredQuickScanServiceName": "all",
+      "UseExperimentalAntiEvasion": true,
+      "FileMaxSizeInBytes": 103809024,
+      "AnalyzeConsumeRequest": true,
+      "GetStatusConsumeRequest": true,
+      "GetAnalysisConsumeRequest": true
+    },
+    "RateQuotaService": {
+      "RateWindowRefreshIntervalMs": 1000,
+      "RateQuota": {
+        "AnalyzeEndpoint": {
+          "EndpointTypes": [
+            "Analyze"
+          ],
+          "MinuteRate": 0,
+          "HourlyRate": 0,
+          "DailyQuota": 100,
+          "MonthlyQuota": 0
+        },
+        "Overall": {
+          "EndpointTypes": [
+            "Analyze",
+            "GetStatus",
+            "GetResults"],
+          "MinuteRate": 200,
+          "HourlyRate": 2000,
+          "DailyQuota": 0,
+          "MonthlyQuota": 0
+        }
+      }
+    },
+    "Scheduler": {
+      "Id": "HybridAnalysis",
+      "Name": "HybridAnalysisScheduler"
+    },
+    "FileTypeDetector": {
+      "FileHeaderSizeInBytes": 1024,
+      "MinAcceptableMatchPercentage": 0.85,
+      "FallbackMimeType": "application/octet-stream"
+    },
+    "SandboxAnalyzer": {
+      "AnyOsSupportedMimeTypes": [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/rtf",
+        "text/html",
+        "message/rfc822",
+        "application/zip",
+        "application/x-rar-compressed",
+        "application/x-7z-compressed",
+        "application/x-tar",
+        "application/gzip",
+        "application/x-bzip2",
+        "application/x-xz",
+        "application/x-iso9660-image",
+        "application/vnd.ms-cab-compressed",
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/tiff",
+        "image/bmp",
+        "image/svg+xml"
+      ],
+      "WinOnlySupportedMimeTypes": [
+        "application/javascript",
+        "text/vbscript",
+        "application/hta",
+        "application/xml",
+        "application/x-dosexec"
+      ],
+      "Win7HwpOnlySupportedMimeTypes": [
+        "application/x-hwp"
+      ],
+      "LinuxOnlySupportedMimeTypes": [
+        "application/x-sh",
+        "application/octet-stream",
+        "text/x-python"
+      ],
+      "MacOnlySupportedMimeTypes": [
+        "application/x-mach-binary"
+      ],
+      "AndroidOnlySupportedMimeTypes": [
+        "application/vnd.android.package-archive"
+      ]
+    }
+  },
+  "VirusTotal": {
+    "Analyzer": {
+      "ServiceName": "VirusTotal",
+      "ApiKeyHeaderName": "x-apikey",
+      "BaseAddress": "https://www.virustotal.com/api/v3/",
+      "RequestsTimeoutMs": 120000,
+      "FileMaxSizeInBytes": 680525824,
+      "AnalyzeConsumeRequest": true,
+      "GetStatusConsumeRequest": false,
+      "GetAnalysisConsumeRequest": false
+    },
+    "VerdictCalculation": {
+      "MaxAllowedTimeoutPercentage": 10,
+      "UndetectedThresholdPercentage": 84,
+      "SuspiciousThresholdPercentage": 2,
+      "MaliciousThresholdPercentage": 4
+    },
+    "RateQuotaService": {
+      "RateWindowRefreshIntervalMs": 1000,
+      "RateQuota": {
+        "AnalyzeEndpoint": {
+          "EndpointTypes": [
+            "Analyze"
+          ],
+          "MinuteRate": 4,
+          "HourlyRate": 0,
+          "DailyQuota": 500,
+          "MonthlyQuota": 15500
+        }
+      }
+    },
+    "Scheduler": {
+      "Id": "VirusTotal",
+      "Name": "VirusTotalScheduler"
+    }
+  }
+}

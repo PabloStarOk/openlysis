@@ -20,7 +20,6 @@ public class UrlAnalysesGroup : Group
                 {
                     b.WithGroupName("Urls");
                     b.WithDisplayName("Urls");
-                    b.WithTags("Urls");
                 });
         });
     }

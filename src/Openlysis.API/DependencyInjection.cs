@@ -1,20 +1,27 @@
+using System.Text;
 using System.Text.Json;
 
 using FastEndpoints;
 using FastEndpoints.Swagger;
 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.ObjectPool;
 
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 
 using NSwag;
 
-using Openlysis.API.Authentication;
-using Openlysis.API.Authentication.API;
+using Openlysis.API.Binders;
 using Openlysis.API.Configuration.Options;
+using Openlysis.API.Documentation;
+using Openlysis.API.Endpoints.Files.Analyze;
+using Openlysis.API.Endpoints.Messages.Analyze;
 using Openlysis.API.Middlewares.Exceptions;
+using Openlysis.API.Notifications;
+using Openlysis.Infrastructure.Configuration;
 
 namespace Openlysis.API;
 
@@ -24,37 +31,46 @@ namespace Openlysis.API;
 public static class DependencyInjection
 {
     /// <summary>
+    /// The name of the Swagger document for API version 1.
+    /// </summary>
+    public const string V1DocumentName = "Version 1";
+
+    private const long MiB = 1024 * 1024;
+    private const int AdditionalMultipartRequestSize = 5;
+    private const string DocumentsTitle = "Openlysis Analysis API";
+    private const string ApiDescription = "Analysis API of Openlysis.";
+    private const string V1DocumentVersion = "v1";
+
+    /// <summary>
     /// Adds all services needed for the API.
     /// </summary>
     /// <param name="services">Collection of services.</param>
     /// <param name="configuration">Configuration settings.</param>
     /// <param name="environment">Hosting environment information.</param>
-    public static void AddApi(
+    internal static void AddApi(
         this IServiceCollection services,
         IConfiguration configuration,
-        IWebHostEnvironment environment)
+        IHostEnvironment environment)
     {
-        var fileUploadOptions = configuration
-            .GetRequiredSection("FileUploadOptions")
-            .Get<FileUploadOptions>();
+        // Get options
+        var messageAnalysisOptionsSection = configuration
+            .GetRequiredSection(MessageAnalysisOptions.SectionName);
+        var fileUploadOptions = messageAnalysisOptionsSection
+            .Get<MessageAnalysisOptions>();
+
+        ArgumentNullException.ThrowIfNull(messageAnalysisOptionsSection);
         ArgumentNullException.ThrowIfNull(fileUploadOptions);
 
+        // Add options
+        services.Configure<MessageAnalysisOptions>(messageAnalysisOptionsSection);
+
         // Server options
-        services.Configure<KestrelServerOptions>(
-            options =>
-            {
-                options.Limits.MaxRequestBodySize = fileUploadOptions.MaxRequestBodySize;
-            });
-
-        // Add authentication and authorization
-        services.AddApiAuthentication(configuration, environment);
-
-        // Request options
-        services.Configure<FormOptions>(
-            options =>
-            {
-                options.MemoryBufferThreshold = fileUploadOptions.MemoryBufferThreshold;
-            });
+        ConfigureKestrelServerOptions(services, configuration);
+        ConfigureFileStorageContextOptions(services, configuration);
+        AddMultipartRequestBinders(services, configuration);
+        AddJwtAuthentication(services, configuration, environment);
+        services.AddAuthorization();
+        services.AddPushNotifications();
 
         services.AddProblemDetails(
             opt =>
@@ -70,20 +86,18 @@ public static class DependencyInjection
             {
                 opt.DisableAutoDiscovery = true;
                 opt.SourceGeneratorDiscoveredTypes.AddRange(typeof(Program).Assembly.DefinedTypes);
-                opt.MapAuthenticationEndpoints();
             });
 
         services.SwaggerDocument(
             opt =>
             {
                 opt.ReleaseVersion = 1;
-                opt.EnableJWTBearerAuth = false;
                 opt.DocumentSettings = s =>
                 {
-                    s.DocumentName = "Version 1";
-                    s.Title = "Openlysis API";
-                    s.Description = "API of openlysis.";
-                    s.Version = "v1";
+                    s.DocumentName = V1DocumentName;
+                    s.Title = DocumentsTitle;
+                    s.Description = ApiDescription;
+                    s.Version = V1DocumentVersion;
                     s.PostProcess = document =>
                     {
                         document.Info = new OpenApiInfo
@@ -95,14 +109,7 @@ public static class DependencyInjection
                             },
                         };
                     };
-
-                    s.AddAuth("API Key", new OpenApiSecurityScheme
-                        {
-                            Name = "X-Api-Key",
-                            In = OpenApiSecurityApiKeyLocation.Header,
-                            Type = OpenApiSecuritySchemeType.ApiKey,
-                            Description = "API Key authentication.",
-                        });
+                    s.SchemaSettings.SchemaNameGenerator = new SchemaNameGenerator();
                 };
 
                 opt.SerializerSettings = s =>
@@ -119,6 +126,99 @@ public static class DependencyInjection
                 opt.RemoveEmptyRequestSchema = true;
             });
 
-        services.AddExceptionHandler<GlobalExceptionHandler>();
+        services.AddExceptionHandlers();
+        AddStringBuilderPool(services);
+    }
+
+    private static void AddJwtAuthentication(
+        IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment)
+    {
+        var jwtBearerOptions = configuration
+            .GetRequiredSection(nameof(JwtBearerOptions))
+            .Get<JwtBearerOptions>();
+        ArgumentNullException.ThrowIfNull(jwtBearerOptions);
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = environment.IsProduction() || jwtBearerOptions.RequireHttpsMetadata;
+
+                    options.Authority = jwtBearerOptions.Authority;
+                    options.MetadataAddress = jwtBearerOptions.MetadataAddress;
+                    options.TokenValidationParameters = jwtBearerOptions.TokenValidationParameters;
+                });
+    }
+
+    private static void AddMultipartRequestBinders(
+        IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var formOptionsSection = configuration.GetRequiredSection(nameof(FormOptions));
+
+        services.AddOptions<FormOptions>()
+            .Bind(formOptionsSection)
+            .ValidateOnStart();
+
+        services.AddSingleton<IRequestBinder<AnalyzeFileRequest>, MultipartRequestBinderFactory<AnalyzeFileRequest>>();
+        services.AddSingleton<IRequestBinder<AnalyzeMessageRequest>, MultipartRequestBinderFactory<AnalyzeMessageRequest>>();
+
+        services.AddScoped<MultipartRequestBinder<AnalyzeMessageRequest>, AnalyzeMessageMultipartRequestBinder>();
+        services.AddScoped<MultipartRequestBinder<AnalyzeFileRequest>, AnalyzeFileMultipartRequestBinder>();
+    }
+
+    private static void ConfigureFileStorageContextOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        MessageAnalysisOptions messageAnalysisOptions = GetMessageAnalysisOptions(configuration);
+        FormOptions formOptions = GetRequiredFormOptions(configuration);
+
+        services.Configure<FileStorageContextOptions>(options =>
+        {
+            options.MaxFileSizeBytes = formOptions.MultipartBodyLengthLimit;
+            options.MaxProcessableFiles = messageAnalysisOptions.MaxAttachedFiles;
+        });
+    }
+
+    private static void ConfigureKestrelServerOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        MessageAnalysisOptions messageAnalysisOptions = GetMessageAnalysisOptions(configuration);
+        FormOptions formOptions = GetRequiredFormOptions(configuration);
+
+        const long overheadBuffer = AdditionalMultipartRequestSize * MiB;
+        long maxRequestBodySize = messageAnalysisOptions.MaxAttachedFiles * formOptions.MultipartBodyLengthLimit;
+        services.Configure<KestrelServerOptions>(
+            options =>
+            {
+                options.Limits.MaxRequestBodySize = maxRequestBodySize + overheadBuffer;
+            });
+    }
+
+    private static MessageAnalysisOptions GetMessageAnalysisOptions(IConfiguration configuration)
+    {
+        var messageAnalysisOptions = configuration
+            .GetRequiredSection(MessageAnalysisOptions.SectionName)
+            .Get<MessageAnalysisOptions>();
+        ArgumentNullException.ThrowIfNull(messageAnalysisOptions);
+        return messageAnalysisOptions;
+    }
+
+    private static FormOptions GetRequiredFormOptions(IConfiguration configuration)
+    {
+        var formOptions = configuration
+            .GetRequiredSection(nameof(FormOptions))
+            .Get<FormOptions>();
+        ArgumentNullException.ThrowIfNull(formOptions);
+        return formOptions;
+    }
+
+    private static void AddStringBuilderPool(IServiceCollection services)
+    {
+        services.AddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+        services.AddSingleton<ObjectPool<StringBuilder>>(sp =>
+        {
+            var poolProvider = sp.GetRequiredService<ObjectPoolProvider>();
+            return poolProvider.CreateStringBuilderPool();
+        });
     }
 }

@@ -16,9 +16,8 @@ public sealed class FileAnalysesGroup : Group
         {
             ep.Description(b =>
                 {
-                    b.WithGroupName("FileMultiAnalyses");
-                    b.WithDisplayName("FileMultiAnalyses");
-                    b.WithTags("Files");
+                    b.WithGroupName("Files");
+                    b.WithDisplayName("Files");
                 });
         });
     }

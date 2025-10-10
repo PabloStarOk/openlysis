@@ -1,0 +1,181 @@
+{
+  "ConnectionStrings": {
+    "MassTransit": "Server=database; Port=5432; Database=openlysis; Username=openlysis_api; Password=Openlysis-Strong-Password-1234; SslMode=Disable; TrustServerCertificate=true;"
+  },
+  "BrokerSettings": {
+    "Scheme": "rabbitmq",
+    "Host": "broker",
+    "Port": 5672,
+    "VirtualHost": "/",
+    "Username": "Openlysis",
+    "Password": "Openlysis-Strong-Password-1234"
+  },
+  "ServicesRegistration": {
+    "RegisterRealServices": false,
+    "RegisterSimulatedServices": true
+  },
+  "ConfigurationPaths": {
+    "Directories": [],
+    "JsonFiles": []
+  },
+  "ConsumersOptions": {
+    "AnalyzeFile": {
+      "Name": "analyze-file",
+      "ConcurrencyLimit": 144
+    },
+    "AnalyzeUrl": {
+      "Name": "analyze-url",
+      "ConcurrencyLimit": 144
+    },
+    "UpdateFileAnalysis": {
+      "Name": "update-file-multi-analysis",
+      "ConcurrencyLimit": 144
+    },
+    "UpdateUrlAnalysis": {
+      "Name": "update-url-multi-analysis",
+      "ConcurrencyLimit": 144
+    },
+    "MessageAnalysisUpdate": {
+      "Name": "message-analysis-update",
+      "ConcurrencyLimit": 48
+    }
+  },
+  "Polling": {
+    "BatchIntervalMs": 10000,
+    "CyclesPerBatch": 3,
+    "CycleIntervalMs": 3000
+  },
+  "JobTimeout": {
+    "TimeoutSeconds": 900,
+    "TimeoutCancellationSeconds": 905
+  },
+  "MultiAnalyzer": {
+    "RetryIntervals": [250, 500, 1000, 2000]
+  },
+  "ServicesSimulation": {
+    "FileAnalysisServices": [
+      {
+        "Name": "File Analysis Service A",
+        "StubFactory": {
+          "ReturnJobId": true,
+          "VerdictSimulation": {
+            "SimulationType": "Random"
+          },
+          "StatusSimulation": {
+            "SimulationType": "Fixed",
+            "FixedValue": "Completed"
+          },
+          "ThreatScoreSimulation": {
+            "SimulationType": "Range",
+            "MaxPossibleValue": 100,
+            "FixedValue": 50,
+            "ValuesRange": {
+              "Minimum": 23,
+              "Maximum": 24
+            }
+          },
+          "UseFileReports": false,
+          "MaxFileReports": 3,
+          "ReturnableFileReports": [
+            {
+              "VerdictSimulation": {
+                "SimulationType": "Random"
+              },
+              "ThreatScoreSimulation": {
+                "SimulationType": "Random",
+                "MaxPossibleValue": 1
+              }
+            }
+          ]
+        },
+        "AnalysisSecondsDuration": {
+          "SimulationType": "Fixed",
+          "FixedValue": 10,
+          "ValuesRange": {
+            "Minimum": 15,
+            "Maximum": 240
+          }
+        },
+        "AnalyzeEndpoint": {
+          "LatencyMs": 0,
+          "ReturnError": false,
+          "MinuteRateLimit": -1,
+          "HourRateLimit": -1,
+          "DailyUsageLimit": -1,
+          "MonthlyUsageLimit": -1
+        },
+        "GetStatusEndpoint": {
+          "LatencyMs": 0,
+          "ReturnError": false,
+          "MinuteRateLimit": -1,
+          "HourRateLimit": -1,
+          "DailyUsageLimit": -1,
+          "MonthlyUsageLimit": -1
+        },
+        "GetAnalysisEndpoint": {
+          "LatencyMs": 0,
+          "ReturnError": false,
+          "MinuteRateLimit": -1,
+          "HourRateLimit": -1,
+          "DailyUsageLimit": -1,
+          "MonthlyUsageLimit": -1
+        }
+      }
+    ],
+    "UrlAnalysisServices": [
+      {
+        "Name": "Url Analysis Service A",
+        "StubFactory": {
+          "ReturnJobId": true,
+          "VerdictSimulation": {
+            "SimulationType": "Random"
+          },
+          "StatusSimulation": {
+            "SimulationType": "Fixed",
+            "FixedValue": "Completed"
+          },
+          "ThreatScoreSimulation": {
+            "SimulationType": "Range",
+            "MaxPossibleValue": 1,
+            "ValuesRange": {
+              "Minimum": 0,
+              "Maximum": 1
+            }
+          }
+        },
+        "AnalysisSecondsDuration": {
+          "SimulationType": "Fixed",
+          "FixedValue": 10,
+          "ValuesRange": {
+            "Minimum": 15,
+            "Maximum": 240
+          }
+        },
+        "AnalyzeEndpoint": {
+          "LatencyMs": 0,
+          "ReturnError": false,
+          "MinuteRateLimit": -1,
+          "HourRateLimit": -1,
+          "DailyUsageLimit": -1,
+          "MonthlyUsageLimit": -1
+        },
+        "GetStatusEndpoint": {
+          "LatencyMs": 0,
+          "ReturnError": false,
+          "MinuteRateLimit": -1,
+          "HourRateLimit": -1,
+          "DailyUsageLimit": -1,
+          "MonthlyUsageLimit": -1
+        },
+        "GetAnalysisEndpoint": {
+          "LatencyMs": 0,
+          "ReturnError": false,
+          "MinuteRateLimit": -1,
+          "HourRateLimit": -1,
+          "DailyUsageLimit": -1,
+          "MonthlyUsageLimit": -1
+        }
+      }
+    ]
+  }
+}

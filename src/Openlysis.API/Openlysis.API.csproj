@@ -5,7 +5,7 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>ef94f7b8-50cd-4943-b8c5-1058f97df21b</UserSecretsId>
-  </PropertyGroup>
+    </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FastEndpoints" Version="5.35.0" />
@@ -14,22 +14,18 @@
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="FastEndpoints.Swagger" Version="5.34.0" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.19" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="9.0.8" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+        <PackageReference Include="Scalar.AspNetCore" Version="2.6.9" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Openlysis.API.Authentication\Openlysis.API.Authentication.csproj" />
-      <ProjectReference Include="..\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj" />
-      <ProjectReference Include="..\Openlysis.Workers\Openlysis.MultiAnalyzer\Openlysis.MultiAnalyzer.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Endpoints\Files\Common\" />
+      <ProjectReference Include="..\Infrastructure\Openlysis.Infrastructure\Openlysis.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>

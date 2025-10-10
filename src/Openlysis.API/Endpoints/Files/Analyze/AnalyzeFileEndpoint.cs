@@ -2,31 +2,42 @@ using ErrorOr;
 
 using FastEndpoints;
 
-using MediatR;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
 
-using Openlysis.Application.FileAnalyses.Commands;
+using Openlysis.API.Endpoints.Common.Responses;
+using Openlysis.API.Middlewares.Files;
+using Openlysis.Application.Common.Models;
+using Openlysis.Application.Files.Services;
+using Openlysis.Domain.Files;
 
 namespace Openlysis.API.Endpoints.Files.Analyze;
 
 /// <summary>
 /// Endpoint to analyze a file.
 /// </summary>
-public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileResponse>
+public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalysisIdentifiers>
 {
-    private readonly IMediator _mediator;
+    private const string Name = "AnalyzeFile";
 
-    /// <summary>
-    /// Gets the name of the endpoint.
-    /// </summary>
-    public static string Name { get; } = "AnalyzeFile";
+    private readonly ILogger<AnalyzeFileEndpoint> _logger;
+    private readonly IFileMultiAnalysisService _multiAnalysisService;
+    private readonly IOptions<FormOptions> _formOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeFileEndpoint"/> class.
     /// </summary>
-    /// <param name="mediator">Mediator to send commands and receive responses to application layer.</param>
-    public AnalyzeFileEndpoint(IMediator mediator)
+    /// <param name="logger">Logger for tracing and debugging.</param>
+    /// <param name="multiAnalysisService">Service to perform multi-file analysis.</param>
+    /// <param name="formOptions">Options for form data, including file upload limits.</param>
+    public AnalyzeFileEndpoint(
+        ILogger<AnalyzeFileEndpoint> logger,
+        IFileMultiAnalysisService multiAnalysisService,
+        IOptions<FormOptions> formOptions)
     {
-        _mediator = mediator;
+        _logger = logger;
+        _multiAnalysisService = multiAnalysisService;
+        _formOptions = formOptions;
     }
 
     /// <summary>
@@ -35,8 +46,9 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
     public override void Configure()
     {
         Post(string.Empty);
+        PostProcessor<FileStorageCleanupPostProcessor<AnalyzeFileRequest, AnalysisIdentifiers>>();
         Group<FileAnalysesGroup>();
-        AllowFileUploads();
+        AllowFileUploads(dontAutoBindFormData: true);
         Version(1);
         Description(
             b =>
@@ -44,9 +56,10 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
                 b.WithName(Name);
                 b.WithDisplayName(Name);
                 b.Accepts<AnalyzeFileRequest>(contentType: "multipart/form-data");
-                b.Produces<AnalyzeFileResponse>(StatusCodes.Status202Accepted);
-                b.ProducesProblemDetails();
-                b.ProducesProblemDetails(StatusCodes.Status500InternalServerError);
+                b.Produces<AnalysisIdentifiers>();
+                b.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
+                b.ProducesProblem(StatusCodes.Status400BadRequest);
+                b.ProducesProblem(StatusCodes.Status500InternalServerError);
             },
             clearDefaults: true);
         Summary(
@@ -54,77 +67,90 @@ public class AnalyzeFileEndpoint : Endpoint<AnalyzeFileRequest, AnalyzeFileRespo
             {
                 s.Summary = "Uploads a file.";
                 s.Description = "Uploads a file to be analyzed.";
-                s.RequestParam(r => r.File, "File to be analyzed.");
-                s.RequestParam(r => r.FileDescription, "Description of the file (Optional).");
-                s.RequestParam(r => r.FilePassword, "Password of the file if it is protected (Not recommended to upload confidential files) (Optional).");
-                s.RequestParam(r => r.IsPrivateFile, "If allow the file to be downloaded by other users (Not recommended to upload confidential files) (Optional).");
-                s.RequestParam(r => r.Reanalyze, "If the file must analyzed again, instead of returning the last analysis. False is the default. (Optional).");
+                s.Responses[StatusCodes.Status200OK] = "Analysis result successfully retrieved.";
+                s.Responses[StatusCodes.Status202Accepted] = "Analysis request accepted and queued for processing.";
+                s.RequestParam(x => x.File, $"File to be analyzed. If there are multiple files, only the first one will be accepted. Default content type is `application/octet-stream.` Max file size: `{_formOptions.Value.MultipartBodyLengthLimit}` bytes.");
+                s.RequestParam(x => x.Password, "Password of the file if it is protected `(Not recommended to upload confidential files)` `(Optional)`.");
+                s.RequestParam(x => x.IsPrivate, "If the file analysis is private. `True` is the default. `(Optional)`");
+                s.RequestParam(x => x.Reanalyze, "If the file must analyzed again, instead of returning the last analysis. `False` is the default. `(Optional)`.");
             });
     }
 
-    /// <summary>
-    /// Handles the file analysis request.
-    /// </summary>
-    /// <param name="request">The request containing the file to be analyzed.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    public override async Task HandleAsync(AnalyzeFileRequest request, CancellationToken ct)
+    /// <inheritdoc/>
+    public override async Task HandleAsync(AnalyzeFileRequest req, CancellationToken ct)
     {
-        if (request.File.Length <= 0)
+#if DEBUG
+        LogFileMetadata(req);
+#endif
+
+        var result = await _multiAnalysisService.AnalyzeAsync(
+            req.UserId,
+            req.File,
+            req.Password,
+            req.IsPrivate,
+            req.Reanalyze,
+            ct);
+
+        if (result.IsError)
         {
-            await SendResultAsync(Results.Problem(
-                statusCode: StatusCodes.Status400BadRequest,
-                detail: "Provided file has no content."));
-        }
-
-        await using var fileData = request.File.OpenReadStream();
-        var command = new AnalyzeFileCommand(
-            request.File.FileName,
-            request.File.ContentType,
-            fileData,
-            request.FileDescription,
-            request.FilePassword,
-            request.IsPrivateFile,
-            request.Reanalyze);
-
-        var mediatorResult = await _mediator.Send(command, ct);
-
-        if (mediatorResult.IsError)
-        {
-            if (mediatorResult.Errors.Any(e => e.Type is ErrorType.Unexpected))
+            if (result.Errors.Any(e => e.Type is ErrorType.Unexpected))
             {
                 await SendResultAsync(Results.Problem(
                     statusCode: StatusCodes.Status500InternalServerError,
                     detail: "An internal error occured, try again later."));
+                return;
             }
 
             var extensions = new Dictionary<string, object?>
             {
                 {
-                    "errors", mediatorResult.Errors
+                    "errors", result.Errors
                 },
             };
             await SendResultAsync(Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
                 detail: "One or more errors occurred.",
                 extensions: extensions));
+            return;
         }
 
-        Response = new AnalyzeFileResponse(
-            mediatorResult.Value.Id.Value.ToString(),
-            mediatorResult.Value.ContentHashSet.Md5,
-            mediatorResult.Value.ContentHashSet.Sha1,
-            mediatorResult.Value.ContentHashSet.Sha256,
-            mediatorResult.Value.ContentHashSet.Sha512);
+        AnalysisRequestResult<FileMultiAnalysis> requestResult = result.Value;
+        var analysisIdentifiers = AnalysisIdentifiers.Parse(requestResult.Analysis);
 
+        // Retrieved final analysis result 200.
+        if (requestResult.RequestStatus is AnalysisRequestStatus.Retrieved)
+        {
+            await SendOkAsync(analysisIdentifiers, CancellationToken.None);
+            return;
+        }
+
+        // Retrieved queued analysis 202.
         var routeValues = new Dictionary<string, string>
         {
-            { "id", Response.FileAnalysisId },
+            { "id", analysisIdentifiers.Id },
         };
 
         await SendResultAsync(Results.AcceptedAtRoute(
             GetAnalysisById.GetAnalysisByIdEndpoint.Name,
             routeValues,
-            Response));
+            analysisIdentifiers));
     }
+
+#if DEBUG
+    /// <summary>
+    /// Logs metadata about the file for debugging purposes.
+    /// </summary>
+    /// <param name="request">The file analysis request containing file.</param>
+    private void LogFileMetadata(AnalyzeFileRequest request)
+    {
+        _logger.LogTrace(
+            "File analysis requested:"
+            + "\n\tFilename: {Filename}"
+            + "\n\tContent type: {ContentType}"
+            + "\n\tFile password: {Password}",
+            request.File.Metadata.Name,
+            request.File.Metadata.ContentType,
+            request.Password);
+    }
+#endif
 }

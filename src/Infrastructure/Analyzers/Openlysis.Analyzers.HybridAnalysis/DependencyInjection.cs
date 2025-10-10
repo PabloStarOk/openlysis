@@ -1,0 +1,114 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+
+using Openlysis.Analyzers.HybridAnalysis.Adapters;
+using Openlysis.Analyzers.HybridAnalysis.Core.Abstractions.Common;
+using Openlysis.Analyzers.HybridAnalysis.Core.Configuration.Common;
+using Openlysis.Analyzers.HybridAnalysis.Core.Constants;
+using Openlysis.Analyzers.HybridAnalysis.Core.Models.Enums;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Analyzers;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Files;
+using Openlysis.Analyzers.HybridAnalysis.Infrastructure.Logging;
+using Openlysis.Analyzers.Shared.Contracts.Common.Abstractions;
+using Openlysis.Analyzers.Shared.Contracts.Files.Requests;
+using Openlysis.Analyzers.Shared.Contracts.URLs.Requests;
+using Openlysis.Analyzers.Shared.Infrastructure.Client;
+using Openlysis.Analyzers.Shared.Infrastructure.RateQuota.Enums;
+using Openlysis.Domain.Files.Entities;
+using Openlysis.Domain.URLs.Entities;
+using Openlysis.Infrastructure.Shared.Contracts.Common.Abstractions;
+using Openlysis.Infrastructure.Shared.Infrastructure.Deserialization;
+using Openlysis.Infrastructure.Shared.Infrastructure.RateQuota;
+
+namespace Openlysis.Analyzers.HybridAnalysis;
+
+/// <summary>
+/// Provides methods for registering Hybrid Analysis analyzer services with the dependency injection container.
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Registers Hybrid Analysis analyzer services and related dependencies with the specified <see cref="IServiceCollection"/>.
+    /// </summary>
+    /// <param name="services">The service collection to add the analyzer services to.</param>
+    /// <param name="apiKeySecretName">The name of the secret containing the API key.</param>
+    /// <param name="configuration">The application configuration instance.</param>
+    public static void AddHybridAnalyzer(
+        this IServiceCollection services,
+        string apiKeySecretName,
+        IConfiguration configuration)
+    {
+        // Get options
+        var analyzerOptionsSection = configuration
+            .GetRequiredSection(HybridAnalyzerOptions.SectionName);
+        var analyzerOptions = analyzerOptionsSection.Get<HybridAnalyzerOptions>();
+
+        var sandboxAnalyzerOptions =
+            configuration.GetRequiredSection(SandboxAnalyzerOptions.SectionName);
+
+        ArgumentNullException.ThrowIfNull(analyzerOptions);
+
+        // Add options
+        services.AddOptions<HybridAnalyzerOptions>()
+            .Bind(analyzerOptionsSection)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<SandboxAnalyzerOptions>()
+            .Bind(sandboxAnalyzerOptions)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton<
+            IValidateOptions<SandboxAnalyzerOptions>,
+            SandboxAnalyzerOptionsValidator>();
+
+        // Add Hybrid Analysis analyzers
+        services.AddSingleton<ISandboxAnalyzer, SandboxAnalyzer>();
+        services.AddSingleton<IQuickScanner, QuickScanner>();
+
+        // Add request limit tracker
+        services.AddRateQuotaService<AnalysisEndpointType>(
+            configuration,
+            UrlAnalyzer.LimitTrackerServiceKey,
+            analyzerOptions.ServiceName);
+
+        // Add analyzer loggers
+        services.AddSingleton<SandboxAnalyzerLogger<SandboxAnalyzer>>();
+        services.AddSingleton<IServiceLogger<QuickScanner>, SandboxAnalyzerLogger<QuickScanner>>();
+        services.AddSingleton<IServiceLogger<FileAnalyzer>, SandboxAnalyzerLogger<FileAnalyzer>>();
+        services.AddSingleton<SandboxAnalyzerLogger<UrlAnalyzer>>();
+
+        // Add analyzer deserializer.
+        services.AddServiceDeserializer<HybridAnalyzerOptions>(
+            KeyedServices.GlobalKey,
+            () => new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                Converters =
+                {
+                    new JsonStringEnumConverter<Status>(JsonNamingPolicy.SnakeCaseUpper),
+                },
+            });
+
+        // Add http client
+        services.ConfigureHttpClient(
+            apiKeySecretName,
+            analyzerOptions,
+            client =>
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd(analyzerOptions.UserAgent);
+            });
+
+        // Add file analyzer
+        services.AddFileTypeDetector(configuration);
+        services.AddSingleton<Analyzer<FileAnalysis, AnalyzeFileRequest>, FileAnalyzer>();
+
+        // Add URL analyzer
+        services.AddSingleton<Analyzer<UrlAnalysis, AnalyzeUrlRequest>, UrlAnalyzer>();
+    }
+}

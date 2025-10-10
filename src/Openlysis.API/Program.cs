@@ -1,12 +1,12 @@
 using Openlysis.API;
 using Openlysis.Application;
 using Openlysis.Infrastructure;
-using Openlysis.MultiAnalyzer.Application;
+using Openlysis.Infrastructure.Shared.Infrastructure.ConfigLoader;
 
 var builder = WebApplication.CreateSlimBuilder();
 
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddAnalysisWorker(builder.Configuration);
+builder.Configuration.UseConfigLoader();
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 builder.Services.AddApi(builder.Configuration, builder.Environment);
 

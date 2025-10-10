@@ -1,17 +1,15 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Security.Claims;
 
 using ErrorOr;
 
 using FastEndpoints;
 
-using MediatR;
-
-using Openlysis.API.Authentication.API.Extensions;
+using Openlysis.API.Endpoints.Common.Responses;
 using Openlysis.API.Endpoints.URLs.GetAnalysisById;
-using Openlysis.Application.URLs.Commands;
+using Openlysis.Application.Common.Models;
+using Openlysis.Application.URLs.Services;
+using Openlysis.Domain.Common.ValueObjects;
 using Openlysis.Domain.URLs;
-using Openlysis.Domain.Users.ValueObjects;
 
 namespace Openlysis.API.Endpoints.URLs.Analyze;
 
@@ -23,25 +21,25 @@ namespace Openlysis.API.Endpoints.URLs.Analyze;
 /// retrieving the user ID, creating and sending the analysis command,
 /// and finally creating the response.
 /// </remarks>
-public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse>
+public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalysisIdentifiers>
 {
     private const string Name = "AnalyzeUrl";
 
     private static readonly string DefaultScheme = Uri.UriSchemeHttps;
     private readonly ILogger<AnalyzeUrlEndpoint> _logger;
-    private readonly IMediator _mediator;
+    private readonly IUrlMultiAnalysisService _multiAnalysisService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnalyzeUrlEndpoint"/> class.
     /// </summary>
-    /// <param name="logger">The logger instance used for logging.</param>
-    /// <param name="mediator">The mediator instance used to send commands.</param>
+    /// <param name="logger">The logger instance for logging information and errors.</param>
+    /// <param name="multiAnalysisService">The service responsible for analyzing URLs.</param>
     public AnalyzeUrlEndpoint(
         ILogger<AnalyzeUrlEndpoint> logger,
-        IMediator mediator)
+        IUrlMultiAnalysisService multiAnalysisService)
     {
         _logger = logger;
-        _mediator = mediator;
+        _multiAnalysisService = multiAnalysisService;
     }
 
     /// <inheritdoc/>
@@ -56,7 +54,8 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
                 builder.WithName(Name);
                 builder.WithDisplayName(Name);
                 builder.Accepts<AnalyzeUrlRequest>("application/x-www-form-urlencoded");
-                builder.Produces<AnalyzeUrlResponse>();
+                builder.Produces<AnalysisIdentifiers>();
+                builder.Produces<AnalysisIdentifiers>(StatusCodes.Status202Accepted);
                 builder.ProducesValidationProblem();
                 builder.ProducesProblem(StatusCodes.Status500InternalServerError);
             },
@@ -66,24 +65,21 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
             {
                 s.Summary = "Uploads a URL";
                 s.Description = "Uploads a URL to be analyzed by multiple services.";
-                s.ExampleRequest = new AnalyzeUrlRequest("https://example-site.com");
+                s.ExampleRequest = new AnalyzeUrlRequest(
+                    Guid.NewGuid().ToString(),
+                    "https://example-site.com");
+                s.Responses[StatusCodes.Status200OK] = "Analysis result successfully retrieved.";
+                s.Responses[StatusCodes.Status202Accepted] = "Analysis request accepted and queued for processing.";
                 s.RequestParam(r => r.Url, "URL to be analyzed.");
+                s.RequestParam(r => r.Reanalyze, "Indicates whether the URL should be reanalyzed even if an existing analysis is available. Default is false.");
                 s.RequestParam(r => r.IsPrivate, "If the analysis is only available to the user who uploads the URL. Default is false");
             });
-        DontThrowIfValidationFails();
     }
 
     /// <inheritdoc/>
     public override async Task HandleAsync(AnalyzeUrlRequest req, CancellationToken ct)
     {
-        if (ValidationFailed)
-        {
-            await SendResultAsync(ValidationFailures.AsValidationProblem());
-            return;
-        }
-
-        Claim claim = HttpContext.User.Claims.Single(c => c.Type is ClaimTypes.NameIdentifier);
-        var userId = UserId.Create(Guid.Parse(claim.Value));
+        var userId = GlobalId.Parse(req.UserId);
 
         if (!TryCreateUri(req.Url, out Uri? url))
         {
@@ -94,12 +90,9 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
             return;
         }
 
-        var command = new AnalyzeUrlCommand(
-            url,
-            userId,
-            req.IsPrivate);
+        var result = await _multiAnalysisService
+            .AnalyzeAsync(userId, req.IsPrivate, url, req.Reanalyze, ct);
 
-        ErrorOr<UrlMultiAnalysis> result = await _mediator.Send(command, ct);
         if (result.IsError)
         {
             IResult internalError = Results.Problem(
@@ -113,13 +106,22 @@ public class AnalyzeUrlEndpoint : Endpoint<AnalyzeUrlRequest, AnalyzeUrlResponse
             return;
         }
 
-        Response = AnalyzeUrlResponse.Parse(result.Value);
+        AnalysisRequestResult<UrlMultiAnalysis> requestResult = result.Value;
+        var analysisIdentifiers = AnalysisIdentifiers.Parse(requestResult.Analysis);
 
+        // Retrieved final analysis result 200.
+        if (requestResult.RequestStatus is AnalysisRequestStatus.Retrieved)
+        {
+            await SendOkAsync(analysisIdentifiers, CancellationToken.None);
+            return;
+        }
+
+        // Retrieved queued analysis 202.
         var routeValues = new RouteValueDictionary
         {
-            { "id", Response.Id },
+            { "id", analysisIdentifiers.Id },
         };
-        IResult accepted = Results.AcceptedAtRoute(GetAnalysisByIdEndpoint.Name, routeValues, Response);
+        IResult accepted = Results.AcceptedAtRoute(GetAnalysisByIdEndpoint.Name, routeValues, analysisIdentifiers);
         await SendResultAsync(accepted);
     }
 
